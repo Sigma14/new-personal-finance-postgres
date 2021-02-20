@@ -1,0 +1,10 @@
+<h1>Budget Delete View</h1>
+
+
+<h4>Do you want to delete this Budget? {{object.name}}</h4>
+<form method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Yes">
+    <a href="/budget_detail/{{object.id}}">No</a>
+</form>
+<a href="/budget_list">back</a>
