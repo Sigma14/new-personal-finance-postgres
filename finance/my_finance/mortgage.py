@@ -1,6 +1,5 @@
-import pandas as pd
 import numpy as np
-import numpy_financial as npf
+import pandas as pd
 
 
 def balance(pv, rate, nper, pmt) -> np.ndarray:
@@ -26,9 +25,4 @@ def calculator(amount, interest, tenure):
 
     table = pd.DataFrame(data, columns=periods, index=cols).T
     table.index.name = 'month'
-    #
     return table.round(2)
-
-
-d = calculator(3000000, 7, 30)
-print(d)

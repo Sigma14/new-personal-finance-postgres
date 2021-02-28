@@ -74,9 +74,10 @@
             </ul>
             <ul class="nav navbar-nav">
                 <li class="nav-item d-none d-l
-            <li class="nav-item dropdown dropdown-language"><a class="nav-link dropdown-toggle" id="dropdown-flag"
-                                                               href="javascript:void(0);" data-toggle="dropdown"
-                                                               aria-haspopup="true" aria-expanded="false"><i
+            <li class=" nav-item dropdown dropdown-language
+                "><a class="nav-link dropdown-toggle" id="dropdown-flag"
+                     href="javascript:void(0);" data-toggle="dropdown"
+                     aria-haspopup="true" aria-expanded="false"><i
                     class="flag-icon flag-icon-us"></i><span class="selected-language">English</span></a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-flag"><a class="dropdown-item"
                                                                                                   href="javascript:void(0);"
@@ -90,38 +91,38 @@
                                                                          href="javascript:void(0);"
                                                                          data-language="pt"><i
                         class="flag-icon flag-icon-pt"></i> Portuguese</a></div>
-            </li>
+                </li>
 
-            <li class="nav-item nav-search"><a class="nav-link nav-link-search"><i class="ficon"
-                                                                                   data-feather="search"></i></a>
-            </li>
-            <li class="nav-item dropdown dropdown-cart mr-25"><a class="nav-link" href="javascript:void(0);"
-                                                                 data-toggle="dropdown"><i class="ficon"
-                                                                                           data-feather="shopping-cart"></i><span
-                    class="badge badge-pill badge-primary badge-up cart-item-count">6</span></a>
-                <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
-                    <li class="dropdown-menu-header">
-                        <div class="dropdown-header d-flex">
-                            <h4 class="notification-title mb-0 mr-auto">My Cart</h4>
-                            <div class="badge badge-pill badge-light-primary">4 Items</div>
-                        </div>
-                    </li>
-                    <li class="scrollable-container media-list">
-                        <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
-                            <div class="media-heading">
+                <li class="nav-item nav-search"><a class="nav-link nav-link-search"><i class="ficon"
+                                                                                       data-feather="search"></i></a>
+                </li>
+                <li class="nav-item dropdown dropdown-cart mr-25"><a class="nav-link" href="javascript:void(0);"
+                                                                     data-toggle="dropdown"><i class="ficon"
+                                                                                               data-feather="shopping-cart"></i><span
+                        class="badge badge-pill badge-primary badge-up cart-item-count">6</span></a>
+                    <ul class="dropdown-menu dropdown-menu-media dropdown-menu-right">
+                        <li class="dropdown-menu-header">
+                            <div class="dropdown-header d-flex">
+                                <h4 class="notification-title mb-0 mr-auto">My Cart</h4>
+                                <div class="badge badge-pill badge-light-primary">4 Items</div>
                             </div>
-    </div>
-    <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
-        <div class="media-heading">
+                        </li>
+                        <li class="scrollable-container media-list">
+                            <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
+                                <div class="media-heading">
+                                </div>
+                            </div>
+                            <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
+                                <div class="media-heading">
+                                </div>
+                                <div class="cart-item-qty">
+                                </div>
+                                <h5 class="cart-item-price">$699.00</h5>
+                            </div>
         </div>
-        <div class="cart-item-qty">
-        </div>
-        <h5 class="cart-item-price">$699.00</h5>
-    </div>
-    </div>
-    <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
-        <div class="media-heading">
-        </div>
+        <div class="media-body"><i class="ficon cart-item-remove" data-feather="x"></i>
+            <div class="media-heading">
+            </div>
         </div>
         <h5 class="cart-item-price">$4,999.00</h5>
     </div>
@@ -320,7 +321,7 @@
                                             href="../../../html/ltr/vertical-menu-template/index.html"><span
                     class="brand-logo">
                             <svg viewbox="0 0 139 95" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                 xmlns:xlink="http://www.w3.org/1999/xlink" height="24">
+                                 height="24">
                                 <defs>
                                     <lineargradient id="linearGradient-1" x1="100%" y1="10.5120544%" x2="50%"
                                                     y2="89.4879456%">
@@ -366,28 +367,35 @@
                 <ul class="menu-content">
                 </ul>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'category_list' %}"><i
+            <li class=" nav-item {% if request.resolver_match.view_name == 'category_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'category_list' %}"><i
                     data-feather="mail"></i><span class="menu-title text-truncate" data-i18n="Category">Category</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'budget_list' %}"><i
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'budget_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'budget_list' %}"><i
                     data-feather="message-square"></i><span class="menu-title text-truncate"
                                                             data-i18n="Budget">Budget</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Bill">Bill</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'account_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'account_list' %}"><i
                     data-feather="Account"></i><span class="menu-title text-truncate" data-i18n="Account">Account</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'transaction_list' %}"><i
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'transaction_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'transaction_list' %}"><i
                     data-feather="grid"></i><span class="menu-title text-truncate"
                                                   data-i18n="Transaction">Transaction</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
                     data-feather="grid"></i><span class="menu-title text-truncate" data-i18n="Goal">Goal</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i
-                    data-feather="save"></i><span class="menu-title text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'mortgagecalculator_list' %}active{% endif %}">
+                <a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i
+                        data-feather="save"></i><span class="menu-title text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
             </li>
             <ul class="menu-content">
             </ul>
@@ -431,17 +439,17 @@
             </li>
         </ul>
         </li>
-            <ul class="menu-content">
-            </ul>
+        <ul class="menu-content">
+        </ul>
         </li>
-            <ul class="menu-content">
-                </li>
-                </li>
-                </li>
-                </li>
-            </ul>
+        <ul class="menu-content">
+            </li>
+            </li>
+            </li>
+            </li>
+        </ul>
         </li>
-            </ul>
+        </ul>
         </li>
         </li>
         <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="pie-chart"></i><span
@@ -450,10 +458,10 @@
                 </li>
             </ul>
         </li>
-            <ul class="menu-content">
-                    </ul>
-                </li>
-            </ul>
+        <ul class="menu-content">
+        </ul>
+        </li>
+        </ul>
         </li>
         </ul>
     </div>
@@ -513,6 +521,11 @@
                 });
             }
         })
+
+
+
+
+
 
 </script>
 </body>
