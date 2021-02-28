@@ -1,7 +1,102 @@
-<h1>MortgageCalculator Add View</h1>
+{% extends "index.html" %}
+{% block content %}
+<h1>Mortgage Calculator</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {{form.as_p}}
-    <input type="submit" value="Create">
-</form>
+<!--<form method="post">-->
+<!--    {% csrf_token %}-->
+<!--    {{form.as_p}}-->
+<!--    <input type="submit" value="Calculate">-->
+<!--    <input type="reset" value="Reset">-->
+<!--</form>-->
+<div class="col-md-6 col-12">
+    <div class="card">
+        <div class="card-body">
+            <form class="form form-horizontal" method = "post">
+              {% csrf_token %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-sm-3 col-form-label">
+                                <label for="fname-icon">Amount</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                    </div>
+                                    <input type="text" id="fname-icon" class="form-control" name="amount"
+                                           placeholder="Amount"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-sm-3 col-form-label">
+                                <label for="email-icon">Interest</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i data-feather="mail"></i></span>
+                                    </div>
+                                    <input type="text" id="email-icon" class="form-control" name="interest"
+                                           placeholder="Interest"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-sm-3 col-form-label">
+                                <label for="contact-icon">Time</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i data-feather="smartphone"></i></span>
+                                    </div>
+                                    <input type="number" id="contact-icon" class="form-control" name="tenure"
+                                           placeholder="Tenure"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-9 offset-sm-3">
+                        <button type="submit" class="btn btn-primary mr-1">Submit</button>
+                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% if data %}
+<div class="container">
+    <h2 class="text-center"></h2><br>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Month</th>
+            <th>Initial Balance</th>
+            <th>Principle</th>
+            <th>Interest</th>
+            <th>Ending Balance</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- jinja2 Technique -->
+        {% for i in data %}
+        <tr>
+            <td>{{i.month}}</td>
+            <td>{{i.initial_balance}}</td>
+            <td>{{i.principle}}</td>
+            <td>{{i.interest}}</td>
+            <td>{{i.ending_balance}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock content%}

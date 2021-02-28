@@ -1,7 +1,70 @@
-<h1>Transaction list</h1>
-<ul>
-   {% for object in object_list %}
-   <li>{{object.name}}</li>
-    {% endfor %}
+{% extends "index.html" %}
+{% block content %}
+<section id="row-grouping-datatable">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h4 class="card-title">Transaction List</h4>
+                </div>
+                <div class="card-datatable">
+                    <table class="dt-row-grouping table">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Categories</th>
+                            <th>Payee</th>
+                            <th>Account</th>
+                            <th>Bill</th>
+                            <th>Cleared</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in object_list %}
+                         <tr>
+                            <th scope="row">{{ object.id }}</th>
+                            <td>{{ object.created_at }}</td>
+                            <td>{{ object.amount }}</td>
+                            <td>{{ object.categories }}</td>
+                            <td>{{ object.payee }}</td>
+                            <td>{{ object.account }}</td>
+                            <td>{{ object.bill }}</td>
+                             {% if object.cleared == True %}
+                            <td><i class="fa fa-check" aria-hidden="true"></i></td>
+                             {% else %}
+                              <td><i class="fa fa-times" aria-hidden="true"></i></td>
+                             {% endif %}
+                            <td>
+                                <!-- Call to action buttons -->
+                                <ul class="list-inline m-0">
+                                    <li class="list-inline-item">
+                                        <button class="btn btn-success btn-sm rounded-0" type="button"
+                                                data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                class="fa fa-edit"></i></button>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <button class="btn btn-danger btn-sm rounded-0" type="button"
+                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                class="fa fa-trash"></i></button>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--<h1>Transaction list</h1>-->
+<!--<ul>-->
+<!--   {% for object in object_list %}-->
+<!--   <li>{{object.name}}</li>-->
+<!--    {% endfor %}-->
 
-</ul>
+<!--</ul>-->
+{% endblock content%}

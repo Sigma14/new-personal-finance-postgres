@@ -1,3 +1,5 @@
+{% extends "index.html" %}
+{% block content %}
 <h1>Transaction Update View</h1>
 
 <form method="post">
@@ -5,3 +7,4 @@
     {{form.as_p}}
     <input type="submit" value="Update">
 </form>
+{% endblock content%}

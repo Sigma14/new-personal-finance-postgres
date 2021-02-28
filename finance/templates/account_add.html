@@ -1,7 +1,57 @@
+{% extends "index.html" %}
+{% block content %}
 <h1>Account Add View</h1>
 
-<form method="post">
-    {% csrf_token %}
-    {{form.as_p}}
-    <input type="submit" value="Create">
+<!--<form method="post">-->
+<!--    {% csrf_token %}-->
+<!--    {{form.as_p}}-->
+<!--    <input type="submit" value="Create">-->
 </form>
+<div class="col-md-6 col-12">
+    <div class="card">
+        <div class="card-body">
+            <form class="form form-horizontal" method = "post">
+              {% csrf_token %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-sm-3 col-form-label">
+                                <label for="fname-icon">Balance</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                    </div>
+                                    <input type="text" id="fname-icon" class="form-control" name="balance"
+                                           placeholder="Balance"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group row">
+                            <div class="col-sm-3 col-form-label">
+                                <label for="email-icon">Interest Rate</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group input-group-merge">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i data-feather="mail"></i></span>
+                                    </div>
+                                    <input type="text" id="email-icon" class="form-control" name="interest rate"
+                                           placeholder="Interest Rate"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-9 offset-sm-3">
+                        <button type="submit" class="btn btn-primary mr-1">Submit</button>
+                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content%}

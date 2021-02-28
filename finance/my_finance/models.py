@@ -65,6 +65,7 @@ class Transaction(models.Model):
     payee = models.CharField(max_length=25)
     account = models.CharField(max_length=20)
     bill = models.ForeignKey(User, on_delete=models.CASCADE)
+    cleared = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

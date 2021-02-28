@@ -2,17 +2,13 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    # path('category_list/',category_list, name='category_list'),
-    # path('category_detail/<int:id>',category_detail, name='category_detail'),
-    # path('category_add/', category_add, name='category_add'),
-    # path('category_update/<int:id>', category_update, name='category_update'),
-    # path('category_delete/<int:id>', category_delete, name='category_delete'),
+    path('', home, name='home'),
     path('category_list/', CategoryList.as_view(), name='category_list'),
     path('category_detail/<int:pk>', CategoryDetail.as_view(), name='category_detail'),
     path('category_add', CategoryAdd.as_view(), name='category_add'),
     path('category_update/<int:pk>', CategoryUpdate.as_view(), name='category_update'),
     path('category_delete/<int:pk>', CategoryDelete.as_view(), name='category_delete'),
-    path('login',user_login,name='user_login'),
+    path('login', user_login, name='user_login'),
     path('budget_list/', BudgetList.as_view(), name='budget_list'),
     path('budget_detail/<int:pk>', BudgetDetail.as_view(), name='budget_detail'),
     path('budget_add/', BudgetAdd.as_view(), name='budget_add'),
@@ -38,10 +34,11 @@ urlpatterns = [
     path('account_add/', AccountAdd.as_view(), name='account_add'),
     path('account_update/<int:pk>', AccountUpdate.as_view(), name='account_update'),
     path('account_delete/<int:pk>', AccountDelete.as_view(), name='account_delete'),
-    path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
-    path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),
-    path('mortgagecalculator_add/', MortgageCalculatorAdd.as_view(), name='mortgagecalculator_add'),
-    path('mortgagecalculator_update/<int:pk>', MortgageCalculatorUpdate.as_view(), name='mortgagecalculator_update'),
-    path('mortgagecalculator_delete/<int:pk>', MortgageCalculatorDelete.as_view(), name='mortgagecalculator_delete'),
+    # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
+    # path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),
+    # path('mortgagecalculator_add/', MortgageCalculatorAdd.as_view(), name='mortgagecalculator_add'),
+    # path('mortgagecalculator_update/<int:pk>', MortgageCalculatorUpdate.as_view(), name='mortgagecalculator_update'),
+    # path('mortgagecalculator_delete/<int:pk>', MortgageCalculatorDelete.as_view(), name='mortgagecalculator_delete'),
+    path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
 
 ]
