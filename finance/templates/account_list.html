@@ -1,10 +1,70 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Account list</h1>
-<ul>
-   {% for object in object_list %}
-   <li>{{object.balance}}</li>
-    {% endfor %}
 
-</ul>
+<section id="row-grouping-datatable">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h4 class="card-title">Account List</h4>
+                    <li class="list-inline-item">
+                            <div class="col-sm-40 offset-sm-20">
+                                <a href="{% url 'account_add' %}" class="btn btn-outline-secondary">Add Account</a>
+                            </div>
+                    </h4>
+                </div>
+                <div class="card-datatable">
+                    <table class="dt-row-grouping table">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Balance</th>
+                            <th>Interest Rate</th>
+                            <th>Last Updated</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in object_list %}
+                         <tr>
+                            <th scope="row">{{ object.id}}</th>
+                            <td>{{ object.created_at }}</td>
+                            <td>{{ object.name }}</td>
+                            <td>{{ object.balance }}</td>
+                            <td>{{ object.interest_rate }}</td>
+                            <td>{{ object.updated_at}}</td>
+                             <td>
+                                <!-- Call to action buttons -->
+                                <ul class="list-inline m-0">
+                                    <li class="list-inline-item">
+                                        <button class="btn btn-success btn-sm rounded-0" type="button"
+                                                data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                class="fa fa-edit"></i></button>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <button class="btn btn-danger btn-sm rounded-0" type="button"
+                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                class="fa fa-trash"></i></button>
+                                    </li>
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--</ul>-->
+
+<!--<h1>Account list</h1>-->
+<!--<ul>-->
+<!--   {% for object in object_list %}-->
+<!--   <li>{{object.balance}}</li>-->
+<!--    {% endfor %}-->
+
+<!--</ul>-->
 {% endblock content%}
