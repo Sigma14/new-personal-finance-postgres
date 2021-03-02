@@ -88,6 +88,9 @@ class CategoryDelete(DeleteView):
     form_class = CategoryForm
     template_name = 'category_delete.html'
 
+    def get_success_url(self):
+        return reverse('category_list')
+
 
 def user_login(request):
     next = request.GET.get('next')

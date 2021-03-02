@@ -7,10 +7,10 @@
                 <div class="card-header border-bottom">
                     <h4 class="card-title">Budget List</h4>
                     <li class="list-inline-item">
-                            <div class="col-sm-40 offset-sm-20">
-                                <a href="{% url 'budget_add' %}" class="btn btn-outline-secondary">Add Budget</a>
-                            </div>
-                    </h4>
+                        <div class="col-sm-40 offset-sm-20">
+                            <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
+                                    class="fa fa-plus"></i> Add Budget</a>
+                        </div>
                 </div>
                 <div class="card-datatable">
                     <table class="dt-row-grouping table">
@@ -27,7 +27,7 @@
                         </thead>
                         <tbody>
                         {% for object in object_list %}
-                         <tr>
+                        <tr>
                             <th scope="row">{{ object.id }}</th>
                             <td>{{ object.created_at }}</td>
                             <td>{{ object.name }}</td>
@@ -39,14 +39,16 @@
                                 <!-- Call to action buttons -->
                                 <ul class="list-inline m-0">
                                     <li class="list-inline-item">
-                                        <button class="btn btn-success btn-sm rounded-0" type="button"
-                                                data-toggle="tooltip" data-placement="top" title="Edit"><i
-                                                class="fa fa-edit"></i></button>
+                                        <a href="{% url 'budget_update' pk=object.id %}"
+                                           class="btn btn-success btn-sm rounded-0"><i
+                                                class="fa fa-edit"></i></a>
+
                                     </li>
                                     <li class="list-inline-item">
-                                        <button class="btn btn-danger btn-sm rounded-0" type="button"
-                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                class="fa fa-trash"></i></button>
+                                        <a href="{% url 'budget_delete' pk=object.id %}"
+                                           class="btn btn-danger btn-sm rounded-0"><i
+                                                class="fa fa-trash" data-toggle="tooltip" data-placement="top"
+                                                title="Delete"></i></a>
                                     </li>
                                 </ul>
                             </td>
