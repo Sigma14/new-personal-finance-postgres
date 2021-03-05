@@ -12,27 +12,28 @@
                             <a href="{% url 'goal_add' %}" class="btn btn-primary"><i
                                     class="fa fa-plus"></i> Add Goal</a>
                         </div>
-                        </h4>
                 </div>
                 <div class="card-datatable">
                     <table class="dt-row-grouping table">
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Label</th>
                             <th>Date</th>
+                            <th>Label</th>
                             <th>Goal Amount</th>
                             <th>Current Balance</th>
+                            <th>Last Updated</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for object in object_list %}
                         <tr>
                             <th scope="row">{{ object.id}}</th>
-                            <td>{{ object.label }}</td>
                             <td>{{ object.created_at }}</td>
-                            <td>{{ object.goal_amount }}</td>
-                            <td>{{ object.current_balance }}</td>
+                            <td>{{ object.label }}</td>
+                            <td>{{ object.goalamount }}</td>
+                            <td>{{ object.currentbalance }}</td>
+                            <td>{{ object.updated_at }}</td>
                             <!-- Call to action buttons -->
                             <td>
                                 <ul class="list-inline m-0">

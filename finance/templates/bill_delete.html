@@ -1,12 +1,20 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Bill Delete View</h1>
+<h1>{{object.name}}</h1>
 
-<h4>Do you want to delete this Bill? {{object.name}}</h4>
-<form method="POST">
+<h4>Are you sure you want to delete this bill?</h4>
+<form class="form form-horizontal" method="post">
     {% csrf_token %}
-    <input type="submit" value="Yes">
-    <a href="/bill_detail/{{object.id}}">No</a>
+    <div class="col-sm-9 offset-sm-3">
+        <button type="submit" class="btn btn-primary mr-1">Yes</button>
+        <a href="{% url 'bill_list' %}" class="btn btn-primary">No</a>
+    </div>
 </form>
-<a href="/bill_list">back</a>
+
 {% endblock content%}
+<!--<form method="POST">-->
+<!--    {% csrf_token %}-->
+<!--    <input type="submit" value="Yes">-->
+<!--    <a href="/bill_detail/{{object.id}}">No</a>-->
+<!--</form>-->
+<!--<a href="/bill_list">back</a>-->

@@ -144,6 +144,9 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
     form_class = BudgetForm
     template_name = 'budget_delete.html'
 
+    def get_success_url(self):
+        return reverse('budget_list')
+
 
 class BillList(LoginRequiredMixin, ListView):
     model = Bill

@@ -11,6 +11,7 @@ BUDGETS = (
 
 )
 
+
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
@@ -93,8 +94,9 @@ class Goal(models.Model):
 
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
+    name = models.CharField(max_length=50,null=True)
     balance = models.CharField(max_length=10)
-    interestrate = models.CharField(max_length=10,verbose_name='Interest rate')
+    interestrate = models.FloatField(verbose_name='Interest rate',default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

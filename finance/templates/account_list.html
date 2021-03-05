@@ -10,9 +10,8 @@
                     <li class="list-inline-item">
                         <div class="col-sm-40 offset-sm-20">
                             <a href="{% url 'account_add' %}" class="btn btn-primary"><i
-                                    class="fa fa-plus"></i>  Add Account</a>
+                                    class="fa fa-plus"></i> Add Account</a>
                         </div>
-                        </h4>
                 </div>
                 <div class="card-datatable">
                     <table class="dt-row-grouping table">
@@ -22,19 +21,19 @@
                             <th>Date</th>
                             <th>Name</th>
                             <th>Balance</th>
-                            <th>Interest Rate</th>
+                            <th>Interested Rate</th>
                             <th>Last Updated</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for object in object_list %}
                         <tr>
-                            <th scope="row">{{ object.id}}</th>
+                            <th scope="row">{{ object.id }}</th>
                             <td>{{ object.created_at }}</td>
                             <td>{{ object.name }}</td>
                             <td>{{ object.balance }}</td>
-                            <td>{{ object.interest_rate }}</td>
-                            <td>{{ object.updated_at}}</td>
+                            <td>{{ object.interestrate }}</td>
+                            <td>{{ object.updated_at }}</td>
                             <td>
                                 <!-- Call to action buttons -->
                                 <ul class="list-inline m-0">
@@ -61,12 +60,12 @@
         </div>
     </div>
 </section>
-<!--</ul>-->
 
-<!--<h1>Account list</h1>-->
+<!--</ul>-->
+<!--<h1>Bill list</h1>-->
 <!--<ul>-->
 <!--   {% for object in object_list %}-->
-<!--   <li>{{object.balance}}</li>-->
+<!--   <li>{{object.name}}</li>-->
 <!--    {% endfor %}-->
 
 <!--</ul>-->
