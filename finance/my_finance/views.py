@@ -1,60 +1,14 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
-from django.urls import reverse
-from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, MortgageForm
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .mortgage import calculator
 import json
 
-'''
-def category_list(request):
-    qs = Category.objects.all()
-    context = {
-         "objects" : qs
-    }
-    return render(request,'category_list.html',context)
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-def category_detail(request,id):
-    qs = Category.objects.get(id=id)
-    context = {
-        "object" : qs
-    }
-    return render(request,'category_detail.html',context)
-
-def category_add(request):
-    form = CategoryForm(request.POST or None)
-    if form.is_valid():
-         form.save()
-         return redirect('/category_list')
-    context = {
-        'form':  form
-    }
-    return render(request, 'category_add.html', context)
-
-def category_update(request, id):
-    qs = Category.objects.get(id=id)
-    form = CategoryForm(request.POST or None, instance=qs)
-    if form.is_valid():
-        form.save()
-        return redirect('/Category_detail/{}'.format(qs.id))
-    context = {
-        'form': form
-    }
-    return render(request,'category_update.html', context)
-
-def category_delete(request, id):
-    qs = Category.objects.get(id=id)
-    if request.method == 'POST':
-        qs.delete()
-        return HttpResponseRedirect('/category_list')
-    context = {
-        'object': qs
-    }
-    return render(request, 'category_delete.html', context)
-'''
+from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, MortgageForm
+from .models import Category, Budget, Bill, Transaction, Goal, Account
+from .mortgage import calculator
 
 
 def home(request):
@@ -260,33 +214,6 @@ class AccountDelete(LoginRequiredMixin, DeleteView):
     template_name = 'account_delete.html'
 
 
-# class MortgageCalculatorList(LoginRequiredMixin, ListView):
-#     model = MortgageCalculator
-#     template_name = 'mortgagecalculator_list.html'
-#
-#
-# class MortgageCalculatorDetail(LoginRequiredMixin, DetailView):
-#     model = MortgageCalculator
-#     template_name = 'mortgagecalculator_detail.html'
-#
-#
-# class MortgageCalculatorAdd(LoginRequiredMixin, CreateView):
-#     model = MortgageCalculator
-#     form_class = MortgageCalculatorForm
-#     template_name = 'mortgagecalculator_add.html'
-#
-#
-# class MortgageCalculatorUpdate(LoginRequiredMixin, UpdateView):
-#     model = MortgageCalculator
-#     form_class = MortgageCalculatorForm
-#     template_name = 'mortgagecalculator_update.html'
-#
-#
-# class MortgageCalculatorDelete(LoginRequiredMixin, DeleteView):
-#     model = MortgageCalculator
-#     form_class = MortgageCalculatorForm
-#     template_name = 'mortgagecalculator_delete.html'
-
 def mortgagecalculator(request):
     form = MortgageForm(request.POST or None)
     if form.is_valid():
@@ -295,7 +222,6 @@ def mortgagecalculator(request):
         tenure = form.cleaned_data.get('tenure')
         table = calculator(amount, interest, tenure)
 
-        # print(table)
         json_records = table.reset_index().to_json(orient='records')
         data = json.loads(json_records)
         context = {

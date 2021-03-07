@@ -14,17 +14,17 @@
                         </div>
                 </div>
                 <div class="card-datatable">
-                    <table class="dt-row-grouping table">
+                    <table class="dt-row-grouping table" id="bills">
                         <thead>
                         <tr>
-                            <th></th>
-                            <th>Date</th>
+                            <th>#</th>
                             <th>Name</th>
                             <th>Currency</th>
-                            <th>Minimum Amount</th>
-                            <th>Maximum Amount</th>
+                            <th>Min Amount</th>
+                            <th>Max Amount</th>
                             <th>Notes</th>
                             <th>Last Updated</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -49,8 +49,8 @@
                                     </li>
                                     <li class="list-inline-item">
                                         <a href="{% url 'bill_delete' pk=object.id %}"
-                                        class="btn btn-danger btn-sm rounded-0" type="button"
-                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                           class="btn btn-danger btn-sm rounded-0" type="button"
+                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                 class="fa fa-trash"></i></a>
                                     </li>
                                 </ul>
@@ -64,13 +64,4 @@
         </div>
     </div>
 </section>
-
-<!--</ul>-->
-<!--<h1>Bill list</h1>-->
-<!--<ul>-->
-<!--   {% for object in object_list %}-->
-<!--   <li>{{object.name}}</li>-->
-<!--    {% endfor %}-->
-
-<!--</ul>-->
 {% endblock content%}

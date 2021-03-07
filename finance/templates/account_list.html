@@ -14,22 +14,21 @@
                         </div>
                 </div>
                 <div class="card-datatable">
-                    <table class="dt-row-grouping table">
+                    <table class="dt-row-grouping table" id="accounts">
                         <thead>
                         <tr>
-                            <th></th>
-                            <th>Date</th>
+                            <th>#</th>
                             <th>Name</th>
                             <th>Balance</th>
-                            <th>Interested Rate</th>
+                            <th>Rate</th>
                             <th>Last Updated</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for object in object_list %}
                         <tr>
                             <th scope="row">{{ object.id }}</th>
-                            <td>{{ object.created_at }}</td>
                             <td>{{ object.name }}</td>
                             <td>{{ object.balance }}</td>
                             <td>{{ object.interestrate }}</td>
