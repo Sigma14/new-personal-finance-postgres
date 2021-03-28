@@ -47,7 +47,7 @@ class Bill(models.Model):
     currency = models.CharField(max_length=5)
     minimumamount = models.CharField(max_length=10)
     maximumamount = models.CharField(max_length=12)
-    notes = models.TextField()
+    notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -94,9 +94,9 @@ class Goal(models.Model):
 
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
-    name = models.CharField(max_length=50,null=True)
+    name = models.CharField(max_length=50, null=True)
     balance = models.CharField(max_length=10)
-    interestrate = models.FloatField(verbose_name='Interest rate',default=0.00)
+    interestrate = models.FloatField(verbose_name='Interest rate', default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
