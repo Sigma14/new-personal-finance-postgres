@@ -1,6 +1,6 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Create Account</h1>
+<h1>Create Goal</h1>
 
 <div class="col-md-6 col-12">
     <div class="card">
@@ -11,15 +11,15 @@
                     <div class="col-12">
                         <div class="form-group row">
                             <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Name</label>
+                                <label for="fname-icon">Label</label>
                             </div>
                             <div class="col-sm-9">
                                 <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="user"></i></span>
                                     </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="name"
-                                           placeholder="Name"/>
+                                    <input type="text" id="fname-icon" class="form-control" name="label" required
+                                           placeholder="Label"/>
                                 </div>
                             </div>
                         </div>
@@ -27,38 +27,38 @@
                     <div class="col-12">
                         <div class="form-group row">
                             <div class="col-sm-3 col-form-label">
-                                <label for="email-icon">Balance</label>
+                                <label for="email-icon">Goal Amount</label>
                             </div>
                             <div class="col-sm-9">
                                 <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="mail"></i></span>
                                     </div>
-                                    <input type="text" id="email-icon" class="form-control" name="balance"
-                                           placeholder="Balance"/>
+                                    <input type="text" id="email-icon" class="form-control" name="goalamount" required
+                                           placeholder="Goal Amount"/>
                                 </div>
                             </div>
                         </div>
                     </div>
-                      <div class="col-12">
+                    <div class="col-12">
                         <div class="form-group row">
                             <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Interest Rate</label>
+                                <label for="fname-icon">Current Balance</label>
                             </div>
                             <div class="col-sm-9">
                                 <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="user"></i></span>
                                     </div>
-                                     <input type="text" id="email-icon" class="form-control" name="interestrate"
-                                           placeholder="Interest Rate"/>
+                                    <input type="text" id="email-icon" class="form-control" name="currentbalance"
+                                           required placeholder="Current Balance"/>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-9 offset-sm-3">
                         <button type="submit" class="btn btn-primary mr-1">Create</button>
-                        <a href="{% url 'account_list' %}" class="btn btn-primary">Cancel</a>
+                        <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
 
                 </div>

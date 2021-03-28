@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator
@@ -52,7 +52,7 @@ class LoginForm(forms.Form):
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
-        exclude = ('user', 'created_at', 'updated_at')
+        exclude = ('user', 'autobudget', 'created_at', 'updated_at')
 
 
 class BillForm(forms.ModelForm):

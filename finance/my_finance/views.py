@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -17,30 +17,30 @@ def home(request):
 
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
-    template_name = 'category_list.html'
+    template_name = 'category/category_list.html'
 
 
 class CategoryDetail(DetailView):
     model = Category
-    template_name = 'category_detail.html'
+    template_name = 'category/category_detail.html'
 
 
 class CategoryAdd(CreateView):
     model = Category
     form_class = CategoryForm
-    template_name = 'category_add.html'
+    template_name = 'category/category_add.html'
 
 
 class CategoryUpdate(UpdateView):
     model = Category
     form_class = CategoryForm
-    template_name = 'category_update.html'
+    template_name = 'category/category_update.html'
 
 
 class CategoryDelete(DeleteView):
     model = Category
     form_class = CategoryForm
-    template_name = 'category_delete.html'
+    template_name = 'category/category_delete.html'
 
     def get_success_url(self):
         return reverse('category_list')
@@ -67,36 +67,36 @@ def user_login(request):
 
 
 def user_logout(request):
-    auth.logout(request)
+    logout(request)
     return redirect('/login')
 
 
 class BudgetList(LoginRequiredMixin, ListView):
     model = Budget
-    template_name = 'budget_list.html'
+    template_name = 'budget/budget_list.html'
 
 
 class BudgetDetail(LoginRequiredMixin, DetailView):
     model = Budget
-    template_name = 'budget_detail.html'
+    template_name = 'budget/budget_detail.html'
 
 
 class BudgetAdd(LoginRequiredMixin, CreateView):
     model = Budget
     form_class = BudgetForm
-    template_name = 'budget_add.html'
+    template_name = 'budget/budget_add.html'
 
 
 class BudgetUpdate(LoginRequiredMixin, UpdateView):
     model = Budget
     form_class = BudgetForm
-    template_name = 'budget_update.html'
+    template_name = 'budget/budget_update.html'
 
 
 class BudgetDelete(LoginRequiredMixin, DeleteView):
     model = Budget
     form_class = BudgetForm
-    template_name = 'budget_delete.html'
+    template_name = 'budget/budget_delete.html'
 
     def get_success_url(self):
         return reverse('budget_list')
@@ -104,114 +104,114 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 
 class BillList(LoginRequiredMixin, ListView):
     model = Bill
-    template_name = 'bill_list.html'
+    template_name = 'bill/bill_list.html'
 
 
 class BillDetail(LoginRequiredMixin, DetailView):
     model = Bill
-    template_name = 'bill_detail.html'
+    template_name = 'bill/bill_detail.html'
 
 
 class BillAdd(LoginRequiredMixin, CreateView):
     model = Bill
     form_class = BillForm
-    template_name = 'bill_add.html'
+    template_name = 'bill/bill_add.html'
 
 
 class BillUpdate(LoginRequiredMixin, UpdateView):
     model = Bill
     form_class = BillForm
-    template_name = 'bill_update.html'
+    template_name = 'bill/bill_update.html'
 
 
 class BillDelete(LoginRequiredMixin, DeleteView):
     model = Bill
     form_class = BillForm
-    template_name = 'bill_delete.html'
+    template_name = 'bill/bill_delete.html'
 
 
 class TransactionList(LoginRequiredMixin, ListView):
     model = Transaction
-    template_name = 'transaction_list.html'
+    template_name = 'transaction/transaction_list.html'
 
 
 class TransactionDetail(LoginRequiredMixin, DetailView):
     model = Transaction
-    template_name = 'transaction_detail.html'
+    template_name = 'transaction/transaction_detail.html'
 
 
 class TransactionAdd(LoginRequiredMixin, CreateView):
     model = Transaction
     form_class = TransactionForm
-    template_name = 'transaction_add.html'
+    template_name = 'transaction/transaction_add.html'
 
 
 class TransactionUpdate(LoginRequiredMixin, UpdateView):
     model = Transaction
     form_class = TransactionForm
-    template_name = 'transaction_update.html'
+    template_name = 'transaction/transaction_update.html'
 
 
 class TransactionDelete(LoginRequiredMixin, DeleteView):
     model = Transaction
     form_class = TransactionForm
-    template_name = 'transaction_delete.html'
+    template_name = 'transaction/transaction_delete.html'
 
 
 class GoalList(LoginRequiredMixin, ListView):
     model = Goal
-    template_name = 'goal_list.html'
+    template_name = 'goal/goal_list.html'
 
 
 class GoalDetail(LoginRequiredMixin, DetailView):
     model = Goal
-    template_name = 'goal_detail.html'
+    template_name = 'goal/goal_detail.html'
 
 
 class GoalAdd(LoginRequiredMixin, CreateView):
     model = Goal
     form_class = GoalForm
-    template_name = 'goal_add.html'
+    template_name = 'goal/goal_add.html'
 
 
 class GoalUpdate(LoginRequiredMixin, UpdateView):
     model = Goal
     form_class = GoalForm
-    template_name = 'goal_update.html'
+    template_name = 'goal/goal_update.html'
 
 
 class GoalDelete(LoginRequiredMixin, DeleteView):
     model = Goal
     form_class = GoalForm
-    template_name = 'goal_delete.html'
+    template_name = 'goal/goal_delete.html'
 
 
 class AccountList(LoginRequiredMixin, ListView):
     model = Account
-    template_name = 'account_list.html'
+    template_name = 'account/account_list.html'
 
 
 class AccountDetail(LoginRequiredMixin, DetailView):
     model = Account
-    template_name = 'account_detail.html'
+    template_name = 'account/account_detail.html'
 
 
 class AccountAdd(LoginRequiredMixin, CreateView):
     model = Account
     form_class = AccountForm
-    template_name = 'account_add.html'
+    template_name = 'account/account_add.html'
 
 
 class AccountUpdate(LoginRequiredMixin, UpdateView):
     model = Account
     form_class = AccountForm
-    template_name = 'account_update.html'
+    template_name = 'account/account_update.html'
 
 
 class AccountDelete(LoginRequiredMixin, DeleteView):
     model = Account
     form_class = AccountForm
-    template_name = 'account_delete.html'
+    template_name = 'account/account_delete.html'
 
 
 def mortgagecalculator(request):

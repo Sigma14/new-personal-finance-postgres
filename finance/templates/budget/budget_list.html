@@ -17,9 +17,7 @@
                         <thead>
                         <tr>
                             <th>#</th>
-                            <th>Date</th>
                             <th>Name</th>
-                            <th>Auto Budget</th>
                             <th>Currency</th>
                             <th>Amount</th>
                             <th>Last Updated</th>
@@ -30,9 +28,7 @@
                         {% for object in object_list %}
                         <tr>
                             <th scope="row">{{ object.id }}</th>
-                            <td>{{ object.created_at }}</td>
                             <td>{{ object.name }}</td>
-                            <td>{{ object.autobudget }}</td>
                             <td>{{ object.currency }}</td>
                             <td>{{ object.amount }}</td>
                             <td>{{ object.updated_at }}</td>

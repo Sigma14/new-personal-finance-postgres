@@ -29,8 +29,8 @@ class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     autobudget = models.CharField(max_length=33, choices=BUDGETS, blank=True, null=True)
-    currency = models.CharField(max_length=5, blank=True, null=True)
-    amount = models.CharField(max_length=10, blank=True, null=True)
+    currency = models.CharField(max_length=5, default='USD')
+    amount = models.CharField(max_length=10, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

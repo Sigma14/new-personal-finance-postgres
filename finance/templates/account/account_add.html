@@ -1,12 +1,7 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Add New Budget</h1>
+<h1>Create Account</h1>
 
-<!--<form method="post">-->
-<!--    {% csrf_token %}-->
-<!--    {{form.as_p}}-->
-<!--    <input type="submit" value="Create">-->
-<!--</form>-->
 <div class="col-md-6 col-12">
     <div class="card">
         <div class="card-body">
@@ -23,7 +18,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="user"></i></span>
                                     </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="name"
+                                    <input type="text" id="fname-icon" class="form-control" name="name" required
                                            placeholder="Name"/>
                                 </div>
                             </div>
@@ -32,15 +27,15 @@
                     <div class="col-12">
                         <div class="form-group row">
                             <div class="col-sm-3 col-form-label">
-                                <label for="email-icon">Auto Budget</label>
+                                <label for="email-icon">Balance</label>
                             </div>
                             <div class="col-sm-9">
                                 <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="mail"></i></span>
                                     </div>
-                                    <input type="text" id="email-icon" class="form-control" name="auto budget"
-                                           placeholder="Auto Budget"/>
+                                    <input type="text" id="email-icon" class="form-control" name="balance" required
+                                           placeholder="Balance"/>
                                 </div>
                             </div>
                         </div>
@@ -48,39 +43,22 @@
                       <div class="col-12">
                         <div class="form-group row">
                             <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Currency</label>
+                                <label for="fname-icon">Interest Rate</label>
                             </div>
                             <div class="col-sm-9">
                                 <div class="input-group input-group-merge">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i data-feather="user"></i></span>
                                     </div>
-                                    <input type="text" id="email-icon" class="form-control" name="currency"
-                                           placeholder="Currency"/>
-                                    {{ form.categories }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Amount</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="amount"
-                                           placeholder="Amount"/>
+                                     <input type="text" id="email-icon" class="form-control" name="interestrate"
+                                           placeholder="Interest Rate"/>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-9 offset-sm-3">
                         <button type="submit" class="btn btn-primary mr-1">Create</button>
-                        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{% url 'account_list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
 
                 </div>
@@ -89,4 +67,9 @@
     </div>
 </div>
 
+<!--<form method="post">-->
+<!--    {% csrf_token %}-->
+<!--    {{form.as_p}}-->
+<!--    <input type="submit" value="Create">-->
+<!--</form>-->
 {% endblock content%}
