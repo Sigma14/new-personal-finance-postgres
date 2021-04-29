@@ -182,6 +182,10 @@
                     class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Bill">Bill</span></a>
             </li>
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
+                    data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Bill">Available Funds</span></a>
+            </li>
             <li class=" nav-item  {% if request.resolver_match.view_name == 'account_list' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'account_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate"
@@ -266,6 +270,45 @@
                 });
             }
         })
+$( document ).ready(function() {
+  $('.new_category').on('click', function(e){
+    e.preventDefault();
+    var name = this.firstChild.data.trim()
+    var csrftoken = getCookie('csrftoken');
+    console.log('name--------', name)
+    console.log('csrftoken--------', csrftoken)
+    alert('Hello World')
+    $.ajax({
+        type: 'POST',
+        url:'/category_add/',
+        data: {
+        'name': name,
+        'csrfmiddlewaretoken': csrftoken
+        },
+        dataType: 'json',
+        success: function(){
+            alert('created');
+        }
+    })
+  })
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 
 </script>
 </body>

@@ -1,5 +1,8 @@
 import json
+import calendar
+from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
@@ -7,7 +10,7 @@ from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, MortgageForm
-from .models import Category, Budget, Bill, Transaction, Goal, Account
+from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory
 from .mortgage import calculator
 
 
@@ -85,6 +88,12 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
     model = Budget
     form_class = BudgetForm
     template_name = 'budget/budget_add.html'
+
+    def get_context_data(self, **kwargs):
+        data = super(BudgetAdd, self).get_context_data(**kwargs)
+        category_suggestions = SuggestiveCategory.objects.all().values_list('name', flat=True)
+        data['category_suggestions'] = category_suggestions
+        return data
 
 
 class BudgetUpdate(LoginRequiredMixin, UpdateView):
@@ -221,12 +230,20 @@ def mortgagecalculator(request):
         interest = form.cleaned_data.get('interest')
         tenure = form.cleaned_data.get('tenure')
         table = calculator(amount, interest, tenure)
-
+        total_payment = abs(table['principle'].sum() + table['interest'].sum())
+        total_month = tenure * 12
         json_records = table.reset_index().to_json(orient='records')
         data = json.loads(json_records)
+        monthly_payment = abs(data[0]['principle'] + data[0]['interest'])
+        last_date = date.today() + relativedelta(months=+total_month)
+        last_month = f'{calendar.month_name[last_date.month]} {last_date.year}'
         context = {
-            'form': form,
+            # 'form': form,
             'data': data,
+            'monthly_payment': monthly_payment,
+            'last_month': last_month,
+            'days': total_month,
+            'total_payment': total_payment
         }
         return render(request, 'mortgagecalculator_add.html', context)
 

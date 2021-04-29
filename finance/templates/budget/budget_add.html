@@ -66,5 +66,19 @@
         </div>
     </div>
 </div>
+<h1>Suggested Categories</h1>
+<div class="col-md-6 col-6">
+    <div class="card">
+        <div class="card-body">
+            {% for category in category_suggestions %}
+            <button type="button" value={{category}} class="btn btn-outline-secondary new_category">
+                {{category}}
+            </button>
+            <br>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 {% endblock content%}
