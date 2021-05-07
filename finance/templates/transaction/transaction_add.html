@@ -1,120 +1,179 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Create New Transaction </h1>
-
-<!--<form method="post">-->
-<!--    {% csrf_token %}-->
-<!--    {{form.as_p}}-->
-<!--    <input type="submit" value="Create">-->
-<!--</form>-->
-<div class="col-md-6 col-12">
-    <div class="card">
-        <div class="card-body">
-            <form class="form form-horizontal" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Name</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="name" required
-                                           placeholder="Name"/>
-                                </div>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Transaction</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'transaction_list' %}">Transactions</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Transaction
+                                    </li>
+                                </ol>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="email-icon">Amount</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="mail"></i></span>
-                                    </div>
-                                    <input type="text" id="email-icon" class="form-control" name="amount" required
-                                           placeholder="Amount"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                      <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Categories</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    {{ form.categories }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Payee</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="payee" required
-                                           placeholder="Payee"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Account</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="account" required
-                                           placeholder="Account"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                     <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Bill</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    {{ form.bill }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-9 offset-sm-3">
-                        <button type="submit" class="btn btn-primary mr-1">Create</button>
-                        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
-                    </div>
-
                 </div>
-            </form>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="POST">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Date</label>
+
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            {{form.transaction_date}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Payee</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="fname-icon" class="form-control" name="payee" required
+                                                   placeholder="Payee"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Account</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                           {{ form.account }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Categories</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.categories }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+<!--                            <div class="col-12">-->
+<!--                                <div class="form-group row">-->
+<!--                                    <div class="col-sm-3 col-form-label">-->
+<!--                                        <label for="fname-icon">Budgets</label>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-9">-->
+<!--                                        <div class="input-group input-group-merge">-->
+<!--                                            <div class="input-group-prepend">-->
+<!--                                                <span class="input-group-text"><i data-feather="user"></i></span>-->
+<!--                                            </div>-->
+<!--                                            {{ form.budgets }}-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bill</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.bill }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    &nbsp;
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="customRadio1" value="False" name="out_flow" class="custom-control-input"  />
+                                        <label class="custom-control-label" for="customRadio1">&nbsp;Inflow&nbsp;</label>
+                                    </div>
+                                    &nbsp;
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="customRadio2" value="True" name="out_flow" class="custom-control-input" checked/>
+                                        <label class="custom-control-label" for="customRadio2">&nbsp;Outflow</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>&nbsp;
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="cleared" class="custom-control-input new_tab_check" id="customCheck1" />
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Cleared</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 {% endblock content %}

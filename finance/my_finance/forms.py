@@ -2,7 +2,14 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
-from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator
+from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property
+
+CURRENCIES = (
+    ("$", 'US Dollar ($)'),
+    ("€", 'Euro (€)'),
+    ("₹", 'Indian rupee (₹)'),
+    ("£", 'British Pound (£)'),
+)
 
 
 class CategoryForm(forms.ModelForm):
@@ -50,33 +57,84 @@ class LoginForm(forms.Form):
 
 
 class BudgetForm(forms.ModelForm):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+
     class Meta:
         model = Budget
         exclude = ('user', 'autobudget', 'created_at', 'updated_at')
 
 
 class BillForm(forms.ModelForm):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     class Meta:
         model = Bill
-        exclude = ('user', 'created_at', 'updated_at')
+        exclude = ('user', 'status', 'created_at', 'updated_at')
 
 
 class TransactionForm(forms.ModelForm):
+    transaction_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control flatpickr-date-time',
+                                                                     'placeholder': "YYYY-MM-DD HH:MM", }),
+                                                                     required=True)
+    in_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    out_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    cleared = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        user_name = self.request.user
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name),
+                                                           empty_label="Select Category",
+                                                           widget=forms.Select(attrs={'class': 'form-control'}))
+        self.fields['bill'] = forms.ModelChoiceField(queryset=Bill.objects.filter(user=user_name),
+                                                     empty_label="Select Bill",
+                                                     widget=forms.Select(attrs={'class': 'form-control'}), required=False)
+        self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name),
+                                                        empty_label="Select Account",
+                                                        widget=forms.Select(attrs={'class': 'form-control'}))
+
     class Meta:
         model = Transaction
-        exclude = ('user', 'created_at', 'updated_at')
+        exclude = ('user', 'remaining_amount', 'created_at')
 
 
 class GoalForm(forms.ModelForm):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+
     class Meta:
         model = Goal
         exclude = ('user', 'created_at', 'updated_at')
 
 
 class AccountForm(forms.ModelForm):
+    include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    lock_amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+
     class Meta:
         model = Account
-        exclude = ('user', 'created_at', 'updated_at')
+        exclude = ('user', 'available_balance', 'liability_type', 'interest_period', 'transaction_count', 'created_at', 'updated_at')
+
+
+class LiabilityForm(forms.ModelForm):
+    TYPES = (
+        ("Debt", 'Debt'),
+        ("Loan", 'Loan'),
+        ("Mortgage", 'Mortgage'),
+    )
+    PERIODS = (
+        ("Per day", 'Per day'),
+        ("Per month", 'Per month'),
+        ("Per year", 'Per year'),
+    )
+    include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    liability_type = forms.CharField(widget=forms.Select(choices=TYPES, attrs={'class': 'form-control'}))
+    interest_period = forms.CharField(widget=forms.Select(choices=PERIODS, attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Account
+        exclude = ('user', 'transaction_count', 'created_at', 'updated_at')
 
 
 class MortgageCalculatorForm(forms.ModelForm):
@@ -86,6 +144,14 @@ class MortgageCalculatorForm(forms.ModelForm):
 
 
 class MortgageForm(forms.Form):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     amount = forms.IntegerField()
     interest = forms.FloatField()
     tenure = forms.IntegerField()
+
+
+class PropertyForm(forms.ModelForm):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    class Meta:
+        model = Property
+        exclude = ('user', 'created_at', 'updated_at')

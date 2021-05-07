@@ -11,6 +11,25 @@ BUDGETS = (
 
 )
 
+TYPES = (
+                ("Debt", 'Debt'),
+                ("Loan", 'Loan'),
+                ("Mortgage", 'Mortgage'),
+            )
+
+PERIODS = (
+                ("Per day", 'Per day'),
+                ("Per month", 'Per month'),
+                ("Per year", 'Per year'),
+            )
+
+CURRENCIES = (
+                ("$", 'US Dollar ($)'),
+                ("€", 'Euro (€)'),
+                ("₹", 'Indian rupee (₹)'),
+                ("£", 'British Pound (£)'),
+            )
+
 
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -38,7 +57,7 @@ class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     autobudget = models.CharField(max_length=33, choices=BUDGETS, blank=True, null=True)
-    currency = models.CharField(max_length=5, default='USD')
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     amount = models.CharField(max_length=10, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -52,42 +71,26 @@ class Budget(models.Model):
 
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-    currency = models.CharField(max_length=5)
-    minimumamount = models.CharField(max_length=10)
-    maximumamount = models.CharField(max_length=12)
-    notes = models.TextField(null=True, blank=True)
+    label = models.CharField(max_length=50)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    amount = models.CharField(max_length=50)
+    date = models.DateField()
+    status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
+    frequency = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.label)
 
     def get_absolute_url(self):
         return reverse('bill_list')
 
 
-class Transaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
-    name = models.CharField(max_length=50)
-    amount = models.CharField(max_length=5)
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
-    payee = models.CharField(max_length=25)
-    account = models.CharField(max_length=20)
-    bill = models.ForeignKey(User, on_delete=models.CASCADE)
-    cleared = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.name)
-
-    def get_absolute_url(self):
-        return reverse('transaction_list')
-
-
 class Goal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goal_user')
+    goal_date = models.DateField(blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     label = models.CharField(max_length=40)
     goalamount = models.CharField(max_length=10)
     currentbalance = models.CharField(max_length=10)
@@ -105,20 +108,79 @@ class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
     name = models.CharField(max_length=50, null=True)
     balance = models.CharField(max_length=10)
-    interestrate = models.FloatField(verbose_name='Interest rate', default=0.00)
+    available_balance = models.CharField(max_length=10, blank=True, null=True)
+    lock_amount = models.CharField(max_length=10, blank=True, null=True,)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    interest_rate = models.FloatField(verbose_name='Interest rate', default=0.00)
+    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
+    liability_type = models.CharField(max_length=10, choices=TYPES, blank=True, null=True)
+    interest_period = models.CharField(max_length=10, choices=PERIODS, blank=True, null=True)
+    transaction_count = models.IntegerField(default=0, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.balance)
+        return str(self.name)
 
     def get_absolute_url(self):
         return reverse('account_list')
 
 
+# class AvailableFunds(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fund_user')
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='fund_account')
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#     def __str__(self):
+#         return str(self.name)
+#
+#     def get_absolute_url(self):
+#         return reverse('account_list')
+
+
+class Property(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
+    name = models.CharField(max_length=30)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    value = models.CharField(max_length=12)
+    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.name)
+
+    def get_absolute_url(self):
+        return reverse('property_list')
+
+
+class Transaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
+    amount = models.CharField(max_length=5)
+    remaining_amount = models.CharField(max_length=10)
+    transaction_date = models.DateTimeField(blank=True, null=True)
+    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+    budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
+    payee = models.CharField(max_length=25)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+    in_flow = models.BooleanField(default=False)
+    out_flow = models.BooleanField(default=True)
+    cleared = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.payee)
+
+    def get_absolute_url(self):
+        return reverse('transaction_list')
+
+
 class MortgageCalculator(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mortgagecalculator_user')
     label = models.CharField(max_length=30)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     amount = models.IntegerField(default=0)
     years = models.CharField(max_length=10)
     interest = models.CharField(max_length=10)

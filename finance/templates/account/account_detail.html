@@ -1,10 +1,201 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Account Details</h1>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Accounts | Asset accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'account_list' %}">Accounts</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        {{object.name}}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'account_update' pk=object.id %}" class="btn btn-primary"><i
+                    data-feather="edit-2"></i>&nbsp;Edit Account</a>
+                    <button type="button" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
+                                            data-feather="trash"></i>&nbsp;Delete</button>
 
-<ul>
-    <li>Name: {{object.balance}}</li>
-</ul>
+                </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center" style="height:150px;">
+                            <a href="{% url 'account_detail' pk=object.id %}">
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ object.name }}</h2>
+                                    <h2 style="float: right;">{{ object.currency }}{{ object.available_balance}}</h2>
+                                </div>
+                                <br/>
+                                <div class="card-body" style="padding-bottom:30px;">
+                                    <h4 style="float: left;">{{ object.interest_rate }}%</h4>
+                                    <h4 style="float: right;">{{ object.updated_at }}</h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">Transactions</h4>
+                                    </div>
+                                    <br/>
+                                    <br/>
+                                    <!-- Line Chart Starts -->
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-header d-flex flex-sm-row flex-column justify-content-md-between align-items-start justify-content-start">
+                                                <div>
+                                                    <h4 class="card-title mb-25">{{object.name}}</h4>
+                                                    <span class="card-subtitle text-muted">Chat For all transactions</span>
+                                                </div>
+                                                <div class="d-flex align-items-center flex-wrap mt-sm-0 mt-1">
+                                                    <h5 class="font-weight-bolder mb-0 mr-1">{{ object.currency }}{{ object.available_balance}}</h5>
+                                                    <div class="badge badge-light-secondary">
+                                                        <i class="text-danger font-small-3" data-feather="arrow-down"></i>
+                                                        <span class="align-middle">20%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="Account-balance-line-chart"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Line Chart Ends -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Responsive Datatable -->
+                <section id="responsive-datatable">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Transactions</h4>
+                                </div>
+                                <div class="card-datatable">
+                                    <table class="table" id="transactions">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Account</th>
+                                                <th>Category </th>
+                                                <th>Payee</th>
+                                                <th>Amount</th>
+                                                <th>Bill</th>
+                                                <th>Cleared</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for data in transaction_data %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.account}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.categories}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.payee}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if data.out_flow %}
+                                                    <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>
+                                                    {% else %}
+                                                    <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.bill}}</span>
+                                                </div>
+                                            </td>
+                                            {% if data.cleared == True %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder text-success mr-1">
+                                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                                    </span>
+                                                    </div>
+                                                </td>
+                                                {% else %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder text-danger mr-1">
+                                                        <i class="fa fa-times" aria-hidden="true"></i>
+                                                    </span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">
+                                                        <ul class="list-inline m-0">
+                                                            <li class="list-inline-item">
+                                                                <a href="{% url 'transaction_update' pk=data.id %}"
+                                                                   class="btn btn-success btn-sm rounded-0" type="button"
+                                                                   data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                                        class="fa fa-edit"></i></a>
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <button type="button" delete_name="{{ data.payee }}" url="{% url 'transaction_delete' pk=data.id %}"
+                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                        class="fa fa-trash"></i></button>
+                                                            </li>
+                                                        </ul>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
 
-<a href="/category_list">back</a>
-{% endblock content%}
+

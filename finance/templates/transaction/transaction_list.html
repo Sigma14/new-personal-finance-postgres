@@ -1,72 +1,146 @@
 {% extends "index.html" %}
 {% block content %}
-<section id="row-grouping-datatable">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header border-bottom">
-                    <h4 class="card-title">Transaction List</h4>
-                    <li class="list-inline-item">
-                        <div class="col-sm-40 offset-sm-20">
-                            <a href="{% url 'transaction_add' %}" class="btn btn-primary"> <i
-                                    class="fa fa-plus"></i> Add Transaction</a>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Transactions</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Transactions
+                                    </li>
+                                </ol>
+                            </div>
                         </div>
-                        </h4>
+                    </div>
                 </div>
-                <div class="card-datatable">
-                    <table class="dt-row-grouping table" id="transactions">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Categories</th>
-                            <th>Payee</th>
-                            <th>Account</th>
-                            <th>Bill</th>
-                            <th>Cleared</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for object in object_list %}
-                        <tr>
-                            <th scope="row">{{ object.id }}</th>
-                            <td>{{ object.created_at }}</td>
-                            <td>{{ object.amount }}</td>
-                            <td>{{ object.categories }}</td>
-                            <td>{{ object.payee }}</td>
-                            <td>{{ object.account }}</td>
-                            <td>{{ object.bill }}</td>
-                            {% if object.cleared == True %}
-                            <td><i class="fa fa-check" aria-hidden="true"></i></td>
-                            {% else %}
-                            <td><i class="fa fa-times" aria-hidden="true"></i></td>
-                            {% endif %}
-                            <td>
-                                <!-- Call to action buttons -->
-                                <ul class="list-inline m-0">
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'transaction_update' pk=object.id %}"
-                                           class="btn btn-success btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Edit"><i
-                                                class="fa fa-edit"></i></a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'transaction_delete' pk=object.id %}"
-                                           class="btn btn-danger btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                class="fa fa-trash"></i></a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Transaction</a>
                 </div>
+                <br/>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="transactions">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Date</th>
+                                                <th>Amount</th>
+                                                <th>Categories</th>
+                                                <th>Payee</th>
+                                                <th>Account</th>
+                                                <th>Bill</th>
+                                                <th>Cleared</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for data in object_list %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.id}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.account}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.categories}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.payee}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if data.out_flow %}
+                                                        <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>
+                                                        {% else %}
+                                                        <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.bill}}</span>
+                                                    </div>
+                                                </td>
+                                                {% if data.cleared == True %}
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder text-success mr-1">
+                                                            <i class="fa fa-check" aria-hidden="true"></i>
+                                                        </span>
+                                                        </div>
+                                                    </td>
+                                                    {% else %}
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder text-danger mr-1">
+                                                            <i class="fa fa-times" aria-hidden="true"></i>
+                                                        </span>
+                                                        </div>
+                                                    </td>
+                                                    {% endif %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'transaction_update' pk=data.id %}"
+                                                                       class="btn btn-success btn-sm rounded-0" type="button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                                            class="fa fa-edit"></i></a>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
-</section>
 {% endblock content%}

@@ -1,0 +1,62 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Accounts | Liability</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Accounts
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'liability_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Liability</a>
+                </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    {% for object in object_list %}
+                    {% if object.liability_type == "Debt" or object.liability_type == "Loan" or object.liability_type == "Mortgage" %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a href="{% url 'liability_detail' pk=object.id %}">
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ object.name }} ({{ object.liability_type }})</h2>
+                                    <h2 style="float: right;">
+                                        <div class="avatar bg-light-info" float="right">
+                                            <div class="avatar-content">{{ object.transaction_count }}</div>
+                                        </div>
+                                    </h2>
+                                </div>
+                                <div class="card-body" style="padding-bottom:40px;">
+                                    <h4 style="float: left;">{{ object.currency }}{{ object.balance }}</h4>
+                                    <h4 style="float: left;">&nbsp;&nbsp;{{ object.interest_rate }}% ({{object.interest_period}})</h4>
+                                    <h4 style="float: right;">{{ object.updated_at }}</h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </section>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+

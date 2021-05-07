@@ -1,66 +1,81 @@
 {% extends "index.html" %}
+{% load static %}
 {% block content %}
-
-<section id="row-grouping-datatable">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header border-bottom">
-                    <h4 class="card-title">Bill List</h4>
-                    <li class="list-inline-item">
-                        <div class="col-sm-40 offset-sm-20">
-                            <a href="{% url 'bill_add' %}" class="btn btn-primary"><i
-                                    class="fa fa-plus"></i> Add Bill</a>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Bills</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Bills
+                                    </li>
+                                </ol>
+                            </div>
                         </div>
+                    </div>
                 </div>
-                <div class="card-datatable">
-                    <table class="dt-row-grouping table" id="bills">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Currency</th>
-                            <th>Min Amount</th>
-                            <th>Max Amount</th>
-                            <th>Notes</th>
-                            <th>Last Updated</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for object in object_list %}
-                        <tr>
-                            <th scope="row">{{ object.id }}</th>
-                            <td>{{ object.name }}</td>
-                            <td>{{ object.currency }}</td>
-                            <td>{{ object.minimumamount }}</td>
-                            <td>{{ object.maximumamount }}</td>
-                            <td>{{ object.notes }}</td>
-                            <td>{{ object.updated_at }}</td>
-                            <td>
-                                <!-- Call to action buttons -->
-                                <ul class="list-inline m-0">
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'bill_update' pk=object.id %}"
-                                           class="btn btn-success btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Edit"><i
-                                                class="fa fa-edit"></i></a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'bill_delete' pk=object.id %}"
-                                           class="btn btn-danger btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                class="fa fa-trash"></i></a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="content-body">
+                <!-- Full calendar start -->
+                <section>
+                    <div class="app-calendar overflow-hidden border">
+                        <div class="row no-gutters">
+                            <!-- Sidebar -->
+                            <div class="col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column" id="app-calendar-sidebar">
+                                <div class="sidebar-wrapper">
+                                    <div class="card-body d-flex justify-content-center">
+                                        <a href="{% url 'bill_add' %}" class="btn btn-primary">
+                                            <i class="fa fa-plus"></i> Add Bill</a>
+                                    </div>
+                                    <div class="card-body pb-0">
+                                        <h5 class="section-label mb-1">
+                                            <span class="align-middle">Filter</span>
+                                        </h5>
+                                        <div class="custom-control custom-checkbox mb-1">
+                                            <input type="checkbox" class="custom-control-input select-all" id="select-all" checked />
+                                            <label class="custom-control-label" for="select-all">View All</label>
+                                        </div>
+                                        <div class="calendar-events-filter">
+                                            <div class="custom-control custom-control-success custom-checkbox mb-1">
+                                                <input type="checkbox" class="custom-control-input input-filter" id="holiday" data-value="holiday" checked />
+                                                <label class="custom-control-label" for="holiday">Paid</label>
+                                            </div>
+                                            <div class="custom-control custom-control-danger custom-checkbox mb-1">
+                                                <input type="checkbox" class="custom-control-input input-filter" id="personal" data-value="personal" checked />
+                                                <label class="custom-control-label" for="personal">Unpaid</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-auto">
+                                    <img src="{% static 'app-assets/images/pages/calendar-illustration.png' %}" alt="Calendar illustration" class="img-fluid" />
+                                </div>
+                            </div>
+                            <!-- /Sidebar -->
+
+                            <!-- Calendar -->
+                            <div class="col position-relative">
+                                <div class="card shadow-none border-0 mb-0 rounded-0">
+                                    <div class="card-body pb-0">
+                                        <div id="calendar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /Calendar -->
+                            <div class="body-content-overlay"></div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Full calendar end -->
             </div>
         </div>
     </div>
-</section>
 {% endblock content%}

@@ -1,146 +1,205 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Mortgage Calculator</h1>
-
-<div class="col-md-6 col-12">
-    <div class="card">
-        <div class="card-body">
-            <form class="form form-horizontal" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Amount</label>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Mortgage Calculator</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Mortgage Calculator
+                                    </li>
+                                </ol>
                             </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="amount"
-                                           placeholder="Amount"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="email-icon">Interest</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="mail"></i></span>
-                                    </div>
-                                    <input type="text" id="email-icon" class="form-control" name="interest"
-                                           placeholder="Interest"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="contact-icon">Time</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="smartphone"></i></span>
-                                    </div>
-                                    <input type="number" id="contact-icon" class="form-control" name="tenure"
-                                           placeholder="Tenure" required/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-9 offset-sm-3">
-                        <button type="submit" class="btn btn-primary mr-1">Calculate</button>
-                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% if data %}
-<div class="col-xl-8 col-md-6 col-12">
-    <div class="card card-statistics">
-        <div class="card-header">
-            <h4 class="card-title">Statistics</h4>
-        </div>
-        <div class="card-body statistics-body">
-            <div class="row">
-                <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
-                    <div class="media">
-                        <div class="avatar bg-light-primary mr-2">
-                            <div class="avatar-content">
-                                <i data-feather="trending-up" class="avatar-icon"></i>
-                            </div>
-                        </div>
-                        <div class="media-body my-auto">
-                            <h4 class="font-weight-bolder mb-0">{{monthly_payment|floatformat:2}}</h4>
-                            <p class="card-text font-small-3 mb-0">Monthly Payment</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
-                    <div class="media">
-                        <div class="avatar bg-light-info mr-2">
-                            <div class="avatar-content">
-                                <i data-feather="user" class="avatar-icon"></i>
-                            </div>
-                        </div>
-                        <div class="media-body my-auto">
-                            <h4 class="font-weight-bolder mb-0">{{total_payment|floatformat:2}}</h4>
-                            <p class="card-text font-small-3 mb-0">Total of {{days}} payments</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-sm-0">
-                    <div class="media">
-                        <div class="avatar bg-light-danger mr-2">
-                            <div class="avatar-content">
-                                <i data-feather="box" class="avatar-icon"></i>
-                            </div>
-                        </div>
-                        <div class="media-body my-auto">
-                            <h4 class="font-weight-bolder mb-0">{{last_month}}</h4>
-                            <p class="card-text font-small-3 mb-0">Payoff date</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="fname-icon" class="form-control" name="amount"
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Currency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.currency }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Interest</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="interest"
+                                                   placeholder="Interest"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="contact-icon">Interest Period (Yearly) </label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="smartphone"></i></span>
+                                            </div>
+                                            <input type="number" id="contact-icon" class="form-control" name="tenure"
+                                                   placeholder="Tenure" required/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Calculate</button>
+                                <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if data %}
+            <section id="responsive-datatable">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card card-statistics">
+                            <div class="card-header">
+                                <h4 class="card-title">Statistics</h4>
+                            </div>
+                            <div class="card-body statistics-body">
+                                <div class="row">
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-danger mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{monthly_payment|floatformat:2}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Monthly Payment</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-success mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{total_payment|floatformat:2}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Total of {{days}} payments</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-sm-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-info mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="calendar" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{last_month}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Payoff date</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Responsive Datatable -->
+            <section id="responsive-datatable">
+                <div class="row match-height">
+                    <div class="col-6">
+                        <div class="card">
+                            <div class="card-header border-bottom">
+                                <h4 class="card-title">Calculation Result</h4>
+                            </div>
+                            <div class="card-datatable">
+                                <table class="table table-striped" id="mortgage">
+                                    <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Initial Balance</th>
+                                        <th>Principle</th>
+                                        <th>Interest</th>
+                                        <th>Ending Balance</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!-- jinja2 Technique -->
+                                    {% for i in data %}
+                                    <tr>
+                                        <td>{{i.month}}</td>
+                                        <td>{{i.initial_balance}}</td>
+                                        <td>{{i.principle}}</td>
+                                        <td>{{i.interest}}</td>
+                                        <td>{{i.ending_balance}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="line-area-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
         </div>
     </div>
-</div>
-<div class="container">
-    <h2 class="text-center"></h2><br>
-    <table class="table table-striped" id="mortgage">
-        <thead>
-        <tr>
-            <th>Month</th>
-            <th>Initial Balance</th>
-            <th>Principle</th>
-            <th>Interest</th>
-            <th>Ending Balance</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- jinja2 Technique -->
-        {% for i in data %}
-        <tr>
-            <td>{{i.month}}</td>
-            <td>{{i.initial_balance}}</td>
-            <td>{{i.principle}}</td>
-            <td>{{i.interest}}</td>
-            <td>{{i.ending_balance}}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endif %}
 {% endblock content%}

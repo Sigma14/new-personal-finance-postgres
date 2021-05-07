@@ -1,71 +1,147 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Create Account</h1>
-
-<div class="col-md-6 col-12">
-    <div class="card">
-        <div class="card-body">
-            <form class="form form-horizontal" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Name</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="name" required
-                                           placeholder="Name"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="email-icon">Balance</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="mail"></i></span>
-                                    </div>
-                                    <input type="text" id="email-icon" class="form-control" name="balance" required
-                                           placeholder="Balance"/>
-                                </div>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Account</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'account_list' %}">Account</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Account
+                                    </li>
+                                </ol>
                             </div>
                         </div>
                     </div>
-                      <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Interest Rate</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                     <input type="text" id="email-icon" class="form-control" name="interestrate"
-                                           placeholder="Interest Rate"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-9 offset-sm-3">
-                        <button type="submit" class="btn btn-primary mr-1">Create</button>
-                        <a href="{% url 'account_list' %}" class="btn btn-outline-secondary">Cancel</a>
-                    </div>
-
                 </div>
-            </form>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="fname-icon" class="form-control" name="name" required
+                                                   placeholder="Name"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Balance</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="balance" required
+                                                   placeholder="Balance"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Currency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.currency }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Interest Rate</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                             <input type="text" id="email-icon" class="form-control" name="interest_rate"
+                                                   placeholder="Interest Rate"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" />
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="lock_amount" class="custom-control-input " id="lock_amount_check" />
+                                        <label class="custom-control-label" for="lock_amount_check">&nbsp;&nbsp;Lock Amount</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="lock_amount_div">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Lock Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="lock_amount"
+                                                   placeholder="Lock Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'account_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
 <!--<form method="post">-->
 <!--    {% csrf_token %}-->

@@ -1,84 +1,90 @@
 {% extends "index.html" %}
 {% block content %}
-<h1>Add New Budget</h1>
-
-<div class="col-md-6 col-12">
-    <div class="card">
-        <div class="card-body">
-            <form class="form form-horizontal" method="post">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Name</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="name" required
-                                           placeholder="Name"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Currency</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="email-icon" class="form-control" name="currency"
-                                           placeholder="Currency"/>
-                                    {{ form.categories }}
-                                </div>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Budget</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Budget
+                                    </li>
+                                </ol>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-group row">
-                            <div class="col-sm-3 col-form-label">
-                                <label for="fname-icon">Amount</label>
-                            </div>
-                            <div class="col-sm-9">
-                                <div class="input-group input-group-merge">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i data-feather="user"></i></span>
-                                    </div>
-                                    <input type="text" id="fname-icon" class="form-control" name="amount" required
-                                           placeholder="Amount"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-9 offset-sm-3">
-                        <button type="submit" class="btn btn-primary mr-1">Create</button>
-                        <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </div>
-            </form>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="fname-icon" class="form-control" name="name" required
+                                                   placeholder="Name"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Currency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.currency }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="fname-icon" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<h1>Suggested Categories</h1>
-<div class="col-md-6 col-6">
-    <div class="card">
-        <div class="card-body">
-            {% for category in category_suggestions %}
-            <button type="button" value={{category}} class="btn btn-outline-secondary new_category">
-                {{category}}
-            </button>
-            <br>
-            <br>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
 {% endblock content%}

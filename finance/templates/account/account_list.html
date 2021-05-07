@@ -1,71 +1,61 @@
 {% extends "index.html" %}
 {% block content %}
-
-<section id="row-grouping-datatable">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header border-bottom">
-                    <h4 class="card-title">Account List</h4>
-                    <li class="list-inline-item">
-                        <div class="col-sm-40 offset-sm-20">
-                            <a href="{% url 'account_add' %}" class="btn btn-primary"><i
-                                    class="fa fa-plus"></i> Add Account</a>
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Accounts | Asset accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Accounts
+                                    </li>
+                                </ol>
+                            </div>
                         </div>
+                    </div>
                 </div>
-                <div class="card-datatable">
-                    <table class="dt-row-grouping table" id="accounts">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Balance</th>
-                            <th>Rate</th>
-                            <th>Last Updated</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for object in object_list %}
-                        <tr>
-                            <th scope="row">{{ object.id }}</th>
-                            <td>{{ object.name }}</td>
-                            <td>{{ object.balance }}</td>
-                            <td>{{ object.interestrate }}</td>
-                            <td>{{ object.updated_at }}</td>
-                            <td>
-                                <!-- Call to action buttons -->
-                                <ul class="list-inline m-0">
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'account_update' pk=object.id %}"
-                                           class="btn btn-success btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Edit"><i
-                                                class="fa fa-edit"></i></a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="{% url 'account_delete' pk=object.id %}"
-                                           class="btn btn-danger btn-sm rounded-0" type="button"
-                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                class="fa fa-trash"></i></a>
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'account_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Account</a>
                 </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    {% for object in object_list %}
+                    {% if object.liability_type != "Debt" and object.liability_type != "Loan" and object.liability_type != "Mortgage" %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a href="{% url 'account_detail' pk=object.id %}">
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ object.name }}</h2>
+                                    <h2 style="float: right;">
+                                        <div class="avatar bg-light-info" float="right">
+                                            <div class="avatar-content">{{ object.transaction_count }}</div>
+                                        </div>
+                                    </h2>
+                                </div>
+                                <div class="card-body" style="padding-bottom:40px;">
+                                    <h4 style="float: left;">{{ object.currency }}{{ object.available_balance}}</h4>
+                                    <h4 style="float: right;">{{ object.updated_at }}</h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </section>
+
             </div>
         </div>
     </div>
-</section>
+{% endblock content %}
 
-<!--</ul>-->
-<!--<h1>Bill list</h1>-->
-<!--<ul>-->
-<!--   {% for object in object_list %}-->
-<!--   <li>{{object.name}}</li>-->
-<!--    {% endfor %}-->
 
-<!--</ul>-->
-{% endblock content%}
