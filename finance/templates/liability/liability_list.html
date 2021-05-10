@@ -14,7 +14,7 @@
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Accounts
+                                    <li class="breadcrumb-item">Liabilities
                                     </li>
                                 </ol>
                             </div>
@@ -43,7 +43,7 @@
                                     </h2>
                                 </div>
                                 <div class="card-body" style="padding-bottom:40px;">
-                                    <h4 style="float: left;">{{ object.currency }}{{ object.balance }}</h4>
+                                    <h4 style="float: left;">{{ object.currency }}{{ object.available_balance }}</h4>
                                     <h4 style="float: left;">&nbsp;&nbsp;{{ object.interest_rate }}% ({{object.interest_period}})</h4>
                                     <h4 style="float: right;">{{ object.updated_at }}</h4>
                                 </div>

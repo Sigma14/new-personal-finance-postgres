@@ -49,7 +49,7 @@
                                             <tbody>
                                             {% for object in object_list %}
                                             <tr>
-                                                <th scope="row">{{ object.id }}</th>
+                                                <th scope="row">{{ forloop.counter }}</th>
                                                 <td>{{ object.name }}</td>
                                                 <td>{{ object.updated_at }}</td>
                                                 <td>

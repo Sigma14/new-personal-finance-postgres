@@ -55,7 +55,7 @@ urlpatterns = [
 
     # Bill Urls:-
     path('bill_list/', bill_list, name='bill_list'),
-    path('bill_details/<int:pk>', bill_detail, name='bill_detail'),
+    path('bill_detail/<int:pk>', bill_detail, name='bill_detail'),
     path('bill_add/', bill_add, name='bill_add'),
     path('bill_update/<int:pk>', bill_update, name='bill_update'),
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),
@@ -72,6 +72,7 @@ urlpatterns = [
     path('funds/', fund_list, name='fund_list'),
 
     path('login', user_login, name='user_login'),
+    path('net_worth', net_worth, name='net_worth'),
     path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
     # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
     # path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),

@@ -14,16 +14,29 @@
         shade_200: '#06774f'
       },
       donut: {
-        series1: '#ffe700',
-        series2: '#00d4bd',
-        series3: '#826bf8',
-        series4: '#2b9bf4',
-        series5: '#FFA1A1'
-      },
+                series1: '#ffe700',
+                series2: '#00d4bd',
+                series3: '#826bf8',
+                series4: '#2b9bf4',
+                series5: '#FFA1A1',
+                series6: '#a4f8cd',
+                series7: '#60f2ca',
+                series8: '#2bdac7',
+                series9: '#826af9',
+                series10: '#d2b0ff',
+                series11: '#06774f',
+                series12: '#7eefc7',
+                series13: '#f8d3ff',
+                series14: '#299AFF',
+                series15: '#84D0FF',
+                series16: '#EDF1F4',
+                series17: '#28c76f66',
+                series18: '#28c76f33'
+              },
       area: {
-        series3: '#826bf8',
-        series2: '#00d4bd',
-        series1: '#ffe700'
+                series1: '#ffe700',
+                series2: '#00d4bd',
+                series3: '#826bf8',
       }
     };
 
@@ -187,15 +200,25 @@
             categories: date_data
           },
           fill: {
-            opacity: 1,
-            type: 'solid'
+            opacity: 0.40,
+            type: ''
           },
           tooltip: {
             shared: false
           },
-          yaxis: {
-            opposite: isRtl
-          }
+          yaxis: [
+                  {
+                    title: {
+                      text: "Balance"
+                    },
+                  },
+                  {
+                    opposite: true,
+                    title: {
+                      text: "Interest & Principle"
+                    }
+                  }
+                  ]
         };
       if (typeof areaChartEl !== undefined && areaChartEl !== null) {
         var areaChart = new ApexCharts(areaChartEl, areaChartConfig);
@@ -206,7 +229,7 @@
   // Multiple Account Chart
   // --------------------------------------------------------------------
 
-function AccountsChart()
+function AccountsChart(account_graph_data, account_date_data, max_value, min_value)
 {
   var primaryColorShade = '#836AF9',
     yellowColor = '#ffe800',
@@ -224,6 +247,36 @@ function AccountsChart()
     labelColor = '#6e6b7b',
     grid_line_color = 'rgba(200, 200, 200, 0.2)'; // RGBA color helps in dark layout
 
+    var chart_colors = [lineChartPrimary, lineChartDanger, warningColorShade]
+    var account_data_set = []; // create an empty array
+    console.log(account_graph_data);
+    console.log(account_date_data);
+    for(let i=0; i < account_graph_data.length; i++)
+    {
+            account_data_set.push(
+                                    {
+                                    data: account_graph_data[i]['data_value'],
+                                    label: account_graph_data[i]['label_name'],
+                                    borderColor: chart_colors[i],
+                                    lineTension: 0.5,
+                                    pointStyle: 'circle',
+                                    backgroundColor: chart_colors[i],
+                                    fill: false,
+                                    pointRadius: 1,
+                                    pointHoverRadius: 5,
+                                    pointHoverBorderWidth: 5,
+                                    pointBorderColor: 'transparent',
+                                    pointHoverBorderColor: window.colors.solid.white,
+                                    pointHoverBackgroundColor: chart_colors[i],
+                                    pointShadowOffsetX: 1,
+                                    pointShadowOffsetY: 1,
+                                    pointShadowBlur: 5,
+                                    pointShadowColor: tooltipShadow
+                                  }
+                                )
+
+    }
+    console.log(account_data_set);
   var chartWrapper = $('.chartjs');
   let lineChartEx = $('.macro-chart');
   // Detect Dark Layout
@@ -298,9 +351,9 @@ function AccountsChart()
                 display: true
               },
               ticks: {
-                stepSize: 100,
-                min: 0,
-                max: 400,
+                stepSize: 2000,
+                min: min_value,
+                max: max_value,
                 fontColor: labelColor
               },
               gridLines: {
@@ -322,66 +375,8 @@ function AccountsChart()
         }
       },
       data: {
-        labels: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140],
-        datasets: [
-          {
-            data: [80, 150, 180, 270, 210, 160, 160, 202, 265, 210, 270, 255, 290, 360, 375],
-            label: 'Europe',
-            borderColor: lineChartDanger,
-            lineTension: 0.5,
-            pointStyle: 'circle',
-            backgroundColor: lineChartDanger,
-            fill: false,
-            pointRadius: 1,
-            pointHoverRadius: 5,
-            pointHoverBorderWidth: 5,
-            pointBorderColor: 'transparent',
-            pointHoverBorderColor: window.colors.solid.white,
-            pointHoverBackgroundColor: lineChartDanger,
-            pointShadowOffsetX: 1,
-            pointShadowOffsetY: 1,
-            pointShadowBlur: 5,
-            pointShadowColor: tooltipShadow
-          },
-          {
-            data: [80, 125, 105, 130, 215, 195, 140, 160, 230, 300, 220, 170, 210, 200, 280],
-            label: 'Asia',
-            borderColor: lineChartPrimary,
-            lineTension: 0.5,
-            pointStyle: 'circle',
-            backgroundColor: lineChartPrimary,
-            fill: false,
-            pointRadius: 1,
-            pointHoverRadius: 5,
-            pointHoverBorderWidth: 5,
-            pointBorderColor: 'transparent',
-            pointHoverBorderColor: window.colors.solid.white,
-            pointHoverBackgroundColor: lineChartPrimary,
-            pointShadowOffsetX: 1,
-            pointShadowOffsetY: 1,
-            pointShadowBlur: 5,
-            pointShadowColor: tooltipShadow
-          },
-          {
-            data: [80, 99, 82, 90, 115, 115, 74, 75, 130, 155, 125, 90, 140, 130, 180],
-            label: 'Africa',
-            borderColor: warningColorShade,
-            lineTension: 0.5,
-            pointStyle: 'circle',
-            backgroundColor: warningColorShade,
-            fill: false,
-            pointRadius: 1,
-            pointHoverRadius: 5,
-            pointHoverBorderWidth: 5,
-            pointBorderColor: 'transparent',
-            pointHoverBorderColor: window.colors.solid.white,
-            pointHoverBackgroundColor: warningColorShade,
-            pointShadowOffsetX: 1,
-            pointShadowOffsetY: 1,
-            pointShadowBlur: 5,
-            pointShadowColor: tooltipShadow
-          }
-        ]
+        labels: account_date_data,
+        datasets: account_data_set
       }
     });
   }
@@ -391,9 +386,9 @@ function AccountsChart()
   // Budgets Chart
   // --------------------------------------------------------------------
 
-function BudgetChart()
+function BudgetChart(graph_label, graph_data)
 {
-  var donutChartEl = document.querySelector('#donut-chart'),
+  var donutChartEl = document.querySelector('#budget-chart'),
     donutChartConfig = {
       chart: {
         height: 350,
@@ -403,13 +398,22 @@ function BudgetChart()
         show: true,
         position: 'bottom'
       },
-      labels: ['Operational', 'Networking', 'Hiring', 'R&D'],
-      series: [85, 16, 50, 50],
+      labels: graph_label,
+      series: graph_data,
       colors: [
         chartColors.donut.series1,
         chartColors.donut.series5,
         chartColors.donut.series3,
-        chartColors.donut.series2
+        chartColors.donut.series2,
+        chartColors.donut.series7,
+        chartColors.donut.series6,
+        chartColors.donut.series4,
+        chartColors.donut.series8,
+        chartColors.donut.series9,
+        chartColors.donut.series10,
+        chartColors.donut.series11,
+        chartColors.donut.series12,
+        chartColors.donut.series13,
       ],
       dataLabels: {
         enabled: true,
@@ -436,9 +440,9 @@ function BudgetChart()
               total: {
                 show: true,
                 fontSize: '1.5rem',
-                label: 'Operational',
+                label: graph_label[0],
                 formatter: function (w) {
-                  return '31%';
+                  return parseInt(graph_data[0]) + "%";
                 }
               }
             }

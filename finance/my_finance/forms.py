@@ -72,8 +72,8 @@ class BillForm(forms.ModelForm):
 
 
 class TransactionForm(forms.ModelForm):
-    transaction_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control flatpickr-date-time',
-                                                                     'placeholder': "YYYY-MM-DD HH:MM", }),
+    transaction_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control flatpickr-basic',
+                                                                     'placeholder': "YYYY-MM-DD", }),
                                                                      required=True)
     in_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     out_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
@@ -89,6 +89,10 @@ class TransactionForm(forms.ModelForm):
         self.fields['bill'] = forms.ModelChoiceField(queryset=Bill.objects.filter(user=user_name),
                                                      empty_label="Select Bill",
                                                      widget=forms.Select(attrs={'class': 'form-control'}), required=False)
+        self.fields['budgets'] = forms.ModelChoiceField(queryset=Budget.objects.filter(user=user_name),
+                                                     empty_label="Select Budget",
+                                                     widget=forms.Select(attrs={'class': 'form-control'}),
+                                                     required=False)
         self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name),
                                                         empty_label="Select Account",
                                                         widget=forms.Select(attrs={'class': 'form-control'}))
@@ -109,7 +113,7 @@ class GoalForm(forms.ModelForm):
 class AccountForm(forms.ModelForm):
     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-    lock_amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
 
     class Meta:
         model = Account
@@ -131,10 +135,11 @@ class LiabilityForm(forms.ModelForm):
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     liability_type = forms.CharField(widget=forms.Select(choices=TYPES, attrs={'class': 'form-control'}))
     interest_period = forms.CharField(widget=forms.Select(choices=PERIODS, attrs={'class': 'form-control'}))
+    lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
 
     class Meta:
         model = Account
-        exclude = ('user', 'transaction_count', 'created_at', 'updated_at')
+        exclude = ('user', 'balance', 'lock_amount', 'transaction_count', 'created_at', 'updated_at')
 
 
 class MortgageCalculatorForm(forms.ModelForm):

@@ -4,12 +4,6 @@ from django.urls import reverse
 from djongo import models
 
 # Create your models here.
-BUDGETS = (
-    (0, 'No auto-budget'),
-    (1, 'Set a fixed amount every period'),
-    (2, 'Add an amount every period'),
-
-)
 
 TYPES = (
                 ("Debt", 'Debt'),
@@ -56,14 +50,13 @@ class SuggestiveCategory(models.Model):
 class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    autobudget = models.CharField(max_length=33, choices=BUDGETS, blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     amount = models.CharField(max_length=10, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name + "(" + self.currency + ")")
 
     def get_absolute_url(self):
         return reverse('budget_list')
@@ -81,7 +74,7 @@ class Bill(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.label)
+        return str(self.label + "(" + self.currency + ")")
 
     def get_absolute_url(self):
         return reverse('bill_list')
@@ -120,7 +113,7 @@ class Account(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name + "(" + self.currency + ")")
 
     def get_absolute_url(self):
         return reverse('account_list')
@@ -159,7 +152,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
     amount = models.CharField(max_length=5)
     remaining_amount = models.CharField(max_length=10)
-    transaction_date = models.DateTimeField(blank=True, null=True)
+    transaction_date = models.DateField(blank=True, null=True)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
     budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
     payee = models.CharField(max_length=25)

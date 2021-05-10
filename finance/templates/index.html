@@ -185,40 +185,40 @@
                     data-feather="home"></i><span class="menu-title text-truncate"
                                                   data-i18n="Dashboard">Dashboard</span></a>
             </li>
-            <li class=" nav-item {% if request.resolver_match.view_name == 'category_list' %}active{% endif %}"><a
+            <li class=" nav-item {% if request.resolver_match.view_name == 'category_list' or request.resolver_match.view_name == 'category_add' or request.resolver_match.view_name == 'category_detail' or request.resolver_match.view_name == 'category_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'category_list' %}"><i
                     data-feather="mail"></i><span class="menu-title text-truncate" data-i18n="Category">Category</span></a>
             </li>
-            <li class=" nav-item  {% if request.resolver_match.view_name == 'budget_list' %}active{% endif %}"><a
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'budget_list' or request.resolver_match.view_name == 'budget_add' or request.resolver_match.view_name == 'budget_detail' or request.resolver_match.view_name == 'budget_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'budget_list' %}"><i
                     data-feather="message-square"></i><span class="menu-title text-truncate"
                                                             data-i18n="Budget">Budget</span></a>
             </li>
-            <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' %}active{% endif %}"><a
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' or request.resolver_match.view_name == 'bill_add' or request.resolver_match.view_name == 'bill_detail' or request.resolver_match.view_name == 'bill_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Bill">Bill</span></a>
             </li>
-            <li class=" nav-item {% if request.resolver_match.view_name == 'fund_list' %}active{% endif %}"><a
+            <li class=" nav-item {% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_add' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'fund_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
             </li>
-            <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' %}active{% endif %}""><a
+            <li class=" nav-item {% if request.resolver_match.view_name == 'property_list'  or request.resolver_match.view_name == 'property_add' or request.resolver_match.view_name == 'property_detail' or request.resolver_match.view_name == 'property_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'property_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
             </li>
             <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Accounts">Accounts</span></a>
                 <ul class="menu-content">
-                    <li class="{% if request.resolver_match.view_name == 'account_list' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Asset Accounts</span></a>
+                    <li class="{% if request.resolver_match.view_name == 'account_list' or request.resolver_match.view_name == 'account_add' or request.resolver_match.view_name == 'account_detail' or request.resolver_match.view_name == 'account_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Asset Accounts</span></a>
                     </li>
-                    <li class="{% if request.resolver_match.view_name == 'liability_list' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'liability_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Liabilities</span></a>
+                    <li class="{% if request.resolver_match.view_name == 'liability_list' or request.resolver_match.view_name == 'liability_add' or request.resolver_match.view_name == 'liability_detail' or request.resolver_match.view_name == 'liability_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'liability_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Liabilities</span></a>
                     </li>
                 </ul>
             </li>
-            <li class=" nav-item  {% if request.resolver_match.view_name == 'transaction_list' %}active{% endif %}"><a
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'transaction_list' or request.resolver_match.view_name == 'transaction_add' or request.resolver_match.view_name == 'transaction_detail' or request.resolver_match.view_name == 'transaction_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'transaction_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Transaction">Transaction</span></a>
             </li>
-            <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' %}active{% endif %}"><a
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' or request.resolver_match.view_name == 'goal_add' or request.resolver_match.view_name == 'goal_detail' or request.resolver_match.view_name == 'goal_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
                     data-feather="target"></i><span class="menu-title text-truncate" data-i18n="Goal">Goal</span></a>
             </li>
@@ -291,8 +291,8 @@
 <script>LinesGraph({{ balance_graph_data | safe }});</script>
 <script>MortgageChart({{ mortgage_graph_data | safe }}, {{ mortgage_date_data | safe}});</script>
 <script>showCalenders( {{ calendar_bill_data | safe }});</script>
-<script>AccountsChart();</script>
-<script>BudgetChart();</script>
+<script>AccountsChart( {{ account_graph_data | safe }}, {{ date_range_list | safe }}, {{max_value}}, {{min_value}});</script>
+<script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_value | safe}});</script>
 
 

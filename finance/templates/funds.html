@@ -50,13 +50,16 @@
                                             </thead>
                                             <tbody>
                                             {% for object in fund_data %}
-                                            {% if object.lock_amount != "None" %}
                                             <tr>
-                                                <th scope="row">{{ object.id }}</th>
+                                                <th scope="row">{{ forloop.counter }}</th>
                                                 <td>{{ object.name }}</td>
                                                 <td>{{ object.balance }}</td>
                                                 <td>{{ object.available_balance }}</td>
+                                                {% if object.lock_amount %}
                                                 <td>{{ object.lock_amount }}</td>
+                                                {% else %}
+                                                <td>0</td>
+                                                {% endif %}
                                                 <td>
                                                     <!-- Call to action buttons -->
                                                     <ul class="list-inline m-0">
@@ -67,15 +70,14 @@
 
                                                         </li>
                                                         <li class="list-inline-item">
-                                                            <a href="{% url 'account_delete' pk=object.id %}"
-                                                               class="btn btn-danger btn-sm rounded-0"><i
-                                                                    class="fa fa-trash" data-toggle="tooltip" data-placement="top"
-                                                                    title="Delete"></i></a>
+                                                            <button type="button" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}"
+                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                    class="fa fa-trash"></i></button>
                                                         </li>
                                                     </ul>
                                                 </td>
                                             </tr>
-                                            {% endif %}
                                             {% endfor %}
                                             </tbody>
                                         </table>

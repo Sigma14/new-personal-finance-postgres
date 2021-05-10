@@ -43,10 +43,11 @@
                                                 <th>#</th>
                                                 <th>Date</th>
                                                 <th>Amount</th>
-                                                <th>Categories</th>
                                                 <th>Payee</th>
                                                 <th>Account</th>
+                                                <th>Categories</th>
                                                 <th>Bill</th>
+                                                <th>Budget</th>
                                                 <th>Cleared</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -56,27 +57,12 @@
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{data.id}}</span>
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
                                                     </div>
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{data.account}}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{data.categories}}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{data.payee}}</span>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -90,7 +76,27 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{data.bill}}</span>
+                                                        <span class="font-weight-bolder mr-1">{{data.payee}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.account.name}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.categories}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>
                                                     </div>
                                                 </td>
                                                 {% if data.cleared == True %}

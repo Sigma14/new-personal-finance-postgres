@@ -27,7 +27,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" method="POST">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
@@ -64,7 +64,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Balance</label>
+                                        <label for="email-icon">Total Balance</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -95,7 +95,9 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-group row">
-                                    <div class="input-group input-group-merge">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
                                     <div class="custom-control custom-checkbox">
                                         {% if form.include_net_worth.value %}
                                         <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" />
@@ -103,7 +105,6 @@
                                         <input type="checkbox" name="include_net_worth" class="custom-control-input new_tab_check" id="customCheck1" />
                                         {% endif %}
                                         <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -114,9 +115,9 @@
                                     </div>
                                     <div class="custom-control custom-checkbox">
                                         {% if form.lock_amount.value %}
-                                        <input type="checkbox" name="lock_amount" checked class="custom-control-input " id="lock_amount_check" />
+                                        <input type="checkbox" name="lock_check" checked class="custom-control-input " id="lock_amount_check" />
                                         {% else %}
-                                        <input type="checkbox" name="lock_amount" class="custom-control-input " id="lock_amount_check" />
+                                        <input type="checkbox" name="lock_check" class="custom-control-input " id="lock_amount_check" />
                                         {% endif %}
                                         <label class="custom-control-label" for="lock_amount_check">&nbsp;&nbsp;Lock Amount</label>
                                     </div>

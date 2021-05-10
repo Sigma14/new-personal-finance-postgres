@@ -1,0 +1,290 @@
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Net Worth</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a url="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Net Worth
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-primary" role="alert">
+                        </div>
+                    </div>
+                </div>
+                <!-- Dashboard Ecommerce Starts -->
+                <section id="dashboard-ecommerce">
+                    <div class="row match-height">
+                        <div class="col-xl-4 col-md-4 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Net Worth</h4>
+                                </div>
+                                <div class="card-datatable">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Currency</th>
+                                                <th>Current Net worth</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for key,value in net_worth_dict.items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{forloop.counter}}</span>
+                                                </div>
+                                            </td>
+                                            {% for cur_key,cur_value in currency_dict.items %}
+                                            {% if cur_key == key %}
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{cur_value}}</span>
+                                                </div>
+                                            </td>
+                                            {% endif %}
+                                            {% endfor %}
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Medal Card -->
+                        <div class="col-xl-8 col-md-8 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Account Balances</h4>
+                                </div>
+                                <div class="card-datatable">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Account Name</th>
+                                                <th>Account Balance</th>
+                                                <th>Creation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for data in assets_data %}
+                                        <tr>
+                                            {% for name in data %}
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{name}}</span>
+                                                </div>
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td colspan="4">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% for key, value in total_asset_amount_dict.items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                </div>
+                                            </td>
+                                            <td colspan="2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/ Medal Card -->
+                    </div>
+                </section>
+                <!-- Dashboard Ecommerce ends -->
+                <!-- Dashboard Ecommerce Starts -->
+                <section id="dashboard-ecommerce">
+                    <div class="row match-height">
+                        <!-- Medal Card -->
+                        <div class="col-xl-6 col-md-6 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Liabilities (Debts/Mortgages/Loans)</h4>
+                                </div>
+                                <div class="card-datatable">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Liability Name</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Creation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for data in liability_data %}
+                                        <tr>
+                                            {% for name in data %}
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{name}}</span>
+                                                </div>
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td colspan="4">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% for key, value in total_liability_dict.items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                </div>
+                                            </td>
+                                            <td colspan="2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Statistics Card -->
+                        <div class="col-xl-6 col-md-6 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Properties</h4>
+                                </div>
+
+                                <div class="card-datatable">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Property Name</th>
+                                                <th>Property Value</th>
+                                                <th>Creation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for data in property_data %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.name}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.currency}}{{data.value}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{data.created_at}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td colspan="4">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1"></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% for key, value in total_property_dict.items %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                </div>
+                                            </td>
+                                            <td colspan="2">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/ Medal Card -->
+
+<!--                        &lt;!&ndash; Statistics Card &ndash;&gt;-->
+                    </div>
+                </section>
+                <!-- Dashboard Ecommerce ends -->
+                <!-- Dashboard Ecommerce Starts -->
+                <section id="dashboard-ecommerce">
+                    <div class="row match-height">
+                        <!-- Medal Card -->
+                        <div class="col-xl-12 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <h5>Net Worth</h5>
+                                    <div id="net-worth-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/ Medal Card -->
+
+<!--                        &lt;!&ndash; Statistics Card &ndash;&gt;-->
+<!--                        <div class="col-xl-6 col-md-6 col-12">-->
+<!--                            <div class="card card-congratulation-medal">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5>Categories</h5>-->
+<!--                                    <div id="column-chart"></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <!-- END: Content-->
+{% endblock content %}

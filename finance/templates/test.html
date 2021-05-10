@@ -1,5 +1,6 @@
 {% extends "index.html" %}
 {% load static %}
+{% load mathfilters %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -85,12 +86,14 @@
                                             <div class="media">
                                                 <div class="avatar bg-light-success mr-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                        <i data-feather="bar-chart" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="media-body my-auto">
-                                                    <h4 class="font-weight-bolder mb-0">$9745</h4>
-                                                    <p class="card-text font-small-3 mb-0">Revenue</p>
+                                                    <h4 class="font-weight-bolder mb-0"><a href="{% url 'net_worth' %}">Net Worth</a></h4>
+                                                    {% for key, value in net_worth_dict.items %}
+                                                    <h5 class="font-weight-bolder mb-0">{{key}}{{value|floatformat:0}}</h5>
+                                                    {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
@@ -105,7 +108,7 @@
                 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Medal Card -->
-                        <div class="col-xl-6 col-md-6 col-12">
+                        <div class="col-xl-8 col-md-8 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <h5>Accounts</h5>
@@ -116,11 +119,11 @@
                         <!--/ Medal Card -->
 
                         <!-- Statistics Card -->
-                        <div class="col-xl-6 col-md-6 col-12">
+                        <div class="col-xl-4 col-md-4 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <h5>Budgets</h5>
-                                    <div id="donut-chart"></div>
+                                    <div id="budget-chart"></div>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +134,7 @@
                 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Medal Card -->
-                        <div class="col-xl-12 col-md-6 col-12">
+                        <div class="col-xl-12 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <h5>Categories</h5>
