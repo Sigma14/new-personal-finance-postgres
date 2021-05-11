@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  dashboard:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8002
+    ports:
+      - "8002:8002"
+    environment:
+      - DEBUG=1
+      - NOSQL_ENGINE=djongo
+      - NOSQL_NAME=personal_finance
+      - NOSQL_HOST=mongodb
+      - NOSQL_ENFORCE_SCHEMA=False
+    depends_on:
+    - mongodb
+    restart: unless-stopped
+  mongodb:
+    image: mongo
+    ports:
+      - 27019:27019
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

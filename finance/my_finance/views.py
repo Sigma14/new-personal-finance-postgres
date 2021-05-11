@@ -10,13 +10,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm,\
-                   MortgageForm, LiabilityForm, PropertyForm
+from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, \
+    MortgageForm, LiabilityForm, PropertyForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property
 from .mortgage import calculator
 
 
-def net_worth_cal(account_data, property_data, fun_name=None):
+def net_worth_cal(account_data, property_data, date_compare, fun_name=None):
     liability_data = []
     assets_data = []
     total_asset_amount_dict = {}
@@ -24,9 +24,30 @@ def net_worth_cal(account_data, property_data, fun_name=None):
     total_property_dict = {}
     currency_count_list = []
     net_worth_dict = {}
+    asset_currency_balance = []
+    liability_currency_balance = []
+    property_currency_balance = []
+    base = max(date_compare)
+    min_date = min(date_compare)
+    num_days = base - min_date
+    num_days = num_days.days
+    date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
+    date_range_list.append(str(min_date))
+
     for data in account_data:
         if data.include_net_worth:
+            transaction_data = Transaction.objects.filter(account__pk=data.pk).order_by(
+                'transaction_date')[::-1]
+            current_balance = float(data.available_balance)
+            balance_graph_dict = {}
+            balance_graph_data = []
+            date_list = []
             if data.liability_type != "Debt" and data.liability_type != "Loan" and data.liability_type != "Mortgage":
+                if fun_name != "dash_board":
+                    overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,
+                                          balance_graph_data,
+                                          date_range_list)
+                    asset_currency_balance.append({data.currency: balance_graph_data[::-1]})
                 assets_data.append([data.name, data.currency + data.available_balance, data.created_at])
                 if data.currency in total_asset_amount_dict:
                     total_asset_amount_dict[data.currency] = round(total_asset_amount_dict[data.currency] +
@@ -43,6 +64,11 @@ def net_worth_cal(account_data, property_data, fun_name=None):
                 else:
                     currency_count_list.append(data.currency)
                     total_liability_dict[data.currency] = round(float(data.available_balance), 2)
+                if fun_name != "dash_board":
+                    overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,
+                                          balance_graph_data,
+                                          date_range_list)
+                    liability_currency_balance.append({data.currency: balance_graph_data[::-1]})
 
     for data in property_data:
         if data.include_net_worth:
@@ -52,6 +78,8 @@ def net_worth_cal(account_data, property_data, fun_name=None):
             else:
                 currency_count_list.append(data.currency)
                 total_property_dict[data.currency] = round(float(data.value), 2)
+
+            property_currency_balance.append({data.currency: data.value})
 
     total_currency_list = list(dict.fromkeys(currency_count_list))
 
@@ -74,11 +102,13 @@ def net_worth_cal(account_data, property_data, fun_name=None):
     if fun_name == "dash_board":
         return net_worth_dict
     else:
-        return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, total_property_dict
+        return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict,\
+               total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance,\
+               total_currency_list, date_range_list
 
 
-def overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,balance_graph_data,
-                          date_range_list, min_date):
+def overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
+                          date_range_list):
     account_index = 1
     for data in transaction_data:
         if account_index == 1:
@@ -132,105 +162,212 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
                 graph_value = balance_graph_dict[date_value]
                 balance_graph_data.append(graph_value)
             else:
-                if date_range_index == 1:
-                    balance_graph_data.append(starting_balance)
+                if date_range_index == len(date_range_list):
+                    print("Latest DAe--------------->", date_value)
+                    balance_graph_data.append(current_balance)
                 else:
-                    if str(min_date) == date_value:
-                        balance_graph_data.append(current_balance)
-                    else:
+                    try:
                         balance_graph_data.append(graph_value)
+                    except:
+                        balance_graph_data.append(balance_graph_dict[balance_key])
             date_range_index += 1
     else:
         for date_value in date_range_list:
             balance_graph_data.append(round(current_balance, 2))
 
-    print(current_balance)
-    print(balance_graph_data)
 
 def home(request):
     user_name = request.user
-    categories = Category.objects.filter(user=user_name)
-    all_transaction_data = Transaction.objects.filter(user=user_name)
-    accounts_data = Account.objects.filter(user=user_name)
-    property_data = Property.objects.filter(user=user_name)
-    budget_data = Budget.objects.filter(user=user_name)
-    budget_label = []
-    budget_values = []
-    budget_percentage = []
-    total_budget = 0
-    categories_name = []
-    categories_value = []
-    bills_name = []
-    bill_value = []
-    account_graph_data = []
-    category_index = 1
-    date_compare = []
-    min_max_value_list = []
-    asset_currency_balance = []
-    liability_currency_balance = []
-    property_currency_balance = []
+    if user_name != "AnonymousUser":
+        categories = Category.objects.filter(user=user_name)
+        all_transaction_data = Transaction.objects.filter(user=user_name)
+        accounts_data = Account.objects.filter(user=user_name)
+        property_data = Property.objects.filter(user=user_name)
+        budget_data = Budget.objects.filter(user=user_name)
+        budget_label = []
+        budget_values = []
+        budget_percentage = []
+        total_budget = 0
+        categories_name = []
+        categories_value = []
+        bills_name = []
+        bill_value = []
+        account_graph_data = []
+        category_index = 1
+        date_compare = []
+        min_max_value_list = []
+        asset_currency_balance = []
+        liability_currency_balance = []
+        property_currency_balance = []
 
-    for obj in all_transaction_data:
-        date_compare.append(obj.account.created_at.date())
-        date_compare.append(obj.transaction_date)
+        for data in property_data:
+            property_currency_balance.append({data.currency: data.value})
 
-    if accounts_data:
-        base = max(date_compare)
-        min_date = min(date_compare)
-        num_days = base - min_date
-        num_days = num_days.days
-        print(num_days)
-        date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
-        date_range_list.append(str(min_date))
-    else:
-        date_range_list = []
+        for obj in all_transaction_data:
+            date_compare.append(obj.account.created_at.date())
+            date_compare.append(obj.transaction_date)
 
-    for acc_obj in accounts_data:
-        if acc_obj.liability_type != "Debt" and acc_obj.liability_type != "Loan" and acc_obj.liability_type != "Mortgage":
+        if accounts_data:
+            base = max(date_compare)
+            min_date = min(date_compare)
+            num_days = base - min_date
+            num_days = num_days.days
+            print(num_days)
+            date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
+            date_range_list.append(str(min_date))
+        else:
+            date_range_list = []
+
+        for acc_obj in accounts_data:
             transaction_data = Transaction.objects.filter(user=user_name, account__pk=acc_obj.pk).order_by(
                 'transaction_date')[::-1]
             current_balance = float(acc_obj.available_balance)
             balance_graph_dict = {}
             balance_graph_data = []
             date_list = []
-            overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
-                                  date_range_list, min_date)
-            graph_dict = {'label_name': acc_obj.name, 'data_value': balance_graph_data[::-1]}
-            account_graph_data.append(graph_dict)
-            min_max_value_list.append(min(balance_graph_data))
-            min_max_value_list.append(max(balance_graph_data))
 
-    for data in all_transaction_data:
-        if data.categories and data.out_flow:
-            if category_index == 1:
-                categories_name.append(data.categories.name)
-                categories_value.append(float(data.amount))
+            if acc_obj.liability_type != "Debt" and acc_obj.liability_type != "Loan" and acc_obj.liability_type != "Mortgage":
+                overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
+                                      date_range_list)
+                asset_currency_balance.append({acc_obj.currency: balance_graph_data[::-1]})
+                graph_dict = {'label_name': acc_obj.name, 'data_value': balance_graph_data[::-1]}
+                account_graph_data.append(graph_dict)
+                min_max_value_list.append(min(balance_graph_data))
+                min_max_value_list.append(max(balance_graph_data))
             else:
-                if data.categories.name in categories_name:
-                    category_index = categories_name.index(data.categories.name)
-                    categories_value[category_index] += float(data.amount)
-                else:
+                overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
+                                      date_range_list)
+                liability_currency_balance.append({acc_obj.currency: balance_graph_data[::-1]})
+
+        for data in all_transaction_data:
+            if data.categories and data.out_flow:
+                if category_index == 1:
                     categories_name.append(data.categories.name)
                     categories_value.append(float(data.amount))
-            category_index += 1
+                else:
+                    if data.categories.name in categories_name:
+                        category_index = categories_name.index(data.categories.name)
+                        categories_value[category_index] += float(data.amount)
+                    else:
+                        categories_name.append(data.categories.name)
+                        categories_value.append(float(data.amount))
+                category_index += 1
 
-    for cat_index in range(len(categories)):
-        if categories[cat_index].name in categories_name:
-            pass
+        for cat_index in range(len(categories)):
+            if categories[cat_index].name in categories_name:
+                pass
+            else:
+                categories_name.append(categories[cat_index].name)
+                categories_value.append(0.0)
+
+        for data in budget_data:
+            total_budget += float(data.amount)
+            budget_label.append(data.name)
+            budget_values.append(float(data.amount))
+
+        for value in budget_values:
+            result = round((value / total_budget) * 100, 2)
+            budget_percentage.append(result)
+
+        net_worth_dict = net_worth_cal(accounts_data, property_data, date_compare, fun_name="dash_board")
+
+        if min_max_value_list:
+            max_value = max(min_max_value_list)
+            min_value = min(min_max_value_list)
         else:
-            categories_name.append(categories[cat_index].name)
-            categories_value.append(0.0)
+            max_value = 0
+            min_value = 0
 
-    for data in budget_data:
-        total_budget += float(data.amount)
-        budget_label.append(data.name)
-        budget_values.append(float(data.amount))
+        print("Assets_currency_data", asset_currency_balance)
+        print("Liabiliy_currency_data", liability_currency_balance)
+        print("Property_currency_data", property_currency_balance)
 
-    for value in budget_values:
-        result = round((value / total_budget) * 100, 2)
-        budget_percentage.append(result)
+        context = {
+            "categories_name": categories_name,
+            "categories_value": categories_value,
+            "account_graph_data": account_graph_data,
+            "date_range_list": date_range_list[::-1],
+            "graph_label": budget_label,
+            "graph_value": budget_percentage,
+            "net_worth_dict": net_worth_dict,
+            "max_value": max_value,
+            "min_value": min_value
+        }
+    else:
+        context = {}
+    return render(request, 'test.html', context=context)
 
-    net_worth_dict = net_worth_cal(accounts_data, property_data, fun_name="dash_board")
+
+def net_worth(request):
+    user_name = request.user
+    account_data = Account.objects.filter(user=user_name)
+    property_data = Property.objects.filter(user=user_name)
+    all_transaction_data = Transaction.objects.filter(user=user_name)
+    date_compare = []
+
+    for obj in all_transaction_data:
+        date_compare.append(obj.account.created_at.date())
+        date_compare.append(obj.transaction_date)
+
+    currency_dict = {
+        "$": 'US Dollar ($)',
+        "€": 'Euro (€)',
+        "₹": 'Indian rupee (₹)',
+        "£": 'British Pound (£)',
+    }
+    net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
+    total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance,\
+    total_currency_list, date_range_list = net_worth_cal(account_data, property_data, date_compare)
+
+    print("Assets_currency_data", asset_currency_balance)
+    print("Liabiliy_currency_data", liability_currency_balance)
+    print("Property_currency_data", property_currency_balance)
+    print(total_currency_list)
+    asset_total_dict = {}
+    liability_total_dict = {}
+    net_worth_graph_list = []
+    min_max_value_list = []
+
+    for currency_index in range(len(asset_currency_balance)):
+        asset_currency_name = list(asset_currency_balance[currency_index])[0]
+        balance_data = asset_currency_balance[currency_index][asset_currency_name]
+        print("asset_currency_name", asset_currency_name)
+        print("currency_name", currency_index)
+        if asset_currency_name in total_currency_list:
+            if asset_currency_name in asset_total_dict:
+                sum_balance_data = [x + y for (x, y) in zip(asset_total_dict[asset_currency_name], balance_data)]
+                asset_total_dict[asset_currency_name] = sum_balance_data
+            else:
+                asset_total_dict[asset_currency_name] = balance_data
+
+    for currency_index in range(len(liability_currency_balance)):
+        liability_currency_name = list(liability_currency_balance[currency_index])[0]
+        liability_balance_data = liability_currency_balance[currency_index][liability_currency_name]
+        if liability_currency_name in total_currency_list:
+            if asset_currency_name in liability_total_dict:
+                sum_liab_data = [x + y for (x, y) in zip(liability_total_dict[liability_currency_name], liability_balance_data)]
+                liability_total_dict[liability_currency_name] = sum_liab_data
+            else:
+                liability_total_dict[liability_currency_name] = liability_balance_data
+
+    print(asset_total_dict)
+    print(liability_total_dict)
+    print(total_property_dict)
+    for name in total_currency_list:
+        net_worth_list = []
+        for net_worth_index in range(len(date_range_list)):
+            overtime_net_worth = 0
+            if name in asset_total_dict:
+                overtime_net_worth += asset_total_dict[name][net_worth_index]
+            if name in total_property_dict:
+                overtime_net_worth += total_property_dict[name]
+                print("overtime_net_worth=====>", overtime_net_worth)
+            if name in liability_total_dict:
+                overtime_net_worth -= liability_total_dict[name][net_worth_index]
+            net_worth_list.append(overtime_net_worth)
+            min_max_value_list.append(overtime_net_worth)
+        net_worth_graph_dict = {'label_name': name, 'data_value': net_worth_list}
+        net_worth_graph_list.append(net_worth_graph_dict)
 
     if min_max_value_list:
         max_value = max(min_max_value_list)
@@ -241,41 +378,20 @@ def home(request):
 
 
     context = {
-                "categories_name": categories_name,
-                "categories_value": categories_value,
-                "account_graph_data": account_graph_data,
-                "date_range_list": date_range_list[::-1],
-                "graph_label": budget_label,
-                "graph_value": budget_percentage,
-                "net_worth_dict": net_worth_dict,
-                "max_value": max_value,
-                "min_value": min_value
-               }
-    return render(request, 'test.html', context=context)
+        "property_data": property_data,
+        "assets_data": assets_data,
+        "liability_data": liability_data,
+        "total_asset_amount_dict": total_asset_amount_dict,
+        "total_liability_dict": total_liability_dict,
+        "total_property_dict": total_property_dict,
+        "net_worth_dict": net_worth_dict,
+        "currency_dict": currency_dict,
+        "account_graph_data": net_worth_graph_list,
+        "date_range_list": date_range_list[::-1],
+        "max_value": max_value,
+        "min_value": min_value
 
-
-def net_worth(request):
-    user_name = request.user
-    account_data = Account.objects.filter(user=user_name)
-    property_data = Property.objects.filter(user=user_name)
-    currency_dict = {
-        "$": 'US Dollar ($)',
-        "€": 'Euro (€)',
-        "₹": 'Indian rupee (₹)',
-        "£": 'British Pound (£)',
     }
-    net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, total_property_dict = net_worth_cal(account_data, property_data)
-    context = {
-                "property_data": property_data,
-                "assets_data": assets_data,
-                "liability_data": liability_data,
-                "total_asset_amount_dict": total_asset_amount_dict,
-                "total_liability_dict":  total_liability_dict,
-                "total_property_dict": total_property_dict,
-                "net_worth_dict": net_worth_dict,
-                "currency_dict": currency_dict
-              }
-    print(net_worth_dict)
     return render(request, "net_worth.html", context=context)
 
 
@@ -538,14 +654,18 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 account_obj = Account.objects.get(user=self.request.user, name=account)
                 if transaction_amount != update_transaction_amount:
                     if transaction_out_flow:
-                        account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
+                        account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount,
+                                                              2)
                     else:
-                        account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
+                        account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount,
+                                                              2)
 
                     if out_flow:
-                        account_obj.available_balance = round(float(account_obj.available_balance) - update_transaction_amount, 2)
+                        account_obj.available_balance = round(
+                            float(account_obj.available_balance) - update_transaction_amount, 2)
                     else:
-                        account_obj.available_balance = round(float(account_obj.available_balance) + update_transaction_amount, 2)
+                        account_obj.available_balance = round(
+                            float(account_obj.available_balance) + update_transaction_amount, 2)
 
 
             else:
@@ -553,14 +673,18 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 account_obj = Account.objects.get(user=self.request.user, name=update_account)
 
                 if transaction_out_flow:
-                    old_account_obj.available_balance = round(float(old_account_obj.available_balance) + transaction_amount, 2)
+                    old_account_obj.available_balance = round(
+                        float(old_account_obj.available_balance) + transaction_amount, 2)
                 else:
-                    old_account_obj.available_balance = round(float(old_account_obj.available_balance) - transaction_amount, 2)
+                    old_account_obj.available_balance = round(
+                        float(old_account_obj.available_balance) - transaction_amount, 2)
 
                 if out_flow:
-                    account_obj.available_balance = round(float(account_obj.available_balance) - update_transaction_amount, 2)
+                    account_obj.available_balance = round(
+                        float(account_obj.available_balance) - update_transaction_amount, 2)
                 else:
-                    account_obj.available_balance = round(float(account_obj.available_balance) + update_transaction_amount, 2)
+                    account_obj.available_balance = round(
+                        float(account_obj.available_balance) + update_transaction_amount, 2)
 
                 account_obj.transaction_count += 1
                 old_account_obj.transaction_count -= 1
@@ -742,7 +866,8 @@ class AccountDetail(LoginRequiredMixin, DetailView):
         account_obj = Account.objects.get(pk=account_pk)
         current_balance = float(account_obj.available_balance)
         initial_balance = current_balance
-        transaction_data = Transaction.objects.filter(user=self.request.user, account__pk=account_pk).order_by('transaction_date')[::-1]
+        transaction_data = Transaction.objects.filter(user=self.request.user, account__pk=account_pk).order_by(
+            'transaction_date')[::-1]
         date_list = []
         balance_graph_data = []
         index = 1
@@ -946,7 +1071,8 @@ class LiabilityDetail(LoginRequiredMixin, DetailView):
         account_obj = Account.objects.get(pk=account_pk)
         current_balance = float(account_obj.available_balance)
         initial_balance = current_balance
-        transaction_data = Transaction.objects.filter(user=self.request.user, account__pk=account_pk).order_by('transaction_date')[::-1]
+        transaction_data = Transaction.objects.filter(user=self.request.user, account__pk=account_pk).order_by(
+            'transaction_date')[::-1]
         date_list = []
         balance_graph_data = []
         index = 1
@@ -1011,7 +1137,6 @@ class LiabilityDetail(LoginRequiredMixin, DetailView):
 
 
 def bill_list(request):
-
     bill_data = Bill.objects.filter(user=request.user)
 
     calendar_bill_data = []
@@ -1059,19 +1184,19 @@ def bill_add(request):
         return redirect("/bill_list")
 
     context = {
-                'form': form
-              }
+        'form': form
+    }
     return render(request, "bill/bill_add.html", context=context)
 
 
 def bill_update(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     currency_dict = {
-                        "$": 'US Dollar ($)',
-                        "€": 'Euro (€)',
-                        "₹": 'Indian rupee (₹)',
-                        "£": 'British Pound (£)',
-                    }
+        "$": 'US Dollar ($)',
+        "€": 'Euro (€)',
+        "₹": 'Indian rupee (₹)',
+        "£": 'British Pound (£)',
+    }
 
     form = BillForm(request.POST or None)
     if form.is_valid():
@@ -1092,10 +1217,10 @@ def bill_update(request, pk):
     print("bill_date======>", bill_obj.date)
     print("bill_date======>", type(bill_obj.date))
     context = {
-                'form': form,
-                'bill_data': bill_obj,
-                'currency_dict': currency_dict
-              }
+        'form': form,
+        'bill_data': bill_obj,
+        'currency_dict': currency_dict
+    }
     return render(request, "bill/bill_update.html", context=context)
 
 

@@ -85,8 +85,8 @@ class Goal(models.Model):
     goal_date = models.DateField(blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     label = models.CharField(max_length=40)
-    goalamount = models.CharField(max_length=10)
-    currentbalance = models.CharField(max_length=10)
+    goalamount = models.FloatField()
+    currentbalance = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
