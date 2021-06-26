@@ -24,6 +24,14 @@ CURRENCIES = (
                 ("£", 'British Pound (£)'),
             )
 
+BUDGET_PERIODS = (
+                ("Daily", 'Daily'),
+                ("Weekly", 'Weekly'),
+                ("Monthly", 'Monthly'),
+                ("Quarterly", 'Quarterly'),
+                ("Yearly", 'Yearly'),
+            )
+
 
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -52,6 +60,9 @@ class Budget(models.Model):
     name = models.CharField(max_length=50)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     amount = models.CharField(max_length=10, default=0)
+    budget_spent = models.CharField(max_length=10, default=0)
+    auto_budget = models.BooleanField(default=True, blank=True, null=True)
+    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,9 +78,10 @@ class Bill(models.Model):
     label = models.CharField(max_length=50)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     amount = models.CharField(max_length=50)
+    remaining_amount = models.CharField(max_length=50)
     date = models.DateField()
     status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
-    frequency = models.IntegerField()
+    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -158,6 +170,7 @@ class Transaction(models.Model):
     payee = models.CharField(max_length=25)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+    tags = models.CharField(max_length=225, blank=True, null=True)
     in_flow = models.BooleanField(default=False)
     out_flow = models.BooleanField(default=True)
     cleared = models.BooleanField(default=False)

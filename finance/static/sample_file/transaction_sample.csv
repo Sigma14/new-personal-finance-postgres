@@ -1,0 +1,7 @@
+Date,Amount,Payee,Account,Categories,Bill,Budget,Cleared,Tags,Type
+20-06-2021,1000,LIGHT BILL,Checking,House Loan,None,None,TRUE,Light,Debit
+21-06-2021,1000,Owner,Checking,House Loan,None,House Loan,TRUE,Loan,Debit
+22-06-2021,500,Owner,Checking,House Loan,None,House Loan,FALSE,Loan,Debit
+23-06-2021,500,House Rent,Checking,Rent,None,None,TRUE,Rent,Credit
+23-06-2021,500,voda care,Checking,Recharge,Recharge,None,TRUE,Recharge,Debit
+24-06-2021,300,Milk Man,Checking,Food,Dudh,None,TRUE,Milk,Debit

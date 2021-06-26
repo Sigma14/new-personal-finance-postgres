@@ -1,19 +1,133 @@
+import ast
+import csv
 import json
 import calendar
+import pandas as pd
 import datetime
-
+from io import BytesIO
+from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, \
     MortgageForm, LiabilityForm, PropertyForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property
 from .mortgage import calculator
+
+
+def transaction_summary(transaction_data, select_filter):
+    tags_data = ['All']
+    credit_date_dict = {}
+    debit_date_dict = {}
+    credit_date_list = []
+    debit_date_list = []
+    date_list = []
+    for transaction_name in transaction_data:
+        if transaction_name.cleared:
+            transaction_date = str(transaction_name.transaction_date)
+            transaction_amount = transaction_name.amount
+            if transaction_name.out_flow:
+                if transaction_date in debit_date_dict:
+                    debit_date_dict[transaction_date] += float(transaction_amount)
+                else:
+                    debit_date_dict[transaction_date] = float(transaction_amount)
+
+            else:
+                if transaction_date in debit_date_dict:
+                    credit_date_dict[transaction_date] += float(transaction_amount)
+                else:
+                    credit_date_dict[transaction_date] = float(transaction_amount)
+            date_list.append(str(transaction_date))
+        if transaction_name.tags:
+            tags_data.append(transaction_name.tags)
+
+    tags_data = list(dict.fromkeys(tags_data))
+    date_list = list(dict.fromkeys(date_list))
+
+    for value in date_list:
+        if value in debit_date_dict:
+            debit_date_list.append(debit_date_dict[value])
+            if value not in credit_date_dict:
+                credit_date_list.append(0)
+        if value in credit_date_dict:
+            credit_date_list.append(credit_date_dict[value])
+            if value not in debit_date_dict:
+                debit_date_list.append(0)
+
+    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
+    context = {
+                'transaction_key': transaction_key,
+                'transaction_key_dumbs': json.dumps(transaction_key),
+                'transaction_data': transaction_data,
+                'tags_data': tags_data,
+                'select_filter': select_filter,
+                'debit_graph_data': debit_date_list,
+                'credit_graph_data': credit_date_list,
+                'transaction_date_data': date_list,
+               }
+    return context
+
+def transaction_checks(username, transaction_amount, account, bill_name, budget_name, cleared_amount, out_flow):
+    if cleared_amount == "True":
+        print("account", account)
+        account_obj = Account.objects.get(user=username, name=account)
+        print(account_obj)
+        if bill_name:
+            bill_name = bill_name.label
+            bill_obj = Bill.objects.filter(user=username, label=bill_name)[0]
+        else:
+            bill_obj = False
+
+        if budget_name:
+            budget_name = budget_name.name
+            budget_obj = Budget.objects.filter(user=username, name=budget_name)[0]
+        else:
+            budget_obj = False
+
+        if out_flow == "True":
+            account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
+        else:
+            account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
+
+        if bill_obj:
+            bill_amount = round(float(bill_obj.remaining_amount), 2)
+            if transaction_amount == bill_amount:
+                bill_obj.status = "paid"
+                bill_obj.remaining_amount = bill_amount - transaction_amount
+            else:
+                bill_obj.status = "unpaid"
+                bill_obj.amount = bill_amount - transaction_amount
+            bill_obj.save()
+
+        if budget_obj:
+            if out_flow == "True":
+                budget_obj.budget_spent = round(float(budget_obj.budget_spent) + transaction_amount, 2)
+            else:
+                budget_obj.amount = round(float(budget_obj.amount) + transaction_amount, 2)
+
+            budget_obj.save()
+        account_obj.transaction_count += 1
+        account_obj.save()
+        return account_obj
+
+
+def category_spent_amount(category_data, user_name, categories_name, categories_value):
+    for category_name in category_data:
+        spent_value = 0
+        category_transaction_data = Transaction.objects.filter(user=user_name, categories=category_name)
+        for transaction_data in category_transaction_data:
+            spent_value += float(transaction_data.amount)
+        if spent_value != 0:
+            categories_name.append(category_name.name)
+            categories_value.append(spent_value)
 
 
 def net_worth_cal(account_data, property_data, date_compare, fun_name=None):
@@ -178,7 +292,7 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
 
 def home(request):
     user_name = request.user
-    if user_name != "AnonymousUser":
+    if not request.user.is_anonymous:
         categories = Category.objects.filter(user=user_name)
         all_transaction_data = Transaction.objects.filter(user=user_name)
         accounts_data = Account.objects.filter(user=user_name)
@@ -193,7 +307,6 @@ def home(request):
         bills_name = []
         bill_value = []
         account_graph_data = []
-        category_index = 1
         date_compare = []
         min_max_value_list = []
         asset_currency_balance = []
@@ -239,26 +352,7 @@ def home(request):
                                       date_range_list)
                 liability_currency_balance.append({acc_obj.currency: balance_graph_data[::-1]})
 
-        for data in all_transaction_data:
-            if data.categories and data.out_flow:
-                if category_index == 1:
-                    categories_name.append(data.categories.name)
-                    categories_value.append(float(data.amount))
-                else:
-                    if data.categories.name in categories_name:
-                        category_index = categories_name.index(data.categories.name)
-                        categories_value[category_index] += float(data.amount)
-                    else:
-                        categories_name.append(data.categories.name)
-                        categories_value.append(float(data.amount))
-                category_index += 1
-
-        for cat_index in range(len(categories)):
-            if categories[cat_index].name in categories_name:
-                pass
-            else:
-                categories_name.append(categories[cat_index].name)
-                categories_value.append(0.0)
+        category_spent_amount(categories, user_name, categories_name, categories_value)
 
         for data in budget_data:
             total_budget += float(data.amount)
@@ -295,7 +389,7 @@ def home(request):
         }
     else:
         context = {}
-    return render(request, 'test.html', context=context)
+    return render(request, 'dashboard.html', context=context)
 
 
 def net_worth(request):
@@ -376,7 +470,6 @@ def net_worth(request):
         max_value = 0
         min_value = 0
 
-
     context = {
         "property_data": property_data,
         "assets_data": assets_data,
@@ -399,8 +492,31 @@ class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'category/category_list.html'
 
-    def get_queryset(self):
-        return Category.objects.filter(user=self.request.user)
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(CategoryList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        category_data = Category.objects.filter(user=self.request.user)
+        categories_name = []
+        categories_value = []
+
+        for category_name in category_data:
+            spent_value = 0
+            category_transaction_data = Transaction.objects.filter(user=user_name, categories=category_name)
+            for transaction_data in category_transaction_data:
+                spent_value += float(transaction_data.amount)
+            if spent_value != 0:
+                categories_name.append(category_name.name)
+                categories_value.append(spent_value)
+
+        category_key = ['S.No.', 'Name', 'Last Activity']
+        data['category_data'] = category_data
+        data['categories_name'] = categories_name
+        data['category_key'] = category_key
+        data['category_key_dumbs'] = json.dumps(category_key)
+        data['categories_value'] = categories_value
+
+        return data
 
 
 class CategoryDetail(DetailView):
@@ -413,11 +529,34 @@ class CategoryAdd(CreateView):
     form_class = CategoryForm
     template_name = 'category/category_add.html'
 
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        user_name = self.request.user
+        data = super(CategoryAdd, self).get_context_data(**kwargs)
+        categories_list = list(Category.objects.filter(user=user_name).values_list('name', flat=True))
+        category_suggestions = SuggestiveCategory.objects.all().values_list('name', flat=True)
+        suggestion_list = []
+        for name in category_suggestions:
+            if name not in categories_list:
+                suggestion_list.append(name)
+        data['category_suggestions'] = suggestion_list
+        return data
+
     def form_valid(self, form):
+        name = form.cleaned_data.get('name').title()
         obj = form.save(commit=False)
         obj.user = self.request.user
+        obj.name = name
         obj.save()
         return super().form_valid(form)
+
+    def get_success_url(self):
+        """Detect the submit button used and act accordingly"""
+        if 'add_other' in self.request.POST:
+            url = reverse_lazy('category_add')
+        else:
+            url = reverse_lazy('category_list')
+        return url
 
 
 class CategoryUpdate(UpdateView):
@@ -464,6 +603,19 @@ class BudgetList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Budget.objects.filter(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(BudgetList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        budget_data = Budget.objects.filter(user=user_name)
+
+        budget_key = ['S.No.', 'Name', 'budget Amount', 'Spent Amount', 'Left Amount', 'Last Updated']
+        data['budget_data'] = budget_data
+        data['budget_key'] = budget_key
+        data['budget_key_dumbs'] = json.dumps(budget_key)
+
+        return data
 
 
 class BudgetDetail(LoginRequiredMixin, DetailView):
@@ -538,13 +690,48 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 #     form_class = BillForm
 #     template_name = 'bill/bill_delete.html'
 
+def transaction_list(request):
+    user_name = request.user
+    if request.method == "POST":
+        tag_name = request.POST['tag_name']
+        tags_data = request.POST['tags_data']
+        print("tags_data", tags_data)
+        if tag_name != 'All':
+            transaction_data = Transaction.objects.filter(user=user_name, tags=tag_name)
+        else:
+            transaction_data = Transaction.objects.filter(user=user_name)
+        select_filter = tag_name
+    else:
+        transaction_data = Transaction.objects.filter(user=user_name)
+        select_filter = 'All'
 
-class TransactionList(LoginRequiredMixin, ListView):
-    model = Transaction
-    template_name = 'transaction/transaction_list.html'
+    context = transaction_summary(transaction_data, select_filter)
+    return render(request, 'transaction/transaction_list.html', context=context)
 
-    def get_queryset(self):
-        return Transaction.objects.filter(user=self.request.user)
+
+def transaction_report(request):
+    user_name = request.user
+    if request.method == "POST":
+        tag_name = request.POST['tag_name']
+        tags_data = request.POST['tags_data']
+        start_date = request.POST['start_date']
+        end_date = request.POST['end_date']
+        tags_data = ast.literal_eval(tags_data)
+        if tag_name != 'All':
+            transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date), tags=tag_name)
+        else:
+            transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date))
+        select_filter = tag_name
+    else:
+        start_date = request.GET['start_date']
+        end_date = request.GET['end_date']
+        transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date))
+        select_filter = 'All'
+
+    context = transaction_summary(transaction_data, select_filter)
+    context['start_date'] = start_date
+    context['end_date'] = end_date
+    return render(request, 'transaction/transaction_list.html', context=context)
 
 
 class TransactionDetail(LoginRequiredMixin, DetailView):
@@ -565,58 +752,31 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         kwargs['request'] = self.request
         return kwargs
 
+    def get_success_url(self):
+        """Detect the submit button used and act accordingly"""
+        if 'add_other' in self.request.POST:
+            url = reverse_lazy('transaction_add')
+        else:
+            url = reverse_lazy('transaction_list')
+        return url
+
     def form_valid(self, form):
         obj = form.save(commit=False)
-        obj.user = self.request.user
-
+        user_name = self.request.user
+        obj.user = user_name
         account = form.cleaned_data.get('account')
         transaction_amount = round(float(form.cleaned_data.get('amount')), 2)
+        tags = form.cleaned_data.get('tags')
+        if tags:
+            obj.tags = tags
         out_flow = form.cleaned_data.get('out_flow')
         cleared_amount = form.cleaned_data.get('cleared')
         bill_name = form.cleaned_data.get('bill')
         budget_name = form.cleaned_data.get('budgets')
         account = account.name
-        if cleared_amount == "True":
-            account_obj = Account.objects.get(user=self.request.user, name=account)
-
-            if bill_name:
-                bill_name = bill_name.label
-                bill_obj = Bill.objects.filter(user=self.request.user, label=bill_name)[0]
-            else:
-                bill_obj = False
-
-            if budget_name:
-                budget_name = budget_name.name
-                budget_obj = Budget.objects.filter(user=self.request.user, name=budget_name)[0]
-            else:
-                budget_obj = False
-
-            if out_flow == "True":
-                account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
-            else:
-                account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
-
-            if bill_obj:
-                bill_obj_amount = round(float(bill_obj.amount), 2)
-                if transaction_amount == bill_obj_amount:
-                    bill_obj.status = "paid"
-                    bill_obj.amount = bill_obj_amount - transaction_amount
-                else:
-                    bill_obj.status = "unpaid"
-                    bill_obj.amount = bill_obj_amount - transaction_amount
-                bill_obj.save()
-
-            if budget_name:
-                if out_flow == "True":
-                    budget_obj.amount = round(float(budget_obj.amount) - transaction_amount, 2)
-                else:
-                    budget_obj.amount = round(float(budget_obj.amount) + transaction_amount, 2)
-                budget_obj.save()
-
-            account_obj.transaction_count += 1
-            account_obj.save()
-            obj.remaining_amount = account_obj.available_balance
-
+        account_obj = transaction_checks(user_name, transaction_amount, account, bill_name,
+                                         budget_name, cleared_amount, out_flow)
+        obj.remaining_amount = account_obj.available_balance
         obj.save()
         return super().form_valid(form)
 
@@ -639,7 +799,6 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         account = transaction_obj.account.name.title()
         transaction_amount = round(float(transaction_obj.amount), 2)
         transaction_out_flow = transaction_obj.out_flow
-
         update_account = form.cleaned_data.get('account').name.title()
         update_transaction_amount = round(float(form.cleaned_data.get('amount')), 2)
         out_flow = form.cleaned_data.get('out_flow')
@@ -731,22 +890,45 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 budget_name = budget_name.name
                 budget_obj = Budget.objects.filter(user=self.request.user, name=budget_name)[0]
             else:
-                budget_obj = False
+                try:
+                    transaction_budget_name = transaction_obj.budgets
+                    budget_obj = Budget.objects.filter(user=self.request.user, name=transaction_budget_name)
+                    if transaction_out_flow:
+                        budget_obj.budget_spent = round(float(budget_obj.budget_spent) - transaction_amount, 2)
+                    else:
+                        budget_obj.amount = round(float(budget_obj.amount) - transaction_amount, 2)
+                    budget_obj.save()
+                    budget_obj = False
+                except:
+                    budget_obj = False
 
             if budget_obj:
-                transaction_budget_name = transaction_obj.budgets
-                budget_obj_amount = round(float(budget_obj.amount), 2)
+                transaction_budget_name = transaction_obj.budgets.name
                 if transaction_budget_name == budget_name:
-                    if transaction_amount != update_transaction_amount:
-                        budget_obj_amount = budget_obj_amount + transaction_amount
-                else:
-                    old_budget_obj = Budget.objects.filter(user=self.request.user, name=transaction_budget_name)
-                    if old_budget_obj:
-                        old_budget_obj_amount = round(float(old_budget_obj.amount), 2)
-                        old_budget_obj.amount = old_budget_obj_amount + transaction_amount
-                        old_bill_obj.save()
+                    if out_flow != transaction_out_flow or transaction_amount != update_transaction_amount:
+                        if transaction_out_flow:
+                            budget_obj.budget_spent = round(float(budget_obj.budget_spent) - transaction_amount, 2)
+                        else:
+                            budget_obj.amount = round(float(budget_obj.amount) - transaction_amount, 2)
 
-                budget_obj.amount = budget_obj_amount - update_transaction_amount
+                        if out_flow == "True":
+                            budget_obj.budget_spent = round(float(budget_obj.budget_spent) + update_transaction_amount, 2)
+                        else:
+                            budget_obj.amount = round(float(budget_obj.amount) + update_transaction_amount, 2)
+                else:
+                    old_budget_obj = Budget.objects.filter(user=self.request.user, name=transaction_budget_name)[0]
+                    if transaction_out_flow:
+                        old_budget_obj.budget_spent = round(float(transaction_obj.budgets.budget_spent) - transaction_amount, 2)
+                    else:
+                        old_budget_obj.amount = round(float(transaction_obj.budgets.amount) - transaction_amount, 2)
+
+                    old_budget_obj.save()
+
+                    if out_flow == "True":
+                        budget_obj.budget_spent = round(float(budget_obj.budget_spent) + update_transaction_amount, 2)
+                    else:
+                        budget_obj.amount = round(float(budget_obj.amount) + update_transaction_amount, 2)
+
                 budget_obj.save()
 
         return super().form_valid(form)
@@ -790,8 +972,9 @@ class TransactionDelete(LoginRequiredMixin, DeleteView):
             if budget_name:
                 budget_name = budget_name.name
                 budget_obj = Budget.objects.filter(user=self.request.user, name=budget_name)[0]
+
                 if out_flow:
-                    budget_obj.amount = round(float(budget_obj.amount) + transaction_amount, 2)
+                    budget_obj.budget_spent = round(float(budget_obj.budget_spent) - transaction_amount, 2)
                 else:
                     budget_obj.amount = round(float(budget_obj.amount) - transaction_amount, 2)
 
@@ -872,44 +1055,45 @@ class AccountDetail(LoginRequiredMixin, DetailView):
         balance_graph_data = []
         index = 1
         for data in transaction_data:
-            if index == 1:
-                graph_dict = {'x': str(data.transaction_date), 'y': round(initial_balance, 2)}
-                if data.out_flow:
-                    amount_list = [float("-" + data.amount)]
-                    current_balance += float(data.amount)
-                else:
-                    amount_list = [float(data.amount)]
-                    current_balance -= float(data.amount)
-                date_list.append(str(data.transaction_date))
-                balance_graph_data.append(graph_dict)
-            else:
-                if str(data.transaction_date) in date_list:
-                    date_index = date_list.index(str(data.transaction_date))
-                    if data.out_flow:
-                        amount_list.append(float("-" + data.amount))
-                        current_balance += float(data.amount)
-                    else:
-                        amount_list.append(float(data.amount))
-                        current_balance -= float(data.amount)
-
-                    if sum(amount_list) < 0:
-                        result_value = current_balance + sum(amount_list)
-                    else:
-                        result_value = current_balance - sum(amount_list)
-                    balance_graph_data[date_index]['y'] = round(result_value, 2)
-                else:
-                    graph_dict = {'x': str(data.transaction_date),
-                                  'y': round(current_balance, 2)}
-                    balance_graph_data.append(graph_dict)
-                    date_list.append(str(data.transaction_date))
-
+            if data.cleared:
+                if index == 1:
+                    graph_dict = {'x': str(data.transaction_date), 'y': round(initial_balance, 2)}
                     if data.out_flow:
                         amount_list = [float("-" + data.amount)]
                         current_balance += float(data.amount)
                     else:
                         amount_list = [float(data.amount)]
                         current_balance -= float(data.amount)
-            index += 1
+                    date_list.append(str(data.transaction_date))
+                    balance_graph_data.append(graph_dict)
+                else:
+                    if str(data.transaction_date) in date_list:
+                        date_index = date_list.index(str(data.transaction_date))
+                        if data.out_flow:
+                            amount_list.append(float("-" + data.amount))
+                            current_balance += float(data.amount)
+                        else:
+                            amount_list.append(float(data.amount))
+                            current_balance -= float(data.amount)
+
+                        if sum(amount_list) < 0:
+                            result_value = current_balance + sum(amount_list)
+                        else:
+                            result_value = current_balance - sum(amount_list)
+                        balance_graph_data[date_index]['y'] = round(result_value, 2)
+                    else:
+                        graph_dict = {'x': str(data.transaction_date),
+                                      'y': round(current_balance, 2)}
+                        balance_graph_data.append(graph_dict)
+                        date_list.append(str(data.transaction_date))
+
+                        if data.out_flow:
+                            amount_list = [float("-" + data.amount)]
+                            current_balance += float(data.amount)
+                        else:
+                            amount_list = [float(data.amount)]
+                            current_balance -= float(data.amount)
+                index += 1
 
         if balance_graph_data:
             if sum(amount_list) < 0:
@@ -924,8 +1108,11 @@ class AccountDetail(LoginRequiredMixin, DetailView):
             amount_inc_percentage = 0
 
         print(balance_graph_data)
+        transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
         context['balance_graph_data'] = balance_graph_data
         context['transaction_data'] = transaction_data
+        context['transaction_key'] = transaction_key
+        context['transaction_key_dumbs'] = json.dumps(transaction_key)
         context['amount_diff'] = amount_diff
         context['amount_inc_percentage'] = amount_inc_percentage
 
@@ -1128,9 +1315,11 @@ class LiabilityDetail(LoginRequiredMixin, DetailView):
             amount_diff = 0
             amount_inc_percentage = 0
 
-        print(balance_graph_data)
+        transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
         context['balance_graph_data'] = balance_graph_data
         context['transaction_data'] = transaction_data
+        context['transaction_key'] = transaction_key
+        context['transaction_key_dumbs'] = json.dumps(transaction_key)
         context['amount_diff'] = amount_diff
         context['amount_inc_percentage'] = amount_inc_percentage
         return context
@@ -1179,6 +1368,7 @@ def bill_add(request):
         bill_obj.amount = amount
         bill_obj.date = bill_date
         bill_obj.currency = currency
+        bill_obj.remaining_amount = amount
         bill_obj.frequency = frequency
         bill_obj.save()
         return redirect("/bill_list")
@@ -1208,6 +1398,7 @@ def bill_update(request, pk):
 
         bill_obj.label = label
         bill_obj.amount = amount
+        bill_obj.remaining_amount = amount
         bill_obj.date = bill_date
         bill_obj.currency = currency
         bill_obj.frequency = frequency
@@ -1228,6 +1419,12 @@ def bill_delete(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     bill_obj.delete()
     return JsonResponse({"status": "Successfully", "path": "/bill_list/"})
+
+
+def bill_automatic_amount(request):
+    bill_id = request.POST['bill_id']
+    bill_obj = Bill.objects.get(pk=bill_id)
+    return JsonResponse({'bill_amount': bill_obj.remaining_amount})
 
 
 def mortgagecalculator(request):
@@ -1257,7 +1454,8 @@ def mortgagecalculator(request):
 
         mortgage_graph_data = [{'name': 'Balance', 'data': balance_data}, {'name': 'Principle', 'data': principle_data},
                                {'name': 'Interest', 'data': interest_data}]
-        print("mortage_data", mortgage_graph_data)
+
+        mortgage_key = ['Month', 'Initial Balance', 'Principle', 'Interest', 'Ending Balance']
         context = {
             'form': form,
             'data': data,
@@ -1265,6 +1463,8 @@ def mortgagecalculator(request):
             'last_month': last_month,
             'days': total_month,
             'total_payment': total_payment,
+            'mortgage_key': mortgage_key,
+            'mortgage_key_dumbs': json.dumps(mortgage_key),
             'mortgage_graph_data': mortgage_graph_data,
             'mortgage_date_data': mortgage_date_data
         }
@@ -1319,5 +1519,180 @@ class PropertyDelete(LoginRequiredMixin, DeleteView):
 def fund_list(request):
     user_name = request.user
     fund_data = Account.objects.filter(user=user_name, liability_type=None)
-    context = {'fund_data': fund_data}
+    fund_key = ['S.No.', 'Account Name', 'Total Fund', 'Available Fund', 'Lock Fund']
+    context = {
+                'fund_data': fund_data,
+                'fund_key': fund_key,
+                'fund_key_dumbs': json.dumps(fund_key),
+              }
     return render(request, 'funds.html', context=context)
+
+
+class PdfPrint:
+    def __init__(self, buffer, pageSize):
+        self.buffer = buffer
+        # default format is A4
+        if pageSize == 'A4':
+            self.pageSize = A4
+        elif pageSize == 'Letter':
+            self.pageSize = letter
+        self.width, self.height = self.pageSize
+
+    def report(self, weather_history, title):
+        # set some characteristics for pdf document
+        doc = SimpleDocTemplate(
+            self.buffer,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=30,
+            bottomMargin=72,
+            pagesize=self.pageSize)
+        styles = getSampleStyleSheet()
+        # create document
+        data = [Paragraph(title, styles['Title'])]
+        list_data = [['00', '01', '02', '03', '04'],
+                ['10', '11', '12', '13', '14'],
+                ['20', '21', '22', '23', '24'],
+                ['30', '31', '32', '33', '34']]
+        t = Table(list_data)
+        t.setStyle(TableStyle(
+            [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+             ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+             ('BACKGROUND', (0, 0), (-1, 0), colors.gray)]))
+        # create other flowables
+
+        data.append(t)
+        print("data", data)
+        doc.build(data)
+        pdf = self.buffer.getvalue()
+        self.buffer.close()
+        return pdf
+
+
+def download_pdf(request):
+    print("kiiiii")
+    if 'pdf' in request.POST:
+        print("innnnnnnnn")
+        response = HttpResponse(content_type='application/pdf')
+        today = datetime.date.today()
+        filename = 'pdf_demo' + today.strftime('%Y-%m-%d')
+        response['Content-Disposition'] = 'attachement; filename={0}.pdf'.format(filename)
+        buffer = BytesIO()
+        reporti = PdfPrint(buffer, 'A4')
+        weather_period = "evening"
+        pdf = reporti.report(weather_period, 'Weather statistics data')
+        response.write(pdf)
+        print("outttttttttt")
+        return response
+    return render(request, "test.html")
+
+
+# Download CSV file
+
+@csrf_exempt
+def download_csv(request):
+    """
+    :param request: Request to Access this Function
+    :return: Csv Download response
+    """
+    print("innnnnnn")
+
+    if request.method == 'POST':
+        csv_data_key = request.POST['csv_data_key']
+        print("csv_data_key", csv_data_key)
+        print("csv_data_key", type(csv_data_key))
+        csv_data_value = request.POST['csv_data_value']
+        print("csv_data_value", csv_data_value)
+        file_name = request.POST['file_name']
+        csv_data_key = json.loads(csv_data_key)
+        csv_data_value = json.loads(csv_data_value)
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
+        writer = csv.writer(response)
+        writer.writerow(csv_data_key)
+        for data in csv_data_value:
+            writer.writerow(data)
+        return response
+
+
+def transaction_upload(request):
+    if request.method == "POST" and request.is_ajax:
+        print("iIIIIIIINnn")
+        try:
+            test_file = request.FILES['csv_file']
+            df = pd.read_csv(test_file)
+            print(df)
+            for index, row in df.iterrows():
+                my_transaction = Transaction()
+                user_name = request.user
+                my_transaction.user = user_name
+                category_name = row['Categories']
+                category_obj = Category.objects.get(user=user_name, name=category_name)
+                my_transaction.categories = category_obj
+                account = row['Account']
+                transaction_amount = row['Amount']
+                out_flow = row['Type']
+                if out_flow == "Debit":
+                    out_flow = "True"
+                    my_transaction.out_flow = True
+                else:
+                    my_transaction.out_flow = False
+
+                cleared_amount = row['Cleared']
+                if cleared_amount:
+                    cleared_amount = "True"
+                transaction_date = row['Date']
+                transaction_date = datetime.datetime.strptime(transaction_date, "%d-%m-%Y")
+                bill_name = row['Bill']
+                budget_name = row['Budget']
+                transaction_tags = row['Tags']
+                if cleared_amount == "True":
+                    account_obj = Account.objects.get(user=user_name, name=account)
+                    if bill_name != "None":
+                        bill_obj = Bill.objects.filter(user=user_name, label=bill_name)[0]
+                    else:
+                        bill_obj = False
+
+                    if budget_name != "None":
+                        budget_obj = Budget.objects.filter(user=user_name, name=budget_name)[0]
+                        print("budget_obj", budget_obj)
+                    else:
+                        budget_obj = False
+
+                    if out_flow == "True":
+                        account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
+                    else:
+                        account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
+
+                    if bill_obj:
+                        bill_amount = round(float(bill_obj.remaining_amount), 2)
+                        if transaction_amount == bill_amount:
+                            bill_obj.status = "paid"
+                            bill_obj.remaining_amount = bill_amount - transaction_amount
+                        else:
+                            bill_obj.status = "unpaid"
+                            bill_obj.amount = bill_amount - transaction_amount
+                        bill_obj.save()
+                        my_transaction.bill = bill_obj
+                    if budget_obj:
+                        if out_flow == "True":
+                            budget_obj.budget_spent = round(float(budget_obj.budget_spent) + transaction_amount, 2)
+                        else:
+                            budget_obj.amount = round(float(budget_obj.amount) + transaction_amount, 2)
+                        budget_obj.save()
+                        my_transaction.budgets = budget_obj
+                    account_obj.transaction_count += 1
+                    account_obj.save()
+                    my_transaction.remaining_amount = account_obj.available_balance
+
+                my_transaction.transaction_date = transaction_date
+                my_transaction.payee = row['Payee']
+                my_transaction.account = account_obj
+                my_transaction.amount = row['Amount']
+                my_transaction.tags = transaction_tags
+                my_transaction.cleared = cleared_amount
+                my_transaction.save()
+            return JsonResponse({'status': 'File Uploaded'})
+        except:
+            return JsonResponse({'status': 'Uploading Failed!! Please Check File Format'})

@@ -49,22 +49,6 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Amount</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
-                                            <input type="text" id="email-icon" class="form-control" name="amount" required
-                                                   placeholder="Amount"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Payee</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -141,6 +125,38 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label for="transaction_tags">Tags</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="transaction_tags" class="form-control" name="tags"
+                                                   placeholder="Tags"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="transaction_amount">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="transaction_amount" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">&nbsp;</label>
                                     </div>
                                     &nbsp;
@@ -167,7 +183,9 @@
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <input type="submit" class="btn btn-primary mr-1" value="Save">
+                                <input type="submit" class="btn btn-primary mr-1" name="add_other" value="Save and add another">
+
                                 <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
                         </div>

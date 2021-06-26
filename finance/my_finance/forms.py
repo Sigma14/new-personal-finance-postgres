@@ -11,6 +11,13 @@ CURRENCIES = (
     ("£", 'British Pound (£)'),
 )
 
+BUDGET_PERIODS = (
+                ("Daily", 'Daily'),
+                ("Weekly", 'Weekly'),
+                ("Monthly", 'Monthly'),
+                ("Quarterly", 'Quarterly'),
+                ("Yearly", 'Yearly'),
+            )
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -58,17 +65,21 @@ class LoginForm(forms.Form):
 
 class BudgetForm(forms.ModelForm):
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    auto_budget = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    budget_period = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
 
     class Meta:
         model = Budget
-        exclude = ('user', 'autobudget', 'created_at', 'updated_at')
+        exclude = ('user', 'created_at', 'budget_spent', 'updated_at')
 
 
 class BillForm(forms.ModelForm):
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    frequency = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
+
     class Meta:
         model = Bill
-        exclude = ('user', 'status', 'created_at', 'updated_at')
+        exclude = ('user', 'status', 'created_at', 'remaining_amount', 'updated_at')
 
 
 class TransactionForm(forms.ModelForm):

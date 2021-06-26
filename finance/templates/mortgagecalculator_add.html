@@ -101,7 +101,7 @@
                 </div>
             </div>
             {% if data %}
-            <section id="responsive-datatable">
+            <section>
                 <div class="row">
                     <div class="col-12">
                         <div class="card card-statistics">
@@ -160,18 +160,18 @@
                 <div class="row match-height">
                     <div class="col-12">
                         <div class="card">
+                            <div class="download_csv_form"></div>
                             <div class="card-header border-bottom">
                                 <h4 class="card-title">Calculation Result</h4>
+                                <button class="btn btn-primary download_csv" file_name="mortgage_calculation.csv" table_heading="{{mortgage_key_dumbs}}" table_length="{{mortgage_key | length}}" table_id="#mortgage">CSV<i data-feather="download" class="avatar-icon"></i></button>
                             </div>
                             <div class="card-datatable">
                                 <table class="table table-striped" id="mortgage">
                                     <thead>
                                     <tr>
-                                        <th>Month</th>
-                                        <th>Initial Balance</th>
-                                        <th>Principle</th>
-                                        <th>Interest</th>
-                                        <th>Ending Balance</th>
+                                        {% for name in mortgage_key %}
+                                            <th>{{name}}</th>
+                                        {% endfor %}
                                     </tr>
                                     </thead>
                                     <tbody>

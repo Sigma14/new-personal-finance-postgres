@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load mathfilters %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -33,43 +34,73 @@
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
+                                    <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">Budgets List</h4>
+                                        <button class="btn btn-primary download_csv" file_name="my_budget.csv" table_heading="{{budget_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
                                         <table class="dt-row-grouping table" id="budgets">
                                             <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th>Name</th>
-                                                <th>Amount</th>
-                                                <th>Last Updated</th>
+                                                {% for name in budget_key %}
+                                                    <th>{{name}}</th>
+                                                {% endfor %}
                                                 <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for object in object_list %}
+                                            {% for object in budget_data %}
                                             <tr>
-                                                <th scope="row">{{ forloop.counter }}</th>
-                                                <td>{{ object.name }}</td>
-                                                <td>{{ object.currency }}{{ object.amount }}</td>
-                                                <td>{{ object.updated_at }}</td>
                                                 <td>
-                                                    <!-- Call to action buttons -->
-                                                    <ul class="list-inline m-0">
-                                                        <li class="list-inline-item">
-                                                            <a href="{% url 'budget_update' pk=object.id %}"
-                                                               class="btn btn-success btn-sm rounded-0"><i
-                                                                    class="fa fa-edit"></i></a>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.name }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.currency }}{{ object.amount }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.currency }}{{ object.budget_spent }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.currency }}{{ object.amount|sub:object.budget_spent }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.updated_at }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'budget_update' pk=object.id %}"
+                                                                       class="btn btn-success btn-sm rounded-0"><i
+                                                                            class="fa fa-edit"></i></a>
 
-                                                        </li>
-                                                        <li class="list-inline-item">
-                                                            <button type="button" delete_name="{{ object.name }} Budget" url="{% url 'budget_delete' pk=object.id %}"
-                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                    class="fa fa-trash"></i></button>
-                                                        </li>
-                                                    </ul>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ object.name }} Budget" url="{% url 'budget_delete' pk=object.id %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             {% endfor %}

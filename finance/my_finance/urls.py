@@ -24,11 +24,13 @@ urlpatterns = [
 
     # Transaction urls :-
 
-    path('transaction_list/', TransactionList.as_view(), name='transaction_list'),
+    path('transaction_list/', transaction_list, name='transaction_list'),
     path('transaction_detail/<int:pk>', TransactionDetail.as_view(), name='transaction_detail'),
     path('transaction_add/', TransactionAdd.as_view(), name='transaction_add'),
     path('transaction_update/<int:pk>', TransactionUpdate.as_view(), name='transaction_update'),
     path('transaction_delete/<int:pk>', TransactionDelete.as_view(), name='transaction_delete'),
+    path('transaction_upload', transaction_upload, name='transaction_upload'),
+    path('transaction_report', transaction_report, name='transaction_report'),
 
     # Goal urls :-
 
@@ -59,6 +61,7 @@ urlpatterns = [
     path('bill_add/', bill_add, name='bill_add'),
     path('bill_update/<int:pk>', bill_update, name='bill_update'),
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),
+    path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
 
     # Property Urls:-
     path('property_list/', PropertyList.as_view(), name='property_list'),
@@ -80,4 +83,8 @@ urlpatterns = [
     # path('mortgagecalculator_update/<int:pk>', MortgageCalculatorUpdate.as_view(), name='mortgagecalculator_update'),
     # path('mortgagecalculator_delete/<int:pk>', MortgageCalculatorDelete.as_view(), name='mortgagecalculator_delete'),
 
+    # DOWNLOADS FILE OPTIONS
+
+    path('download/pdf', download_pdf, name='download_pdf'),
+    path('download/csv', download_csv, name='download_scv'),
 ]

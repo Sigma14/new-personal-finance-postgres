@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load static %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -28,32 +29,95 @@
                             class="fa fa-plus"></i> Add Transaction</a>
                 </div>
                 <br/>
-                <section id="dashboard-ecommrc">
+                <section>
                     <div class="row match-height">
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
+                                    <form action="{% url 'transaction_upload' %}" id="upload_transaction_form" method="post" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                    <div class="form-validate">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Transaction File</label>
+                                                    <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect analyse_tab">Upload</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </form>
+                                    <p>{{message}}</p>
+                                    <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
+									<form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">
+										{% csrf_token %}
+                                    <!-- users edit account form start -->
+                                    <div class="form-validate">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="start_date">From</label>
+                                    				<input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="end_date">To</label>
+                                    				<input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" >
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Search</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </form>
+                                    <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>
+                                        <div class="basic-modal">
+                                            {% if start_date %}
+                                                <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">
+                                                    <input type="hidden" name="start_date" value="{{start_date}}">
+                                                    <input type="hidden" name="end_date" value="{{end_date}}">
+                                            {% else %}
+                                            <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">
+                                            {% endif %}
+                                                {% csrf_token %}
+                                            <input type="hidden" name="tags_data" value="{{tags_data}}">
+                                            <label>Filter By Tags</label>
+                                            <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags" style="width:200px">
+                                                {% for name in tags_data %}
+                                                {% if select_filter == name %}
+                                                    <option selected>{{name}}</option>
+                                                {% else %}
+                                                    <option>{{name}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            </form>
+                                        </div>
+                                        <button class="btn btn-primary download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
-                                        <table class="dt-row-grouping table" id="transactions">
+                                            <table class="dt-row-grouping table" id="transactions">
                                             <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th>Date</th>
-                                                <th>Amount</th>
-                                                <th>Payee</th>
-                                                <th>Account</th>
-                                                <th>Categories</th>
-                                                <th>Bill</th>
-                                                <th>Budget</th>
-                                                <th>Cleared</th>
+                                                {% for name in transaction_key %}
+                                                <th>{{name}}</th>
+                                                {% endfor %}
                                                 <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for data in object_list %}
+                                            {% for data in transaction_data %}
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
@@ -89,20 +153,37 @@
                                                         <span class="font-weight-bolder mr-1">{{data.categories}}</span>
                                                     </div>
                                                 </td>
+                                                {% if data.bill.label %}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>
                                                     </div>
                                                 </td>
+                                                {% else %}
+                                                 <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">None</span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                                {% if data.budgets.name %}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>
                                                     </div>
                                                 </td>
+                                                {% else %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">None</span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
                                                 {% if data.cleared == True %}
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder text-success mr-1">
+                                                            <input type="hidden" value="True" class="cleared{{forloop.counter}}">
                                                             <i class="fa fa-check" aria-hidden="true"></i>
                                                         </span>
                                                         </div>
@@ -111,6 +192,7 @@
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder text-danger mr-1">
+                                                            <input type="hidden" value="False" class="cleared{{forloop.counter}}">
                                                             <i class="fa fa-times" aria-hidden="true"></i>
                                                         </span>
                                                         </div>
@@ -141,6 +223,29 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">Transactions</h4>
+                                    </div>
+                                    <br/>
+                                    <br/>
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div id="transaction-chart"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Line Chart Ends -->
                                 </div>
                             </div>
                         </div>

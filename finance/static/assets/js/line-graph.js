@@ -497,71 +497,170 @@ function BudgetChart(graph_label, graph_data)
 
 function CategorySpentChart(categories_name, categories_value)
 {
-  var columnChartEl = document.querySelector('#column-chart'),
-    columnChartConfig = {
-      chart: {
-        height: 400,
-        type: 'bar',
-        stacked: true,
-        parentHeightOffset: 0,
-        toolbar: {
-          show: false
-        }
-      },
-      plotOptions: {
-        bar: {
-          columnWidth: '15%',
-          colors: {
-            backgroundBarColors: [
-              chartColors.column.bg,
-              chartColors.column.bg,
-              chartColors.column.bg,
-              chartColors.column.bg,
-              chartColors.column.bg
-            ],
-            backgroundBarRadius: 10
-          }
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      legend: {
-        show: true,
-        position: 'top',
-        horizontalAlign: 'start'
-      },
-      colors: [chartColors.column.series1, chartColors.column.series2],
-      stroke: {
-        show: true,
-        colors: ['transparent']
-      },
-      grid: {
-        xaxis: {
-          lines: {
-            show: true
-          }
-        }
-      },
-      series: [
-        {
-          name: 'Spent',
-          data: categories_value
+//  var columnChartEl = document.querySelector('#column-chart'),
+//    columnChartConfig = {
+//      chart: {
+//        height: 400,
+//        type: 'bar',
+//        stacked: true,
+//        parentHeightOffset: 0,
+//        toolbar: {
+//          show: false
+//        }
+//      },
+//      plotOptions: {
+//        bar: {
+//          columnWidth: '15%',
+//          colors: {
+//            backgroundBarColors: [
+//              chartColors.column.bg,
+//              chartColors.column.bg,
+//              chartColors.column.bg,
+//              chartColors.column.bg,
+//              chartColors.column.bg
+//            ],
+//            backgroundBarRadius: 10
+//          }
+//        }
+//      },
+//      dataLabels: {
+//        enabled: false
+//      },
+//      legend: {
+//        show: true,
+//        position: 'top',
+//        horizontalAlign: 'start'
+//      },
+//      colors: [chartColors.column.series1, chartColors.column.series2],
+//      stroke: {
+//        show: true,
+//        colors: ['transparent']
+//      },
+//      grid: {
+//        xaxis: {
+//          lines: {
+//            show: true
+//          }
+//        }
+//      },
+//      series: [
+//        {
+//          name: 'Spent',
+//          data: categories_value
+//        },
+//      ],
+//      xaxis: {
+//        categories: categories_name
+//      },
+//      fill: {
+//        opacity: 1
+//      },
+//      yaxis: {
+//        opposite: isRtl
+//      }
+//    };
+//  if (typeof columnChartEl !== undefined && columnChartEl !== null) {
+//    var columnChart = new ApexCharts(columnChartEl, columnChartConfig);
+//    columnChart.render();
+//  }
+  var options = {
+          series: [
+                    {
+                        name: 'Spent',
+                        data: categories_value
+                    }
+                  ],
+          chart: {
+          type: 'bar',
+          height: 430
         },
-      ],
-      xaxis: {
-        categories: categories_name
-      },
-      fill: {
-        opacity: 1
-      },
-      yaxis: {
-        opposite: isRtl
-      }
-    };
-  if (typeof columnChartEl !== undefined && columnChartEl !== null) {
-    var columnChart = new ApexCharts(columnChartEl, columnChartConfig);
-    columnChart.render();
-  }
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            dataLabels: {
+              position: 'top',
+            },
+            columnWidth: '5%'
+          }
+        },
+        dataLabels: {
+          enabled: false,
+          offsetX: -6,
+          style: {
+            fontSize: '12px',
+            colors: ['#fff']
+          }
+        },
+        stroke: {
+          show: true,
+          width: 1,
+          colors: ['#fff']
+        },
+        tooltip: {
+          shared: true,
+          intersect: false
+        },
+        colors: [chartColors.column.series1, chartColors.column.series2],
+        xaxis: {
+          categories: categories_name,
+        },
+        };
+
+        var chart = new ApexCharts(document.querySelector("#column-chart"), options);
+        chart.render();
+
+}
+
+function TransactionGraph(debit_graph_data, credit_graph_data, transaction_date_data)
+{
+  var options = {
+          series: [
+                    {
+                        name: 'Debit',
+                        data: debit_graph_data
+                    },
+                    {
+                        name: 'Credit',
+                        data: credit_graph_data
+                    }
+                  ],
+          chart: {
+          type: 'bar',
+          height: 430
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            dataLabels: {
+              position: 'top',
+            },
+            columnWidth: '10%'
+          }
+        },
+        dataLabels: {
+          enabled: false,
+          offsetX: -6,
+          style: {
+            fontSize: '12px',
+            colors: ['#fff']
+          }
+        },
+        stroke: {
+          show: true,
+          width: 1,
+          colors: ['#fff']
+        },
+        tooltip: {
+          shared: true,
+          intersect: false
+        },
+        colors: ['#B22222', '#008000'],
+        xaxis: {
+          categories: transaction_date_data,
+        },
+        };
+
+        var chart = new ApexCharts(document.querySelector("#transaction-chart"), options);
+        chart.render();
 
 }

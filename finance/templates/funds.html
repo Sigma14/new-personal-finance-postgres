@@ -33,49 +33,76 @@
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
+                                    <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">Fund List</h4>
+                                        <button class="btn btn-primary download_csv" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
                                         <table class="dt-row-grouping table" id="budgets">
                                             <thead>
                                             <tr>
-                                                <th>#</th>
-                                                <th>Account Name</th>
-                                                <th>Total Fund</th>
-                                                <th>Available Fund</th>
-                                                <th>Lock Fund</th>
-                                                <th>Actions</th>
+                                                {% for name in fund_key %}
+                                                    <th>{{name}}</th>
+                                                {% endfor %}
+                                                <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for object in fund_data %}
                                             <tr>
-                                                <th scope="row">{{ forloop.counter }}</th>
-                                                <td>{{ object.name }}</td>
-                                                <td>{{ object.balance }}</td>
-                                                <td>{{ object.available_balance }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.name }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.balance }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.available_balance }}</span>
+                                                    </div>
+                                                </td>
                                                 {% if object.lock_amount %}
-                                                <td>{{ object.lock_amount }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.lock_amount }}</span>
+                                                    </div>
+                                                </td>
                                                 {% else %}
-                                                <td>0</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">0</span>
+                                                    </div>
+                                                </td>
                                                 {% endif %}
                                                 <td>
-                                                    <!-- Call to action buttons -->
-                                                    <ul class="list-inline m-0">
-                                                        <li class="list-inline-item">
-                                                            <a href="{% url 'account_update' pk=object.id %}"
-                                                               class="btn btn-success btn-sm rounded-0"><i
-                                                                    class="fa fa-edit"></i></a>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'account_update' pk=object.id %}"
+                                                                       class="btn btn-success btn-sm rounded-0"><i
+                                                                            class="fa fa-edit"></i></a>
 
-                                                        </li>
-                                                        <li class="list-inline-item">
-                                                            <button type="button" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}"
-                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                    class="fa fa-trash"></i></button>
-                                                        </li>
-                                                    </ul>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             {% endfor %}
