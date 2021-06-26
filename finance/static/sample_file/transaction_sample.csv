@@ -4,4 +4,4 @@ Date,Amount,Payee,Account,Categories,Bill,Budget,Cleared,Tags,Type
 22-06-2021,500,Owner,Checking,House Loan,None,House Loan,FALSE,Loan,Debit
 23-06-2021,500,House Rent,Checking,Rent,None,None,TRUE,Rent,Credit
 23-06-2021,500,voda care,Checking,Recharge,Recharge,None,TRUE,Recharge,Debit
-24-06-2021,300,Milk Man,Checking,Food,Dudh,None,TRUE,Milk,Debit
+24-06-2021,300,Milk Man,Checking,Food,Milk,None,TRUE,Milk,Debit
