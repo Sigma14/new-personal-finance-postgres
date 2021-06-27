@@ -229,7 +229,7 @@
   // Multiple Account Chart
   // --------------------------------------------------------------------
 
-function AccountsChart(account_graph_data, account_date_data, max_value, min_value)
+    function AccountsChart(account_graph_data, account_date_data, max_value, min_value)
 {
   var primaryColorShade = '#836AF9',
     yellowColor = '#ffe800',

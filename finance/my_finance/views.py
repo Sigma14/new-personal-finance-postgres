@@ -75,6 +75,7 @@ def transaction_summary(transaction_data, select_filter):
                }
     return context
 
+
 def transaction_checks(username, transaction_amount, account, bill_name, budget_name, cleared_amount, out_flow):
     if cleared_amount == "True":
         print("account", account)
@@ -130,7 +131,44 @@ def category_spent_amount(category_data, user_name, categories_name, categories_
             categories_value.append(spent_value)
 
 
-def net_worth_cal(account_data, property_data, date_compare, fun_name=None):
+def multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list, acc_create_date,
+                    account_transaction_value, acc_available_balance):
+    for data in acc_transaction_data:
+        if data.cleared:
+            acc_date = str(data.transaction_date)
+            acc_transaction_amount = data.amount
+            if acc_date in amount_date_dict:
+                if data.out_flow:
+                    acc_current_balance += float("-" + acc_transaction_amount)
+                else:
+                    acc_current_balance += float(acc_transaction_amount)
+
+                amount_date_dict[acc_date] = float(acc_current_balance)
+            else:
+                if data.out_flow:
+                    acc_current_balance += float("-" + acc_transaction_amount)
+                else:
+                    acc_current_balance += float(acc_transaction_amount)
+                amount_date_dict[acc_date] = float(acc_current_balance)
+
+    for date_value in account_date_list:
+        check_date = datetime.datetime.strptime(date_value, '%Y-%m-%d').date()
+        if acc_create_date >= check_date:
+            if date_value in amount_date_dict:
+                account_transaction_value.append(amount_date_dict[date_value])
+                amount_constant = amount_date_dict[date_value]
+            else:
+                amount_constant = acc_available_balance
+                account_transaction_value.append(amount_constant)
+        if acc_create_date < check_date:
+            if date_value in amount_date_dict:
+                account_transaction_value.append(amount_date_dict[date_value])
+                amount_constant = amount_date_dict[date_value]
+            else:
+                account_transaction_value.append(amount_constant)
+
+
+def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
     liability_data = []
     assets_data = []
     total_asset_amount_dict = {}
@@ -141,12 +179,12 @@ def net_worth_cal(account_data, property_data, date_compare, fun_name=None):
     asset_currency_balance = []
     liability_currency_balance = []
     property_currency_balance = []
-    base = max(date_compare)
-    min_date = min(date_compare)
-    num_days = base - min_date
-    num_days = num_days.days
-    date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
-    date_range_list.append(str(min_date))
+    # base = max(date_compare)
+    # min_date = min(date_compare)
+    # num_days = base - min_date
+    # num_days = num_days.days
+    # date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
+    # date_range_list.append(str(min_date))
 
     for data in account_data:
         if data.include_net_worth:
@@ -304,53 +342,41 @@ def home(request):
         total_budget = 0
         categories_name = []
         categories_value = []
-        bills_name = []
-        bill_value = []
-        account_graph_data = []
-        date_compare = []
-        min_max_value_list = []
+        acc_graph_data = []
+        acc_min_max_value_list = []
         asset_currency_balance = []
         liability_currency_balance = []
         property_currency_balance = []
 
-        for data in property_data:
-            property_currency_balance.append({data.currency: data.value})
-
-        for obj in all_transaction_data:
-            date_compare.append(obj.account.created_at.date())
-            date_compare.append(obj.transaction_date)
-
         if accounts_data:
-            base = max(date_compare)
-            min_date = min(date_compare)
-            num_days = base - min_date
-            num_days = num_days.days
-            print(num_days)
-            date_range_list = [str(base - datetime.timedelta(days=x)) for x in range(num_days)]
-            date_range_list.append(str(min_date))
-        else:
-            date_range_list = []
+            min_date = accounts_data[0].created_at.date()
+            max_date = datetime.datetime.today().date()
+            day_diff = (max_date - min_date).days
+            account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
+            account_date_list.append(str(min_date))
+            account_date_list = account_date_list[::-1]
 
         for acc_obj in accounts_data:
-            transaction_data = Transaction.objects.filter(user=user_name, account__pk=acc_obj.pk).order_by(
-                'transaction_date')[::-1]
-            current_balance = float(acc_obj.available_balance)
-            balance_graph_dict = {}
-            balance_graph_data = []
-            date_list = []
-
-            if acc_obj.liability_type != "Debt" and acc_obj.liability_type != "Loan" and acc_obj.liability_type != "Mortgage":
-                overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
-                                      date_range_list)
-                asset_currency_balance.append({acc_obj.currency: balance_graph_data[::-1]})
-                graph_dict = {'label_name': acc_obj.name, 'data_value': balance_graph_data[::-1]}
-                account_graph_data.append(graph_dict)
-                min_max_value_list.append(min(balance_graph_data))
-                min_max_value_list.append(max(balance_graph_data))
+            account_transaction_value = []
+            acc_create_date = acc_obj.created_at.date()
+            amount_date_dict = {}
+            if acc_obj.lock_amount:
+                acc_current_balance = float(acc_obj.balance) - float(acc_obj.lock_amount)
             else:
-                overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
-                                      date_range_list)
-                liability_currency_balance.append({acc_obj.currency: balance_graph_data[::-1]})
+                acc_current_balance = float(acc_obj.balance)
+
+            acc_available_balance = float(acc_current_balance)
+            acc_transaction_data = Transaction.objects.filter(user=user_name, account__pk=acc_obj.pk).order_by(
+                'transaction_date')
+            multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
+                            acc_create_date, account_transaction_value, acc_available_balance)
+            graph_dict = {'label_name': acc_obj.name, 'data_value': account_transaction_value}
+            acc_graph_data.append(graph_dict)
+            acc_min_max_value_list.append(min(account_transaction_value))
+            acc_min_max_value_list.append(max(account_transaction_value))
+
+        for data in property_data:
+            property_currency_balance.append({data.currency: data.value})
 
         category_spent_amount(categories, user_name, categories_name, categories_value)
 
@@ -363,14 +389,14 @@ def home(request):
             result = round((value / total_budget) * 100, 2)
             budget_percentage.append(result)
 
-        net_worth_dict = net_worth_cal(accounts_data, property_data, date_compare, fun_name="dash_board")
-
-        if min_max_value_list:
-            max_value = max(min_max_value_list)
-            min_value = min(min_max_value_list)
+        net_worth_dict = net_worth_cal(accounts_data, property_data, account_date_list, fun_name="dash_board")
+        print(net_worth_dict)
+        if acc_min_max_value_list:
+            acc_max_value = max(acc_min_max_value_list)
+            acc_min_value = min(acc_min_max_value_list)
         else:
-            max_value = 0
-            min_value = 0
+            acc_max_value = 0
+            acc_min_value = 0
 
         print("Assets_currency_data", asset_currency_balance)
         print("Liabiliy_currency_data", liability_currency_balance)
@@ -379,13 +405,13 @@ def home(request):
         context = {
             "categories_name": categories_name,
             "categories_value": categories_value,
-            "account_graph_data": account_graph_data,
-            "date_range_list": date_range_list[::-1],
+            "account_graph_data": acc_graph_data,
+            "date_range_list": account_date_list,
             "graph_label": budget_label,
             "graph_value": budget_percentage,
             "net_worth_dict": net_worth_dict,
-            "max_value": max_value,
-            "min_value": min_value
+            "max_value": acc_max_value,
+            "min_value": acc_min_value
         }
     else:
         context = {}
@@ -397,11 +423,13 @@ def net_worth(request):
     account_data = Account.objects.filter(user=user_name)
     property_data = Property.objects.filter(user=user_name)
     all_transaction_data = Transaction.objects.filter(user=user_name)
-    date_compare = []
-
-    for obj in all_transaction_data:
-        date_compare.append(obj.account.created_at.date())
-        date_compare.append(obj.transaction_date)
+    if account_data:
+        min_date = account_data[0].created_at.date()
+        max_date = datetime.datetime.today().date()
+        day_diff = (max_date - min_date).days
+        account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
+        account_date_list.append(str(min_date))
+        account_date_list = account_date_list
 
     currency_dict = {
         "$": 'US Dollar ($)',
@@ -411,7 +439,7 @@ def net_worth(request):
     }
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
     total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance,\
-    total_currency_list, date_range_list = net_worth_cal(account_data, property_data, date_compare)
+    total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
 
     print("Assets_currency_data", asset_currency_balance)
     print("Liabiliy_currency_data", liability_currency_balance)

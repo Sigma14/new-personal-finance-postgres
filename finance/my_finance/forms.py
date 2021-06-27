@@ -123,8 +123,9 @@ class GoalForm(forms.ModelForm):
 
 class AccountForm(forms.ModelForm):
     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    interest_rate = forms.FloatField(required=False)
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-    lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}), required=False)
 
     class Meta:
         model = Account
