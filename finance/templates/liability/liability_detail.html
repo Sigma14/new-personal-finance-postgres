@@ -107,7 +107,7 @@
                                 <div class="download_csv_form"></div>
                                 <div class="card-header border-bottom">
                                     <h4 class="card-title">Transactions</h4>
-                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_liability_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_liability_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                 </div>
                                 <div class="card-datatable">
                                         <table class="dt-row-grouping table" id="transactions">

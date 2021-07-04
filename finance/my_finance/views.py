@@ -5,6 +5,10 @@ import calendar
 import pandas as pd
 import datetime
 from io import BytesIO
+from collections import OrderedDict
+from django.contrib.auth.decorators import login_required
+import requests
+from django.contrib.auth.hashers import identify_hasher
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -13,14 +17,21 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from reportlab.graphics.charts.legends import Legend
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, \
     MortgageForm, LiabilityForm, PropertyForm
-from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property
+from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, Expenses
 from .mortgage import calculator
+from reportlab.lib.colors import PCMYKColor
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.lib.validators import Auto
 
 
 def transaction_summary(transaction_data, select_filter):
@@ -64,15 +75,16 @@ def transaction_summary(transaction_data, select_filter):
 
     transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
     context = {
-                'transaction_key': transaction_key,
-                'transaction_key_dumbs': json.dumps(transaction_key),
-                'transaction_data': transaction_data,
-                'tags_data': tags_data,
-                'select_filter': select_filter,
-                'debit_graph_data': debit_date_list,
-                'credit_graph_data': credit_date_list,
-                'transaction_date_data': date_list,
-               }
+        'transaction_key': transaction_key,
+        'transaction_key_dumbs': json.dumps(transaction_key),
+        'transaction_data': transaction_data,
+        'tags_data': tags_data,
+        'select_filter': select_filter,
+        'debit_graph_data': debit_date_list,
+        'credit_graph_data': credit_date_list,
+        'transaction_date_data': date_list,
+        'transaction_date_data_dumbs': json.dumps(date_list),
+    }
     return context
 
 
@@ -254,8 +266,8 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
     if fun_name == "dash_board":
         return net_worth_dict
     else:
-        return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict,\
-               total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance,\
+        return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
+               total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
                total_currency_list, date_range_list
 
 
@@ -355,7 +367,8 @@ def home(request):
             account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
             account_date_list.append(str(min_date))
             account_date_list = account_date_list[::-1]
-
+        else:
+            account_date_list = []
         for acc_obj in accounts_data:
             account_transaction_value = []
             acc_create_date = acc_obj.created_at.date()
@@ -438,7 +451,7 @@ def net_worth(request):
         "£": 'British Pound (£)',
     }
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
-    total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance,\
+    total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
     total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
 
     print("Assets_currency_data", asset_currency_balance)
@@ -467,7 +480,8 @@ def net_worth(request):
         liability_balance_data = liability_currency_balance[currency_index][liability_currency_name]
         if liability_currency_name in total_currency_list:
             if asset_currency_name in liability_total_dict:
-                sum_liab_data = [x + y for (x, y) in zip(liability_total_dict[liability_currency_name], liability_balance_data)]
+                sum_liab_data = [x + y for (x, y) in
+                                 zip(liability_total_dict[liability_currency_name], liability_balance_data)]
                 liability_total_dict[liability_currency_name] = sum_liab_data
             else:
                 liability_total_dict[liability_currency_name] = liability_balance_data
@@ -540,6 +554,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         category_key = ['S.No.', 'Name', 'Last Activity']
         data['category_data'] = category_data
         data['categories_name'] = categories_name
+        data['categories_name_dumbs'] = json.dumps(categories_name)
         data['category_key'] = category_key
         data['category_key_dumbs'] = json.dumps(category_key)
         data['categories_value'] = categories_value
@@ -601,23 +616,26 @@ class CategoryDelete(DeleteView):
 
 
 def user_login(request):
-    next = request.GET.get('next')
-    form = LoginForm(request.POST or None)
-    if form.is_valid():
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password')
+    if request.method == 'POST':
+        next = request.POST['next']
+        username = request.POST['register-username']
+        password = request.POST['register-password']
         user = authenticate(username=username, password=password)
-        print(user)
-        if user:
+        if user is None:
+            context = {'login_error': 'Username and Password Incorrect'}
+            return render(request, "login_page.html", context)
+        elif not user.is_active:
+            context = {'login_error': 'User is not active'}
+            return render(request, "login_page.html", context)
+        else:
             login(request, user)
             if next:
                 return redirect(next)
             else:
-                return redirect("/list")
-
-    context = {'form': form}
-    template = 'login.html'
-    return render(request, template, context)
+                return redirect('/')
+    else:
+        next = request.GET['next']
+        return render(request, "login_page.html", context={'next': next})
 
 
 def user_logout(request):
@@ -639,10 +657,41 @@ class BudgetList(LoginRequiredMixin, ListView):
         budget_data = Budget.objects.filter(user=user_name)
 
         budget_key = ['S.No.', 'Name', 'budget Amount', 'Spent Amount', 'Left Amount', 'Last Updated']
+        revenue_values = []
+        revenue_data = Revenues.objects.filter(user=user_name).order_by('month')
+        revenue_month = []
+        revenue_name = []
+        for revenue_value in revenue_data:
+            revenue_month.append(revenue_value.month)
+            if revenue_value.primary:
+                revenue_name.insert(1, revenue_value.name)
+            else:
+                revenue_name.append(revenue_value.name)
+
+        revenue_month = list(dict.fromkeys(revenue_month))
+        revenue_name = list(dict.fromkeys(revenue_name))
+        print(revenue_name)
+        for month in revenue_month:
+            obj_data = {'month': datetime.datetime.strftime(month, "%B, %y")}
+            for name in revenue_name:
+                revenue_obj = Revenues.objects.filter(user=user_name, month=month, name=name)
+                if revenue_obj:
+                    currency_name = revenue_obj[0].currency
+                    obj_data[revenue_obj[0].id] = revenue_obj[0].currency + revenue_obj[0].amount
+                else:
+                    new_revenue_obj = Revenues()
+                    new_revenue_obj.non_primary = True
+                    revenue_save(new_revenue_obj, user_name, name, "0", month, currency_name)
+                    obj_data[new_revenue_obj.id] = currency_name + "0"
+            revenue_values.append(obj_data)
+
+        revenue_name.insert(0, 'Month')
         data['budget_data'] = budget_data
         data['budget_key'] = budget_key
         data['budget_key_dumbs'] = json.dumps(budget_key)
-
+        data['revenue_keys'] = revenue_name
+        data['revenue_values'] = revenue_values
+        print('revenue_values', revenue_values)
         return data
 
 
@@ -718,6 +767,7 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 #     form_class = BillForm
 #     template_name = 'bill/bill_delete.html'
 
+@login_required(login_url="/login")
 def transaction_list(request):
     user_name = request.user
     if request.method == "POST":
@@ -746,9 +796,11 @@ def transaction_report(request):
         end_date = request.POST['end_date']
         tags_data = ast.literal_eval(tags_data)
         if tag_name != 'All':
-            transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date), tags=tag_name)
+            transaction_data = Transaction.objects.filter(user=user_name,
+                                                          transaction_date__range=(start_date, end_date), tags=tag_name)
         else:
-            transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date))
+            transaction_data = Transaction.objects.filter(user=user_name,
+                                                          transaction_date__range=(start_date, end_date))
         select_filter = tag_name
     else:
         start_date = request.GET['start_date']
@@ -940,13 +992,15 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                             budget_obj.amount = round(float(budget_obj.amount) - transaction_amount, 2)
 
                         if out_flow == "True":
-                            budget_obj.budget_spent = round(float(budget_obj.budget_spent) + update_transaction_amount, 2)
+                            budget_obj.budget_spent = round(float(budget_obj.budget_spent) + update_transaction_amount,
+                                                            2)
                         else:
                             budget_obj.amount = round(float(budget_obj.amount) + update_transaction_amount, 2)
                 else:
                     old_budget_obj = Budget.objects.filter(user=self.request.user, name=transaction_budget_name)[0]
                     if transaction_out_flow:
-                        old_budget_obj.budget_spent = round(float(transaction_obj.budgets.budget_spent) - transaction_amount, 2)
+                        old_budget_obj.budget_spent = round(
+                            float(transaction_obj.budgets.budget_spent) - transaction_amount, 2)
                     else:
                         old_budget_obj.amount = round(float(transaction_obj.budgets.amount) - transaction_amount, 2)
 
@@ -1081,6 +1135,7 @@ class AccountDetail(LoginRequiredMixin, DetailView):
             'transaction_date')[::-1]
         date_list = []
         balance_graph_data = []
+        transaction_graph_value = []
         index = 1
         for data in transaction_data:
             if data.cleared:
@@ -1131,6 +1186,8 @@ class AccountDetail(LoginRequiredMixin, DetailView):
 
             amount_diff = initial_balance - starting_balance
             amount_inc_percentage = round(amount_diff / starting_balance * 100, 2)
+            for data in balance_graph_data:
+                transaction_graph_value.append(data['y'])
         else:
             amount_diff = 0
             amount_inc_percentage = 0
@@ -1139,6 +1196,8 @@ class AccountDetail(LoginRequiredMixin, DetailView):
         transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
         context['balance_graph_data'] = balance_graph_data
         context['transaction_data'] = transaction_data
+        context['transaction_date_dumbs'] = json.dumps(date_list)
+        context['transaction_graph_value'] = transaction_graph_value
         context['transaction_key'] = transaction_key
         context['transaction_key_dumbs'] = json.dumps(transaction_key)
         context['amount_diff'] = amount_diff
@@ -1549,10 +1608,10 @@ def fund_list(request):
     fund_data = Account.objects.filter(user=user_name, liability_type=None)
     fund_key = ['S.No.', 'Account Name', 'Total Fund', 'Available Fund', 'Lock Fund']
     context = {
-                'fund_data': fund_data,
-                'fund_key': fund_key,
-                'fund_key_dumbs': json.dumps(fund_key),
-              }
+        'fund_data': fund_data,
+        'fund_key': fund_key,
+        'fund_key_dumbs': json.dumps(fund_key),
+    }
     return render(request, 'funds.html', context=context)
 
 
@@ -1566,23 +1625,15 @@ class PdfPrint:
             self.pageSize = letter
         self.width, self.height = self.pageSize
 
-    def report(self, weather_history, title):
+    def report(self, pdf_data_value, title, d=None):
         # set some characteristics for pdf document
         doc = SimpleDocTemplate(
             self.buffer,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=30,
-            bottomMargin=72,
             pagesize=self.pageSize)
         styles = getSampleStyleSheet()
         # create document
         data = [Paragraph(title, styles['Title'])]
-        list_data = [['00', '01', '02', '03', '04'],
-                ['10', '11', '12', '13', '14'],
-                ['20', '21', '22', '23', '24'],
-                ['30', '31', '32', '33', '34']]
-        t = Table(list_data)
+        t = Table(pdf_data_value)
         t.setStyle(TableStyle(
             [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
              ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
@@ -1591,27 +1642,116 @@ class PdfPrint:
         # create other flowables
 
         data.append(t)
-        print("data", data)
+        # d.save(formats=['pdf'], outDir='.', fnRoot='test')
+        if d:
+            data.append(d)
         doc.build(data)
         pdf = self.buffer.getvalue()
         self.buffer.close()
         return pdf
 
 
+def draw_bar_chart(bar_data, data_label, graph_type):
+    d = Drawing(200, 500)
+    bar = VerticalBarChart()
+    bar.x = 100
+    bar.y = 85
+    bar.width = 300
+    bar.height = 300
+    bar.data = bar_data
+    bar.valueAxis.valueMin = 0
+    bar.barSpacing = 0.5
+    bar.categoryAxis.labels.dx = 8
+    bar.categoryAxis.labels.dy = -2
+    bar.categoryAxis.categoryNames = data_label
+    bar.barLabels.nudge = 7
+    bar.valueAxis.labels.fontName = 'Helvetica'
+    bar.valueAxis.labels.fontSize = 8
+    bar.valueAxis.forceZero = 1
+    bar.valueAxis.rangeRound = 'both'
+    bar.valueAxis.valueMax = None  # 10#
+    bar.categoryAxis.visible = 1
+    bar.categoryAxis.visibleTicks = 0
+    bar.barLabels.fontSize = 6
+    bar.valueAxis.labels.fontSize = 6
+    bar.strokeWidth = 0.1
+    bar.bars.strokeWidth = 0.5
+    if graph_type == "bar":
+        bar.bars[0].fillColor = PCMYKColor(46, 51, 0, 4)
+        d.add(bar)
+    else:
+        legend = Legend()
+        legend.columnMaximum = 10
+        legend.fontName = 'Helvetica'
+        legend.fontSize = 5.5
+        legend.boxAnchor = 'w'
+        legend.x = 400
+        legend.y = 400
+        legend.dx = 16
+        legend.dy = 16
+        legend.alignment = 'left'
+        legend.colorNamePairs = [(colors.red, "Debit"), (colors.green, "Credit")]
+        d.add(bar)
+        d.add(legend)
+
+    #
+    # bar.bars[1].fillColor = PCMYKColor(23, 51, 0, 4, alpha=85)
+    # bar.bars.fillColor = PCMYKColor(100, 0, 90, 50, alpha=85)
+    return d
+
+
+@csrf_exempt
 def download_pdf(request):
-    print("kiiiii")
-    if 'pdf' in request.POST:
-        print("innnnnnnnn")
+    if request.method == 'POST':
+        pdf_data_key = request.POST['csv_data_key']
+        pdf_title = request.POST['pdf_title']
+        pdf_data_value = request.POST['csv_data_value']
+        file_name = request.POST['file_name']
+        pdf_data_key = json.loads(pdf_data_key)
+        pdf_data_value = json.loads(pdf_data_value)
+        pdf_data_value.insert(0, pdf_data_key)
         response = HttpResponse(content_type='application/pdf')
-        today = datetime.date.today()
-        filename = 'pdf_demo' + today.strftime('%Y-%m-%d')
-        response['Content-Disposition'] = 'attachement; filename={0}.pdf'.format(filename)
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
         buffer = BytesIO()
         reporti = PdfPrint(buffer, 'A4')
-        weather_period = "evening"
-        pdf = reporti.report(weather_period, 'Weather statistics data')
+        try:
+            graph_type = request.POST['graph_type']
+            print("graph_type=======>", graph_type)
+            print(type(graph_type))
+            data_label = request.POST['data_label']
+            data_value = request.POST['data_value']
+            data_label = json.loads(data_label)
+            data_value = json.loads(data_value)
+            if graph_type == 'transaction-bar':
+                credit_value = request.POST['credit_value']
+                debit_value = data_value
+                credit_value = json.loads(credit_value)
+                bar_data = [debit_value, credit_value]
+                d = draw_bar_chart(bar_data, data_label, graph_type)
+
+            if graph_type == 'bar':
+                bar_data = [data_value]
+                print(bar_data)
+                d = draw_bar_chart(bar_data, data_label, graph_type)
+
+            if graph_type == 'line':
+                print("Line===", data_value)
+                d = Drawing(200, 500)
+                chart = HorizontalLineChart()
+                chart.data = [tuple(data_value[::-1])]
+                chart.x = 5
+                chart.y = 5
+                chart.width = 500
+                chart.height = 300
+                chart.valueAxis.valueMin = 0
+                chart.lines[0].fillColor = colors.orange
+                chart.categoryAxis.categoryNames = data_label[::-1]
+                d.add(chart)
+            pdf = reporti.report(pdf_data_value, pdf_title, d)
+        except:
+            pdf = reporti.report(pdf_data_value, pdf_title)
+
         response.write(pdf)
-        print("outttttttttt")
         return response
     return render(request, "test.html")
 
@@ -1689,9 +1829,11 @@ def transaction_upload(request):
                         budget_obj = False
 
                     if out_flow == "True":
-                        account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
+                        account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount,
+                                                              2)
                     else:
-                        account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
+                        account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount,
+                                                              2)
 
                     if bill_obj:
                         bill_amount = round(float(bill_obj.remaining_amount), 2)
@@ -1724,3 +1866,196 @@ def transaction_upload(request):
             return JsonResponse({'status': 'File Uploaded'})
         except:
             return JsonResponse({'status': 'Uploading Failed!! Please Check File Format'})
+
+
+@login_required(login_url="/login")
+def stock_analysis(request):
+    url = "http://vuexy.myds.me:8000/api/portfolio/list/"
+    portfolio_response = requests.get(url, data={'user_name': request.user.username})
+    portfolio_list = portfolio_response.json()
+
+    if request.method == 'POST':
+        p_name = request.POST['p_name']
+    else:
+        p_name = portfolio_list[0]
+    print(p_name)
+    url_response = requests.post(url, data={'user_name': request.user.username, 'p_name': p_name})
+    my_portfolio_context = url_response.json()
+    my_portfolio_context['portfolio_list'] = portfolio_list
+    return render(request, 'stock_analysis.html', context=my_portfolio_context)
+
+
+# REVENUE ADD
+
+def revenue_save(revenue_object, user_name, name, amount, month_name, currency):
+    revenue_object.user = user_name
+    revenue_object.name = name
+    revenue_object.amount = amount
+    revenue_object.month = month_name
+    revenue_object.currency = currency
+    revenue_object.save()
+
+
+def revenue_add(request):
+    if request.method == 'POST':
+        revenue_obj = Revenues()
+        user_name = request.user
+        name = request.POST['name']
+        amount = request.POST['amount']
+        month = request.POST['start_month']
+        currency = request.POST['currency']
+        primary = request.POST['revenue_type']
+        month = datetime.datetime.strptime(month, '%Y-%m')
+        if primary == "non-prime":
+            revenue_obj.non_primary = True
+            revenue_save(revenue_obj, user_name, name, amount, month, currency)
+        else:
+            end_month = request.POST['end_month']
+            end_month = datetime.datetime.strptime(end_month, '%Y-%m')
+            today_month = datetime.datetime.today().date().strftime('%Y-%m')
+            today_month = datetime.datetime.strptime(today_month, '%Y-%m')
+            if today_month > month:
+                months_list = list(OrderedDict(((month + datetime.timedelta(_)).strftime(r"%b-%y"), None) for _ in range((today_month - month).days + 1)).keys())
+                for month_name in months_list:
+                    month_name = datetime.datetime.strptime(month_name, '%b-%y')
+                    revenue_value = Revenues.objects.filter(user=user_name, month=month_name)
+                    if revenue_value:
+                        for data in revenue_value:
+                            revenue_object = data
+                    else:
+                        revenue_object = Revenues()
+
+                    revenue_object.end_month = end_month
+                    revenue_object.primary = True
+                    revenue_save(revenue_object, user_name, name, amount, month_name, currency)
+            else:
+                revenue_obj.end_month = end_month
+                revenue_obj.primary = True
+                revenue_save(revenue_obj, user_name, name, amount, month, currency)
+
+        if 'add_other' in request.POST:
+            return redirect("/revenue_add/")
+        else:
+            return redirect("/budget_list/")
+    else:
+        current = datetime.datetime.today()
+        current_month = datetime.datetime.strftime(current, '%Y-%m')
+        context = {'current_month': current_month}
+        return render(request, "revenue/revenue_add.html", context=context)
+
+
+# REVENUE UPDATE
+
+def revenue_update(request, pk):
+
+    revenue_obj = Revenues.objects.get(pk=int(pk))
+
+    if request.method == 'POST':
+        user_name = request.user
+        name = request.POST['name']
+        amount = request.POST['amount']
+        month = request.POST['start_month']
+        currency = request.POST['currency']
+        primary = request.POST['revenue_type']
+        month = datetime.datetime.strptime(month, '%Y-%m').date()
+        obj_month = revenue_obj.month
+        if month != obj_month:
+            try:
+                new_revenue_obj = Revenues.objects.get(user=user_name, month=month, name=name)
+                revenue_save(new_revenue_obj, user_name, name, amount, month, currency)
+            except:
+                context = {
+                    'name': revenue_obj.name,
+                    'start_date': datetime.datetime.strftime(month, '%Y-%m'),
+                    'amount': revenue_obj.amount,
+                    'currency': revenue_obj.currency,
+                    'primary': revenue_obj.primary,
+                    'pk': pk,
+                    'error': '*Month not present in your income!! Please Select Another or'
+                }
+                return render(request, "revenue/revenue_update.html", context=context)
+            revenue_obj.amount = '0'
+            revenue_obj.save()
+        else:
+            print("innnn")
+            revenue_save(revenue_obj, user_name, name, amount, month, currency)
+        return redirect("/budget_list/")
+    else:
+        start_date = datetime.datetime.strftime(revenue_obj.month, '%Y-%m')
+        context = {
+                    'name': revenue_obj.name,
+                    'start_date': start_date,
+                    'amount': revenue_obj.amount,
+                    'currency': revenue_obj.currency,
+                    'primary': revenue_obj.primary,
+                    'pk': pk
+                  }
+        return render(request, "revenue/revenue_update.html", context=context)
+
+
+# REVENUE DELETE
+
+def revenue_delete(request):
+    return render(request, "revenue/revenue_add.html")
+
+
+def revenue_update_name(request, pk):
+    if request.method == 'POST':
+        name = request.POST['name']
+        user_name = request.user
+        if name != pk:
+            revenue_obj = Revenues.objects.filter(user=user_name, name=pk)
+            check_revenue = Revenues.objects.filter(user=user_name, name=name)
+            if check_revenue:
+                context = {
+                    'name': pk,
+                    'fun_name': 'only_name',
+                    'error': 'Name already exists enter another name or'
+                }
+                return render(request, "revenue/revenue_update.html", context=context)
+            else:
+                for data in revenue_obj:
+                    data.name = name
+                    data.save()
+        return redirect("/budget_list/")
+    else:
+        context = {
+                   'name': pk,
+                   'fun_name': 'only_name'
+        }
+    return render(request, "revenue/revenue_update.html", context=context)
+
+
+
+# EXPENSES ADD
+
+def expenses_add(request):
+    if request.method == 'POST':
+        user_name = request.user
+        category = request.POST['category']
+        name = request.POST['name']
+        amount = request.POST['amount']
+        month = request.POST['month']
+        expenses_obj = Expenses()
+        expenses_obj.user = user_name
+        expenses_obj.name = name
+        expenses_obj.amount = amount
+        expenses_obj.month = month
+        expenses_obj.save()
+    else:
+        current = datetime.datetime.today()
+        current_month = datetime.datetime.strftime(current, '%y-%m')
+        context = {'current_month': current_month}
+    return render(request, "revenue/revenue_add.html", context=context)
+
+
+# EXPENSES UPDATE
+
+def expenses_update(request):
+    return render(request, "revenue/revenue_update.html")
+
+
+# EXPENSES DELETE
+
+def expenses_delete(request):
+    return render(request, "revenue/revenue_add.html")

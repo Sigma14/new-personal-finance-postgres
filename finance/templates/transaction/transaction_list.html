@@ -54,6 +54,16 @@
                                     </form>
                                     <p>{{message}}</p>
                                     <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
 									<form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">
 										{% csrf_token %}
                                     <!-- users edit account form start -->
@@ -73,13 +83,14 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Search</button>
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     </form>
                                     <div class="download_csv_form"></div>
+                                    <div class="download_pdf_form"></div>
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>
                                         <div class="basic-modal">
@@ -104,7 +115,11 @@
                                             </select>
                                             </form>
                                         </div>
-                                        <button class="btn btn-primary download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <div float="right">
+                                        <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                        <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data}}" credit_value="{{credit_graph_data}}">
+                                        </div>
                                     </div>
                                     <div class="card-datatable">
                                             <table class="dt-row-grouping table" id="transactions">

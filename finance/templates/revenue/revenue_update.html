@@ -1,0 +1,166 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Update Revenue</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Revenues</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Update Revenue
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <section class="app-user-edit">
+                    <div class="card" >
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group row">
+                                        <div class="col-sm-3 col-form-label">
+                                            {% if error %}
+                                            <p class="text-danger">{{error}}<a href="{% url 'revenue_add' %}"> Add New</a></p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if fun_name == "only_name" %}
+                        <div class="card-body">
+                            <form class="form form-horizontal" action="{% url 'revenue_update_name' pk=name %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="name">Name</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="text" id="name" value="{{name}}" class="form-control" name="name" required
+                                                           placeholder="Name"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 offset-sm-3">
+                                        <input type="submit" class="btn btn-primary mr-1" value="Update">
+                                        <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="card-body">
+                            <form class="form form-horizontal" action="{% url 'revenue_update' pk=pk %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="name">Name</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="text" id="name" value="{{name}}" class="form-control" name="name" required
+                                                           placeholder="Name" readonly/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="currency">Currency</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <select class="form-control" id="currency" name="currency" value="{{currency}}">
+                                                        <option value="$">US Dollar ($)</option>
+                                                        <option value="€">Euro (€)</option>
+                                                        <option value="₹">Indian rupee (₹)</option>
+                                                        <option value="£">British Pound (£)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="amount">Amount</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="text" id="amount" value="{{amount}}" class="form-control" name="amount" required
+                                                           placeholder="Amount"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label id="check_month">Month</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="month" class="form-control" name="start_month" value="{{start_date}}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label>&nbsp;</label>
+                                            </div>&nbsp;
+                                            {% if primary %}
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="customRadio1" value="prime" name="revenue_type" class="custom-control-input" checked/>
+                                                <label class="custom-control-label" for="customRadio1">&nbsp;Primary&nbsp;</label>
+                                            </div>
+                                            {% else %}
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="customRadio2" value="non-prime" name="revenue_type" class="custom-control-input" checked/>
+                                                <label class="custom-control-label" for="customRadio2">&nbsp;Non-Primary</label>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 offset-sm-3">
+                                        <input type="submit" class="btn btn-primary mr-1" value="Update">
+                                        <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+{% endblock content%}

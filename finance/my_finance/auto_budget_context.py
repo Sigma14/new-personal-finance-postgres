@@ -1,4 +1,4 @@
-from .models import Budget, Bill
+from .models import Budget, Bill, Revenues
 from datetime import datetime, timedelta
 
 
@@ -28,8 +28,24 @@ def check_auto_budget(request):
         user_name = request.user
         budget_data = Budget.objects.filter(user=user_name)
         bill_data = Bill.objects.filter(user=user_name)
+        revenue_data = Revenues.objects.filter(user=user_name, primary=True).order_by('-month')
         today_date = datetime.today().date()
         print("today_date", today_date)
+        for obj in revenue_data:
+            previous_month_date = obj.month
+            revenue_end_date = obj.end_month
+            next_month_date = (previous_month_date.replace(day=1) + timedelta(days=32)).replace(day=1)
+            if next_month_date <= today_date and revenue_end_date >= next_month_date:
+                revenue_obj = Revenues()
+                revenue_obj.user = user_name
+                revenue_obj.name = obj.name
+                revenue_obj.month = next_month_date
+                revenue_obj.end_month = obj.end_month
+                revenue_obj.amount = obj.amount
+                revenue_obj.currency = obj.currency
+                revenue_obj.primary = obj.primary
+                revenue_obj.save()
+            break
 
         for data in bill_data:
             bill_period = data.frequency

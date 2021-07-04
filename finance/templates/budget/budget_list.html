@@ -37,7 +37,7 @@
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">Budgets List</h4>
-                                        <button class="btn btn-primary download_csv" file_name="my_budget.csv" table_heading="{{budget_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary download_csv" file_name="my_budget.csv" table_heading="{{budget_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
                                         <table class="dt-row-grouping table" id="budgets">
@@ -102,6 +102,50 @@
                                                         </span>
                                                     </div>
                                                 </td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">Revenues</h4>
+                                        <div class="col-sm-40 offset-sm-20">
+                                            <a href="{% url 'revenue_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Revenue</a>
+                                        </div>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="revenue_table">
+                                            <thead>
+                                            <tr>
+                                            {% for data in revenue_keys %}
+                                                {% if forloop.counter == 1 %}
+                                                <th>{{data}}</th>
+                                                {% else %}
+                                                <th><a href="{% url 'revenue_update_name' pk=data %}" title="Edit">{{data}}</a></th>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for value in revenue_values %}
+                                            <tr>
+                                                {% for key, object in value.items %}
+                                                {% if forloop.counter == 1 %}
+                                                <td>{{object}}</td>
+                                                {% else %}
+                                                <td><a href="{% url 'revenue_update' pk=key %}" title="Edit">{{object}}</a></td>
+                                                {% endif %}
+                                                {% endfor %}
                                             </tr>
                                             {% endfor %}
                                             </tbody>

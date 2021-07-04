@@ -53,11 +53,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/pickers/form-pickadate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-calendar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-validation.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/page-auth.css' %}">
 
     <!-- END: Page CSS-->
 
     <!-- BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
     <!-- END: Custom CSS-->
 
 </head>
@@ -75,95 +77,42 @@
             <ul class="nav navbar-nav d-xl-none">
                 <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i class="ficon"
                                                                                                    data-feather="menu"></i></a>
+
                 </li>
             </ul>
+            {% if request.resolver_match.view_name == 'home' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Welcome to <strong>Personal Finance!</strong> On this page you get a quick overview of your finances. For more information, check out Accounts → <a href="{% url 'account_list' %}">Asset Accounts</a> and of course the <a href="{% url 'budget_list' %}">Budgets</a>, <a href="{% url 'bill_list' %}">Bills</a> and <a href="{% url 'transaction_list' %}">Transactions pages</a>. Or just take a look around and see where you end up.</div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'budget_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you an overview of your budgets. Budget table shows -> How many amount spent and left in budget</div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'bill_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows monthly weekly and daily bills and also shows which bill is <strong class="text-success">paid</strong> or <strong class="text-danger">unpaid</strong></div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'fund_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows an overview of your funds. Funds Table shows -> Amount of total funds, available funds, lock funds. You can use Lock Amount in the future and add extra funds if you receive</div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'account_detail' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Asset accounts are your personal bank accounts. This page shows your current balance and all transactions data of asset account </div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'liability_detail' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Liabilities are your debts and loans such as old credit card debts or student loans. This page shows your current balance and all transactions data of liabilities account </div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'transaction_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you all accounts transactions. you can filter transactions by tags and make reports of transaction between two date range and also upload transactions file in your transactions</div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'category_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you all categories list and also shows how many amount spent on particular category using bar graph</div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'goal_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows your goals and also shows goals are completed or not </div>
+            {% endif %}
+            {% if request.resolver_match.view_name == 'mortgagecalculator_list' %}
+            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page calculate mortgage and shows your mortgage payments details according to interest periods</div>
+            {% endif %}
         </div>
     </div>
 </nav>
-<ul class="main-search-list-defaultlist d-none">
-    <li class="d-flex align-items-center"><a href="javascript:void(0);">
-        <h6 class="section-label mt-75 mb-0">Files</h6>
-    </a></li>
-    <li class="auto-suggestion"><a class="d-flex align-items-center justify-content-between w-100"
-                                   href="app-file-manager.html">
-        <div class="d-flex">
-            <div class="mr-75"><img src="{% static 'app-assets/images/icons/xls.png'%}" alt="png" height="32"></div>
-            <div class="search-data">
-                <p class="search-data-title mb-0">Two new item submitted</p><small class="text-muted">Marketing
-                Manager</small>
-            </div>
-        </div>
-        <small class="search-data-size mr-50 text-muted">&apos;17kb</small>
-    </a></li>
-    <li class="auto-suggestion"><a class="d-flex align-items-center justify-content-between w-100"
-                                   href="app-file-manager.html">
-        <div class="d-flex">
-            <div class="mr-75"><img src="{% static 'app-assets/images/icons/jpg.png'%}" alt="png" height="32"></div>
-            <div class="search-data">
-                <p class="search-data-title mb-0">52 JPG file Generated</p><small class="text-muted">FontEnd
-                Developer</small>
-            </div>
-        </div>
-        <small class="search-data-size mr-50 text-muted">&apos;11kb</small>
-    </a></li>
-    <li class="auto-suggestion"><a class="d-flex align-items-center justify-content-between w-100"
-                                   href="app-file-manager.html">
-        <div class="d-flex">
-            <div class="mr-75"><img src="{% static 'app-assets/images/icons/pdf.png'%}" alt="png" height="32"></div>
-            <div class="search-data">
-                <p class="search-data-title mb-0">25 PDF File Uploaded</p><small class="text-muted">Digital Marketing
-                Manager</small>
-            </div>
-        </div>
-        <small class="search-data-size mr-50 text-muted">&apos;150kb</small>
-    </a></li>
-    <li class="auto-suggestion"><a class="d-flex align-items-center justify-content-between w-100"
-                                   href="app-file-manager.html">
-        <div class="d-flex">
-            <div class="mr-75"><img src="{% static 'app-assets/images/icons/doc.png'%}" alt="png" height="32"></div>
-            <div class="search-data">
-                <p class="search-data-title mb-0">Anna_Strong.doc</p><small class="text-muted">Web Designer</small>
-            </div>
-        </div>
-        <small class="search-data-size mr-50 text-muted">&apos;256kb</small>
-    </a></li>
-    <li class="d-flex align-items-center"><a href="javascript:void(0);">
-        <h6 class="section-label mt-75 mb-0">Members</h6>
-    </a></li>
-    <div class="d-flex align-items-center">
-        <div class="search-data">
-            <p class="search-data-title mb-0">John Doe</p><small class="text-muted">UI designer</small>
-        </div>
-    </div>
-    </a></li>
-    <div class="d-flex align-items-center">
-        <div class="search-data">
-            <p class="search-data-title mb-0">Michal Clark</p><small class="text-muted">FontEnd Developer</small>
-        </div>
-    </div>
-    </a></li>
-    <div class="d-flex align-items-center">
-        <div class="search-data">
-            <p class="search-data-title mb-0">Milena Gibson</p><small class="text-muted">Digital Marketing
-            Manager</small>
-        </div>
-    </div>
-    </a></li>
-    <div class="d-flex align-items-center">
-        <div class="search-data">
-            <p class="search-data-title mb-0">Anna Strong</p><small class="text-muted">Web Designer</small>
-        </div>
-    </div>
-    </a></li>
-</ul>
-<ul class="main-search-list-defaultlist-other-list d-none">
-    <li class="auto-suggestion justify-content-between"><a
-            class="d-flex align-items-center justify-content-between w-100 py-50">
-        <div class="d-flex justify-content-start"><span class="mr-75" data-feather="alert-circle"></span><span>No results found.</span>
-        </div>
-    </a></li>
-</ul>
-<!-- END: Header-->
 
 
 <!-- BEGIN: Main Menu-->
@@ -226,6 +175,10 @@
                 <a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i
                         data-feather="save"></i><span class="menu-title text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
             </li>
+            <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_analysis' %}active{% endif %}">
+                <a class="d-flex align-items-center" href="{% url 'stock_analysis' %}"><i
+                        data-feather="save"></i><span class="menu-title text-truncate" data-i18n="Mortgage Calculator">Stock Analysis</span></a>
+            </li>
         </ul>
     </div>
 </div>
@@ -282,32 +235,55 @@
 <script src="{% static 'app-assets/js/scripts/forms/pickers/form-pickers.js' %}"></script>
 <script src="{% static 'assets/js/app-calendars-events.js' %}"></script>
 <script src="{% static 'assets/js/app-calendars.js' %}"></script>
+<script src="{% static 'app-assets/js/scripts/pages/page-auth-register.js' %}"></script>
 
 <!-- END: Page JS-->
 
 <script src="{% static 'assets/js/line-graph.js' %}"></script>
 <script src="{% static 'assets/js/custom.js' %}"></script>
+<script src="{% static 'assets/js/pie_graphs.js' %}"></script>
+<script src="{% static 'assets/js/diversification_tree.js' %}"></script>
 
-
+<script>diversification_tree({{ diversification_data | safe }})</script>
 <script>LinesGraph({{ balance_graph_data | safe }});</script>
+<script>LinesGraph({{close_graph_data | safe}});</script>
 <script>MortgageChart({{ mortgage_graph_data | safe }}, {{ mortgage_date_data | safe}});</script>
 <script>showCalenders( {{ calendar_bill_data | safe }});</script>
 <script>AccountsChart( {{ account_graph_data | safe }}, {{ date_range_list | safe }}, {{max_value}}, {{min_value}});</script>
 <script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }});</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_value | safe}});</script>
+<script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>
+<script>showStockAmount({{stocks_amount | safe}});</script>
+<script>portfolioWeights({{code_list | safe}}, {{weight1 | safe}}, {{weight2 | safe}});</script>
+<script>PortfolioValueChart( {{ candle_graph_data | safe }}, {{ candle_graph_data_id | safe }});</script>
+<script>showPortfolioRange({{close_week_1 | safe }}, "{{ week_1_id }}");</script>
+<script>showPortfolioRange({{close_month_1 | safe }}, "{{ month_1_id }}");</script>
+<script>showPortfolioRange({{close_month_3 | safe }}, "{{ month_3_id }}");</script>
+<script>showPortfolioRange({{close_month_6 | safe }}, "{{ month_6_id }}");</script>
+<script>showPortfolioRange({{close_year | safe }}, "{{ year_1_id }}");</script>
 
 
 <script>$('#categories').DataTable({"aaSorting": []});</script>
+<script>$('#revenue_table').DataTable({"aaSorting": []});</script>
 <script>$('#accounts').DataTable({"aaSorting": []});</script>
 <script>$('#bills').DataTable({"aaSorting": []});</script>
 <script>$('#budgets').DataTable({"aaSorting": []});</script>
 <script>$('#transactions').DataTable({"aaSorting": []});</script>
 <script>$('#goals').DataTable({"aaSorting": []});</script>
 <script>$('#mortgage').DataTable({"aaSorting": []});</script>
-
-
-
+<script>$('#my_port_table').DataTable({"aaSorting": [],
+                                         "scrollY": "480px",
+                                         "scrollX": true,
+                                         "scrollCollapse": true,
+                                         "paging": true});
+</script>
+<script>$('#portfolio_earnings').DataTable({"aaSorting": []});</script>
+<script>$('#portfolio_value').DataTable({"aaSorting": []});</script>
+<script>$('#portfolio_profitability').DataTable({"aaSorting": []});</script>
+<script>$('#portfolio_income').DataTable({"aaSorting": []});</script>
+<script>$('#portfolio_balance_sheet').DataTable({"aaSorting": []});</script>
+<script>$('#portfolio_cash_flow_data').DataTable({"aaSorting": []});</script>
 <script>
     $(window).on('load', function() {
         if (feather) {

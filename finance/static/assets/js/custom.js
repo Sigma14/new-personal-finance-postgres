@@ -81,6 +81,10 @@ $( document ).ready(function()
         var file_name = $(this).attr('file_name')
         var table_length = parseInt($(this).attr('table_length'));
         var csv_data_key = $(this).attr('table_heading');
+        var download_url = $(this).attr('url');
+        var pdf_title = $(this).attr('pdf_title');
+        var fun_name = $(this).attr('fun_name');
+        var graph_type = $('#download_graph_data').attr('graph_type');
         csv_data_value = []
         var value_index = 1
         $(table_id + " >  tbody").find('tr').each(function (i, el)
@@ -106,13 +110,44 @@ $( document ).ready(function()
             csv_data_value.push(data_value)
        });
        $(table_id).DataTable({"aaSorting": []});
+        console.log(csv_data_value);
         $(".download_csv_form").empty();
-        console.log(csv_data_key)
-        formHtml = "<form action=" +  "/download/csv" + " method='post'>" + "<input type='hidden' name='file_name' value='" + file_name + "' >"
+        $(".download_pdf_form").empty();
+
+        formHtml = "<form action=" +  download_url + " method='post'>" + "<input type='hidden' name='file_name' value='" + file_name + "' >"
                      + "<input type='hidden' name='csv_data_key' value='" + csv_data_key + "' >" + "<input type='hidden' name='csv_data_value' value='" + JSON.stringify(csv_data_value) + "' >"
-                     + "</form>"
+        if(pdf_title)
+        {
+            formHtml += "<input type='hidden' name='pdf_title' value='" + pdf_title + "' >"
+        }
+        if(graph_type == 'transaction-bar')
+        {
+            var data_label = $('#download_graph_data').attr('data_label');
+            var debit_value = $('#download_graph_data').attr('data_value');
+            var credit_value = $('#download_graph_data').attr('credit_value');
+            formHtml += "<input type='hidden' name='graph_type' value='" + graph_type + "' >" +
+                        "<input type='hidden' name='data_label' value='" + data_label + "' >" +
+                        "<input type='hidden' name='data_value' value='" + debit_value + "' >" +
+                        "<input type='hidden' name='credit_value' value='" + credit_value + "' >"
+        }
+        if(graph_type == 'bar' || graph_type == 'line')
+        {
+            var data_label = $('#download_graph_data').attr('data_label');
+            var data_value = $('#download_graph_data').attr('data_value');
+            formHtml += "<input type='hidden' name='graph_type' value='" + graph_type + "' >" +
+                        "<input type='hidden' name='data_label' value='" + data_label + "' >" +
+                        "<input type='hidden' name='data_value' value='" + data_value + "' >"
+        }
+        formHtml += "</form>"
         var form = $(formHtml);
-        $('.download_csv_form').append(form);
+        if(fun_name == "download_csv")
+        {
+            $('.download_csv_form').append(form);
+        }
+        else
+        {
+            $('.download_pdf_form').append(form);
+        }
         form.submit();
 
     });
@@ -218,6 +253,20 @@ $( document ).ready(function()
         });
         return false;
     });
+
+$('.check_primary').on("click", function(e)
+{
+    $('.end_month').toggle();
+    var month_label = $('#check_month').text()
+    if(month_label == 'Start Month')
+    {
+        $('#check_month').text('Month')
+    }
+    else
+    {
+        $('#check_month').text('Start Month')
+    }
+});
 
 function getCookie(name) {
     let cookieValue = null;

@@ -70,6 +70,16 @@ urlpatterns = [
     path('property_update/<int:pk>', PropertyUpdate.as_view(), name='property_update'),
     path('property_delete/<int:pk>', PropertyDelete.as_view(), name='property_delete'),
 
+    # Revenue Urls :-
+    path('revenue_add/', revenue_add, name='revenue_add'),
+    path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
+    path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
+
+    # Revenue Urls :-
+    path('expenses_add/', expenses_add, name='expenses_add'),
+    path('expenses_update/<int:pk>', expenses_update, name='expenses_update'),
+    path('expenses_delete/<int:pk>', expenses_delete, name='expenses_delete'),
+
     # Available Funds urls :-
 
     path('funds/', fund_list, name='fund_list'),
@@ -82,6 +92,10 @@ urlpatterns = [
     # path('mortgagecalculator_add/', MortgageCalculatorAdd.as_view(), name='mortgagecalculator_add'),
     # path('mortgagecalculator_update/<int:pk>', MortgageCalculatorUpdate.as_view(), name='mortgagecalculator_update'),
     # path('mortgagecalculator_delete/<int:pk>', MortgageCalculatorDelete.as_view(), name='mortgagecalculator_delete'),
+
+    # STOCK ANALYSIS
+
+    path('stock-analysis', stock_analysis, name='stock_analysis'),
 
     # DOWNLOADS FILE OPTIONS
 

@@ -1,0 +1,86 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Category</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Category</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Category
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <section class="app-user-edit">
+                    <div class="card" >
+                        <div class="card-body">
+                            <form class="form form-horizontal" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="fname-icon">Name</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="text" id="fname-icon" class="form-control" name="name" required
+                                                           placeholder="Name"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 offset-sm-3">
+                                        <input type="submit" class="btn btn-primary mr-1" value="Save">
+                                        <input type="submit" class="btn btn-primary mr-1" name="add_other" value="Save and add another">
+                                        <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">SUGGESTED CATEGORIES</h4>
+                                </div>
+                                <br/>
+                                <div class="card-body">
+                                    <div class="form-validate">
+                                        <div class="row">
+                                            {% for category in category_suggestions %}
+                                            <button type="button" style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary new_category">
+                                                {{category}}&nbsp;<i class="fa fa-plus"></i>
+                                            </button>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+{% endblock content%}

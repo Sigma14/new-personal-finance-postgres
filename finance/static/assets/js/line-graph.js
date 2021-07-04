@@ -600,7 +600,7 @@ function CategorySpentChart(categories_name, categories_value)
           shared: true,
           intersect: false
         },
-        colors: [chartColors.column.series1, chartColors.column.series2],
+        colors: ['#826af9'],
         xaxis: {
           categories: categories_name,
         },
@@ -662,5 +662,190 @@ function TransactionGraph(debit_graph_data, credit_graph_data, transaction_date_
 
         var chart = new ApexCharts(document.querySelector("#transaction-chart"), options);
         chart.render();
+
+}
+
+// Candlestick Chart
+// --------------------------------------------------------------------
+
+function PortfolioValueChart(candlestick_data, candlestick_id)
+{
+    console.log(candlestick_id)
+    var graph_data = []; // create an empty array
+
+    for (let i = 0; i < candlestick_data.length; i++)
+    {
+            graph_data.push({
+                        x:  new Date(candlestick_data[i]['x']),
+                        y:  candlestick_data[i]['y']
+                      });
+
+    }
+    console.log(graph_data);
+  var candlestickEl = document.querySelector(candlestick_id),
+    candlestickChartConfig = {
+      chart: {
+        height: 400,
+        type: 'candlestick',
+        parentHeightOffset: 0,
+        toolbar: {
+          show: true
+        }
+      },
+      series: [
+        {
+          data: graph_data
+        }
+      ],
+      xaxis: {
+        type: 'datetime'
+      },
+      yaxis: {
+        tooltip: {
+          enabled: true
+        },
+        labels: {
+        formatter: function (price_value) {
+          return parseInt(price_value) // The formatter function overrides format property
+          }
+        }
+      },
+      grid: {
+        xaxis: {
+          lines: {
+            show: true
+          }
+        },
+        padding: {
+          top: -23
+        }
+      },
+      plotOptions: {
+        candlestick: {
+          colors: {
+            upward: window.colors.solid.success,
+            downward: window.colors.solid.danger
+          }
+        },
+        bar: {
+          columnWidth: '40%'
+        }
+      }
+    };
+  if (typeof candlestickEl !== undefined && candlestickEl !== null) {
+    var candlestickChart = new ApexCharts(candlestickEl, candlestickChartConfig);
+    candlestickChart.render();
+  }
+}
+
+  //------------ Portfolio Line Chart With Range 1M 1Y------------
+  //-----------------------------------------------
+
+
+function showPortfolioRange(close_range_data, close_id)
+{
+    console.log(typeof(close_id));
+    var graph_data = []; // create an empty array
+
+    for (let i = 0; i < close_range_data.length; i++)
+    {
+            graph_data.push({
+                        x:  new Date(close_range_data[i]['x']),
+                        y:  close_range_data[i]['y']
+                      });
+
+    }
+
+
+  var $trackBgColor = '#EBEBEB';
+  var statisticsProfitChart = document.querySelector(close_id);
+  var statisticsProfitChartOptions = {
+                                    chart: {
+                                      height: 100,
+                                      type: 'line',
+                                      toolbar: {
+                                        show: false
+                                      },
+                                      zoom: {
+                                        enabled: false
+                                      }
+                                    },
+                                    grid: {
+                                      borderColor: $trackBgColor,
+                                      strokeDashArray: 5,
+                                      xaxis: {
+                                        lines: {
+                                          show: true
+                                        }
+                                      },
+                                      yaxis: {
+                                        lines: {
+                                          show: false
+                                        }
+                                      },
+                                      padding: {
+                                        top: -30,
+                                        bottom: -10
+                                      }
+                                    },
+                                    stroke: {
+                                      width: 3
+                                    },
+                                    colors: [window.colors.solid.info],
+                                    series: [
+                                      {
+                                        name: 'Portfolio Change',
+                                        data: graph_data
+                                      }
+                                    ],
+                                    markers: {
+                                      size: 2,
+                                      colors: window.colors.solid.info,
+                                      strokeColors: window.colors.solid.info,
+                                      strokeWidth: 2,
+                                      strokeOpacity: 1,
+                                      strokeDashArray: 0,
+                                      fillOpacity: 1,
+                                      discrete: [
+                                        {
+                                          seriesIndex: 0,
+                                          dataPointIndex: 5,
+                                          fillColor: '#ffffff',
+                                          strokeColor: window.colors.solid.info,
+                                          size: 5
+                                        }
+                                      ],
+                                      shape: 'circle',
+                                      radius: 2,
+                                      hover: {
+                                        size: 3
+                                      }
+                                    },
+                                    xaxis: {
+                                      labels: {
+                                        show: true,
+                                        style: {
+                                          fontSize: '0px'
+                                        }
+                                      },
+                                      type: 'datetime',
+                                      axisBorder: {
+                                        show: false
+                                      },
+                                      axisTicks: {
+                                        show: false
+                                      }
+                                    },
+                                    yaxis: {
+                                      show: false
+                                    },
+                                    tooltip: {
+                                      x: {
+                                        show: false
+                                      }
+                                    }
+                                };
+  statisticsProfitChart = new ApexCharts(statisticsProfitChart, statisticsProfitChartOptions);
+  statisticsProfitChart.render();
 
 }

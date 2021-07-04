@@ -6,31 +6,31 @@ from djongo import models
 # Create your models here.
 
 TYPES = (
-                ("Debt", 'Debt'),
-                ("Loan", 'Loan'),
-                ("Mortgage", 'Mortgage'),
-            )
+    ("Debt", 'Debt'),
+    ("Loan", 'Loan'),
+    ("Mortgage", 'Mortgage'),
+)
 
 PERIODS = (
-                ("Per day", 'Per day'),
-                ("Per month", 'Per month'),
-                ("Per year", 'Per year'),
-            )
+    ("Per day", 'Per day'),
+    ("Per month", 'Per month'),
+    ("Per year", 'Per year'),
+)
 
 CURRENCIES = (
-                ("$", 'US Dollar ($)'),
-                ("€", 'Euro (€)'),
-                ("₹", 'Indian rupee (₹)'),
-                ("£", 'British Pound (£)'),
-            )
+    ("$", 'US Dollar ($)'),
+    ("€", 'Euro (€)'),
+    ("₹", 'Indian rupee (₹)'),
+    ("£", 'British Pound (£)'),
+)
 
 BUDGET_PERIODS = (
-                ("Daily", 'Daily'),
-                ("Weekly", 'Weekly'),
-                ("Monthly", 'Monthly'),
-                ("Quarterly", 'Quarterly'),
-                ("Yearly", 'Yearly'),
-            )
+    ("Daily", 'Daily'),
+    ("Weekly", 'Weekly'),
+    ("Monthly", 'Monthly'),
+    ("Quarterly", 'Quarterly'),
+    ("Yearly", 'Yearly'),
+)
 
 
 class Category(models.Model):
@@ -114,7 +114,7 @@ class Account(models.Model):
     name = models.CharField(max_length=50, null=True)
     balance = models.CharField(max_length=10)
     available_balance = models.CharField(max_length=10, blank=True, null=True)
-    lock_amount = models.CharField(max_length=10, blank=True, null=True,)
+    lock_amount = models.CharField(max_length=10, blank=True, null=True, )
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     interest_rate = models.FloatField(verbose_name='Interest rate', default=0.00)
     include_net_worth = models.BooleanField(default=True, blank=True, null=True)
@@ -198,3 +198,33 @@ class MortgageCalculator(models.Model):
 
     def get_absolute_url(self):
         return reverse('mortgagecalculator_list')
+
+
+class Revenues(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='revenue_user')
+    name = models.CharField(max_length=255)
+    month = models.DateField(blank=True, null=True)
+    end_month = models.DateField(blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    amount = models.CharField(max_length=20)
+    primary = models.BooleanField(default=False, blank=True, null=True)
+    non_primary = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.month)
+
+
+class Expenses(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expenses_user')
+    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    month = models.DateField(blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    amount = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.month)

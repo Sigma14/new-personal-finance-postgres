@@ -1,0 +1,782 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Stock Analysis</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">stock-analysis</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <!-- PORTFOLIO TABS -->
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills">
+                                <li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle active" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="true" aria-expanded="false">
+										My Portfolio
+									</a>
+									<div class="dropdown-menu">
+                                    {% for portfolio_name in portfolio_list %}
+                                        {% if forloop.counter == 1 %}
+                                            {% if portfolio_name == my_portfolio_name %}
+										        <a class="dropdown-item active" href="{% url 'stock_analysis' %}">{{portfolio_name}}</a>
+                                            {% else %}
+                                                <a class="dropdown-item" href="{% url 'stock_analysis' %}">{{portfolio_name}}</a>
+                                            {% endif %}
+                                        {% else %}
+                                            <form action="{% url 'stock_analysis' %}" method="post" id="portfolio{{forloop.counter}}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="p_name" value="{{portfolio_name}}">
+                                                {% if portfolio_name == my_portfolio_name %}
+										        <a class="dropdown-item active" onclick="document.getElementById('portfolio{{forloop.counter}}').submit();">{{portfolio_name}}</a>
+                                                {% else %}
+                                                <a class="dropdown-item" onclick="document.getElementById('portfolio{{forloop.counter}}').submit();">{{portfolio_name}}</a>
+                                                {% endif %}
+                                            </form>
+                                        {% endif %}
+                                    {% endfor %}
+									</div>
+								</li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="http://127.0.0.1:8001/">Go to Stock Application</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- PORTFOLIO TABS -->
+                {% if status %}
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 style="text-align:center;">{{status}}</h4>
+                        </div>
+                    </div>
+                </section>
+                {% else %}
+                <!-- PORTFOLIO WEIGHTS AND INDUSTRY GRAPHS -->
+                <section id="dashboard-ecommerc">
+                    <div class="row match-height">
+                        <div class="col-lg-12 col-12">
+                            <div class="row match-height">
+                                <!-- CURRENT WEIGHTS GRAPHS -->
+                                <div class="col-lg-2 col-12">
+                                    <div class="card">
+                                        <div class="card-body pb-50">
+                                            <h5 style="text-align:center;">Current Weights</h5>
+                                            <div id="donut-weight2-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- CURRENT WEIGHTS GRAPHS -->
+
+                                <!-- OPTIMIZED WEIGHTS GRAPHS -->
+                                <div class="col-lg-2 col-12">
+                                    <div class="card card-tiny-line-stats">
+                                        <div class="card-body pb-50">
+                                            <h5 style="text-align:center;">Optimized Weights</h5>
+                                            <div id="donut-weight1-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- OPTIMIZED WEIGHTS GRAPHS -->
+
+                                <!-- STOCK AMOUNTS -->
+                                <div class="col-lg-2 col-12">
+                                    <div class="card">
+                                        <div class="card-body pb-50">
+                                            <h5 style="text-align:center;">Stock Amounts</h5>
+                                            <div id="statistics-amount-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- STOCK AMOUNTS -->
+
+                                <!-- PORTFOLIO VALUE CHANGE -->
+                                <div class="col-lg-2 col-12">
+                                    <div class="card card-tiny-line-stats">
+                                        <div class="card-body pb-50">
+                                            <h5 style="text-align:center;">Portfolio Industry</h5>
+                                            <div id="donut-industry-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="card-title"> Portfolio Change</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="nav nav-pills">
+                                                {% for key, value in close_range.items %}
+                                                {% if forloop.counter == 1 %}
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active" id="{{key}}-tab" data-toggle="pill" href="#{{key}}" aria-expanded="true">{{value}}</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" id="{{key}}_tab" data-toggle="pill" href="#{{key}}" aria-expanded="false">{{value}}</a>
+                                                    </li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div role="tabpanel" class="tab-pane active" id="one_week" aria-labelledby="one_week-tab" aria-expanded="true">
+                                                    <div id="portfolio-profit-chart-one"></div>
+                                                </div>
+                                                <div class="tab-pane" id="one_month" role="tabpanel" aria-labelledby="one_month_tab" aria-expanded="false">
+                                                    <div id="portfolio-profit-chart-two"></div>
+                                                </div>
+                                                <div class="tab-pane" id="three_month" role="tabpanel" aria-labelledby="three_month_tab" aria-expanded="false">
+                                                    <div id="portfolio-profit-chart-three"></div>
+                                                </div>
+                                                <div class="tab-pane" id="six_month" role="tabpanel" aria-labelledby="six_month_tab" aria-expanded="false">
+                                                    <div id="portfolio-profit-chart-four"></div>
+                                                </div>
+                                                <div class="tab-pane" id="year" role="tabpanel" aria-labelledby="year_tab" aria-expanded="false">
+                                                    <div id="portfolio-profit-chart-five"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- PORTFOLIO VALUE CHANGE -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- PORTFOLIO WEIGHTS AND INDUSTRY GRAPHS -->
+                <!-- PORTFOLIOS SECTIONS -->
+				<section class="app-user-edit">
+					<div class="card" style="height:80px;">
+						<div class="card-body">
+							<ul class="nav nav-pills" role="tablist">
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center active" id="holdings_tab" data-toggle="tab" href="#holdings_data" aria-controls="holdings_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Holdings</span>
+									</a>
+								</li>
+                                {% if portfolio_earnings_value or portfolio_value_section_data or portfolio_profitability_section_data or portfolio_income_state_data or portfolio_balance_sheet_data or portfolio_cash_flow_data %}
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="earnings_tab" data-toggle="tab" href="#earnings_data" aria-controls="earnings_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Earnings</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="income_state_tab" data-toggle="tab" href="#income_state_data" aria-controls="income_state_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Income Statement</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="balance_sheet_tab" data-toggle="tab" href="#balance_sheet_data" aria-controls="balance_sheet_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Balance Sheet</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="cash_flow_tab" data-toggle="tab" href="#cash_flow_data" aria-controls="cash_flow_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Cash Flows</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="values_tab" data-toggle="tab" href="#values_data" aria-controls="values_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Value</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="profitability_tab" data-toggle="tab" href="#profitability_data" aria-controls="profitability_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">Profitability</span>
+									</a>
+								</li>
+                                {% endif %}
+<!--								<li class="nav-item">-->
+<!--									<a class="nav-link d-flex align-items-center" id="earnings_tab" data-toggle="tab" href="#earnings_data" aria-controls="earnings_data" role="tab" aria-selected="false">-->
+<!--										<span class="d-none d-sm-block">Earnings</span>-->
+<!--									</a>-->
+<!--								</li>-->
+							</ul>
+                        </div>
+                    </div>
+                </section>
+                <!-- PORTFOLIOS SECTIONS -->
+                <div class="tab-content">
+                    <!-- PORTFOLIO TABLE DATA -->
+                    <div class="tab-pane active" id="holdings_data" aria-labelledby="holdings_tab" role="tabpanel">
+                        <section id="responsive-datatable">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-datatable">
+                                            <table class="table" id="my_port_table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Symbol</th>
+                                                        <th>Currency</th>
+                                                        <th>Price</th>
+                                                        <th>Change</th>
+                                                        <th>% Change</th>
+                                                        <th>Date</th>
+                                                        <th>Type</th>
+                                                        <th>Shares</th>
+                                                        <th>Cost</th>
+                                                        <th>Today's Gain</th>
+                                                        <th>Today's % Gain</th>
+                                                        <th>Total Change</th>
+                                                        <th>Total % Change</th>
+                                                        <th>% Portfolio</th>
+                                                        <th>Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for data in my_portfolios_data %}
+                                                    <tr>
+                                                            {% for i in data %}
+                                                            {% if forloop.counter == 1 %}
+                                                                <input type="hidden" name="product" id="product" value="{{i}}" >
+                                                            {% else %}
+                                                                {% if forloop.counter == 2 %}
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="font-weight-bolder mr-1">
+                                                                            {{i}}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                {% else %}
+                                                                    {% if forloop.counter == 3 or forloop.counter == 4 or forloop.counter == 7 or forloop.counter == 8 or forloop.counter == 9 or forloop.counter == 10 or forloop.counter == 15 or forloop.counter == 16 %}
+                                                                        {% if forloop.counter == 9 %}
+                                                                            <td>
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder mr-1">
+                                                                                            {{i}}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </td>
+                                                                        {% else %}
+                                                                        <td>
+                                                                            <div class="d-flex align-items-center">
+                                                                                <span class="font-weight-bolder mr-1">{{i}}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        {% if i > 0 %}
+                                                                            {% if forloop.counter == 6 or forloop.counter == 12 or forloop.counter == 14 %}
+                                                                            <td>
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder text-success mr-1">{{i}}%</span>
+                                                                                    <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                                </div>
+                                                                            </td>
+                                                                            {% else %}
+                                                                                <td>
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="font-weight-bolder text-success mr-1">{{i}}</span>
+                                                                                        <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                                    </div>
+                                                                                </td>
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            {% if forloop.counter == 6 or forloop.counter == 12 or forloop.counter == 14 %}
+                                                                                <td>
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="font-weight-bolder text-danger mr-1">{{i}}%</span>
+                                                                                        <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                                    </div>
+                                                                                </td>
+                                                                            {% else %}
+                                                                                <td>
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="font-weight-bolder text-danger mr-1">{{i}}</span>
+                                                                                        <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                                    </div>
+                                                                                </td>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="font-weight-bolder mr-1">TOTAL</span>
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="7">&nbsp;</td>
+                                                        {% if total_today_gain > 0 %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-success mr-1">{{total_today_gain}}</span>
+                                                                    <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% else %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-danger mr-1">{{total_today_gain}}</span>
+                                                                    <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% endif %}
+                                                        {% if total_percentage_today_gain > 0 %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-success mr-1">{{total_percentage_today_gain}}%</span>
+                                                                    <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% else %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-danger mr-1">{{total_percentage_today_gain}}%</span>
+                                                                    <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% endif %}
+                                                        {% if sum_total_change > 0 %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-success mr-1">{{sum_total_change}}</span>
+                                                                    <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% else %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-danger mr-1">{{sum_total_change}}</span>
+                                                                    <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% endif %}
+                                                        {% if total_change_percentage > 0 %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-success mr-1">{{total_change_percentage}}%</span>
+                                                                    <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% else %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder text-danger mr-1">{{total_change_percentage}}%</span>
+                                                                    <i data-feather="trending-down" class="text-danger font-medium-1"></i>
+                                                                </div>
+                                                            </td>
+                                                        {% endif %}
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="font-weight-bolder mr-1">{{total_percent_portfolio}}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <span class="font-weight-bolder mr-1">{{total_values}}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <!-- PORTFOLIO TABLE DATA -->
+                    {% if portfolio_earnings_value or portfolio_value_section_data or portfolio_profitability_section_data or portfolio_income_state_data or portfolio_balance_sheet_data or portfolio_cash_flow_data %}
+                    <!-- EARNINGS DATA -->
+                    <div class="tab-pane" id="earnings_data" aria-labelledby="earnings_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Earnings</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_earnings">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_earnings_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_earnings_value %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                        {% if forloop.counter == 7 or forloop.counter == 9 %}
+                                                            {% if forloop.counter == 7 %}
+                                                                {% if objects > 0 %}
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder text-success mr-1">{{objects}}</span>
+                                                                            <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                        </div>
+                                                                    </td>
+                                                                {% else %}
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder text-danger mr-1">{{objects}}</span>
+                                                                            <i data-feather="trending-up" class="text-danger font-medium-1"></i>
+                                                                        </div>
+                                                                    </td>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                {% if "-" in objects %}
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder text-danger mr-1">{{objects}}</span>
+                                                                            <i data-feather="trending-up" class="text-danger font-medium-1"></i>
+                                                                        </div>
+                                                                    </td>
+                                                                {% else %}
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder text-success mr-1">{{objects}}</span>
+                                                                            <i data-feather="trending-up" class="text-success font-medium-1"></i>
+                                                                        </div>
+                                                                    </td>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- EARNINGS DATA ENDS-->
+                    <!-- VALUE Starts-->
+                    <div class="tab-pane" id="values_data" aria-labelledby="values_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Value</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_value">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_value_section_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_value_section_data %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- VALUE ENDS-->
+                    <!-- profitability Starts-->
+                    <div class="tab-pane" id="profitability_data" aria-labelledby="profitability_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Value</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_profitability">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_profitability_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_profitability_section_data %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- profitability ENDS-->
+                    <!-- income_state Starts-->
+                    <div class="tab-pane" id="income_state_data" aria-labelledby="income_state_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Income Statement (TTM)</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_income">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_income_state_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_income_state_data %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- income_state ENDS-->
+                    <!-- balance_sheet Starts-->
+                    <div class="tab-pane" id="balance_sheet_data" aria-labelledby="balance_sheet_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Balance Sheet (Last Report)</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_balance_sheet">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_balance_sheet_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_balance_sheet_data %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- balance_sheet ENDS-->
+                    <!-- cash_flow_data Starts-->
+                    <div class="tab-pane" id="cash_flow_data" aria-labelledby="cash_flow_tab" role="tabpanel">
+                        <div class="row match-height">
+                            <div class="col-lg-12 col-md-12 col-12">
+                                <div class="card card-company-table">
+                                    <div class="card-body p-0">
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="5">Cash Flows (TTM)</th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table" id="portfolio_cash_flow_data">
+                                                <thead>
+                                                    <tr>
+                                                    {% for data in portfolio_cash_flow_key %}
+                                                        <th>{{data}}</th>
+                                                    {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for data in portfolio_cash_flow_data %}
+                                                    <tr>
+                                                        {% for objects in data %}
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">{{objects}}</span>
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- cash_flow_data ENDS-->
+                    {% endif %}
+                </div>
+                <!-- PORTFOLIO CANDLE STICK AND LINE GRAPHS -->
+                <section id="dashboard-ecommerce">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="OHLC-tab" data-toggle="pill" href="#OHLC_data" aria-expanded="true">OHLC</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="close-tab" data-toggle="pill" href="#close_data" aria-expanded="false">CLOSE</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="OHLC_data" aria-labelledby="OHLC-tab" aria-expanded="true">
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card card-congratulation-medal">
+                                                <div class="card-body">
+                                                    <div class="card-header border-bottom">
+                                                        <h4 class="card-title mb-25">PORTFOLIO OHLC OVERTIME</h4>
+                                                    </div>
+                                                    <br/>
+                                                    <br/>
+                                                    <div class="card-body">
+                                                        <div id="candlestick-chart"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="close_data" aria-labelledby="close-tab" aria-expanded="true">
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card card-congratulation-medal">
+                                                <div class="card-body">
+                                                    <div class="card-header border-bottom">
+                                                        <h4 class="card-title mb-25">PORTFOLIO CLOSE OVERTIME</h4>
+                                                    </div>
+                                                    <br/>
+                                                    <br/>
+                                                    <div class="card-body">
+                                                        <div id="Account-balance-line-chart"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- PORTFOLIO CANDLE STICK AND LINE GRAPHS -->
+                <!-- PORTFOLIO DIVERSIFICATION -->
+				{% if show_tree %}
+                <section id="dashboard-ecomrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="row match-height">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body pb-50">
+                                            <h5 style="text-align:center;">PORTFOLIO DIVERSIFICATION</h5>
+                                            <div class="diversification_tree"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- PORTFOLIO DIVERSIFICATION -->
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content%}
