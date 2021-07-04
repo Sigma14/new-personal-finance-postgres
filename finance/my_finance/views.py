@@ -1878,8 +1878,9 @@ def stock_analysis(request):
         p_name = request.POST['p_name']
     else:
         p_name = portfolio_list[0]
-    print(p_name)
-    url_response = requests.post(url, data={'user_name': request.user.username, 'p_name': p_name})
+
+    my_portfolio_url = "http://vuexy.myds.me:8000/api/my_portfolio/list/"
+    url_response = requests.post(my_portfolio_url, data={'user_name': request.user.username, 'p_name': p_name})
     my_portfolio_context = url_response.json()
     my_portfolio_context['portfolio_list'] = portfolio_list
     return render(request, 'stock_analysis.html', context=my_portfolio_context)
