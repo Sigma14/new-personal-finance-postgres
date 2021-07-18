@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
-from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property
+from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds
 
 CURRENCIES = (
     ("$", 'US Dollar ($)'),
@@ -113,23 +113,26 @@ class TransactionForm(forms.ModelForm):
         exclude = ('user', 'remaining_amount', 'created_at')
 
 
-class GoalForm(forms.ModelForm):
-    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-
-    class Meta:
-        model = Goal
-        exclude = ('user', 'created_at', 'updated_at')
-
-
 class AccountForm(forms.ModelForm):
     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     interest_rate = forms.FloatField(required=False)
+    balance = forms.FloatField(required=True)
+    lock_amount = forms.FloatField(required=True)
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}), required=False)
 
     class Meta:
         model = Account
         exclude = ('user', 'available_balance', 'liability_type', 'interest_period', 'transaction_count', 'created_at', 'updated_at')
+
+
+# class FundForm(forms.ModelForm):
+#     total_fund = forms.FloatField(required=True)
+#     lock_fund = forms.FloatField(required=True)
+#
+#     class Meta:
+#         model = AvailableFunds
+#         exclude = ('user', 'account', 'created_at', 'updated_at')
 
 
 class LiabilityForm(forms.ModelForm):

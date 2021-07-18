@@ -92,29 +92,12 @@ class Bill(models.Model):
         return reverse('bill_list')
 
 
-class Goal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goal_user')
-    goal_date = models.DateField(blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    label = models.CharField(max_length=40)
-    goalamount = models.FloatField()
-    currentbalance = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.label)
-
-    def get_absolute_url(self):
-        return reverse('goal_list')
-
-
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
     name = models.CharField(max_length=50, null=True)
-    balance = models.CharField(max_length=10)
+    balance = models.CharField(max_length=10, blank=True, null=True)
     available_balance = models.CharField(max_length=10, blank=True, null=True)
-    lock_amount = models.CharField(max_length=10, blank=True, null=True, )
+    lock_amount = models.CharField(max_length=10, blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     interest_rate = models.FloatField(verbose_name='Interest rate', default=0.00)
     include_net_worth = models.BooleanField(default=True, blank=True, null=True)
@@ -131,17 +114,31 @@ class Account(models.Model):
         return reverse('account_list')
 
 
-# class AvailableFunds(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fund_user')
-#     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='fund_account')
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self):
-#         return str(self.name)
-#
-#     def get_absolute_url(self):
-#         return reverse('account_list')
+class AvailableFunds(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fund_user')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='fund_account')
+    total_fund = models.CharField(max_length=20)
+    lock_fund = models.CharField(max_length=20)
+    created_at = models.DateField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.account)
+
+
+class Goal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goal_user')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    goal_date = models.DateField(blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    label = models.CharField(max_length=40)
+    goal_amount = models.FloatField()
+    allocate_amount = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.label)
 
 
 class Property(models.Model):

@@ -386,8 +386,10 @@
   // Budgets Chart
   // --------------------------------------------------------------------
 
-function BudgetChart(graph_label, graph_data)
+function BudgetChart(graph_label, graph_data, graph_currency)
 {
+  console.log(graph_data)
+  $('#budget-chart').empty();
   var donutChartEl = document.querySelector('#budget-chart'),
     donutChartConfig = {
       chart: {
@@ -434,7 +436,7 @@ function BudgetChart(graph_label, graph_data)
                 fontSize: '1rem',
                 fontFamily: 'Montserrat',
                 formatter: function (val) {
-                  return parseInt(val) + '%';
+                  return parseInt(val) + graph_currency;
                 }
               },
               total: {
@@ -442,7 +444,7 @@ function BudgetChart(graph_label, graph_data)
                 fontSize: '1.5rem',
                 label: graph_label[0],
                 formatter: function (w) {
-                  return parseInt(graph_data[0]) + "%";
+                  return parseInt(graph_data[0]) + graph_currency;
                 }
               }
             }

@@ -33,11 +33,10 @@ urlpatterns = [
     path('transaction_report', transaction_report, name='transaction_report'),
 
     # Goal urls :-
-
+    path('goal_add/', goal_add, name='goal_add'),
     path('goal_list/', GoalList.as_view(), name='goal_list'),
+    path('goal_update/<int:pk>', goal_update, name='goal_update'),
     path('goal_detail/<int:pk>', GoalDetail.as_view(), name='goal_detail'),
-    path('goal_add/', GoalAdd.as_view(), name='goal_add'),
-    path('goal_update/<int:pk>', GoalUpdate.as_view(), name='goal_update'),
     path('goal_delete/<int:pk>', GoalDelete.as_view(), name='goal_delete'),
 
     # Account urls :-
@@ -82,7 +81,9 @@ urlpatterns = [
 
     # Available Funds urls :-
 
-    path('funds/', fund_list, name='fund_list'),
+    path('funds_list/', FundList.as_view(), name='fund_list'),
+    path('fund_update/<int:pk>', fund_update, name='fund_update'),
+    path('fund_overtime', fund_overtime, name='fund_overtime'),
 
     path('login', user_login, name='user_login'),
     path('net_worth', net_worth, name='net_worth'),

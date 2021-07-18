@@ -45,11 +45,10 @@
                                                 {% for name in fund_key %}
                                                     <th>{{name}}</th>
                                                 {% endfor %}
-                                                <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for object in fund_data %}
+                                            {% for object in fund_value %}
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
@@ -58,44 +57,32 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.name }}</span>
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <p class="dropdown-item fund_overtime" data-toggle="modal" data-target="#edit">Show
+                                                            </p>
+                                                        </span>
                                                     </div>
                                                 </td>
+                                                {% for data in object %}
+                                                {% if forloop.counter != 5 %}
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.balance }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.available_balance }}</span>
-                                                    </div>
-                                                </td>
-                                                {% if object.lock_amount %}
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.lock_amount }}</span>
+                                                        <span class="font-weight-bolder mr-1" id="acc_name" account_name="{{data}}">{{ data }}</span>
                                                     </div>
                                                 </td>
                                                 {% else %}
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">0</span>
-                                                    </div>
-                                                </td>
-                                                {% endif %}
-                                                <td>
-                                                    <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">
                                                             <ul class="list-inline m-0">
                                                                 <li class="list-inline-item">
-                                                                    <a href="{% url 'account_update' pk=object.id %}"
+                                                                    <a href="{% url 'fund_update' pk=data %}"
                                                                        class="btn btn-success btn-sm rounded-0"><i
                                                                             class="fa fa-edit"></i></a>
 
                                                                 </li>
                                                                 <li class="list-inline-item">
-                                                                    <button type="button" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}"
+                                                                    <button type="button" delete_name="{{ object.name }} Account" url=""
                                                                        class="btn btn-danger btn-sm rounded-0 delete_button"
                                                                        data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                                             class="fa fa-trash"></i></button>
@@ -104,12 +91,49 @@
                                                         </span>
                                                     </div>
                                                 </td>
+                                                {% endif %}
+                                                {% endfor %}
                                             </tr>
                                             {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade text-left" id="edit" tabindex="-1" role="dialog" aria-labelledby="editLabel1" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content" style="width:800px;">
+                                <form class="form form-vertical" method="POST">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="editLabel1">Funds Charts</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Basic Vertical form layout section start -->
+                                    <section id="basic-vertical-layout" >
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="card card-congratulation-medal">
+                                                    <div class="card-body">
+                                                        <h5>Accounts</h5>
+                                                        <canvas class="macro-chart chartjs" data-height="450"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <!-- Basic Vertical form layout section end -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>

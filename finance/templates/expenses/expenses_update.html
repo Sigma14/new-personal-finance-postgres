@@ -2,22 +2,20 @@
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
-        <div class="content-overlay"></div>
-        <div class="header-navbar-shadow"></div>
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Update Category</h2>
+                            <h2 class="content-header-title float-left mb-0">Update Expense</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categories</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Expenses</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Update Category
+                                        Update Expense
                                     </li>
                                 </ol>
                             </div>
@@ -25,44 +23,109 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body" float="left">
-                <br/>
-                <section id="dashboard-ecommrc">
-                    <div class="row match-height">
-                        <div class="col-12">
-                            <div class="card card-congratulation-medal">
-                                <div class="card-body">
-                                    <form class="form form-horizontal" method="post">
-                                        {% csrf_token %}
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <div class="form-group row">
-                                                    <div class="col-sm-3 col-form-label">
-                                                        <label for="fname-icon">Name</label>
+            <div class="content-body">
+                <section class="app-user-edit">
+                    <div class="card" >
+                        <div class="card-body">
+                            <form class="form form-horizontal" action="{% url 'expenses_update' pk=expense_obj.id %}" method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="name">Name</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
                                                     </div>
-                                                    <div class="col-sm-9">
-                                                        <div class="input-group input-group-merge">
-                                                            <div class="input-group-prepend">
-                                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                                            </div>
-                                                            <input type="text" id="fname-icon" class="form-control" name="name"
-                                                                   placeholder="Name" value="{{ form.name.value }}">
-                                                        </div>
-                                                    </div>
+                                                    <input type="text" id="name" class="form-control" value="{{expense_obj.name}}" name="name" required
+                                                           placeholder="Name"/>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-9 offset-sm-3">
-                                                <button type="submit" class="btn btn-primary mr-1">Update</button>
-                                                <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="currency">Currency</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <select class="form-control" id="currency"  name="currency">
+                                                        {% for key, value in currency_data.items %}
+                                                        {% if key == expense_obj.currency %}
+                                                        <option value="{{key}}" selected>{{value}}</option>
+                                                        {% else %}
+                                                        <option value="{{key}}">{{value}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
-                                    </form>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label for="amount">Amount</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="text" id="amount" value="{{expense_obj.amount}}" class="form-control" name="amount" required
+                                                           placeholder="Amount"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label id="check_month">Start Month</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <input type="month" class="form-control" name="start_month" value="{{current_month}}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row end_month">
+                                            <div class="col-sm-3 col-form-label">
+                                                <label>Category</label>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="input-group input-group-merge">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i data-feather="user"></i></span>
+                                                    </div>
+                                                    <select class="form-control" id="category" name="category">
+                                                        {% for data in category_data %}
+                                                        {% if data.name == expense_obj.categories.name %}
+                                                        <option selected>{{data.name}}</option>
+                                                        {% else %}
+                                                        <option>{{data.name}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-9 offset-sm-3">
+                                        <input type="submit" class="btn btn-primary mr-1" value="Save">
+                                        <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </section>
             </div>
         </div>
     </div>
+
 {% endblock content%}

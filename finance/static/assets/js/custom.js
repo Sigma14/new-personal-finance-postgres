@@ -1,5 +1,73 @@
-$( document ).ready(function()
+$(document).ready(function()
 {
+    $('.edit_income').on('click', function(event)
+    {
+        location.assign($(this).attr('href'))
+    });
+    $('#revenue_table').DataTable( {
+    "footerCallback": function(row, data, start, end, display) {
+
+      var api = this.api(), data;
+      column_length = $(this).attr('column_length')
+     // Total over this page
+     for(let j=2; j<column_length; j++)
+     {
+
+        pageTotal = api
+            .column( j, { page: 'current'} )
+            .data()
+            .reduce( function (a, b)
+            {
+                currency_name = b[0]
+                b = parseFloat(b.replace(currency_name, ''))
+                return a + b;
+            }, 0);
+        $( api.column( j ).footer() ).html(currency_name+pageTotal);
+
+     }
+    },
+     columnDefs: [
+            { orderable: false, targets: 1 }
+     ],
+    pageLength : 12,
+    lengthMenu: [[12, 24, 36], [12, 24, 36]]
+    } );
+
+$('#expense_table').DataTable( {
+    "footerCallback": function(row, data, start, end, display) {
+
+      var api = this.api(), data;
+      category_name = []
+      category_value = []
+      graph_label = api
+                .column( 1, { page: 'current'} )
+                .data()
+                .reduce( function (a, b)
+                {
+                    category_name.push(b)
+                return b;
+                }, 0 );
+
+      pageTotal = api
+                .column( 4, { page: 'current'} )
+                .data()
+                .reduce( function (a, b) {
+                    currency_name = b[0]
+                    b = parseFloat(b.replace(currency_name, ''))
+                    category_value.push(b)
+                return a + b;
+                }, 0 );
+
+            // Update footer
+            $( api.column( 4 ).footer() ).html('$'+pageTotal);
+            CategorySpentChart(category_name, category_value);
+    },
+    columnDefs: [
+            { orderable: false, targets: 3 }
+     ],
+    pageLength : 12,
+    lengthMenu: [[12, 24, 36], [12, 24, 36]]
+    } );
 
     if($('#lock_amount_check').prop("checked"))
     {
@@ -171,7 +239,7 @@ $( document ).ready(function()
       {
         if (result.value)
         {
-            var csrfmiddlewaretoken = getCookie('csrftoken');;
+            var csrfmiddlewaretoken = getCookie('csrftoken');
             $.ajax
             ({
                 type: 'POST',
@@ -238,7 +306,7 @@ $( document ).ready(function()
                               });
                      location.reload();
                 }
-                if(response.status == "Uploading Failed!! Please Check File Format")
+                else
                 {
                      Swal.fire({
                                 title: response.status,
@@ -267,6 +335,27 @@ $('.check_primary').on("click", function(e)
         $('#check_month').text('Start Month')
     }
 });
+
+// Fund Overtime
+
+    $('.fund_overtime').on("click", function(e)
+    {
+        var account_name = $(this).closest('td').next().find('#acc_name').attr('account_name');
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+        $.ajax(
+        {
+            type: 'POST',
+            url: '/fund_overtime',
+            data: {
+                    'account_name': account_name,
+                    'csrfmiddlewaretoken': csrfmiddlewaretoken
+                  },
+            success: function(response)
+            {
+                AccountsChart(response.fund_data, response.date_range_list, response.max_value, response.min_value);
+            }
+        });
+    });
 
 function getCookie(name) {
     let cookieValue = null;

@@ -55,7 +55,7 @@ def check_auto_budget(request):
             if bill_date <= today_date:
                 next_bill_date = check_frequency_date(bill_period, bill_date)
                 data.date = next_bill_date
-                next_amount = bill_amount + remaining_amount
+                next_amount = float(bill_amount) + float(remaining_amount)
                 data.amount = next_amount
                 data.remaining_amount = next_amount
                 data.status = 'unpaid'
@@ -71,7 +71,7 @@ def check_auto_budget(request):
             print("budget_end_date", budget_end_date)
             if budget_end_date <= today_date:
                 print("date complete")
-                data.amount = budget_amount + budget_left
+                data.amount = float(budget_amount) + float(budget_left)
                 data.budget_spent = 0.0
                 data.updated_at = today_date
                 data.save()

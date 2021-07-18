@@ -27,8 +27,11 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" action="{% url 'goal_update' pk=goal_data.id %}" method="post">
                         {% csrf_token %}
+                        {% if error %}
+                            <p class="text-danger">{{error}}</p>
+                        {% endif %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group row">
@@ -41,7 +44,7 @@
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
                                             <input type="text" id="fname-icon" class="form-control" name="label"
-                                                   placeholder="Label" value="{{ form.label.value }}">
+                                                   placeholder="Label" value="{{ goal_data.label }}">
                                         </div>
                                     </div>
                                 </div>
@@ -56,8 +59,31 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="goalamount"
-                                                   placeholder="Goal Amount" value="{{ form.goalamount.value }}">
+                                            <input type="text" id="email-icon" class="form-control" name="goal_amount"
+                                                   placeholder="Goal Amount" value="{{ goal_data.goal_amount }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Account</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" id="account" name="account_name" required>
+                                                {% for value in account_data %}
+                                                {% if key == goal_data.account.name %}
+                                                <option value="{{value.name}}" selected>{{value}}</option>
+                                                {% else %}
+                                                <option value="{{value.name}}">{{value}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -72,7 +98,15 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.currency }}
+                                            <select class="form-control" id="currency" name="currency" required>
+                                                {% for key, value in currency_dict.items %}
+                                                {% if key == goal_data.currency %}
+                                                <option value="{{key}}" selected>{{value}}</option>
+                                                {% else %}
+                                                <option value="{{key}}">{{value}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -88,7 +122,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" name="goal_date" class="form-control flatpickr-basic" value="{{form.goal_date.value}}"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="email-icon" name="goal_date" class="form-control flatpickr-basic" value="{{goal_date}}"  placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>
@@ -97,15 +131,15 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Current Balance</label>
+                                        <label for="fname-icon">Allocate Amount</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="currentbalance"
-                                                   placeholder="Current Balance" value="{{ form.currentbalance.value }}">
+                                            <input type="text" id="fname-icon" class="form-control" name="allocate_amount"
+                                                   placeholder="Enter Lock Amount Allocate to Goal" value="{{ goal_data.allocate_amount }}">
                                         </div>
                                     </div>
                                 </div>

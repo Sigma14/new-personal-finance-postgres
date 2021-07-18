@@ -250,7 +250,7 @@
 <script>MortgageChart({{ mortgage_graph_data | safe }}, {{ mortgage_date_data | safe}});</script>
 <script>showCalenders( {{ calendar_bill_data | safe }});</script>
 <script>AccountsChart( {{ account_graph_data | safe }}, {{ date_range_list | safe }}, {{max_value}}, {{min_value}});</script>
-<script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }});</script>
+<script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }}, "{{ graph_currency | safe }}");</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_value | safe}});</script>
 <script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>
@@ -265,7 +265,6 @@
 
 
 <script>$('#categories').DataTable({"aaSorting": []});</script>
-<script>$('#revenue_table').DataTable({"aaSorting": []});</script>
 <script>$('#accounts').DataTable({"aaSorting": []});</script>
 <script>$('#bills').DataTable({"aaSorting": []});</script>
 <script>$('#budgets').DataTable({"aaSorting": []});</script>

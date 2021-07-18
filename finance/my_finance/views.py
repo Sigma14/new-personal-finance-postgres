@@ -9,6 +9,7 @@ from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
 from django.contrib.auth.hashers import identify_hasher
+from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -24,14 +25,17 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, letter
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, GoalForm, AccountForm, \
+from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm   , AccountForm, \
     MortgageForm, LiabilityForm, PropertyForm
-from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, Expenses
+from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
+    Expenses, AvailableFunds
 from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.validators import Auto
+
+currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 
 
 def transaction_summary(transaction_data, select_filter):
@@ -52,7 +56,7 @@ def transaction_summary(transaction_data, select_filter):
                     debit_date_dict[transaction_date] = float(transaction_amount)
 
             else:
-                if transaction_date in debit_date_dict:
+                if transaction_date in credit_date_dict:
                     credit_date_dict[transaction_date] += float(transaction_amount)
                 else:
                     credit_date_dict[transaction_date] = float(transaction_amount)
@@ -145,6 +149,7 @@ def category_spent_amount(category_data, user_name, categories_name, categories_
 
 def multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list, acc_create_date,
                     account_transaction_value, acc_available_balance):
+
     for data in acc_transaction_data:
         if data.cleared:
             acc_date = str(data.transaction_date)
@@ -163,21 +168,16 @@ def multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance,
                     acc_current_balance += float(acc_transaction_amount)
                 amount_date_dict[acc_date] = float(acc_current_balance)
 
+    print("amount_date_ditvc=====>", amount_date_dict)
+    print("account_date_list=======>", account_date_list)
+    amount_constant = acc_available_balance
     for date_value in account_date_list:
         check_date = datetime.datetime.strptime(date_value, '%Y-%m-%d').date()
-        if acc_create_date >= check_date:
-            if date_value in amount_date_dict:
-                account_transaction_value.append(amount_date_dict[date_value])
-                amount_constant = amount_date_dict[date_value]
-            else:
-                amount_constant = acc_available_balance
-                account_transaction_value.append(amount_constant)
-        if acc_create_date < check_date:
-            if date_value in amount_date_dict:
-                account_transaction_value.append(amount_date_dict[date_value])
-                amount_constant = amount_date_dict[date_value]
-            else:
-                account_transaction_value.append(amount_constant)
+        if date_value in amount_date_dict:
+            account_transaction_value.append(amount_date_dict[date_value])
+            amount_constant = amount_date_dict[date_value]
+        else:
+            account_transaction_value.append(amount_constant)
 
 
 def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
@@ -344,7 +344,7 @@ def home(request):
     user_name = request.user
     if not request.user.is_anonymous:
         categories = Category.objects.filter(user=user_name)
-        all_transaction_data = Transaction.objects.filter(user=user_name)
+        all_transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
         accounts_data = Account.objects.filter(user=user_name)
         property_data = Property.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name)
@@ -360,47 +360,48 @@ def home(request):
         liability_currency_balance = []
         property_currency_balance = []
 
-        if accounts_data:
-            min_date = accounts_data[0].created_at.date()
+        if accounts_data and all_transaction_data:
+            account_min_date = accounts_data[0].created_at.date()
+            transaction_min_date = all_transaction_data[0].transaction_date
+            if transaction_min_date <= account_min_date:
+                min_date = transaction_min_date
             max_date = datetime.datetime.today().date()
             day_diff = (max_date - min_date).days
             account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
             account_date_list.append(str(min_date))
             account_date_list = account_date_list[::-1]
+            for acc_obj in accounts_data:
+                account_transaction_value = []
+                acc_create_date = acc_obj.created_at.date()
+                amount_date_dict = {}
+                if acc_obj.lock_amount:
+                    acc_current_balance = float(acc_obj.balance) - float(acc_obj.lock_amount)
+                else:
+                    acc_current_balance = float(acc_obj.balance)
+
+                acc_available_balance = float(acc_current_balance)
+                acc_transaction_data = Transaction.objects.filter(user=user_name, account__pk=acc_obj.pk).order_by(
+                    'transaction_date')
+                multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
+                                acc_create_date, account_transaction_value, acc_available_balance)
+                graph_dict = {'label_name': acc_obj.name, 'data_value': account_transaction_value}
+                acc_graph_data.append(graph_dict)
+                acc_min_max_value_list.append(min(account_transaction_value))
+                acc_min_max_value_list.append(max(account_transaction_value))
+
         else:
             account_date_list = []
-        for acc_obj in accounts_data:
-            account_transaction_value = []
-            acc_create_date = acc_obj.created_at.date()
-            amount_date_dict = {}
-            if acc_obj.lock_amount:
-                acc_current_balance = float(acc_obj.balance) - float(acc_obj.lock_amount)
-            else:
-                acc_current_balance = float(acc_obj.balance)
-
-            acc_available_balance = float(acc_current_balance)
-            acc_transaction_data = Transaction.objects.filter(user=user_name, account__pk=acc_obj.pk).order_by(
-                'transaction_date')
-            multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
-                            acc_create_date, account_transaction_value, acc_available_balance)
-            graph_dict = {'label_name': acc_obj.name, 'data_value': account_transaction_value}
-            acc_graph_data.append(graph_dict)
-            acc_min_max_value_list.append(min(account_transaction_value))
-            acc_min_max_value_list.append(max(account_transaction_value))
 
         for data in property_data:
             property_currency_balance.append({data.currency: data.value})
 
         category_spent_amount(categories, user_name, categories_name, categories_value)
-
+        budget_currency = '$'
         for data in budget_data:
+            budget_currency = data.currency
             total_budget += float(data.amount)
             budget_label.append(data.name)
             budget_values.append(float(data.amount))
-
-        for value in budget_values:
-            result = round((value / total_budget) * 100, 2)
-            budget_percentage.append(result)
 
         net_worth_dict = net_worth_cal(accounts_data, property_data, account_date_list, fun_name="dash_board")
         print(net_worth_dict)
@@ -414,6 +415,7 @@ def home(request):
         print("Assets_currency_data", asset_currency_balance)
         print("Liabiliy_currency_data", liability_currency_balance)
         print("Property_currency_data", property_currency_balance)
+        print("account_graph_data==========>", acc_graph_data)
 
         context = {
             "categories_name": categories_name,
@@ -421,7 +423,8 @@ def home(request):
             "account_graph_data": acc_graph_data,
             "date_range_list": account_date_list,
             "graph_label": budget_label,
-            "graph_value": budget_percentage,
+            "graph_value": budget_values,
+            "graph_currency": budget_currency,
             "net_worth_dict": net_worth_dict,
             "max_value": acc_max_value,
             "min_value": acc_min_value
@@ -444,12 +447,6 @@ def net_worth(request):
         account_date_list.append(str(min_date))
         account_date_list = account_date_list
 
-    currency_dict = {
-        "$": 'US Dollar ($)',
-        "€": 'Euro (€)',
-        "₹": 'Indian rupee (₹)',
-        "£": 'British Pound (£)',
-    }
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
     total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
     total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
@@ -658,7 +655,8 @@ class BudgetList(LoginRequiredMixin, ListView):
 
         budget_key = ['S.No.', 'Name', 'budget Amount', 'Spent Amount', 'Left Amount', 'Last Updated']
         revenue_values = []
-        revenue_data = Revenues.objects.filter(user=user_name).order_by('month')
+        revenue_data = Revenues.objects.filter(user=user_name)
+        print(revenue_data)
         revenue_month = []
         revenue_name = []
         for revenue_value in revenue_data:
@@ -670,27 +668,51 @@ class BudgetList(LoginRequiredMixin, ListView):
 
         revenue_month = list(dict.fromkeys(revenue_month))
         revenue_name = list(dict.fromkeys(revenue_name))
+        currency_name = "$"
         print(revenue_name)
-        for month in revenue_month:
-            obj_data = {'month': datetime.datetime.strftime(month, "%B, %y")}
+        non_primary_dict = {}
+        index = 1
+        for month_name in revenue_month[::-1]:
+            obj_data = {'S.No.': index, 'month': datetime.datetime.strftime(month_name, "%B, %y")}
+            index += 1
+            print(month_name)
             for name in revenue_name:
-                revenue_obj = Revenues.objects.filter(user=user_name, month=month, name=name)
+                revenue_obj = Revenues.objects.filter(user=user_name, month=month_name, name=name)
                 if revenue_obj:
                     currency_name = revenue_obj[0].currency
                     obj_data[revenue_obj[0].id] = revenue_obj[0].currency + revenue_obj[0].amount
+                    if revenue_obj[0].non_primary:
+                        non_primary_amount = float(revenue_obj[0].amount)
+                        if name in non_primary_dict:
+                            non_primary_dict[name] += non_primary_amount
+                        else:
+                            non_primary_dict[name] = non_primary_amount
                 else:
                     new_revenue_obj = Revenues()
                     new_revenue_obj.non_primary = True
-                    revenue_save(new_revenue_obj, user_name, name, "0", month, currency_name)
+                    revenue_save(new_revenue_obj, user_name, name, "0", month_name, currency_name)
                     obj_data[new_revenue_obj.id] = currency_name + "0"
             revenue_values.append(obj_data)
 
-        revenue_name.insert(0, 'Month')
+        expenses_data = Expenses.objects.filter(user=user_name)
+
+        non_primary_label = list(non_primary_dict.keys())
+        non_primary_value = list(non_primary_dict.values())
+        print("graph_label", non_primary_label)
+        print("graph_value", non_primary_value)
+
+        print("non_primary_total_dict========", non_primary_dict)
+        revenue_name.insert(0, 'S.NO')
+        revenue_name.insert(1, 'Month')
         data['budget_data'] = budget_data
         data['budget_key'] = budget_key
         data['budget_key_dumbs'] = json.dumps(budget_key)
         data['revenue_keys'] = revenue_name
+        data['graph_label'] = non_primary_label
+        data['graph_value'] = non_primary_value
+        data['graph_currency'] = currency_name
         data['revenue_values'] = revenue_values
+        data['expenses_data'] = expenses_data
         print('revenue_values', revenue_values)
         return data
 
@@ -780,7 +802,7 @@ def transaction_list(request):
             transaction_data = Transaction.objects.filter(user=user_name)
         select_filter = tag_name
     else:
-        transaction_data = Transaction.objects.filter(user=user_name)
+        transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
         select_filter = 'All'
 
     context = transaction_summary(transaction_data, select_filter)
@@ -1075,12 +1097,64 @@ class TransactionDelete(LoginRequiredMixin, DeleteView):
         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
+def calculate_available_lock_amount(user_name, account_obj):
+    fund_data = AvailableFunds.objects.filter(user=user_name, account=account_obj).order_by('created_at')[::-1]
+    if fund_data:
+        lock_amount = fund_data[0].lock_fund
+    goal_data = Goal.objects.filter(user=user_name, account=account_obj)
+    total_allocate_amount = 0
+    for data in goal_data:
+        total_allocate_amount += float(data.allocate_amount)
+
+    available_lock_amount = float(lock_amount) - total_allocate_amount
+    return available_lock_amount
+
+
+def goal_obj_save(request, goal_obj, user_name, fun_name=None):
+    label = request.POST['label']
+    goal_amount = request.POST['goal_amount']
+    currency = request.POST['currency']
+    goal_date = request.POST['goal_date']
+    account_name = request.POST['account_name']
+    allocate_amount = request.POST['allocate_amount']
+    account_obj = Account.objects.get(name=account_name)
+    available_lock_amount = calculate_available_lock_amount(user_name, account_obj)
+    if float(allocate_amount) > available_lock_amount:
+        context = {'currency_dict': currency_dict, 'error': 'Lock Amount Insufficient Please Add More..'}
+        if fun_name:
+            print("fun_name")
+            return render(request, 'goal/goal_update.html', context=context)
+        else:
+            print("fun_name====>", context)
+            return render(request, 'goal/goal_add.html', context=context)
+    else:
+        goal_obj.user = user_name
+        goal_obj.account = account_obj
+        goal_obj.goal_amount = goal_amount
+        goal_obj.currency = currency
+        goal_obj.goal_date = goal_date
+        goal_obj.label = label
+        goal_obj.allocate_amount = allocate_amount
+        goal_obj.save()
+        return redirect("/goal_list")
+
+
 class GoalList(LoginRequiredMixin, ListView):
     model = Goal
     template_name = 'goal/goal_list.html'
 
-    def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user)
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(GoalList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        goal_data = Goal.objects.filter(user=user_name)
+        fund_value = show_current_funds(user_name, fun_name='goal_funds')
+        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Lock fund',
+                    'Available Fund', 'Action']
+        data['fund_key'] = fund_key
+        data['fund_value'] = fund_value
+        data['goal_data'] = goal_data
+        return data
 
 
 class GoalDetail(LoginRequiredMixin, DetailView):
@@ -1088,22 +1162,45 @@ class GoalDetail(LoginRequiredMixin, DetailView):
     template_name = 'goal/goal_detail.html'
 
 
-class GoalAdd(LoginRequiredMixin, CreateView):
-    model = Goal
-    form_class = GoalForm
-    template_name = 'goal/goal_add.html'
+# class GoalAdd(LoginRequiredMixin, CreateView):
+#     model = Goal
+#     form_class = GoalForm
+#     template_name = 'goal/goal_add.html'
+#
+#     def form_valid(self, form):
+#         obj = form.save(commit=False)
+#         obj.user = self.request.user
+#         obj.save()
+#         return super().form_valid(form)
 
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
-        return super().form_valid(form)
+
+# class GoalUpdate(LoginRequiredMixin, UpdateView):
+#     model = Goal
+#     form_class = GoalForm
+#     template_name = 'goal/goal_update.html'
+
+def goal_add(request):
+    user_name = request.user
+    if request.method == 'POST':
+        goal_obj = Goal()
+        return goal_obj_save(request, goal_obj, user_name)
+
+    else:
+        account_data = Account.objects.filter(user=user_name)
+        context = {'currency_dict': currency_dict, 'account_data': account_data}
+        return render(request, 'goal/goal_add.html', context=context)
 
 
-class GoalUpdate(LoginRequiredMixin, UpdateView):
-    model = Goal
-    form_class = GoalForm
-    template_name = 'goal/goal_update.html'
+def goal_update(request, pk):
+    user_name = request.user
+    goal_data = Goal.objects.get(pk=pk)
+    if request.method == 'POST':
+        return goal_obj_save(request, goal_data, user_name, fun_name='goal_update')
+    else:
+        goal_date = datetime.datetime.strftime(goal_data.goal_date, '%Y-%m-%d')
+        account_data = Account.objects.filter(user=user_name)
+        context = {'goal_data': goal_data, 'currency_dict': currency_dict, 'goal_date': goal_date, 'account_data': account_data}
+        return render(request, 'goal/goal_update.html', context=context)
 
 
 class GoalDelete(LoginRequiredMixin, DeleteView):
@@ -1213,9 +1310,9 @@ class AccountAdd(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         total_balance = float(form.cleaned_data.get('balance'))
+        print("total Balance", total_balance)
         lock_amount = form.cleaned_data.get('lock_amount')
         lock_check = form.cleaned_data.get('lock_check')
-        print("lock_check=====>", lock_check)
         if lock_amount != "None" and lock_amount and lock_check == "True":
             available_balance = total_balance - float(lock_amount)
         else:
@@ -1226,6 +1323,14 @@ class AccountAdd(LoginRequiredMixin, CreateView):
         obj.lock_amount = lock_amount
         obj.available_balance = round(available_balance, 2)
         obj.save()
+
+        fund_obj = AvailableFunds()
+        fund_obj.user = self.request.user
+        fund_obj.account = obj
+        fund_obj.lock_fund = lock_amount
+        fund_obj.total_fund = total_balance
+        fund_obj.save()
+
         return super().form_valid(form)
 
 
@@ -1411,6 +1516,189 @@ class LiabilityDetail(LoginRequiredMixin, DetailView):
         context['amount_inc_percentage'] = amount_inc_percentage
         return context
 
+# FUNDS VIEWS
+
+
+def show_current_funds(user_name, fun_name=None):
+    account_data = Account.objects.all()
+    fund_value = []
+    for obj in account_data:
+        fund_data = AvailableFunds.objects.filter(user=user_name, account=obj).order_by('created_at')[::-1]
+        if fund_data:
+            fund_obj = fund_data[0]
+            transaction_data = Transaction.objects.filter(user=user_name, account=obj)
+            spend_amount = 0
+            for transaction in transaction_data:
+                if transaction.cleared:
+                    if transaction.out_flow:
+                        spend_amount += float(transaction.amount)
+                    else:
+                        if spend_amount != 0:
+                            spend_amount -= float(transaction.amount)
+
+            if fun_name:
+                available_lock_amount = calculate_available_lock_amount(user_name, obj)
+                fund_value.append([fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund, available_lock_amount,
+                                   obj.available_balance, fund_obj.id])
+            else:
+                fund_value.append([fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund,
+                                   obj.available_balance, fund_obj.id])
+
+    return fund_value
+
+
+class FundList(LoginRequiredMixin, ListView):
+    model = AvailableFunds
+    template_name = 'funds/funds_list.html'
+
+    def get_context_data(self, **kwargs):
+        data = super(FundList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        fund_value = show_current_funds(user_name)
+        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Fund', 'Action']
+        data['fund_key'] = fund_key
+        data['fund_value'] = fund_value
+        return data
+
+
+def fund_overtime(request):
+    if request.method == 'POST' and request.is_ajax():
+        user_name = request.user
+        account_name = request.POST['account_name']
+        account_data = Account.objects.get(user=user_name, name=account_name)
+        transaction_data = Transaction.objects.filter(user=user_name, account=account_data)
+        account_min_date = account_data.created_at.date()
+        print(transaction_data)
+        if transaction_data:
+            transaction_min_date = transaction_data[0].transaction_date
+            if transaction_min_date <= account_min_date:
+                min_date = transaction_min_date
+            else:
+                min_date = account_min_date
+        else:
+            min_date = account_min_date
+        max_date = datetime.datetime.today().date()
+        day_diff = (max_date - min_date).days
+        account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
+        account_date_list.append(str(min_date))
+        account_date_list = account_date_list[::-1]
+        print("account_date_list=======>", account_date_list)
+        total_fund_data = []
+        lock_fund_data = []
+        fund_graph_data = []
+        initial_fund = AvailableFunds.objects.filter(user=user_name, account=account_data)[0]
+        total_fund = float(initial_fund.total_fund)
+        lock_fund = float(initial_fund.lock_fund)
+        account_transaction_value = []
+        acc_create_date = account_data.created_at.date()
+        amount_date_dict = {}
+        if account_data.lock_amount:
+            acc_current_balance = float(account_data.balance) - float(account_data.lock_amount)
+        else:
+            acc_current_balance = float(account_data.balance)
+
+        acc_available_balance = float(acc_current_balance)
+        acc_transaction_data = Transaction.objects.filter(user=user_name, account=account_data).order_by('transaction_date')
+        multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
+                        acc_create_date, account_transaction_value, acc_available_balance)
+        print("account_transaction_value", account_transaction_value)
+        for name in account_date_list:
+            check_date = datetime.datetime.strptime(name, '%Y-%m-%d').date()
+            fund_data = AvailableFunds.objects.filter(user=user_name, account=account_data, created_at=check_date)
+            print(fund_data)
+            if fund_data:
+                for fund_value in fund_data:
+                    total_fund = float(fund_value.total_fund)
+                    lock_fund = float(fund_value.lock_fund)
+                total_fund_data.append(round(total_fund, 2))
+                lock_fund_data.append(round(lock_fund, 2))
+
+            else:
+                total_fund_data.append(total_fund)
+                lock_fund_data.append(lock_fund)
+
+        result_list = total_fund_data + lock_fund_data + account_transaction_value
+        max_value = max(result_list)
+        min_value = min(result_list)
+        fund_graph_data.append({'label_name': 'Total Fund', 'data_value': total_fund_data})
+        fund_graph_data.append({'label_name': 'Lock Fund', 'data_value': lock_fund_data})
+        fund_graph_data.append({'label_name': 'Available Fund', 'data_value': account_transaction_value})
+
+    return JsonResponse({'fund_data': fund_graph_data, 'date_range_list': account_date_list,
+                         'max_value': max_value, 'min_value': min_value})
+
+
+def fund_update(request, pk):
+    fund_obj = AvailableFunds.objects.get(pk=pk)
+    total_fund = float(fund_obj.total_fund)
+    lock_fund = float(fund_obj.lock_fund)
+    if request.method == 'POST':
+        user_name = request.user
+        update_total_fund = float(request.POST['total_fund'])
+        update_lock_fund = float(request.POST['lock_fund'])
+        if update_total_fund < total_fund:
+            context = {'fund_obj': fund_obj, 'error': 'Please Enter Total Fund Greater Than Current Total Fund'}
+        else:
+            if update_total_fund == total_fund and update_lock_fund == lock_fund:
+                context = {'fund_obj': fund_obj}
+            else:
+                current_balance = float(fund_obj.account.available_balance)
+                account_obj = Account.objects.get(name=fund_obj.account.name)
+                new_fund_obj = AvailableFunds()
+                new_fund_obj.user = fund_obj.user
+                new_fund_obj.account = account_obj
+                new_fund_obj.lock_fund = update_lock_fund
+                new_fund_obj.total_fund = update_total_fund
+                new_fund_obj.save()
+                transaction_obj = Transaction()
+                try:
+                    category_obj = Category.objects.get(user=user_name, name='Funds')
+                except:
+                    category_obj = Category()
+                    category_obj.user = user_name
+                    category_obj.name = 'Funds'
+                    category_obj.save()
+
+                transaction_obj.user = user_name
+                transaction_obj.remaining_amount = current_balance
+                transaction_obj.transaction_date = datetime.datetime.today().date()
+                transaction_obj.categories = category_obj
+                transaction_obj.account = account_obj
+                transaction_obj.payee = 'Self'
+                transaction_obj.tags = 'Funds'
+                transaction_obj.cleared = True
+
+                if update_total_fund != total_fund:
+                    new_fund_amount = update_total_fund - total_fund
+                    transaction_obj.amount = new_fund_amount
+                    transaction_obj.out_flow = False
+                    account_obj.available_balance = round(current_balance + new_fund_amount, 2)
+                    account_obj.save()
+                    transaction_obj.save()
+                    return redirect("/funds_list")
+                elif update_lock_fund > lock_fund:
+                    new_fund_amount = update_lock_fund - lock_fund
+                    account_obj.available_balance = round(current_balance - new_fund_amount, 2)
+                    transaction_obj.amount = new_fund_amount
+                    transaction_obj.out_flow = True
+                    account_obj.save()
+                    transaction_obj.save()
+                    return redirect("/funds_list")
+                else:
+                    context = {'fund_obj': fund_obj, 'error': 'Please Enter Lock Fund Greater Than Current Lock Fund'}
+    else:
+        context = {'fund_obj': fund_obj}
+
+    return render(request, 'funds/funds_update.html', context=context)
+
+# class FundUpdate(UpdateView):
+#     model = AvailableFunds
+#     form_class = FundForm
+#     template_name = 'funds/funds_update.html'
+
+
+
+# BILL VIEWS
 
 def bill_list(request):
     bill_data = Bill.objects.filter(user=request.user)
@@ -1468,13 +1756,6 @@ def bill_add(request):
 
 def bill_update(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
-    currency_dict = {
-        "$": 'US Dollar ($)',
-        "€": 'Euro (€)',
-        "₹": 'Indian rupee (₹)',
-        "£": 'British Pound (£)',
-    }
-
     form = BillForm(request.POST or None)
     if form.is_valid():
         label = form.cleaned_data.get('label')
@@ -1601,19 +1882,6 @@ class PropertyDelete(LoginRequiredMixin, DeleteView):
         property_obj = Property.objects.get(pk=self.kwargs['pk'])
         property_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
-
-
-def fund_list(request):
-    user_name = request.user
-    fund_data = Account.objects.filter(user=user_name, liability_type=None)
-    fund_key = ['S.No.', 'Account Name', 'Total Fund', 'Available Fund', 'Lock Fund']
-    context = {
-        'fund_data': fund_data,
-        'fund_key': fund_key,
-        'fund_key_dumbs': json.dumps(fund_key),
-    }
-    return render(request, 'funds.html', context=context)
-
 
 class PdfPrint:
     def __init__(self, buffer, pageSize):
@@ -1786,17 +2054,24 @@ def download_csv(request):
 
 def transaction_upload(request):
     if request.method == "POST" and request.is_ajax:
-        print("iIIIIIIINnn")
         try:
             test_file = request.FILES['csv_file']
             df = pd.read_csv(test_file)
-            print(df)
             for index, row in df.iterrows():
                 my_transaction = Transaction()
                 user_name = request.user
                 my_transaction.user = user_name
                 category_name = row['Categories']
-                category_obj = Category.objects.get(user=user_name, name=category_name)
+                if type(category_name) == float:
+                    return JsonResponse({'status': 'Category is mandatory field'})
+                category_obj = Category.objects.filter(user=user_name, name=category_name)
+                if not category_obj:
+                    category_obj = Category()
+                    category_obj.user = user_name
+                    category_obj.name = category_name
+                    category_obj.save()
+                else:
+                    category_obj = category_obj[0]
                 my_transaction.categories = category_obj
                 account = row['Account']
                 transaction_amount = row['Amount']
@@ -1816,14 +2091,25 @@ def transaction_upload(request):
                 budget_name = row['Budget']
                 transaction_tags = row['Tags']
                 if cleared_amount == "True":
-                    account_obj = Account.objects.get(user=user_name, name=account)
-                    if bill_name != "None":
-                        bill_obj = Bill.objects.filter(user=user_name, label=bill_name)[0]
+                    try:
+                        account_obj = Account.objects.get(user=user_name, name=account)
+                    except:
+                        return JsonResponse({'status': account + ' Account not Found!!'})
+                    if type(bill_name) != float:
+                        bill_obj = Bill.objects.filter(user=user_name, label=bill_name)
+                        if not bill_obj:
+                            return JsonResponse({'status': bill_name + ' Bill Not Found!!'})
+                        else:
+                            bill_obj = bill_obj[0]
                     else:
                         bill_obj = False
 
-                    if budget_name != "None":
-                        budget_obj = Budget.objects.filter(user=user_name, name=budget_name)[0]
+                    if type(budget_name) != float:
+                        budget_obj = Budget.objects.filter(user=user_name, name=budget_name)
+                        if not budget_obj:
+                            return JsonResponse({'status': budget_name + ' Budget Not Found!!'})
+                        else:
+                            budget_obj = budget_obj[0]
                         print("budget_obj", budget_obj)
                     else:
                         budget_obj = False
@@ -1870,7 +2156,7 @@ def transaction_upload(request):
 
 @login_required(login_url="/login")
 def stock_analysis(request):
-    url = "http://vuexy.myds.me:8000/api/portfolio/list/"
+    url = "http://stock.tradingtech.org/api/portfolio/list/"
     portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
     portfolio_list = portfolio_response.json()
 
@@ -1879,7 +2165,7 @@ def stock_analysis(request):
     else:
         p_name = portfolio_list[0]
 
-    my_portfolio_url = "http://vuexy.myds.me:8000/api/my_portfolio/list/"
+    my_portfolio_url = "http://stock.tradingtech.org/api/my_portfolio/list/"
     url_response = requests.post(my_portfolio_url, data={'user_name': request.user.username, 'p_name': p_name}, timeout=500)
     my_portfolio_context = url_response.json()
     my_portfolio_context['portfolio_list'] = portfolio_list
@@ -2027,36 +2313,62 @@ def revenue_update_name(request, pk):
     return render(request, "revenue/revenue_update.html", context=context)
 
 
-
 # EXPENSES ADD
+def expense_save(request, user_name, expenses_obj):
+    category = request.POST['category']
+    name = request.POST['name']
+    amount = request.POST['amount']
+    month = request.POST['start_month']
+    currency = request.POST['currency']
+    category_data = Category.objects.get(user=user_name, name=category)
+    month = datetime.datetime.strptime(month, '%Y-%m').date()
+    if not expenses_obj:
+        expenses_obj = Expenses()
+    expenses_obj.user = user_name
+    expenses_obj.name = name
+    expenses_obj.currency = currency
+    expenses_obj.categories = category_data
+    expenses_obj.amount = amount
+    expenses_obj.month = month
+    expenses_obj.save()
+
 
 def expenses_add(request):
+    user_name = request.user
     if request.method == 'POST':
-        user_name = request.user
-        category = request.POST['category']
-        name = request.POST['name']
-        amount = request.POST['amount']
-        month = request.POST['month']
-        expenses_obj = Expenses()
-        expenses_obj.user = user_name
-        expenses_obj.name = name
-        expenses_obj.amount = amount
-        expenses_obj.month = month
-        expenses_obj.save()
+        expense_save(request, user_name, None)
+        if 'add_other' in request.POST:
+            return redirect("/expenses_add/")
+        else:
+            return redirect("/budget_list/")
     else:
+        category_data = Category.objects.filter(user=user_name)
         current = datetime.datetime.today()
-        current_month = datetime.datetime.strftime(current, '%y-%m')
-        context = {'current_month': current_month}
-    return render(request, "revenue/revenue_add.html", context=context)
+        current_month = datetime.datetime.strftime(current, '%Y-%m')
+        context = {'current_month': current_month, 'category_data': category_data}
+    return render(request, "expenses/expenses_add.html", context=context)
 
 
 # EXPENSES UPDATE
 
-def expenses_update(request):
-    return render(request, "revenue/revenue_update.html")
+def expenses_update(request, pk):
+    user_name = request.user
+    expense_obj = Expenses.objects.get(pk=pk)
+    print()
+    if request.method == 'POST':
+        expense_save(request, user_name, expense_obj)
+        return redirect("/budget_list/")
+    else:
+        category_data = Category.objects.filter(user=user_name)
+        current_month = datetime.datetime.strftime(expense_obj.month, '%Y-%m')
+        context = {'expense_obj': expense_obj, 'category_data': category_data, 'current_month': current_month,
+                   'currency_data': currency_dict}
+        return render(request, "expenses/expenses_update.html", context=context)
 
 
 # EXPENSES DELETE
 
-def expenses_delete(request):
-    return render(request, "revenue/revenue_add.html")
+def expenses_delete(request, pk):
+    expense_obj = Expenses.objects.get(pk=pk)
+    expense_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": "None"})

@@ -27,7 +27,10 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" action="{% url 'goal_add' %}" method="post">
+                        {% if error %}
+                            <p class="text-danger">{{error}}</p>
+                        {% endif %}
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
@@ -56,8 +59,27 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="goalamount" required
+                                            <input type="text" id="email-icon" class="form-control" name="goal_amount" required
                                                    placeholder="Goal Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Account</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" id="account" name="account_name" required>
+                                                {% for value in account_data %}
+                                                <option value="{{value.name}}">{{value}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -72,7 +94,11 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.currency }}
+                                            <select class="form-control" id="currency" name="currency" required>
+                                                {% for key, value in currency_dict.items %}
+                                                <option value="{{key}}">{{value}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -95,15 +121,15 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Current Balance</label>
+                                        <label for="fname-icon">Allocate Amount</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="currentbalance"
-                                                   required placeholder="Current Balance"/>
+                                            <input type="text" id="email-icon" class="form-control" name="allocate_amount"
+                                                   required placeholder="Enter Lock Amount Allocate to Goal"/>
                                         </div>
                                     </div>
                                 </div>

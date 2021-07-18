@@ -31,31 +31,32 @@
                 </div>
                 <br/>
                 <section id="ecommerce-products" class="list-view">
-                    {% for object in object_list %}
+                    {% for object in goal_data %}
                     <div class="card ecommerce-card">
                         <div class="item-img text-center">
                             <a href="{% url 'goal_update' pk=object.id %}">
                                 <div class="card-body">
                                     <h2 style="float: left;">{{ object.label }}</h2>
-                                    <h2 style="float: right;">{{ object.currency }}{{ object.goalamount }} / {{ object.currency }}{{ object.currentbalance }}</h2>
+                                    <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
                                 </div>
                                 <br/>
-                                {% if object.currentbalance >= object.goalamount %}
+                                {% if object.allocate_amount >= object.goal_amount %}
                                 <div class="progress progress-bar-success" style="height:30px;">
-                                    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.currentbalance|div:object.goalamount|mul:100|floatformat:0 }}%">
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
                                         {{ 100 }}%
                                     </div>
                                 </div>
                                 {% else %}
                                 <div class="progress progress-bar-warning" style="height:30px;">
-                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.currentbalance|div:object.goalamount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.currentbalance|div:object.goalamount|mul:100|floatformat:0 }}%">
-                                        {{ object.currentbalance|div:object.goalamount|mul:100|floatformat:0 }}%
+                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
+                                        {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%
                                     </div>
                                 </div>
                                 {% endif %}
 
                                 <div class="card-body" style="padding-bottom:40px;">
                                     <h4 style="float: left;">Goal Date :- {{ object.goal_date }}</h4>
+                                    <h4>Account :- {{object.account}}</h4>
                                     <h4 style="float: right;">
                                         <div class="col-sm-40 offset-sm-20">
                                             <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
@@ -71,7 +72,116 @@
                     </div>
                     {% endfor %}
                 </section>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="download_csv_form"></div>
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">Fund List</h4>
+                                        <button class="btn btn-primary download_csv" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="budgets">
+                                            <thead>
+                                            <tr>
+                                                {% for name in fund_key %}
+                                                    <th>{{name}}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for object in fund_value %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <p class="dropdown-item fund_overtime" data-toggle="modal" data-target="#edit">Show
+                                                            </p>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                {% for data in object %}
+                                                {% if forloop.counter != 6 %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1" id="acc_name" account_name="{{data}}">{{ data }}</span>
+                                                    </div>
+                                                </td>
+                                                {% else %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'fund_update' pk=data %}"
+                                                                       class="btn btn-success btn-sm rounded-0"><i
+                                                                            class="fa fa-edit"></i></a>
 
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ object.name }} Account" url=""
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade text-left" id="edit" tabindex="-1" role="dialog" aria-labelledby="editLabel1" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content" style="width:800px;">
+                                <form class="form form-vertical" method="POST">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="editLabel1">Funds Charts</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Basic Vertical form layout section start -->
+                                    <section id="basic-vertical-layout" >
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="card card-congratulation-medal">
+                                                    <div class="card-body">
+                                                        <h5>Accounts</h5>
+                                                        <canvas class="macro-chart chartjs" data-height="450"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <!-- Basic Vertical form layout section end -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
