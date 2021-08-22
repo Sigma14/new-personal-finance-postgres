@@ -57,17 +57,22 @@ class SuggestiveCategory(models.Model):
 
 class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
     name = models.CharField(max_length=50)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    amount = models.CharField(max_length=10, default=0)
-    budget_spent = models.CharField(max_length=10, default=0)
+    initial_amount = models.CharField(max_length=15, blank=True, null=True)
+    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
     auto_budget = models.BooleanField(default=True, blank=True, null=True)
     budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateField(blank=True, null=True)
+    ended_at = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return str(self.name + "(" + self.currency + ")")
+        return f"{self.name}{self.id}{self.currency}"
 
     def get_absolute_url(self):
         return reverse('budget_list')

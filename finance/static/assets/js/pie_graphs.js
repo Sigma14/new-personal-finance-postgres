@@ -21,6 +21,122 @@
               }
                 };
 
+  // Budgets Chart
+  // --------------------------------------------------------------------
+
+function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
+{
+  console.log("graph_id", graph_id)
+  console.log("graph_label", graph_label)
+  console.log("graph_data", graph_data)
+  console.log("graph_currency", graph_currency)
+
+  var donutChartEl = document.querySelector(graph_id),
+    donutChartConfig = {
+      chart: {
+        height: 350,
+        type: 'donut'
+      },
+      legend: {
+        show: true,
+        position: 'bottom'
+      },
+      labels: graph_label,
+      series: graph_data,
+      colors: [
+        chartColors.donut.series1,
+        chartColors.donut.series5,
+        chartColors.donut.series3,
+        chartColors.donut.series2,
+        chartColors.donut.series7,
+        chartColors.donut.series6,
+        chartColors.donut.series4,
+        chartColors.donut.series8,
+        chartColors.donut.series9,
+        chartColors.donut.series10,
+        chartColors.donut.series11,
+        chartColors.donut.series12,
+        chartColors.donut.series13,
+      ],
+      dataLabels: {
+        enabled: true,
+        formatter: function (val, opt) {
+          return parseInt(val) + '%';
+        }
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            labels: {
+              show: true,
+              name: {
+                fontSize: '2rem',
+                fontFamily: 'Montserrat'
+              },
+              value: {
+                fontSize: '1rem',
+                fontFamily: 'Montserrat',
+                formatter: function (val) {
+                  return parseInt(val) + graph_currency;
+                }
+              },
+              total: {
+                show: true,
+                fontSize: '1.5rem',
+                label: graph_label[0],
+                formatter: function (w) {
+                  return parseInt(graph_data[0]) + graph_currency;
+                }
+              }
+            }
+          }
+        }
+      },
+      responsive: [
+        {
+          breakpoint: 992,
+          options: {
+            chart: {
+              height: 380
+            }
+          }
+        },
+        {
+          breakpoint: 576,
+          options: {
+            chart: {
+              height: 320
+            },
+            plotOptions: {
+              pie: {
+                donut: {
+                  labels: {
+                    show: true,
+                    name: {
+                      fontSize: '1.5rem'
+                    },
+                    value: {
+                      fontSize: '1rem'
+                    },
+                    total: {
+                      fontSize: '1.5rem'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    };
+  if (typeof donutChartEl !== undefined && donutChartEl !== null) {
+    var donutChart = new ApexCharts(donutChartEl, donutChartConfig);
+    donutChart.render();
+  }
+}
+
+
+
 //--------------- Portfolio Current & Weights Chart ---------------
 //----------------------------------------------
 
@@ -327,4 +443,26 @@
     {
         console.log(portfolio_amount);
         stockAmount(portfolio_amount, "#statistics-amount-chart");
+    }
+
+
+    function MakePieData(budgets_data, graph_currency, graph_id)
+    {
+        var i = 1
+        for (const [key, value] of Object.entries(budgets_data))
+        {
+            graph_new_id = "#" + graph_id + i
+            graph_label = ['Total Spent', 'Total Left']
+            BudgetChart(graph_label, value, graph_currency, graph_new_id)
+            var i = i + 1
+
+        }
+
+    }
+    function AllCompareBudgets(week_budgets_data, month_budgets_data, quarter_budgets_data, year_budgets_data, graph_currency)
+    {
+        MakePieData(week_budgets_data, graph_currency, "week-pie-chart")
+        MakePieData(month_budgets_data, graph_currency, "month-pie-chart")
+        MakePieData(quarter_budgets_data, graph_currency, "quart-pie-chart")
+        MakePieData(year_budgets_data, graph_currency, "year-pie-chart")
     }

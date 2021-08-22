@@ -229,7 +229,7 @@
   // Multiple Account Chart
   // --------------------------------------------------------------------
 
-    function AccountsChart(account_graph_data, account_date_data, max_value, min_value)
+function AccountsChart(account_graph_data, account_date_data, max_value, min_value)
 {
   var primaryColorShade = '#836AF9',
     yellowColor = '#ffe800',
@@ -381,117 +381,6 @@
     });
   }
 
-}
-
-  // Budgets Chart
-  // --------------------------------------------------------------------
-
-function BudgetChart(graph_label, graph_data, graph_currency)
-{
-  console.log(graph_data)
-  $('#budget-chart').empty();
-  var donutChartEl = document.querySelector('#budget-chart'),
-    donutChartConfig = {
-      chart: {
-        height: 350,
-        type: 'donut'
-      },
-      legend: {
-        show: true,
-        position: 'bottom'
-      },
-      labels: graph_label,
-      series: graph_data,
-      colors: [
-        chartColors.donut.series1,
-        chartColors.donut.series5,
-        chartColors.donut.series3,
-        chartColors.donut.series2,
-        chartColors.donut.series7,
-        chartColors.donut.series6,
-        chartColors.donut.series4,
-        chartColors.donut.series8,
-        chartColors.donut.series9,
-        chartColors.donut.series10,
-        chartColors.donut.series11,
-        chartColors.donut.series12,
-        chartColors.donut.series13,
-      ],
-      dataLabels: {
-        enabled: true,
-        formatter: function (val, opt) {
-          return parseInt(val) + '%';
-        }
-      },
-      plotOptions: {
-        pie: {
-          donut: {
-            labels: {
-              show: true,
-              name: {
-                fontSize: '2rem',
-                fontFamily: 'Montserrat'
-              },
-              value: {
-                fontSize: '1rem',
-                fontFamily: 'Montserrat',
-                formatter: function (val) {
-                  return parseInt(val) + graph_currency;
-                }
-              },
-              total: {
-                show: true,
-                fontSize: '1.5rem',
-                label: graph_label[0],
-                formatter: function (w) {
-                  return parseInt(graph_data[0]) + graph_currency;
-                }
-              }
-            }
-          }
-        }
-      },
-      responsive: [
-        {
-          breakpoint: 992,
-          options: {
-            chart: {
-              height: 380
-            }
-          }
-        },
-        {
-          breakpoint: 576,
-          options: {
-            chart: {
-              height: 320
-            },
-            plotOptions: {
-              pie: {
-                donut: {
-                  labels: {
-                    show: true,
-                    name: {
-                      fontSize: '1.5rem'
-                    },
-                    value: {
-                      fontSize: '1rem'
-                    },
-                    total: {
-                      fontSize: '1.5rem'
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      ]
-    };
-  if (typeof donutChartEl !== undefined && donutChartEl !== null) {
-    var donutChart = new ApexCharts(donutChartEl, donutChartConfig);
-    donutChart.render();
-  }
 }
 
   // CategorySpent Chart
@@ -850,4 +739,51 @@ function showPortfolioRange(close_range_data, close_id)
   statisticsProfitChart = new ApexCharts(statisticsProfitChart, statisticsProfitChartOptions);
   statisticsProfitChart.render();
 
+}
+
+function BudgetsBarChart(budget_data, budgets_name)
+{
+var options = {
+          series: budget_data,
+          chart: {
+          type: 'bar',
+          height: 350,
+          stacked: true,
+          toolbar: {
+            show: true
+          },
+          zoom: {
+            enabled: true
+          }
+        },
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            legend: {
+              position: 'bottom',
+              offsetX: -10,
+              offsetY: 0
+            }
+          }
+        }],
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            borderRadius: 10,
+            columnWidth: '8%'
+          },
+        },
+        xaxis: {
+          categories: budgets_name,
+        },
+        legend: {
+          show: false
+        },
+        fill: {
+          opacity: 1
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#budgets-bar"), options);
+        chart.render();
 }

@@ -1,0 +1,237 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{budget_obj.name}} Budget</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Budgets</a>
+                                    </li>
+                                </ol>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Transaction</a>
+                </div>
+                <br/>
+<!--                <section id="ecommerce-products" class="list-view">-->
+<!--                    <div class="card ecommerce-card">-->
+<!--                        <div class="item-img text-center" style="height:150px;">-->
+<!--                            <div class="card-body">-->
+<!--                                <h2 style="float: left;">{{ budget_obj.name }}</h2>-->
+<!--                                <h2 style="text-align:center;   ">{{budget_obj.updated_at}}</h2>-->
+<!--                                <h3 style="float: right;">Budget Amount :- <span class="text-primary">{{ budget_obj.currency }}{{ budget_obj.amount}}</span>   Left :- <span class="text-success">{{ budget_left }}</span></h3>-->
+<!--                            </div>-->
+<!--                            <br/>-->
+<!--                            <div class="card-body" style="padding-bottom:30px;">-->
+<!--                                <h3 style="float: left;">Spent :- <span class="text-danger">{{ budget_spent }}</span>  Over Spent :- <span class="text-warning">{{ budget_over_spent }}</span></h3>-->
+<!--                                <h3 style="float: right;">Total Spent :- <span class="text-danger">{{ budget_total_spent }}</span></h3>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </section>-->
+                <section>
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+									<form action="{% url 'budget_detail' pk=budget_obj.id %}" id="jquery-val-form" method="post" target="">
+										{% csrf_token %}
+                                    <!-- users edit account form start -->
+                                    <div class="form-validate">
+                                        <div class="row">
+                                            {% if start_date %}
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="start_date">From</label>
+                                    				<input type="text" name="start_date" class="form-control flatpickr-basic" value="{{start_date}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="end_date">To</label>
+                                    				<input type="text" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}">
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="start_date">From</label>
+                                    				<input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+													<label for="end_date">To</label>
+                                    				<input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" >
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </form>
+                                    <div class="download_csv_form"></div>
+                                    <div class="card-header border-bottom">
+                                        {% if start_date %}
+                                            <h4 class="card-title mb-25">Chart for all transactions for budget "{{budget_obj.name}}" between {{start_date}} and {{end_date}}</h4>
+                                        {% else %}
+                                        <h4 class="card-title mb-25">Chart for all transactions for budget "{{budget_obj.name}}"</h4>
+                                        {% endif %}
+                                        <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="table table-hover" id="budgets">
+                                            <thead>
+                                            <tr>
+                                                {% for name in transaction_key %}
+                                                <th>{{name}}</th>
+                                                {% endfor %}
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for data in budget_transaction_data %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if data.out_flow %}
+                                                        <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>
+                                                        {% else %}
+                                                        <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.payee}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.account.name}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.categories}}</span>
+                                                    </div>
+                                                </td>
+                                                {% if data.bill.label %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>
+                                                    </div>
+                                                </td>
+                                                {% else %}
+                                                 <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">-</span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                                {% if data.budgets.name %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>
+                                                    </div>
+                                                </td>
+                                                {% else %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">-</span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                                {% if data.cleared == True %}
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder text-success mr-1">
+                                                            <input type="hidden" value="True" class="cleared{{forloop.counter}}">
+                                                            <i class="fa fa-check" aria-hidden="true"></i>
+                                                        </span>
+                                                        </div>
+                                                    </td>
+                                                    {% else %}
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder text-danger mr-1">
+                                                            <input type="hidden" value="False" class="cleared{{forloop.counter}}">
+                                                            <i class="fa fa-times" aria-hidden="true"></i>
+                                                        </span>
+                                                        </div>
+                                                    </td>
+                                                    {% endif %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'transaction_update' pk=data.id %}"
+                                                                       class="btn btn-success btn-sm rounded-0" type="button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                                            class="fa fa-edit"></i></a>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+<!--                        <div class="col-6">-->
+<!--                            <div class="card card-congratulation-medal">-->
+<!--                                <div class="card-body">-->
+<!--                                    <h5>Budgets and Spending</h5>-->
+<!--                                    <div id="budgets-bar"></div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+

@@ -70,7 +70,7 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
-        exclude = ('user', 'created_at', 'budget_spent', 'updated_at')
+        exclude = ('user', 'created_at', 'budget_spent', 'budget_left', 'updated_at', 'initial_amount', 'budget_status')
 
 
 class BillForm(forms.ModelForm):
@@ -100,17 +100,13 @@ class TransactionForm(forms.ModelForm):
         self.fields['bill'] = forms.ModelChoiceField(queryset=Bill.objects.filter(user=user_name),
                                                      empty_label="Select Bill",
                                                      widget=forms.Select(attrs={'class': 'form-control'}), required=False)
-        self.fields['budgets'] = forms.ModelChoiceField(queryset=Budget.objects.filter(user=user_name),
-                                                     empty_label="Select Budget",
-                                                     widget=forms.Select(attrs={'class': 'form-control'}),
-                                                     required=False)
         self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name),
                                                         empty_label="Select Account",
                                                         widget=forms.Select(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Transaction
-        exclude = ('user', 'remaining_amount', 'created_at')
+        exclude = ('user', 'remaining_amount', 'created_at', 'budgets')
 
 
 class AccountForm(forms.ModelForm):

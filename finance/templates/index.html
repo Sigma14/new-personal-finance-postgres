@@ -244,13 +244,19 @@
 <script src="{% static 'assets/js/pie_graphs.js' %}"></script>
 <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
 
-<script>diversification_tree({{ diversification_data | safe }})</script>
+<script>BudgetsBarChart({{ budget_graph_data | safe }}, {{ budget_names | safe }});</script>
 <script>LinesGraph({{ balance_graph_data | safe }});</script>
 <script>LinesGraph({{close_graph_data | safe}});</script>
 <script>MortgageChart({{ mortgage_graph_data | safe }}, {{ mortgage_date_data | safe}});</script>
 <script>showCalenders( {{ calendar_bill_data | safe }});</script>
 <script>AccountsChart( {{ account_graph_data | safe }}, {{ date_range_list | safe }}, {{max_value}}, {{min_value}});</script>
-<script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }}, "{{ graph_currency | safe }}");</script>
+<script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }}, "{{ graph_currency | safe }}", "{{graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_graph_label | safe }}, {{ budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_budget_value | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_month_graph_id | safe}}");</script>
+<script>AllCompareBudgets( {{ week_pie_chart | safe }}, {{ monthly_pie_chart | safe }}, {{ quart_pie_chart | safe }}, {{ yearly_pie_chart | safe }}, "{{ budget_graph_currency | safe }}");</script>
+<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_week_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_week_list_id | safe}}");</script>
+<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_quart_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_quart_list_id | safe}}");</script>
+<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_yearly_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_yearly_list_id | safe}}");</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_value | safe}});</script>
 <script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>

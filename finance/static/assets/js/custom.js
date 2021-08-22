@@ -357,6 +357,14 @@ $('.check_primary').on("click", function(e)
         });
     });
 
+// Budget Month Filter budget_month_filter
+
+    $('.budget_period_filter').on("change", function(e)
+    {
+        $("#period_filter_form").submit();
+    });
+
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

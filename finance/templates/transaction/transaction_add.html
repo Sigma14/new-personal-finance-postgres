@@ -117,7 +117,12 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.budgets }}
+                                            <select class="form-control" name="budget_name">
+                                                <option value="" selected>Select Budgets</option>
+                                                {% for name in budgets_name %}
+                                                <option>{{name}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

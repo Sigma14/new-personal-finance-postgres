@@ -45,21 +45,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Amount</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
-                                            <input type="text" id="email-icon" value="{{form.amount.value}}" class="form-control" name="amount" required
-                                                   placeholder="Amount"/>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group row">
@@ -110,6 +95,84 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bill</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.bill }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="budget_name">
+                                            {% if select_name != "Select Budget" %}
+                                                <option value="">Select Budget</option>
+                                                {% for name in budgets_name %}
+                                                {% if select_name == name %}
+                                                <option selected>{{name}}</option>
+                                                {% else %}
+                                                <option>{{name}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <option value="" selected>Select Budget</option>
+                                                {% for name in budgets_name %}
+                                                <option>{{name}}</option>
+                                                {% endfor %}
+                                            {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="transaction_tags">Tags</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" value="{{form.tags.value}}" id="transaction_tags" class="form-control" name="tags"
+                                                   placeholder="Tags"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" value="{{form.amount.value}}" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">&nbsp;</label>
                                     </div>
                                     &nbsp;
@@ -149,52 +212,6 @@
                                         <input type="checkbox" name="cleared" class="custom-control-input new_tab_check" id="customCheck1" />
                                         {% endif %}
                                         <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Cleared</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Bill</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            {{ form.bill }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Budget</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            {{ form.budgets }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="transaction_tags">Tags</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" value="{{form.tags.value}}" id="transaction_tags" class="form-control" name="tags"
-                                                   placeholder="Tags"/>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
