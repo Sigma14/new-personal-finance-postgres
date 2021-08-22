@@ -586,9 +586,11 @@ def home(request):
     if not request.user.is_anonymous:
         categories = Category.objects.filter(user=user_name)
         all_transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
+        current_date = datetime.datetime.today().date()
+        month_start, month_end = start_end_date(current_date, "Monthly")
         accounts_data = Account.objects.filter(user=user_name)
         property_data = Property.objects.filter(user=user_name)
-        budget_data = Budget.objects.filter(user=user_name)
+        budget_data = Budget.objects.filter(user=user_name, start_date=month_start, end_date=month_end)
         budget_label = []
         budget_values = []
         budget_percentage = []
