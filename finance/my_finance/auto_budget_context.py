@@ -108,13 +108,13 @@ def check_auto_budget(request):
             budget_currency = data.currency
             budget_auto = data.auto_budget
             budget_name = data.name
-            budget_amount = float(data.amount)
-            budget_spent = float(data.budget_spent)
-            budget_left = budget_amount - budget_spent
             budget_end_date = data.ended_at
             if budget_end_date and budget_auto:
                 if budget_end_date < today_date:
                     initial_amount = float(data.initial_amount)
+                    budget_amount = float(data.amount)
+                    budget_spent = float(data.budget_spent)
+                    budget_left = budget_amount - budget_spent
                     budget_amount = initial_amount + budget_left
                     start_month_date, end_month_date = start_end_date(today_date, "Monthly")
                     if budget_period == 'Monthly':
