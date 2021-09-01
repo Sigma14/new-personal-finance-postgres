@@ -2,7 +2,8 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
-from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds
+from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds,\
+    TemplateBudget
 
 CURRENCIES = (
     ("$", 'US Dollar ($)'),
@@ -18,6 +19,7 @@ BUDGET_PERIODS = (
                 ("Quarterly", 'Quarterly'),
                 ("Yearly", 'Yearly'),
             )
+
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -70,6 +72,16 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
+        exclude = ('user', 'created_at', 'budget_spent', 'budget_left', 'updated_at', 'initial_amount', 'budget_status')
+
+
+class TemplateBudgetForm(forms.ModelForm):
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+    auto_budget = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    budget_period = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = TemplateBudget
         exclude = ('user', 'created_at', 'budget_spent', 'budget_left', 'updated_at', 'initial_amount', 'budget_status')
 
 

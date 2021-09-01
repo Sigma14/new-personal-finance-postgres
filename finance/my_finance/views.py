@@ -25,10 +25,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, letter
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm   , AccountForm, \
+from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, PropertyForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
-    Expenses, AvailableFunds
+    Expenses, AvailableFunds, TemplateBudget
 from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
@@ -173,7 +173,8 @@ def compare_budgets(user_name, start, end, budget_names_list):
     cmp_transaction_budgets = []
     for budget_name in budget_names_list:
         transaction_budget = Transaction.objects.filter(user=user_name, budgets__name=budget_name,
-                                                        transaction_date__range=(start, end)).order_by('transaction_date')
+                                                        transaction_date__range=(start, end)).order_by(
+            'transaction_date')
         cmp_transaction_budgets.append(transaction_budget)
         cmp_total_budget_amount_dict[budget_name] = 0
         cmp_total_budget_spent_dict[budget_name] = 0
@@ -255,7 +256,8 @@ def start_end_date(date_value, period):
     if period == "Yearly":
         start_year_date = f"01-01-{date_value.year}"
         end_year_date = f"31-12-{date_value.year}"
-        return datetime.datetime.strptime(start_year_date, "%d-%m-%Y").date(), datetime.datetime.strptime(end_year_date, "%d-%m-%Y").date()
+        return datetime.datetime.strptime(start_year_date, "%d-%m-%Y").date(), datetime.datetime.strptime(end_year_date,
+                                                                                                          "%d-%m-%Y").date()
 
     if period == "Quarterly":
         current_date = datetime.datetime.now()
@@ -390,7 +392,6 @@ def category_spent_amount(category_data, user_name, categories_name, categories_
 
 def multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list, acc_create_date,
                     account_transaction_value, acc_available_balance):
-
     for data in acc_transaction_data:
         if data.cleared:
             acc_date = str(data.transaction_date)
@@ -872,6 +873,56 @@ def user_login(request):
             return render(request, "login_page.html", context)
         else:
             login(request, user)
+            template_budget_data = TemplateBudget.objects.filter(user=user)
+            if template_budget_data:
+                budget_obj = TemplateBudget.objects.filter(user=user)
+                budget_obj.delete()
+            period_list = {'Daily': 'Going out', 'Weekly': 'Groceries', 'Monthly': 'Bills'}
+            date_value = datetime.datetime.today().date()
+            start_month_date, end_month_date = start_end_date(date_value, "Monthly")
+            for key, value in period_list.items():
+                template_obj = TemplateBudget()
+                template_obj.user = user
+                budget_name = value
+                template_obj.name = budget_name
+                template_obj.currency = "$"
+                template_obj.auto_budget = True
+                template_obj.budget_period = key
+
+                if key == 'Monthly':
+                    template_obj.start_date = start_month_date
+                    template_obj.end_date = end_month_date
+                    template_obj.initial_amount = 1500
+                    template_obj.amount = 1500
+                    template_obj.budget_spent = 1000
+                    template_obj.budget_left = 500
+                    template_obj.created_at = start_month_date
+                    template_obj.ended_at = end_month_date
+                    template_obj.save()
+
+                if key == 'Weekly':
+                    start_week_date, end_week_date = start_end_date(date_value, key)
+                    template_obj.start_date = start_month_date
+                    template_obj.end_date = end_month_date
+                    template_obj.initial_amount = 200
+                    template_obj.amount = 200
+                    template_obj.budget_spent = 150
+                    template_obj.budget_left = 50
+                    template_obj.created_at = start_week_date
+                    template_obj.ended_at = end_week_date
+                    template_obj.save()
+
+                if key == 'Daily':
+                    template_obj.start_date = start_month_date
+                    template_obj.end_date = end_month_date
+                    template_obj.initial_amount = 100
+                    template_obj.amount = 100
+                    template_obj.budget_spent = 120
+                    template_obj.budget_left = -20
+                    template_obj.created_at = date_value
+                    template_obj.ended_at = date_value
+                    template_obj.save()
+
             if next:
                 return redirect(next)
             else:
@@ -886,30 +937,15 @@ def user_logout(request):
     return redirect('/login')
 
 
-@login_required(login_url="/login")
-def budget_list(request):
-    user_name = request.user
+def make_budgets_values(user_name, budget_data):
+    total_budget = 0
+    total_spent = 0
+    total_left = 0
     spent_data = []
     left_data = []
     budget_names_list = []
     over_spent_data = []
     all_budgets = []
-
-    if request.method == 'POST':
-        month_name = "01-" + request.POST['select_period']
-        date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
-        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
-    else:
-        date_value = datetime.datetime.today().date()
-        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
-
-    total_budget = 0
-    total_spent = 0
-    total_left = 0
-    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
-    budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
     if budget_data:
         for data in budget_data:
             budget_create_date = data.created_at
@@ -944,12 +980,11 @@ def budget_list(request):
 
         earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
         start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
-        list_of_months = list(OrderedDict(((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
-        budget_label = ['Total Spent', 'Total Left']
+        list_of_months = list(OrderedDict(
+            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
         budget_values = [total_spent, total_left]
     else:
         list_of_months = []
-        budget_label = []
         budget_values = []
         budget_currency = None
 
@@ -957,7 +992,30 @@ def budget_list(request):
                          {'name': 'Left', 'data': left_data},
                          {'name': 'OverSpent', 'data': over_spent_data}]
 
+    return all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, budget_names_list
+
+
+def budgets_page_data(request, budget_page, template_page):
+    user_name = request.user
+    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
+    if request.method == 'POST':
+        month_name = "01-" + request.POST['select_period']
+        date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
+    else:
+        date_value = datetime.datetime.today().date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
+
+    budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
+    template_budget_data = TemplateBudget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
     budget_key = ['Name', 'budgeted', 'Spent', 'Left']
+    budget_label = ['Total Spent', 'Total Left']
+    all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, budget_names_list = make_budgets_values(
+        user_name, budget_data)
+    template_all_budgets, template_budget_graph_data, template_budget_values, template_budget_currency, \
+    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data)
 
     # COMPARE BUDGETS :-
 
@@ -966,10 +1024,14 @@ def budget_list(request):
     month_start, month_end = start_end_date(current_date, "Monthly")
     quart_end, quart_start = start_end_date(current_date, "Quarterly")
     yearly_start, yearly_end = start_end_date(current_date, "Yearly")
-    monthly_budget_transaction_data, cmp_month_list, monthly_cmp_budgets_dict, monthly_cmp_transaction_budgets = compare_budgets(user_name, month_start, month_end, budget_names_list)
-    week_budget_transaction_data, cmp_week_list, week_cmp_budgets_dict, week_cmp_transaction_budgets = compare_budgets(user_name, week_start, week_end, budget_names_list)
-    quart_budget_transaction_data, cmp_quart_list, quart_cmp_budgets_dict, quart_cmp_transaction_budgets = compare_budgets(user_name, quart_start, quart_end, budget_names_list)
-    yearly_budget_transaction_data, cmp_yearly_list, yearly_cmp_budgets_dict, yearly_cmp_transaction_budgets = compare_budgets(user_name, yearly_start, yearly_end, budget_names_list)
+    monthly_budget_transaction_data, cmp_month_list, monthly_cmp_budgets_dict, monthly_cmp_transaction_budgets = compare_budgets(
+        user_name, month_start, month_end, budget_names_list)
+    week_budget_transaction_data, cmp_week_list, week_cmp_budgets_dict, week_cmp_transaction_budgets = compare_budgets(
+        user_name, week_start, week_end, budget_names_list)
+    quart_budget_transaction_data, cmp_quart_list, quart_cmp_budgets_dict, quart_cmp_transaction_budgets = compare_budgets(
+        user_name, quart_start, quart_end, budget_names_list)
+    yearly_budget_transaction_data, cmp_yearly_list, yearly_cmp_budgets_dict, yearly_cmp_transaction_budgets = compare_budgets(
+        user_name, yearly_start, yearly_end, budget_names_list)
 
     revenue_values = []
     revenue_data = Revenues.objects.filter(user=user_name)
@@ -1013,16 +1075,24 @@ def budget_list(request):
     non_primary_value = list(non_primary_dict.values())
     revenue_name.insert(0, 'S.NO')
     revenue_name.insert(1, 'Month')
-    print("current_month", current_month)
-    print("week_cmp_transaction_budgets==========>", week_cmp_transaction_budgets)
-    print("monthly_budget_transaction_data==========>", monthly_budget_transaction_data)
+    if not budget_names_list:
+        budget_page = ""
+        template_page = "active"
 
-    context = {'all_budgets': all_budgets, 'budget_key': budget_key, 'budget_key_dumbs': json.dumps(budget_key),
+    context = {'all_budgets': all_budgets, 'budget_graph_data': budget_graph_data, 'budget_names': budget_names_list,
+               'list_of_months': list_of_months, "budget_graph_value": budget_values,
+               "budget_graph_currency": budget_currency, "budget_bar_id": "#budgets-bar",
+               "template_budget_bar_id": "#template-budgets-bar", "template_budget_graph_id": "#template_total_budget",
+               'template_all_budgets': template_all_budgets, 'template_budget_graph_data': template_budget_graph_data,
+               'template_budget_names': template_budget_names_list, 'template_list_of_months': template_list_of_months,
+               "template_budget_graph_value": template_budget_values,
+               "template_budget_graph_currency": template_budget_currency, 'budget_key': budget_key,
+               'budget_key_dumbs': json.dumps(budget_key),
                'revenue_keys': revenue_name, 'graph_label': non_primary_label, 'graph_value': non_primary_value,
                'graph_currency': currency_name, "graph_id": "#budget-chart", 'revenue_values': revenue_values,
-               'expenses_data': expenses_data, 'budget_graph_data': budget_graph_data, 'budget_names': budget_names_list,
-               'list_of_months': list_of_months, "current_month": current_month, "budget_graph_label": budget_label,
-               "budget_graph_value": budget_values, "budget_graph_currency": budget_currency,
+               'expenses_data': expenses_data,
+               "current_month": current_month, "budget_graph_label": budget_label,
+               "budget_graph_value": budget_values,
                "budget_graph_id": "#total_budget", "monthly_budget_transaction_data": monthly_budget_transaction_data,
                "week_budget_transaction_data": week_budget_transaction_data,
                "quart_budget_transaction_data": quart_budget_transaction_data,
@@ -1039,11 +1109,15 @@ def budget_list(request):
                "cmp_month_graph_id": "#cmp_month_budget", "cmp_week_list": cmp_week_list,
                "cmp_week_list_id": "#cmp_week_list", "cmp_quart_list": cmp_quart_list,
                "cmp_quart_list_id": "#cmp_quart_list", "cmp_yearly_list": cmp_yearly_list,
-               "cmp_yearly_list_id": "#cmp_yearly_list"
-              }
+               "cmp_yearly_list_id": "#cmp_yearly_list", "budget_page": budget_page, "template_page": template_page
+               }
+    return context
 
+
+@login_required(login_url="/login")
+def budget_list(request):
+    context = budgets_page_data(request, "active", "")
     return render(request, 'budget/budget_list.html', context=context)
-
 
 @login_required(login_url="/login")
 def budget_details(request, pk):
@@ -1054,20 +1128,23 @@ def budget_details(request, pk):
     if request.method == "POST":
         start_date = request.POST['start_date']
         end_date = request.POST['end_date']
-        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj, transaction_date__range=(start_date, end_date)).order_by('transaction_date')
+        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj,
+                                                      transaction_date__range=(start_date, end_date)).order_by(
+            'transaction_date')
     else:
         start_date = False
         end_date = False
         transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj).order_by('transaction_date')
     context = {
-               'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
-               'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
-               'start_date': start_date, 'end_date': end_date
-               }
+        'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
+        'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
+        'start_date': start_date, 'end_date': end_date
+    }
     return render(request, "budget/budget_detail.html", context=context)
 
 
-def make_month_obj(obj, user_name, quarter_list, quarter_value, upcoming_quarter_date, budget_name, budget_period, budget_currency,
+def make_month_obj(obj, user_name, quarter_list, quarter_value, upcoming_quarter_date, budget_name, budget_period,
+                   budget_currency,
                    budget_amount, budget_auto):
     quarter_index = 0
     for month_date in quarter_list:
@@ -1075,7 +1152,6 @@ def make_month_obj(obj, user_name, quarter_list, quarter_value, upcoming_quarter
             obj.start_date = month_date
             obj.end_date = month_date.replace(day=calendar.monthrange(month_date.year, month_date.month)[1])
             obj.initial_amount = budget_amount
-            obj.budget_left = budget_amount
             obj.created_at = quarter_value
             obj.ended_at = upcoming_quarter_date
             obj.save()
@@ -1135,14 +1211,16 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
 
         if budget_period == 'Yearly':
             start_year_date, end_year_date = start_end_date(date_value, budget_period)
-            year_list = list(OrderedDict(((start_year_date + datetime.timedelta(_)).replace(day=1), None) for _ in range((end_year_date - start_year_date).days + 1)).keys())
+            year_list = list(OrderedDict(((start_year_date + datetime.timedelta(_)).replace(day=1), None) for _ in
+                                         range((end_year_date - start_year_date).days + 1)).keys())
             year_list = list(dict.fromkeys(year_list))
             make_month_obj(obj, user_name, year_list, start_year_date, end_year_date, budget_name,
                            budget_period, budget_currency, budget_amount, budget_auto)
 
         if budget_period == 'Quarterly':
             upcoming_quarter_date, quarter_value = start_end_date(date_value, budget_period)
-            quarter_list = list(OrderedDict(((quarter_value + datetime.timedelta(_)).replace(day=1), None) for _ in range((upcoming_quarter_date - quarter_value).days + 1)).keys())
+            quarter_list = list(OrderedDict(((quarter_value + datetime.timedelta(_)).replace(day=1), None) for _ in
+                                            range((upcoming_quarter_date - quarter_value).days + 1)).keys())
             quarter_list = list(dict.fromkeys(quarter_list))
             make_month_obj(obj, user_name, quarter_list, quarter_value, upcoming_quarter_date, budget_name,
                            budget_period, budget_currency, budget_amount, budget_auto)
@@ -1198,6 +1276,113 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
             budget_data.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
 
+@login_required(login_url="/login")
+def template_budget_list(request):
+    context = budgets_page_data(request, "", "active")
+    return render(request, 'budget/budget_list.html', context=context)
+
+
+class TemplateAdd(LoginRequiredMixin, CreateView):
+    model = TemplateBudget
+    form_class = TemplateBudgetForm
+    template_name = 'budget/budget_add.html'
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        user_name = self.request.user
+        obj.user = user_name
+        budget_period = form.cleaned_data['budget_period']
+        date_value = datetime.datetime.today().date()
+        budget_name = form.cleaned_data['name']
+        budget_amount = form.cleaned_data['amount']
+        budget_currency = form.cleaned_data['currency']
+        budget_auto = form.cleaned_data['auto_budget']
+        start_month_date, end_month_date = start_end_date(date_value, "Monthly")
+
+        obj.start_date = start_month_date
+        obj.end_date = end_month_date
+        obj.initial_amount = budget_amount
+        obj.budget_left = budget_amount
+
+        if budget_period == 'Weekly':
+            start_week_date, end_week_date = start_end_date(date_value, budget_period)
+            obj.created_at = start_week_date
+            obj.ended_at = end_week_date
+            obj.save()
+
+        if budget_period == 'Daily':
+            obj.created_at = date_value
+            obj.ended_at = date_value
+            obj.save()
+
+        if budget_period == 'Yearly':
+            start_year_date, end_year_date = start_end_date(date_value, budget_period)
+            obj.created_at = start_year_date
+            obj.ended_at = end_year_date
+            obj.save()
+
+        if budget_period == 'Quarterly':
+            upcoming_quarter_date, quarter_value = start_end_date(date_value, budget_period)
+            obj.created_at = quarter_value
+            obj.ended_at = upcoming_quarter_date
+            obj.save()
+
+        return super().form_valid(form)
+
+
+class TemplateUpdate(LoginRequiredMixin, UpdateView):
+    model = TemplateBudget
+    form_class = TemplateBudgetForm
+    template_name = 'budget/budget_update.html'
+
+    def form_valid(self, form):
+        user_name = self.request.user
+        budget_obj = TemplateBudget.objects.get(user=user_name, pk=self.kwargs['pk'])
+        old_amount = float(budget_obj.amount)
+        update_amount = float(form.cleaned_data['amount'])
+        update_period = form.cleaned_data['budget_period']
+        auto_budget = form.cleaned_data['auto_budget']
+        if auto_budget == "True":
+            is_auto = True
+        else:
+            is_auto = False
+        extra_amount = update_amount - old_amount
+        obj = form.save(commit=False)
+        obj.start_date = budget_obj.start_date
+        obj.end_date = budget_obj.end_date
+        obj.amount = update_amount
+        obj.budget_left = float(budget_obj.budget_left) + extra_amount
+        obj.budget_period = update_period
+        obj.auto_budget = is_auto
+        obj.created_at = budget_obj.created_at
+        obj.ended_at = budget_obj.ended_at
+        obj.save()
+        return super().form_valid(form)
+
+
+class TemplateDelete(LoginRequiredMixin, DeleteView):
+    def post(self, request, *args, **kwargs):
+        budget_obj = TemplateBudget.objects.get(pk=self.kwargs['pk'])
+        budget_obj.delete()
+        return JsonResponse({"status": "Successfully", "path": "None"})
+
+
+# @login_required(login_url="/login")
+# def template_budget_details(request, pk):
+#     user_name = request.user
+#     budget_obj = TemplateBudget.objects.get(pk=pk)
+#     transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
+#
+#     start_date = budget_obj.start_date
+#     end_date = budget_obj.end_date
+#     going_out_list = [[1, start_date, 100, "gaming", "", ]]
+#     transaction_dict = {'Going out': [], 'Groceries': [], 'Bills': []}
+#     context = {
+#         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
+#         'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
+#         'start_date': start_date, 'end_date': end_date
+#     }
+#     return render(request, "budget/budget_detail.html", context=context)
 
 # class BillList(LoginRequiredMixin, ListView):
 #     model = Bill
@@ -1235,6 +1420,7 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 #     form_class = BillForm
 #     template_name = 'bill/bill_delete.html'
 
+
 @login_required(login_url="/login")
 def transaction_list(request):
     user_name = request.user
@@ -1251,7 +1437,7 @@ def transaction_list(request):
         transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
         select_filter = 'All'
 
-    context = transaction_summary(transaction_data, select_filter)  
+    context = transaction_summary(transaction_data, select_filter)
     return render(request, 'transaction/transaction_list.html', context=context)
 
 
@@ -1265,15 +1451,19 @@ def transaction_report(request):
         tags_data = ast.literal_eval(tags_data)
         if tag_name != 'All':
             transaction_data = Transaction.objects.filter(user=user_name,
-                                                          transaction_date__range=(start_date, end_date), tags=tag_name).order_by('transaction_date')
+                                                          transaction_date__range=(start_date, end_date),
+                                                          tags=tag_name).order_by('transaction_date')
         else:
             transaction_data = Transaction.objects.filter(user=user_name,
-                                                          transaction_date__range=(start_date, end_date)).order_by('transaction_date')
+                                                          transaction_date__range=(start_date, end_date)).order_by(
+                'transaction_date')
         select_filter = tag_name
     else:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        transaction_data = Transaction.objects.filter(user=user_name, transaction_date__range=(start_date, end_date)).order_by('transaction_date')
+        transaction_data = Transaction.objects.filter(user=user_name,
+                                                      transaction_date__range=(start_date, end_date)).order_by(
+            'transaction_date')
         select_filter = 'All'
 
     context = transaction_summary(transaction_data, select_filter)
@@ -1471,7 +1661,8 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             else:
                 try:
                     transaction_budget_name = transaction_obj.budgets.name
-                    transaction_start_date, transaction_end_date = start_end_date(transaction_obj.transaction_date, "Monthly")
+                    transaction_start_date, transaction_end_date = start_end_date(transaction_obj.transaction_date,
+                                                                                  "Monthly")
 
                     budget_obj = Budget.objects.filter(user=user_name, name=transaction_budget_name,
                                                        start_date=transaction_start_date,
@@ -1493,12 +1684,14 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                         if out_flow != transaction_out_flow or transaction_amount != update_transaction_amount:
                             budget_obj = update_budget_items(user_name, budget_obj, transaction_amount,
                                                              transaction_out_flow)
-                            budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow)
+                            budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount,
+                                                              out_flow)
                     else:
                         old_budget_obj = Budget.objects.get(user=user_name, name=transaction_budget_name,
                                                             start_date=transaction_start_date,
                                                             end_date=transaction_end_date)
-                        old_budget_obj = update_budget_items(user_name, old_budget_obj, transaction_amount, transaction_out_flow)
+                        old_budget_obj = update_budget_items(user_name, old_budget_obj, transaction_amount,
+                                                             transaction_out_flow)
                         old_budget_obj.save()
                         budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow)
                 except:
@@ -1659,7 +1852,8 @@ def goal_update(request, pk):
     else:
         goal_date = datetime.datetime.strftime(goal_data.goal_date, '%Y-%m-%d')
         account_data = Account.objects.filter(user=user_name)
-        context = {'goal_data': goal_data, 'currency_dict': currency_dict, 'goal_date': goal_date, 'account_data': account_data}
+        context = {'goal_data': goal_data, 'currency_dict': currency_dict, 'goal_date': goal_date,
+                   'account_data': account_data}
         return render(request, 'goal/goal_update.html', context=context)
 
 
@@ -1976,6 +2170,7 @@ class LiabilityDetail(LoginRequiredMixin, DetailView):
         context['amount_inc_percentage'] = amount_inc_percentage
         return context
 
+
 # FUNDS VIEWS
 
 
@@ -1998,8 +2193,9 @@ def show_current_funds(user_name, fun_name=None):
 
             if fun_name:
                 available_lock_amount = calculate_available_lock_amount(user_name, obj)
-                fund_value.append([fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund, available_lock_amount,
-                                   obj.available_balance, fund_obj.id])
+                fund_value.append(
+                    [fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund, available_lock_amount,
+                     obj.available_balance, fund_obj.id])
             else:
                 fund_value.append([fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund,
                                    obj.available_balance, fund_obj.id])
@@ -2015,7 +2211,8 @@ class FundList(LoginRequiredMixin, ListView):
         data = super(FundList, self).get_context_data(**kwargs)
         user_name = self.request.user
         fund_value = show_current_funds(user_name)
-        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Fund', 'Action']
+        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Fund',
+                    'Action']
         data['fund_key'] = fund_key
         data['fund_value'] = fund_value
         return data
@@ -2058,7 +2255,8 @@ def fund_overtime(request):
             acc_current_balance = float(account_data.balance)
 
         acc_available_balance = float(acc_current_balance)
-        acc_transaction_data = Transaction.objects.filter(user=user_name, account=account_data).order_by('transaction_date')
+        acc_transaction_data = Transaction.objects.filter(user=user_name, account=account_data).order_by(
+            'transaction_date')
         multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
                         acc_create_date, account_transaction_value, acc_available_balance)
         print("account_transaction_value", account_transaction_value)
@@ -2151,11 +2349,11 @@ def fund_update(request, pk):
 
     return render(request, 'funds/funds_update.html', context=context)
 
+
 # class FundUpdate(UpdateView):
 #     model = AvailableFunds
 #     form_class = FundForm
 #     template_name = 'funds/funds_update.html'
-
 
 
 # BILL VIEWS
@@ -2342,6 +2540,7 @@ class PropertyDelete(LoginRequiredMixin, DeleteView):
         property_obj = Property.objects.get(pk=self.kwargs['pk'])
         property_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
+
 
 class PdfPrint:
     def __init__(self, buffer, pageSize):
@@ -2626,7 +2825,8 @@ def stock_analysis(request):
         p_name = portfolio_list[0]
 
     my_portfolio_url = "https://stock.tradingtech.org/api/my_portfolio/list/"
-    url_response = requests.post(my_portfolio_url, data={'user_name': request.user.username, 'p_name': p_name}, timeout=500)
+    url_response = requests.post(my_portfolio_url, data={'user_name': request.user.username, 'p_name': p_name},
+                                 timeout=500)
     my_portfolio_context = url_response.json()
     my_portfolio_context['portfolio_list'] = portfolio_list
     return render(request, 'stock_analysis.html', context=my_portfolio_context)
@@ -2662,7 +2862,8 @@ def revenue_add(request):
             today_month = datetime.datetime.today().date().strftime('%Y-%m')
             today_month = datetime.datetime.strptime(today_month, '%Y-%m')
             if today_month > month:
-                months_list = list(OrderedDict(((month + datetime.timedelta(_)).strftime(r"%b-%y"), None) for _ in range((today_month - month).days + 1)).keys())
+                months_list = list(OrderedDict(((month + datetime.timedelta(_)).strftime(r"%b-%y"), None) for _ in
+                                               range((today_month - month).days + 1)).keys())
                 for month_name in months_list:
                     month_name = datetime.datetime.strptime(month_name, '%b-%y')
                     revenue_value = Revenues.objects.filter(user=user_name, month=month_name)
@@ -2694,7 +2895,6 @@ def revenue_add(request):
 # REVENUE UPDATE
 
 def revenue_update(request, pk):
-
     revenue_obj = Revenues.objects.get(pk=int(pk))
 
     if request.method == 'POST':
@@ -2730,13 +2930,13 @@ def revenue_update(request, pk):
     else:
         start_date = datetime.datetime.strftime(revenue_obj.month, '%Y-%m')
         context = {
-                    'name': revenue_obj.name,
-                    'start_date': start_date,
-                    'amount': revenue_obj.amount,
-                    'currency': revenue_obj.currency,
-                    'primary': revenue_obj.primary,
-                    'pk': pk
-                  }
+            'name': revenue_obj.name,
+            'start_date': start_date,
+            'amount': revenue_obj.amount,
+            'currency': revenue_obj.currency,
+            'primary': revenue_obj.primary,
+            'pk': pk
+        }
         return render(request, "revenue/revenue_update.html", context=context)
 
 
@@ -2767,8 +2967,8 @@ def revenue_update_name(request, pk):
         return redirect("/budget_list/")
     else:
         context = {
-                   'name': pk,
-                   'fun_name': 'only_name'
+            'name': pk,
+            'fun_name': 'only_name'
         }
     return render(request, "revenue/revenue_update.html", context=context)
 

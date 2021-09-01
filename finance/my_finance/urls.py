@@ -22,6 +22,14 @@ urlpatterns = [
     path('budget_update/<int:pk>', BudgetUpdate.as_view(), name='budget_update'),
     path('budget_delete/<int:pk>', BudgetDelete.as_view(), name='budget_delete'),
 
+    # Template Budget urls :-
+
+    path('template_budget_list/', template_budget_list, name='template_budget_list'),
+    # path('template_budget_detail/<int:pk>', template_budget_details, name='template_budget_detail'),
+    path('template_budget_add/', TemplateAdd.as_view(), name='template_budget_add'),
+    path('template_budget_update/<int:pk>', TemplateUpdate.as_view(), name='template_budget_update'),
+    path('template_budget_delete/<int:pk>', TemplateDelete.as_view(), name='template_budget_delete'),
+
     # Transaction urls :-
 
     path('transaction_list/', transaction_list, name='transaction_list'),

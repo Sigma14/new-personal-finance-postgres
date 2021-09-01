@@ -388,72 +388,7 @@ function AccountsChart(account_graph_data, account_date_data, max_value, min_val
 
 function CategorySpentChart(categories_name, categories_value)
 {
-//  var columnChartEl = document.querySelector('#column-chart'),
-//    columnChartConfig = {
-//      chart: {
-//        height: 400,
-//        type: 'bar',
-//        stacked: true,
-//        parentHeightOffset: 0,
-//        toolbar: {
-//          show: false
-//        }
-//      },
-//      plotOptions: {
-//        bar: {
-//          columnWidth: '15%',
-//          colors: {
-//            backgroundBarColors: [
-//              chartColors.column.bg,
-//              chartColors.column.bg,
-//              chartColors.column.bg,
-//              chartColors.column.bg,
-//              chartColors.column.bg
-//            ],
-//            backgroundBarRadius: 10
-//          }
-//        }
-//      },
-//      dataLabels: {
-//        enabled: false
-//      },
-//      legend: {
-//        show: true,
-//        position: 'top',
-//        horizontalAlign: 'start'
-//      },
-//      colors: [chartColors.column.series1, chartColors.column.series2],
-//      stroke: {
-//        show: true,
-//        colors: ['transparent']
-//      },
-//      grid: {
-//        xaxis: {
-//          lines: {
-//            show: true
-//          }
-//        }
-//      },
-//      series: [
-//        {
-//          name: 'Spent',
-//          data: categories_value
-//        },
-//      ],
-//      xaxis: {
-//        categories: categories_name
-//      },
-//      fill: {
-//        opacity: 1
-//      },
-//      yaxis: {
-//        opposite: isRtl
-//      }
-//    };
-//  if (typeof columnChartEl !== undefined && columnChartEl !== null) {
-//    var columnChart = new ApexCharts(columnChartEl, columnChartConfig);
-//    columnChart.render();
-//  }
+
   var options = {
           series: [
                     {
@@ -741,7 +676,7 @@ function showPortfolioRange(close_range_data, close_id)
 
 }
 
-function BudgetsBarChart(budget_data, budgets_name)
+function BudgetsBarChart(budget_data, budgets_name, budget_id)
 {
 var options = {
           series: budget_data,
@@ -779,11 +714,14 @@ var options = {
         legend: {
           show: false
         },
+        dataLabels: {
+          enabled: false,
+          },
         fill: {
           opacity: 1
         }
         };
 
-        var chart = new ApexCharts(document.querySelector("#budgets-bar"), options);
+        var chart = new ApexCharts(document.querySelector(budget_id), options);
         chart.render();
 }

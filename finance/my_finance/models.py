@@ -78,6 +78,29 @@ class Budget(models.Model):
         return reverse('budget_list')
 
 
+class TemplateBudget(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    name = models.CharField(max_length=50)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    initial_amount = models.CharField(max_length=15, blank=True, null=True)
+    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
+    auto_budget = models.BooleanField(default=True, blank=True, null=True)
+    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateField(blank=True, null=True)
+    ended_at = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}{self.id}{self.currency}"
+
+    def get_absolute_url(self):
+        return reverse('template_budget_list')
+
+
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     label = models.CharField(max_length=50)
