@@ -937,7 +937,7 @@ def user_logout(request):
     return redirect('/login')
 
 
-def make_budgets_values(user_name, budget_data):
+def make_budgets_values(user_name, budget_data, page_method):
     total_budget = 0
     total_spent = 0
     total_left = 0
@@ -947,6 +947,7 @@ def make_budgets_values(user_name, budget_data):
     over_spent_data = []
     all_budgets = []
     if budget_data:
+        print("innnnnnnnnnnnnnnn", budget_data, user_name)
         for data in budget_data:
             budget_create_date = data.created_at
             budget_end_date = data.ended_at
@@ -978,7 +979,11 @@ def make_budgets_values(user_name, budget_data):
             total_left += left_amount
             budget_currency = data.currency
 
-        earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+        if page_method == "budget_page":
+            earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+        else:
+            earliest = TemplateBudget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+            
         start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
         list_of_months = list(OrderedDict(
             ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
@@ -1009,13 +1014,14 @@ def budgets_page_data(request, budget_page, template_page):
         start_date, end_date = start_end_date(date_value, "Monthly")
 
     budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
+    print(budget_data)
     template_budget_data = TemplateBudget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
     budget_key = ['Name', 'budgeted', 'Spent', 'Left']
     budget_label = ['Total Spent', 'Total Left']
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, budget_names_list = make_budgets_values(
-        user_name, budget_data)
+        user_name, budget_data, "budget_page")
     template_all_budgets, template_budget_graph_data, template_budget_values, template_budget_currency, \
-    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data)
+    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data, "template_page")
 
     # COMPARE BUDGETS :-
 
