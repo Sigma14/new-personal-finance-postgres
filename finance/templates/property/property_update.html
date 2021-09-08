@@ -28,7 +28,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" action="{% url 'rental_property_update' %}" method="post">
+                    <form class="form form-horizontal" action="{% url 'rental_property_update' pk=property_obj.id %}" method="post">
                         {% csrf_token %}
                         <div class="row">
                             {% if error %}
