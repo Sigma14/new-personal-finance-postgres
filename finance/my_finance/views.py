@@ -3138,6 +3138,7 @@ def property_details(request, pk):
 
     return render(request, "property/property_detail.html", context=context)
 
+
 def others_costs_data(other_closing_cost):
     cost_dict = dict.fromkeys(other_closing_cost[::2], 0)
     cost_index = 1
@@ -3168,7 +3169,7 @@ def property_add(request):
         capex_budget_obj = CapexBudgetDetails()
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                              expense_obj, capex_budget_obj, property_name, currency_name, user_name)
-        return redirect("/property_list/")
+        return redirect("/rental_property_list/")
 
     else:
         context = {'currency_dict': currency_dict, 'scenario_dict': scenario_dict,}
@@ -3196,7 +3197,7 @@ def property_update(request, pk):
 
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                              expense_obj, capex_budget_obj, property_name, currency_name, user_name)
-        return redirect("/property_list/")
+        return redirect("/rental_property_list/")
 
     else:
         property_obj = RentalPropertyModel.objects.get(pk=pk)
