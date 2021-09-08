@@ -71,11 +71,11 @@ urlpatterns = [
     path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
 
     # Property Urls:-
-    path('property_list/', PropertyList.as_view(), name='property_list'),
-    path('property_detail/<int:pk>', PropertyDetail.as_view(), name='property_detail'),
-    path('property_add/', PropertyAdd.as_view(), name='property_add'),
-    path('property_update/<int:pk>', PropertyUpdate.as_view(), name='property_update'),
-    path('property_delete/<int:pk>', PropertyDelete.as_view(), name='property_delete'),
+    path('rental_property_list/', PropertyList.as_view(), name='rental_property_list'),
+    path('rental_property_detail/<int:pk>', property_details, name='rental_property_detail'),
+    path('rental_property_add/', property_add, name='rental_property_add'),
+    path('rental_property_update/<int:pk>', property_update, name='rental_property_update'),
+    path('rental_property_delete/<int:pk>', property_delete, name='rental_property_delete'),
 
     # Revenue Urls :-
     path('revenue_add/', revenue_add, name='revenue_add'),

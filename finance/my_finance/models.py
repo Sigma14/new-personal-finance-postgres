@@ -185,6 +185,109 @@ class Property(models.Model):
         return reverse('property_list')
 
 
+class PropertyPurchaseDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_purchase_user')
+    best_case_price = models.CharField(max_length=30)
+    likely_case_price = models.CharField(max_length=30)
+    worst_case_price = models.CharField(max_length=30)
+    selected_case = models.CharField(max_length=30)
+    selected_price = models.CharField(max_length=30, blank=True, null=True)
+    down_payment = models.CharField(max_length=30)
+
+
+class MortgageDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mortgage_user')
+    start_date = models.DateField(blank=True, null=True)
+    interest_rate = models.CharField(max_length=30)
+    amortization_year = models.CharField(max_length=30)
+
+
+class ClosingCostDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='closing_cost_user')
+    transfer_tax = models.CharField(max_length=30)
+    legal_fee = models.CharField(max_length=30)
+    title_insurance = models.CharField(max_length=30)
+    inspection = models.CharField(max_length=30)
+    appraisal_fee = models.CharField(max_length=30)
+    appliances = models.CharField(max_length=30)
+    renovation_cost = models.CharField(max_length=30)
+    others_cost = models.CharField(max_length=10000000)
+    total_investment = models.CharField(max_length=30, blank=True, null=True)
+
+
+class RevenuesDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rev_user')
+    unit_1 = models.CharField(max_length=30)
+    others_revenue_cost = models.CharField(max_length=1000000000)
+    total_revenue = models.CharField(max_length=30)
+    rent_increase_assumption = models.CharField(max_length=30)
+
+
+class ExpensesDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='expense_user')
+    property_tax = models.CharField(max_length=30)
+    insurance = models.CharField(max_length=30)
+    maintenance = models.CharField(max_length=30)
+    water = models.CharField(max_length=30)
+    gas = models.CharField(max_length=30)
+    electricity = models.CharField(max_length=30)
+    water_heater_rental = models.CharField(max_length=30)
+    other_utilities = models.CharField(max_length=1000000000)
+    management_fee = models.CharField(max_length=30)
+    vacancy = models.CharField(max_length=30)
+    capital_expenditure = models.CharField(max_length=30)
+    other_expenses = models.CharField(max_length=1000000000)
+    total_expenses = models.CharField(max_length=30)
+    inflation_assumption = models.CharField(max_length=30)
+    appreciation_assumption = models.CharField(max_length=30)
+
+
+class CapexBudgetDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='capex_budget_user')
+    roof = models.CharField(max_length=1000000000, blank=True, null=True)
+    water_heater = models.CharField(max_length=1000000000, blank=True, null=True)
+    all_appliances = models.CharField(max_length=1000000000, blank=True, null=True)
+    bathroom_fixtures = models.CharField(max_length=1000000000, blank=True, null=True)
+    drive_way = models.CharField(max_length=1000000000, blank=True, null=True)
+    furnance = models.CharField(max_length=1000000000, blank=True, null=True)
+    air_conditioner = models.CharField(max_length=1000000000, blank=True, null=True)
+    flooring = models.CharField(max_length=1000000000, blank=True, null=True)
+    plumbing = models.CharField(max_length=1000000000, blank=True, null=True)
+    electrical = models.CharField(max_length=1000000000, blank=True, null=True)
+    windows = models.CharField(max_length=1000000000, blank=True, null=True)
+    paint = models.CharField(max_length=1000000000, blank=True, null=True)
+    kitchen = models.CharField(max_length=1000000000, blank=True, null=True)
+    structure = models.CharField(max_length=1000000000, blank=True, null=True)
+    components = models.CharField(max_length=1000000000, blank=True, null=True)
+    landscaping = models.CharField(max_length=1000000000, blank=True, null=True)
+    other_budgets = models.CharField(max_length=10000000000000000, blank=True, null=True)
+    total_budget_cost = models.CharField(max_length=30, blank=True, null=True)
+
+
+class RentalPropertyModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_rental')
+    name = models.CharField(max_length=30)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    purchase_price_detail = models.ForeignKey(PropertyPurchaseDetails, on_delete=models.CASCADE,
+                                              related_name='property_purchase_user')
+    mortgage_detail = models.ForeignKey(MortgageDetails, on_delete=models.CASCADE,
+                                        related_name='mortgage_user')
+    closing_cost_detail = models.ForeignKey(ClosingCostDetails, on_delete=models.CASCADE,
+                                            related_name='closing_cost_user')
+    monthly_revenue = models.ForeignKey(RevenuesDetails, on_delete=models.CASCADE,
+                                        related_name='rev_user')
+    monthly_expenses = models.ForeignKey(ExpensesDetails, on_delete=models.CASCADE,
+                                         related_name='expense_user')
+    capex_budget_details = models.ForeignKey(CapexBudgetDetails, on_delete=models.CASCADE,
+                                             related_name='capex_budget')
+    investor_details = models.CharField(max_length=1000000000, blank=True, null=True)
+    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.name)
+
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
     amount = models.CharField(max_length=5)

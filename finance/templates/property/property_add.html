@@ -9,12 +9,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Property</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Rental Property</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'property_list' %}">Properties</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'rental_property_list' %}">Rental Properties</a>
                                     </li>
                                     <li class="breadcrumb-item">
                                         Add Property
@@ -27,21 +27,27 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" action="{% url 'rental_property_add' %}" method="post">
                         {% csrf_token %}
                         <div class="row">
+                            {% if error %}
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <span class="text-danger">*{{error}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Name</label>
+                                        <label for="fname-icon">Name / Address</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="name" required
-                                                   placeholder="Property Name"/>
+                                            <input type="text" id="fname-icon" class="form-control" name="name_address" required
+                                                   placeholder="Property Name / Address"/>
                                         </div>
                                     </div>
                                 </div>
@@ -53,10 +59,11 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            {{ form.currency }}
+                                            <select class="form-control" name="currency_name" required>
+                                                {% for key, value in currency_dict.items %}
+                                                    <option value="{{key}}">{{value}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -64,22 +71,876 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Amount</label>
+                                        <h4 for="fname-icon">Property Purchase Price</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Best Case Scenario Purchase Price</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="value" required
-                                                   placeholder="Property Value"/>
+                                            <input type="text" id="best_case" class="form-control" name="best_case" required
+                                                   placeholder="Best Case Purchase Price"/>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Likely Case Scenario Purchase Price</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="likely_case" class="form-control" name="likely_case" required
+                                                   placeholder="Likely Case Purchase Price"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Worst Case Scenario Purchase Price</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="worst_case" class="form-control" name="worst_case" required
+                                                   placeholder="Worst Case Purchase Price"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Select a Scenario Purchase Price</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <select class="form-control select_purchase_price" name="select_case" required>
+                                                <option>Select a Scenario Purchase Price</option>
+                                                {% for key, value in scenario_dict.items  %}
+                                                <option value="{{key}}">{{value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Purchase Price Selected</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control purchase_price_value" name="select_price" required
+                                                   placeholder="Selected Price"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Down Payment(%)</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="down_payment" required
+                                                   placeholder="Down Payment(%)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Mortgage Details</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Interest Rate on Mortgage(%)</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="interest_rate" required
+                                                   placeholder="Interest Rate(%)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Mortgage Amortization (Year)</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="amortization_year" required
+                                                   placeholder="Mortgage Amortization (Year)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Mortgage Start Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" name="mortgage_start_date" id="start_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Closing Costs /Renovation cost / Start Up Costs</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Land Transfer Taxes</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="transfer_tax" required
+                                                   placeholder="Land Transfer Taxes"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Legal Fees and Professional Fees</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="legal_fee" required
+                                                   placeholder="Fees"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Title Insurance/Search</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="title_insurance" required
+                                                   placeholder="Insurance/Search"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Home Inspection</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="inspection" required
+                                                   placeholder="Home Inspection"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Appraisal Fee</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="appraisal_fee" required
+                                                   placeholder="Appraisal Fee"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Appliances</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="appliances" required
+                                                   placeholder="Appliances"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Renovation Cost/Referbishment Cost</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="renovation_cost" required
+                                                   placeholder="Renovation Cost/Referbishment Cost"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 other_cost_div_1">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <input type="text" class="form-control" value="Other(Please Specify)" name="other_cost" required
+                                                   placeholder="Other(Please Specify)"/>
+                                    </div>
+                                    <div class="col-sm-8" style="padding-top: 7px;">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="other_cost" required
+                                                   placeholder="-"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 extra_other_cost_div_1" style="padding-top: 7px;">
+                                        <button class="btn btn-primary add_other_cost" input_name="other_cost" main_class="other_cost_div_" extra_class="extra_other_cost_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Monthly Revenues</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Unit 1</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="unit_1" required
+                                                   placeholder="Unit 1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 unit_div_2">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Unit 2</label>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="others_revenue_cost" required
+                                                   placeholder="Unit 2"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 extra_unit_div_2">
+                                        <button class="btn btn-primary add_unit_button" div_class="3" title="Add Unit"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+<!--                            <div class="col-12">-->
+<!--                                <div class="form-group row">-->
+<!--                                    <div class="col-sm-3 col-form-label">-->
+<!--                                        <h6>Total Monthly Revenue</h6>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-9">-->
+<!--                                        <div class="input-group input-group-merge">-->
+<!--                                            <input type="text" class="form-control" name="total_revenue" required-->
+<!--                                                   placeholder="Total Monthly Revenue"/>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Annual % Rent Increase Assumption</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="rent_increase_assumption" required
+                                                   placeholder="Rent Increase Assumption(%)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Capital Expenditure Budget Details</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Roof</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="roof" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="roof" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Water Heater</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="water_heater" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="water_heater" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">All Appliances</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="all_appliances" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="all_appliances" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bathroom Fixtures (Showers, Vanities, Toilets etc.)</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="bathroom" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="bathroom" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Driveway/Parking Lot</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="drive_way" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="drive_way" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Furnace</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="furnace" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="furnace" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Air Conditioner</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="air_conditioner" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="air_conditioner" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Flooring</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="flooring" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="flooring" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Plumbing</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="plumbing" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="plumbing" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Electrical</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="electrical" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="electrical" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Windows</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="windows" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="windows" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Paint</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="paint" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="paint" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Kitchen Cabinets/Counters</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="kitchen" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="kitchen" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Structure (foundation, framing)</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="structure" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="structure" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Components (garage door, etc.)</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="component" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="component" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Landscaping</label>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control budget_cost" name="landscaping" placeholder="Total Replacement Cost"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control life_span_input" name="landscaping" placeholder="Lifespan (years)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="budget_add_div">
+                                <button type="button" class="btn btn-primary mr-1 budget_button" div_class="1"> Add other budget</button>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Total Budget Cost</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control total_budget_cost" name="total_budget_cost" readonly/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+<!--                            <div class="col-12">-->
+<!--                                <div class="form-group row">-->
+<!--                                    <div class="col-sm-3 col-form-label">-->
+<!--                                        <label for="fname-icon">Kitchen Cabinets/Counters</label>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-5">-->
+<!--                                        <div class="input-group input-group-merge">-->
+<!--                                            <input type="text" class="form-control" name="kitchen" placeholder="Total Replacement Cost"/>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-4">-->
+<!--                                        <div class="input-group input-group-merge">-->
+<!--                                            <input type="text" class="form-control" name="kitchen" placeholder="Lifespan (years)"/>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Monthly Expenses</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Property Taxes</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="property_tax" required
+                                                   placeholder="Property Taxes"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Insurance</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="insurance" required
+                                                   placeholder="Insurance"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Regular Maintenance</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="maintenance" required
+                                                   placeholder="Regular Maintenance"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h6>Utilities</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Water</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="water" required
+                                                   placeholder="Water"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Gas</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="gas" required
+                                                   placeholder="Gas"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Electricity</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="electricity" required
+                                                   placeholder="Electricity"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Water Heater Rental</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="water_heater_rental" required
+                                                   placeholder="Water Heater Rental"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 other_utility_div_1">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <input type="text" class="form-control" value="Other Utility(Please Specify)" name="other_utilities" required
+                                                   placeholder="Other Utility(Please Specify)"/>
+                                    </div>
+                                    <div class="col-sm-8" style="padding-top: 7px;">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="other_utilities" required
+                                                   placeholder="-"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 extra_other_utility_div_1" style="padding-top: 7px;">
+                                        <button class="btn btn-primary add_other_cost" input_name="other_utilities" main_class="other_utility_div_" extra_class="extra_other_utility_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Property Management Fees</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="management_fee" required
+                                                   placeholder="Property Management Fees"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Vacancy</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="vacancy" required
+                                                   placeholder="Vacancy"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Capital Expenditure Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control capital_expenditure_monthtly" budget_cost_data="" name="capital_expenditure"  required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 other_expenses_div_1">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <input type="text" class="form-control" value="Other Expenses(Please Specify)" name="other_expenses" required
+                                                   placeholder="Other Expenses(Please Specify)"/>
+                                    </div>
+                                    <div class="col-sm-8" style="padding-top: 7px;">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="other_expenses" required
+                                                   placeholder="-"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 extra_other_expenses_div_1" style="padding-top: 7px;">
+                                        <button class="btn btn-primary add_other_cost" input_name="other_expenses" main_class="other_expenses_div_" extra_class="extra_other_expenses_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+<!--                            <div class="col-12">-->
+<!--                                <div class="form-group row">-->
+<!--                                    <div class="col-sm-3 col-form-label">-->
+<!--                                        <h6>Total Expenses</h6>-->
+<!--                                    </div>-->
+<!--                                    <div class="col-sm-9">-->
+<!--                                        <div class="input-group input-group-merge">-->
+<!--                                            <input type="text" class="form-control" name="total_expenses" required-->
+<!--                                                   placeholder="Total Expenses"/>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Annual Expense % Inflation Assumption</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="inflation_assumption" required
+                                                   placeholder="Inflation Assumption(%"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Annual Property Appreciation Assumption</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="appreciation_assumption" required
+                                                   placeholder="Appreciation Assumption"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <h4>Investors Details</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-2 col-form-label">
+                                        <label for="fname-icon">Name</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="investor_detail" placeholder="Investor Name"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-form-label">
+                                        <label for="fname-icon">Capital Contribution</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" name="investor_detail" placeholder="Investor Capital Contribution"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="investor_add_div">
+                                <button type="button" class="btn btn-primary mr-1 investor_button" div_class="1"> Add Another Investor</button>
+                            </div>
                             <div class="col-sm-9 offset-sm-3">
                                 <button type="submit" class="btn btn-primary mr-1">Create</button>
-                                <a href="{% url 'property_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                <a href="{% url 'rental_property_list' %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
                         </div>
                     </form>

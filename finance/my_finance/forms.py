@@ -172,10 +172,11 @@ class MortgageCalculatorForm(forms.ModelForm):
 
 
 class MortgageForm(forms.Form):
-    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-    amount = forms.IntegerField()
-    interest = forms.FloatField()
-    tenure = forms.IntegerField()
+    mortgage_date = forms.DateField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}), required=True)
+    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}), required=True)
+    amount = forms.IntegerField(required=True)
+    interest = forms.FloatField(required=True)
+    tenure = forms.IntegerField(required=True)
 
 
 class PropertyForm(forms.ModelForm):

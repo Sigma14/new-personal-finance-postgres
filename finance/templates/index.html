@@ -21,12 +21,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/vendors.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/charts/apexcharts.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/toastr.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/charts/apexcharts.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/pickers/pickadate/pickadate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/pickers/flatpickr/flatpickr.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/calendars/fullcalendar.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/select/select2.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/sweetalert2.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/wizard/bs-stepper.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css' %}">
 
 
     <!-- END: Vendor CSS-->
@@ -54,6 +55,8 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-calendar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-validation.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/page-auth.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-toastr.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-number-input.css' %}">
 
     <!-- END: Page CSS-->
 
@@ -151,9 +154,13 @@
                     class="d-flex align-items-center" href="{% url 'fund_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
             </li>
-            <li class=" nav-item {% if request.resolver_match.view_name == 'property_list'  or request.resolver_match.view_name == 'property_add' or request.resolver_match.view_name == 'property_detail' or request.resolver_match.view_name == 'property_update' %}active{% endif %}"><a
-                    class="d-flex align-items-center" href="{% url 'property_list' %}"><i
-                    data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+            <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+                <ul class="menu-content">
+                    <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list'  or request.resolver_match.view_name == 'property_add' or request.resolver_match.view_name == 'rental_property_detail' or request.resolver_match.view_name == 'rental_property_update' %}active{% endif %}"><a
+                            class="d-flex align-items-center" href="{% url 'rental_property_list' %}"><i
+                            data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Rental Properties</span></a>
+                    </li>
+                </ul>
             </li>
             <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Accounts">Accounts</span></a>
                 <ul class="menu-content">
@@ -220,6 +227,10 @@
 <script src="{% static 'app-assets/vendors/js/forms/select/select2.full.min.js' %}"></script>
 <script src="{% static 'app-assets/vendors/js/forms/validation/jquery.validate.min.js' %}"></script>
 <script src="{% static 'app-assets/vendors/js/extensions/sweetalert2.all.min.js' %}"></script>
+<script src="{% static 'app-assets/vendors/js/forms/wizard/bs-stepper.min.js' %}"></script>
+<script src="{% static 'app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js' %}"></script>
+<script src="{% static 'app-assets/vendors/js/extensions/toastr.min.js' %}"></script>
+
 
 
 <!-- END: Page Vendor JS-->
@@ -236,6 +247,7 @@
 <script src="{% static 'assets/js/app-calendars-events.js' %}"></script>
 <script src="{% static 'assets/js/app-calendars.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/pages/page-auth-register.js' %}"></script>
+<script src="{% static 'app-assets/js/scripts/pages/app-ecommerce-checkout.js' %}"></script>
 
 <!-- END: Page JS-->
 
@@ -260,7 +272,12 @@
 <script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_quart_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_quart_list_id | safe}}");</script>
 <script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_yearly_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_yearly_list_id | safe}}");</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
-<script>CategorySpentChart({{ categories_name | safe }}, {{ categories_value | safe}});</script>
+<script>CategorySpentChart({{ categories_name | safe }}, {{ categories_series | safe}}, "#column-chart");</script>
+<script>CategorySpentChart({{ projection_key | safe }}, {{ cash_on_cash_return_data | safe}}, "#cash-bar-chart");</script>
+<script>CategorySpentChart({{ projection_key | safe }}, {{ return_on_investment_data | safe}}, "#return-bar");</script>
+<script>CategorySpentChart({{ projection_key | safe }}, {{ debt_cov_ratio_data | safe}}, "#coverage-ratio-bar");</script>
+<script>CategorySpentChart({{ projection_key | safe }}, {{ return_investment_data | safe}}, "#investment-return-bar");</script>
+<script>CategorySpentChart({{ projection_key | safe }}, {{ property_expense_data | safe}}, "#expense-bar");</script>
 <script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>
 <script>showStockAmount({{stocks_amount | safe}});</script>
 <script>portfolioWeights({{code_list | safe}}, {{weight1 | safe}}, {{weight2 | safe}});</script>

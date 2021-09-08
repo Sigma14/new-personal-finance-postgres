@@ -4,6 +4,58 @@ $(document).ready(function()
     {
         location.assign($(this).attr('href'))
     });
+
+    $('#capex_budget').DataTable( {
+    "footerCallback": function ( row, data, start, end, display ) {
+            var api = this.api(), data;
+
+            // Remove the formatting to get integer data for summation
+            var intVal = function ( i ) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '')*1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+
+            // Total over all pages
+            all_total = api
+                .column(1)
+                .data()
+                .reduce( function (a, b) {
+                    currency_name = b[0]
+                    return intVal(a) + intVal(b);
+                }, 0 );
+            year_total = api
+                .column(2)
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+            year_cost_total = api
+                .column(3)
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+            month_cost_total = api
+                .column(4)
+                .data()
+                .reduce( function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0 );
+
+            // Update footer
+            $( api.column(1).footer() ).html(currency_name + all_total);
+            $( api.column(2).footer() ).html(year_total + "(Year)");
+            $( api.column(3).footer() ).html(currency_name + year_cost_total);
+            $( api.column(4).footer() ).html(currency_name + month_cost_total.toFixed(2));
+            },
+            columnDefs: [
+            { orderable: false, targets: 1 }
+            ],
+            pageLength : 24,
+            lengthMenu: [[24,48, 72], [24,48, 72]]
+    } );
     $('#revenue_table').DataTable( {
     "footerCallback": function(row, data, start, end, display) {
 
@@ -362,6 +414,216 @@ $('.check_primary').on("click", function(e)
     $('.budget_period_filter').on("change", function(e)
     {
         $("#period_filter_form").submit();
+    });
+
+
+
+// RENTAL PROPERTY JS
+
+// ADD Units Fields
+$("body").delegate(".add_unit_button", "click", function(event)
+{
+    div_number = $(this).attr('div_class')
+    class_name = "unit_div_" + div_number
+    extra_div_number = parseInt(div_number) + 1
+    parent_div =  parseInt(div_number) - 1
+    var inputHtml = "<div class='col-12 " + class_name +" '>" + "<div class='form-group row'>" + "<div class='col-sm-3 col-form-label'>"
+        inputHtml += "<label for='fname-icon'>" + "Unit" + div_number + "</label>" + "</div>" + "<div class='col-sm-7'>"
+        inputHtml += "<div class='input-group input-group-merge'>" + "<input type='text' class='form-control' name='others_revenue_cost' required placeholder='Unit" + div_number + "' />"
+        inputHtml += "</div>" + "</div>" + "<div class='col-sm-2 extra_unit_div_" + div_number + "'>"
+        inputHtml += "<button class='btn btn-primary add_unit_button' div_class='" + extra_div_number + "' title='Add Unit'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+    $(inputHtml).insertAfter(".unit_div_"+parent_div);
+    deleteButton = "<button class='btn btn-danger remove_unit_button' div_number='" + parent_div + "' div_class='" + class_name + "' title='Delete Unit' style='margin-left:5px;' ><i class='fa fa-minus'></i></button></div></div></div>"
+    $(".extra_unit_div_"+div_number).append(deleteButton)
+    $(".extra_unit_div_"+parent_div).empty()
+});
+
+$("body").delegate(".remove_unit_button", "click", function(event)
+{
+    div_number = parseInt($(this).attr('div_number'))
+    if(div_number > 2)
+    {
+        extra_div_number = div_number + 1
+        parent_div =  div_number - 1
+        change_class = "unit_div_" + div_number
+        inputHtml = "<button class='btn btn-primary add_unit_button' div_class='" + extra_div_number + "' title='Add Unit'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+        inputHtml += "<button class='btn btn-danger remove_unit_button' div_number='" + parent_div + "' div_class='" + change_class + "' title='Delete Unit' style='margin-left:5px;' ><i class='fa fa-minus'></i></button></div></div></div>"
+    }
+    else
+    {
+        inputHtml = "<button class='btn btn-primary add_unit_button' div_class='" + 3 + "' title='Add Unit'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+    }
+    $(".extra_unit_div_"+div_number).append(inputHtml)
+    class_name = $(this).attr('div_class')
+    $("."+class_name).remove()
+});
+
+$("body").delegate(".add_other_cost", "click", function(event)
+{
+    main_class = $(this).attr('main_class')
+    extra_class = $(this).attr('extra_class')
+    input_name = $(this).attr('input_name')
+    div_number = $(this).attr('div_class')
+    class_name = main_class + div_number
+    extra_div_number = parseInt(div_number) + 1
+    parent_div =  parseInt(div_number) - 1
+    var inputHtml = "<div class='col-12 " + class_name +" '>" + "<div class='form-group row'>" + "<div class='col-sm-3 col-form-label'>"
+        inputHtml += "<input type='text' class='form-control' value='Other(Please Specify)' name='" + input_name + "' required placeholder='Other(Please Specify)'/> " + "</div>" + "<div class='col-sm-7' style='padding-top:7px;'>"
+        inputHtml += "<div class='input-group input-group-merge'>" + "<input type='text' class='form-control' name='" + input_name + "' required placeholder='-' />"
+        inputHtml += "</div>" + "</div>" + "<div class='col-sm-2 "+ extra_class + div_number + "' style='padding-top:7px;'>"
+        inputHtml += "<button class='btn btn-primary add_other_cost' input_name='" + input_name + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + extra_div_number + "' title='Add Other'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+    $(inputHtml).insertAfter("."+ main_class +parent_div);
+    deleteButton = "<button class='btn btn-danger remove_other_cost' input_name='" + input_name + "' div_number='" + parent_div + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + class_name + "' title='Delete' style='margin-left:5px;' ><i class='fa fa-minus'></i></button></div></div></div>"
+    $("."+extra_class+div_number).append(deleteButton)
+    $("."+extra_class+parent_div).empty()
+
+
+});
+
+$("body").delegate(".remove_other_cost", "click", function(event)
+{
+    div_number = parseInt($(this).attr('div_number'))
+    main_class = $(this).attr('main_class')
+    extra_class = $(this).attr('extra_class')
+    input_name = $(this).attr('input_name')
+
+    if(div_number > 1)
+    {
+        extra_div_number = div_number + 1
+        parent_div =  div_number - 1
+        change_class = main_class + div_number
+        inputHtml = "<button class='btn btn-primary add_other_cost' input_name='" + input_name + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + extra_div_number + "' title='Add Other'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+        inputHtml += "<button class='btn btn-danger remove_other_cost' input_name='" + input_name + "' div_number='" + parent_div + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + change_class + "' title='Delete' style='margin-left:5px;' ><i class='fa fa-minus'></i></button></div></div></div>"
+    }
+    else
+    {
+        inputHtml = "<button class='btn btn-primary add_other_cost' input_name='" + input_name + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + 2 + "' title='Add Other'>"
+        inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
+    }
+    $("."+extra_class+div_number).append(inputHtml)
+    class_name = $(this).attr('div_class')
+    $("."+class_name).remove()
+});
+
+$("body").delegate(".investor_button", "click", function(event)
+{
+    div_number = parseInt($(this).attr('div_class'))
+    $(this).attr('div_class', div_number+1)
+    var inputHtml = "<div class='col-12 investor_div_" + div_number + "' >" + "<div class='form-group row'>" + "<div class='col-sm-2 col-form-label'>"
+        inputHtml += "<label for='fname-icon'>Name</label></div><div class='col-sm-4'><div class='input-group input-group-merge'>"
+        inputHtml += "<input type='text' class='form-control' name='investor_detail' required placeholder='Investor Name'/></div></div>"
+        inputHtml +=  "<div class='col-sm-2 col-form-label'><label for='fname-icon'>Capital Contribution</label></div><div class='col-sm-3'>"
+        inputHtml +=  "<div class='input-group input-group-merge'><input type='text' class='form-control' name='investor_detail' required placeholder='Investor Name'/></div></div>"
+        inputHtml += "<div class='col-sm-1'><button class='btn btn-danger remove_investor' div_class='investor_div_" + div_number + "' title='Delete' style='margin-left:5px;' ><i class='fa fa-minus'></i></button>"
+        inputHtml +=  "</div></div></div>"
+
+    $(inputHtml).insertBefore("#investor_add_div");
+});
+
+$("body").delegate(".budget_button", "click", function(event)
+{
+    div_number = parseInt($(this).attr('div_class'))
+    $(this).attr('div_class', div_number+1)
+    var inputHtml = "<div class='col-12 budget_div_" + div_number + "' >" + "<div class='form-group row'>" + "<div class='col-sm-3 col-form-label'>"
+        inputHtml += "<input type='text' class='form-control' name='other_budget' placeholder='Name'/></div><div class='col-sm-4' style='padding-top:7px;'><div class='input-group input-group-merge'>"
+        inputHtml += "<input type='text' class='form-control budget_cost' name='other_budget' placeholder='Total Replacement Cost'/></div></div>"
+        inputHtml +=  "<div class='col-sm-4' style='padding-top:7px;' >"
+        inputHtml +=  "<div class='input-group input-group-merge'><input type='text' class='form-control' name='other_budget' placeholder='Lifespan (years) '/></div></div>"
+        inputHtml += "<div class='col-sm-1' style='padding-top:7px;'><button class='btn btn-danger remove_budget' div_class='budget_div_" + div_number + "' title='Delete' style='margin-left:5px;' ><i class='fa fa-minus'></i></button>"
+        inputHtml +=  "</div></div></div>"
+
+    $(inputHtml).insertBefore("#budget_add_div");
+});
+
+$("body").delegate(".remove_investor", "click", function(event)
+{
+    class_name = $(this).attr('div_class')
+    $("."+class_name).remove()
+    div_number = parseInt($(".investor_button").attr('div_class')) - 1
+    $(".investor_button").attr('div_class', div_number)
+});
+
+$("body").delegate(".budget_cost", "change", function(event)
+{
+    var sum = 0;
+    var budget_cost_data = []
+    $(".budget_cost").each(function(){
+
+        input_val = $(this).val()
+        if(input_val)
+        {
+            budget_cost_data.push(input_val)
+            sum = sum + parseFloat(input_val);
+        }
+    });
+    $(".total_budget_cost").val(sum);
+    $(".capital_expenditure_monthtly").attr('budget_cost_data', JSON.stringify(budget_cost_data))
+});
+$("body").delegate(".capital_expenditure_monthtly", "click", function(event)
+{
+    var life_sum = 0;
+    var budget_cost_data = JSON.parse($(this).attr("budget_cost_data"))
+    var budget_index = 0
+    $(".life_span_input").each(function(){
+        input_val = $(this).val()
+        if(input_val)
+        {
+            if (input_val != 0 && budget_cost_data[budget_index] != 0)
+            {
+                life_value = budget_cost_data[budget_index] / input_val
+                life_value = life_value / 12;
+                life_sum = life_sum + life_value
+            }
+            budget_index = budget_index + 1
+        }
+    });
+
+    if(life_sum)
+    {
+        $(".capital_expenditure_monthtly").val(life_sum.toFixed(2));
+    }
+    else
+    {
+        $(".capital_expenditure_monthtly").val("*please check Capex Budgets Details Something Went Wrong");
+    }
+
+});
+
+$("body").delegate(".remove_budget", "click", function(event)
+{
+    class_name = $(this).attr('div_class')
+    $("."+class_name).remove()
+    div_number = parseInt($(".budget_button").attr('div_class')) - 1
+    $(".budget_button").attr('div_class', div_number)
+});
+
+// SELECT PURCHASE PRICE
+
+$('.select_purchase_price').on("change", function(e)
+    {
+        select_value = $(this).val()
+
+        if(select_value == "best_case")
+        {
+            purchase_price = $("#best_case").val()
+            $(".purchase_price_value").val(purchase_price)
+        }
+        if(select_value == "likely_case")
+        {
+            purchase_price = $("#likely_case").val()
+            $(".purchase_price_value").val(purchase_price)
+        }
+        if(select_value == "worst_case")
+        {
+            purchase_price = $("#worst_case").val()
+            $(".purchase_price_value").val(purchase_price)
+        }
+
     });
 
 

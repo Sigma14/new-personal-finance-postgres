@@ -36,7 +36,7 @@
       area: {
                 series1: '#ffe700',
                 series2: '#00d4bd',
-                series3: '#826bf8',
+                series3: '#60f2ca',
       }
     };
 
@@ -165,6 +165,7 @@
 
   function MortgageChart(mortgage_graph_data, date_data)
   {
+
       var areaChartEl = document.querySelector('#line-area-chart'),
         areaChartConfig = {
           chart: {
@@ -194,7 +195,7 @@
               }
             }
           },
-          colors: [chartColors.area.series3, chartColors.area.series2, chartColors.area.series1],
+          colors: ["#FFFF00", "#ff0000", "#ffa500"],
           series: mortgage_graph_data,
           xaxis: {
             categories: date_data
@@ -386,16 +387,20 @@ function AccountsChart(account_graph_data, account_date_data, max_value, min_val
   // CategorySpent Chart
   // --------------------------------------------------------------------
 
-function CategorySpentChart(categories_name, categories_value)
+function CategorySpentChart(categories_name, series_data, graph_id)
 {
-
+  console.log(series_data)
+  console.log(typeof(series_data))
+  if(graph_id == "#column-chart")
+  {
+    var column_width = '5%'
+  }
+  else
+  {
+    var column_width = '80%'
+  }
   var options = {
-          series: [
-                    {
-                        name: 'Spent',
-                        data: categories_value
-                    }
-                  ],
+          series: series_data,
           chart: {
           type: 'bar',
           height: 430
@@ -406,7 +411,7 @@ function CategorySpentChart(categories_name, categories_value)
             dataLabels: {
               position: 'top',
             },
-            columnWidth: '5%'
+            columnWidth: column_width
           }
         },
         dataLabels: {
@@ -426,13 +431,13 @@ function CategorySpentChart(categories_name, categories_value)
           shared: true,
           intersect: false
         },
-        colors: ['#826af9'],
+        colors: ['#826af9', "#ffa500", "#ffff00", "#ff0000"],
         xaxis: {
           categories: categories_name,
         },
         };
 
-        var chart = new ApexCharts(document.querySelector("#column-chart"), options);
+        var chart = new ApexCharts(document.querySelector(graph_id), options);
         chart.render();
 
 }

@@ -28,7 +28,8 @@ from reportlab.lib.pagesizes import A4, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, PropertyForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
-    Expenses, AvailableFunds, TemplateBudget
+    Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
+    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails
 from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
@@ -36,6 +37,241 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.validators import Auto
 
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
+scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
+                 'worst_case': 'Worst Case Scenario Purchase Price'}
+
+
+def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
+                         expense_obj, capex_budget_obj, property_name, currency_name, user_name):
+    # Investor Details
+    investor_detail = others_costs_data(request.POST.getlist('investor_detail'))
+
+    # Budget Details
+    roof = request.POST.getlist('roof')
+    water_heater = request.POST.getlist('water_heater')
+    all_appliances = request.POST.getlist('all_appliances')
+    bathroom = request.POST.getlist('bathroom')
+    drive_way = request.POST.getlist('drive_way')
+    furnace = request.POST.getlist('furnace')
+    air_conditioner = request.POST.getlist('air_conditioner')
+    flooring = request.POST.getlist('flooring')
+    plumbing = request.POST.getlist('plumbing')
+    electrical = request.POST.getlist('electrical')
+    windows = request.POST.getlist('windows')
+    paint = request.POST.getlist('paint')
+    kitchen = request.POST.getlist('kitchen')
+    structure = request.POST.getlist('structure')
+    component = request.POST.getlist('component')
+    landscaping = request.POST.getlist('landscaping')
+    others_budgets = request.POST.getlist('other_budget')
+    total_budget_cost = request.POST['total_budget_cost']
+    others_budgets_len = len(others_budgets)
+    avg = 3
+    others_budgets_list = []
+    last = 0
+
+    while last < others_budgets_len:
+        others_budgets_list.append(others_budgets[int(last):int(last + avg)])
+        last += avg
+
+    others_budgets_dict = {}
+    for val in others_budgets_list:
+        others_budgets_dict[val[0]] = [float(val[1]), float(val[2])]
+
+    # Property Purchase Details
+    best_case = check_float(request.POST['best_case'])
+    likely_case = check_float(request.POST['likely_case'])
+    worst_case = check_float(request.POST['worst_case'])
+    select_case = request.POST['select_case']
+    select_price = float(request.POST['select_price'])
+    down_payment = check_float(request.POST['down_payment'])
+
+    property_purchase_obj.user = user_name
+    property_purchase_obj.best_case_price = best_case
+    property_purchase_obj.likely_case_price = likely_case
+    property_purchase_obj.worst_case_price = worst_case
+    property_purchase_obj.selected_case = select_case
+    property_purchase_obj.selected_price = select_price
+    property_purchase_obj.down_payment = down_payment
+    property_purchase_obj.save()
+
+    # Mortgage Details
+    interest_rate = check_float(request.POST['interest_rate'])
+    amortization_year = check_float(request.POST['amortization_year'])
+    mortgage_start_date = request.POST['mortgage_start_date']
+    mortgage_obj.user = user_name
+    mortgage_obj.interest_rate = interest_rate
+    mortgage_obj.amortization_year = amortization_year
+    mortgage_obj.start_date = mortgage_start_date
+    mortgage_obj.save()
+
+    # Closing Costs / Renovations Costs Details
+    transfer_tax = check_float(request.POST['transfer_tax'])
+    legal_fee = check_float(request.POST['legal_fee'])
+    title_insurance = check_float(request.POST['title_insurance'])
+    inspection = check_float(request.POST['inspection'])
+    appraisal_fee = check_float(request.POST['appraisal_fee'])
+    appliances = check_float(request.POST['appliances'])
+    renovation_cost = check_float(request.POST['renovation_cost'])
+    others_cost = others_costs_data(request.POST.getlist('other_cost'))
+    down_payment_value = round(select_price * down_payment / 100, 2)
+    total_investment = down_payment_value + transfer_tax + legal_fee + title_insurance + inspection + appraisal_fee + appliances + renovation_cost
+    for key in others_cost:
+        total_investment += others_cost[key]
+
+    closing_cost_obj.user = user_name
+    closing_cost_obj.transfer_tax = transfer_tax
+    closing_cost_obj.legal_fee = legal_fee
+    closing_cost_obj.title_insurance = title_insurance
+    closing_cost_obj.inspection = inspection
+    closing_cost_obj.appraisal_fee = appraisal_fee
+    closing_cost_obj.appliances = appliances
+    closing_cost_obj.renovation_cost = renovation_cost
+    closing_cost_obj.others_cost = str([others_cost])
+    closing_cost_obj.total_investment = total_investment
+    closing_cost_obj.save()
+
+    # Monthly Revenue Details
+    unit_1 = check_float(request.POST['unit_1'])
+    others_revenue_cost = request.POST.getlist('others_revenue_cost')
+    rent_increase_assumption = request.POST['rent_increase_assumption']
+    others_revenue_cost_dict = {}
+    revenue_index = 2
+    for data in others_revenue_cost:
+        name = f"Unit {revenue_index}"
+        others_revenue_cost_dict[name] = check_float(data)
+        revenue_index += 1
+
+    total_revenue = float(unit_1)
+    for key in others_revenue_cost_dict:
+        total_revenue += float(others_revenue_cost_dict[key])
+
+    revenue_obj.user = user_name
+    revenue_obj.unit_1 = unit_1
+    revenue_obj.total_revenue = total_revenue
+    revenue_obj.others_revenue_cost = str([others_revenue_cost_dict])
+    revenue_obj.rent_increase_assumption = rent_increase_assumption
+    revenue_obj.save()
+
+    # Monthly Expenses Details
+    property_tax = check_float(request.POST['property_tax'])
+    insurance = check_float(request.POST['insurance'])
+    maintenance = check_float(request.POST['maintenance'])
+    water = check_float(request.POST['water'])
+    gas = check_float(request.POST['gas'])
+    electricity = check_float(request.POST['electricity'])
+    water_heater_rental = check_float(request.POST['water_heater_rental'])
+    other_utilities = others_costs_data(request.POST.getlist('other_utilities'))
+    management_fee = check_float(request.POST['management_fee'])
+    vacancy = check_float(request.POST['vacancy'])
+    capital_expenditure = check_float(request.POST['capital_expenditure'])
+    other_expenses = others_costs_data(request.POST.getlist('other_expenses'))
+    inflation_assumption = check_float(request.POST['inflation_assumption'])
+    appreciation_assumption = check_float(request.POST['appreciation_assumption'])
+    total_expenses = property_tax + insurance + maintenance + water + gas + electricity + water_heater_rental + \
+                     management_fee + vacancy + capital_expenditure
+
+    for key in other_utilities:
+        total_expenses += other_utilities[key]
+
+    for key in other_expenses:
+        total_expenses += other_expenses[key]
+
+    expense_obj.user = user_name
+    expense_obj.property_tax = property_tax
+    expense_obj.insurance = insurance
+    expense_obj.maintenance = maintenance
+    expense_obj.water = water
+    expense_obj.gas = gas
+    expense_obj.electricity = electricity
+    expense_obj.water_heater_rental = water_heater_rental
+    expense_obj.other_utilities = str([other_utilities])
+    expense_obj.management_fee = management_fee
+    expense_obj.vacancy = vacancy
+    expense_obj.capital_expenditure = capital_expenditure
+    expense_obj.other_expenses = str([other_expenses])
+    expense_obj.total_expenses = total_expenses
+    expense_obj.inflation_assumption = inflation_assumption
+    expense_obj.appreciation_assumption = appreciation_assumption
+    expense_obj.save()
+
+    # Rental Property Model
+
+    rental_obj.user = user_name
+    rental_obj.name = property_name
+    rental_obj.currency = currency_name
+    rental_obj.purchase_price_detail = property_purchase_obj
+    rental_obj.mortgage_detail = mortgage_obj
+    rental_obj.closing_cost_detail = closing_cost_obj
+    rental_obj.monthly_revenue = revenue_obj
+    rental_obj.monthly_expenses = expense_obj
+    if investor_detail:
+        rental_obj.investor_details = [investor_detail]
+
+    # Budget Save
+
+    capex_budget_obj.user = user_name
+    capex_budget_obj.roof = roof
+    capex_budget_obj.water_heater = water_heater
+    capex_budget_obj.all_appliances = all_appliances
+    capex_budget_obj.bathroom_fixtures = bathroom
+    capex_budget_obj.drive_way = drive_way
+    capex_budget_obj.furnance = furnace
+    capex_budget_obj.air_conditioner = air_conditioner
+    capex_budget_obj.flooring = flooring
+    capex_budget_obj.plumbing = plumbing
+    capex_budget_obj.electrical = electrical
+    capex_budget_obj.windows = windows
+    capex_budget_obj.paint = paint
+    capex_budget_obj.kitchen = kitchen
+    capex_budget_obj.structure = structure
+    capex_budget_obj.components = component
+    capex_budget_obj.landscaping = landscaping
+    capex_budget_obj.other_budgets = [others_budgets_dict]
+    capex_budget_obj.total_budget_cost = total_budget_cost
+    capex_budget_obj.save()
+
+    rental_obj.capex_budget_details = capex_budget_obj
+    rental_obj.save()
+
+
+def check_float(data_var):
+    if data_var:
+        try:
+            data_var = round(float(data_var), 2)
+        except:
+            data_var = 0.0
+    else:
+        data_var = 0.0
+    return data_var
+
+
+def make_capex_budget(result_list):
+    try:
+        cost_per_year = float(result_list[0]) / float(result_list[1])
+    except:
+        cost_per_year = 0.0
+
+    cost_per_month = cost_per_year / 12
+    result_list.append(round(cost_per_year, 2))
+    result_list.append(round(cost_per_month, 2))
+    return  result_list
+
+
+def make_others_dict(other_unit_dict):
+    for key, units in other_unit_dict.items():
+        other_unit_dict[key] = [float(units) * 12]
+    return other_unit_dict
+
+
+def make_other_data(other_unit_dict, year, mortgage_year, rent_increase_assumption):
+    for key, unit_value in other_unit_dict.items():
+        current_unit = unit_value[-1]
+        other_unit_value_increase = round((current_unit * rent_increase_assumption / 100) + current_unit, 2)
+        if year != int(mortgage_year):
+            unit_value.append(other_unit_value_increase)
+            other_unit_dict[key] = unit_value
+    return other_unit_dict
 
 
 def update_budget_items(user_name, budget_obj, transaction_amount, transaction_out_flow):
@@ -665,6 +901,7 @@ def home(request):
 
         context = {
             "categories_name": categories_name,
+            "categories_series": [{'name': 'Spend', 'data': categories_value}],
             "categories_value": categories_value,
             "account_graph_data": acc_graph_data,
             "date_range_list": account_date_list,
@@ -802,6 +1039,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['category_key'] = category_key
         data['category_key_dumbs'] = json.dumps(category_key)
         data['categories_value'] = categories_value
+        data['categories_series'] = [{'name': 'Spend', 'data': categories_value}]
 
         return data
 
@@ -983,7 +1221,7 @@ def make_budgets_values(user_name, budget_data, page_method):
             earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
         else:
             earliest = TemplateBudget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
-            
+
         start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
         list_of_months = list(OrderedDict(
             ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
@@ -1021,7 +1259,8 @@ def budgets_page_data(request, budget_page, template_page):
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, budget_names_list = make_budgets_values(
         user_name, budget_data, "budget_page")
     template_all_budgets, template_budget_graph_data, template_budget_values, template_budget_currency, \
-    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data, "template_page")
+    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data,
+                                                                              "template_page")
 
     # COMPARE BUDGETS :-
 
@@ -1124,6 +1363,7 @@ def budgets_page_data(request, budget_page, template_page):
 def budget_list(request):
     context = budgets_page_data(request, "active", "")
     return render(request, 'budget/budget_list.html', context=context)
+
 
 @login_required(login_url="/login")
 def budget_details(request, pk):
@@ -1281,6 +1521,7 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
         for budget_data in all_obj:
             budget_data.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
+
 
 @login_required(login_url="/login")
 def template_budget_list(request):
@@ -2459,35 +2700,40 @@ def bill_automatic_amount(request):
     return JsonResponse({'bill_amount': bill_obj.remaining_amount})
 
 
+def make_mortgage_data(data, total_month, mortgage_date):
+    last_date = mortgage_date + relativedelta(months=+total_month)
+    last_month = f'{calendar.month_name[last_date.month]} {last_date.year}'
+    balance_data = []
+    principle_data = []
+    interest_data = []
+    mortgage_date_data = [str(mortgage_date + relativedelta(months=+x)) for x in range(total_month)]
+
+    for value in data:
+        balance_data.append(value['initial_balance'])
+        principle_data.append(abs(value['principle']))
+        interest_data.append(abs(value['interest']))
+
+    mortgage_graph_data = [{'name': 'Balance', 'data': balance_data}, {'name': 'Principle', 'data': principle_data},
+                           {'name': 'Interest', 'data': interest_data}]
+
+    mortgage_key = ['Month', 'Initial Balance', 'Payment', 'Interest', 'Principle', 'Ending Balance']
+    return mortgage_key, mortgage_graph_data, last_month, mortgage_date_data
+
+
 def mortgagecalculator(request):
     form = MortgageForm(request.POST or None)
     if form.is_valid():
         amount = form.cleaned_data.get('amount')
         interest = form.cleaned_data.get('interest')
         tenure = form.cleaned_data.get('tenure')
+        mortgage_date = form.cleaned_data.get('mortgage_date')
         table = calculator(amount, interest, tenure)
         total_payment = abs(table['principle'].sum() + table['interest'].sum())
         total_month = tenure * 12
         json_records = table.reset_index().to_json(orient='records')
         data = json.loads(json_records)
         monthly_payment = abs(data[0]['principle'] + data[0]['interest'])
-        last_date = datetime.date.today() + relativedelta(months=+total_month)
-        last_month = f'{calendar.month_name[last_date.month]} {last_date.year}'
-        print("data======>", data)
-        balance_data = []
-        principle_data = []
-        interest_data = []
-        mortgage_date_data = [str(datetime.date.today() + relativedelta(months=+x)) for x in range(total_month)]
-
-        for value in data:
-            balance_data.append(value['initial_balance'])
-            principle_data.append(abs(value['principle']))
-            interest_data.append(abs(value['interest']))
-
-        mortgage_graph_data = [{'name': 'Balance', 'data': balance_data}, {'name': 'Principle', 'data': principle_data},
-                               {'name': 'Interest', 'data': interest_data}]
-
-        mortgage_key = ['Month', 'Initial Balance', 'Principle', 'Interest', 'Ending Balance']
+        mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month, mortgage_date)
         context = {
             'form': form,
             'data': data,
@@ -2511,41 +2757,502 @@ def mortgagecalculator(request):
 # Properties Views
 
 class PropertyList(LoginRequiredMixin, ListView):
-    model = Property
+    model = RentalPropertyModel
     template_name = 'property/property_list.html'
 
     def get_queryset(self):
-        return Property.objects.filter(user=self.request.user)
+        return RentalPropertyModel.objects.filter(user=self.request.user)
 
 
-class PropertyDetail(LoginRequiredMixin, DetailView):
-    model = Property
-    template_name = 'property/property_detail.html'
+def property_details(request, pk):
+    user_name = request.user
+    property_obj = RentalPropertyModel.objects.get(user=user_name, pk=pk)
+    down_payment_value = (float(property_obj.purchase_price_detail.selected_price) * float(
+        property_obj.purchase_price_detail.down_payment)) / 100
+    selected_price = float(property_obj.purchase_price_detail.selected_price)
+    amount = float(property_obj.purchase_price_detail.selected_price) - down_payment_value
+    interest = float(property_obj.mortgage_detail.interest_rate)
+    currency_name = property_obj.currency
+    mortgage_year = float(property_obj.mortgage_detail.amortization_year)
+    other_cost_dict = ast.literal_eval(property_obj.closing_cost_detail.others_cost)[0]
+    total_investement = float(property_obj.closing_cost_detail.total_investment)
+    for key in other_cost_dict:
+        other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
+    other_cost_dict["Total Investment Required"] = f"{currency_name}{total_investement}"
+    other_cost_dict["Interest Rate Financed at"] = f"{interest}%"
+
+    table = calculator(amount, interest, mortgage_year)
+    total_payment = abs(table['principle'].sum() + table['interest'].sum())
+    total_month = int(mortgage_year * 12)
+    json_records = table.reset_index().to_json(orient='records')
+    data = json.loads(json_records)
+    mortgage_date = property_obj.mortgage_detail.start_date
+    mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month, mortgage_date)
+    monthly_payment = data[0]['principle'] + data[0]['interest']
+
+    other_cost_dict["Monthly Mortgage Payment (Principle & Interest)"] = f"{currency_name}{monthly_payment}"
+    investment_data = {'Property Address': property_obj.name,
+                       'Property Purchase Price': f"{currency_name}{selected_price}",
+                       'Down Payment': f"{currency_name}{down_payment_value}",
+                       'Land Transfer Tax': f"{currency_name}{property_obj.closing_cost_detail.transfer_tax}",
+                       'Legal Fees': f"{currency_name}{property_obj.closing_cost_detail.legal_fee}",
+                       'Title Insurance': f"{currency_name}{property_obj.closing_cost_detail.title_insurance}",
+                       'Home Inspection ': f"{currency_name}{property_obj.closing_cost_detail.inspection}",
+                       'Appraisal Fee': f"{currency_name}{property_obj.closing_cost_detail.appraisal_fee}",
+                       'Purchase of Appliances': f"{currency_name}{property_obj.closing_cost_detail.appliances}",
+                       'Renovation Cost': f"{currency_name}{property_obj.closing_cost_detail.renovation_cost}",
+                       }
+    projection_key = []
+    total_revenue_list = []
+    annual_cash_flow_list = []
+    operating_expenses_list = []
+    cash_return_list = []
+    operating_expenses_ratio_list = []
+    net_operating_income_list = []
+    debt_cov_ratio_list = []
+    net_income_list = []
+    appreciation_assumption_list = []
+    roi_list = []
+    roi_p_list = []
+    roi_with_appreciation_list = []
+    roi_p_with_appreciation_list = []
+    cap_rate_list = []
+    cap_rate_include_closing_cost_list = []
+    revenue_unit_1_list = []
+    mortgage_principle_list = []
+    mortgage_interest_list = []
+    property_tax_list = []
+    insurance_list = []
+    maintenance_list = []
+    water_list = []
+    gas_list = []
+    electricity_list = []
+    water_heater_rental_list = []
+    management_fee_list = []
+    vacancy_list = []
+    capital_expenditure_list = []
+    annual_cash_flow_dict_investors = {}
+    net_operating_income_dict_investors = {}
+    roi_dict_investors = {}
+    roi_with_appreciation_dict_investors = {}
+    total_year_return_dict_investors = {}
+
+    total_revenue = float(property_obj.monthly_revenue.total_revenue) * 12
+    rent_increase_assumption = float(property_obj.monthly_revenue.rent_increase_assumption)
+    interest_appreciation_assumption = float(property_obj.monthly_expenses.appreciation_assumption)
+    appreciation_assumption_value = (selected_price * interest_appreciation_assumption) / 100
+    all_investment = total_investement + (selected_price - down_payment_value)
+    unit_1_value = float(property_obj.monthly_revenue.unit_1) * 12
+    property_tax = float(property_obj.monthly_expenses.property_tax) * 12
+    insurance = float(property_obj.monthly_expenses.insurance) * 12
+    maintenance = float(property_obj.monthly_expenses.maintenance) * 12
+    water = float(property_obj.monthly_expenses.water) * 12
+    gas = float(property_obj.monthly_expenses.gas) * 12
+    electricity = float(property_obj.monthly_expenses.electricity) * 12
+    water_heater_rental = float(property_obj.monthly_expenses.water_heater_rental) * 12
+    management_fee = float(property_obj.monthly_expenses.management_fee) * 12
+    vacancy = float(property_obj.monthly_expenses.vacancy) * 12
+    capital_expenditure = float(property_obj.monthly_expenses.capital_expenditure) * 12
+    total_expense = float(property_obj.monthly_expenses.total_expenses) * 12
+    inflation_assumption = float(property_obj.monthly_expenses.inflation_assumption)
+
+    other_unit_dict = make_others_dict(ast.literal_eval(property_obj.monthly_revenue.others_revenue_cost)[0])
+    other_utility_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_utilities)[0])
+    other_expense_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_expenses)[0])
+    investors_dict = ast.literal_eval(property_obj.investor_details)[0]
+    total_investor_contributions = sum(investors_dict.values())
+    excess_short_fall = total_investor_contributions - total_investement
+    debt_financing = amount
+    total_financing = total_investor_contributions + amount
+
+    for key, units in investors_dict.items():
+        investor_contribution = round(float(units) / total_investor_contributions * 100, 2)
+        annual_cash_flow_dict_investors[key] = [investor_contribution]
+        net_operating_income_dict_investors[key] = [investor_contribution]
+        roi_dict_investors[key] = [investor_contribution]
+        roi_with_appreciation_dict_investors[key] = [investor_contribution]
+        investors_dict[key] = [f"{currency_name}{units}", f"{investor_contribution}%"]
+
+    start_index = 0
+    end_index = 12
+
+    for year in range(1, int(mortgage_year) + 1):
+        projection_key.append(f"Year {year}")
+        revenue_increase_assumption = total_revenue * rent_increase_assumption / 100
+        expense_increase_assumption = total_expense * inflation_assumption / 100
+        property_tax_increase = property_tax * inflation_assumption / 100
+        insurance_increase = insurance * inflation_assumption / 100
+        maintenance_increase = maintenance * inflation_assumption / 100
+        water_increase = water * inflation_assumption / 100
+        gas_increase = gas * inflation_assumption / 100
+        electricity_increase = electricity * inflation_assumption / 100
+        water_heater_rental_increase = water_heater_rental * inflation_assumption / 100
+        management_fee_increase = management_fee * inflation_assumption / 100
+        vacancy_increase = vacancy * inflation_assumption / 100
+        capital_expenditure_increase = capital_expenditure * inflation_assumption / 100
+
+        appreciation_assumption_increase = (appreciation_assumption_value * interest_appreciation_assumption) / 100
+        unit_1_value_increase = unit_1_value * rent_increase_assumption / 100
+        mortgage_principle = 0
+        mortgage_interest = 0
+        for payment in data[start_index:end_index]:
+            mortgage_principle += abs(payment['principle'])
+            mortgage_interest += abs(payment['interest'])
+
+        other_units_dict = make_other_data(other_unit_dict, year, mortgage_year, rent_increase_assumption)
+        other_utilities_dict = make_other_data(other_utility_dict, year, mortgage_year, rent_increase_assumption)
+        other_expenses_dict = make_other_data(other_expense_dict, year, mortgage_year, rent_increase_assumption)
+
+        expenses_ratio = round(total_expense / total_revenue * 100, 2)
+        cash_flow_value = total_revenue - total_expense - (monthly_payment * 12)
+        cash_return_value = cash_flow_value / total_investement * 100
+        income_value = round(total_revenue - total_expense, 2)
+        debt_value = round(income_value / (monthly_payment * 12), 2)
+        net_income_value = round(income_value - mortgage_interest, 2)
+        roi_value = round(cash_flow_value + mortgage_principle, 2)
+        roi_p_value = round(roi_value / total_investement * 100, 2)
+        roi_with_appreciation_value = round(roi_value + appreciation_assumption_value, 2)
+        roi_p_with_appreciation_value = round(roi_with_appreciation_value / total_investement * 100, 2)
+        cap_rate_value = round(income_value / selected_price * 100, 2)
+        cap_rate_include_closing_cost_value = round(income_value / all_investment * 100, 2)
+
+        for key, value in annual_cash_flow_dict_investors.items():
+            investor_value = round(cash_flow_value * value[0] / 100, 2)
+            value.append(investor_value)
+
+        for key, value in net_operating_income_dict_investors.items():
+            investor_value = round(income_value * value[0] / 100, 2)
+            value.append(investor_value)
+
+        for key, value in roi_dict_investors.items():
+            investor_value = round(roi_value * value[0] / 100, 2)
+            value.append(investor_value)
+
+        for key, value in roi_with_appreciation_dict_investors.items():
+            investor_value = round(roi_with_appreciation_value * value[0] / 100, 2)
+            value.append(investor_value)
+
+        total_revenue_list.append(f"{currency_name}{round(total_revenue, 2)}")
+        operating_expenses_list.append(f"{currency_name}{round(total_expense, 2)}")
+        cash_return_list.append(f"{round(cash_return_value, 2)}%")
+        operating_expenses_ratio_list.append(f"{expenses_ratio}%")
+        annual_cash_flow_list.append(f"{currency_name}{round(cash_flow_value, 2)}")
+        net_operating_income_list.append(f"{currency_name}{income_value}")
+        debt_cov_ratio_list.append(debt_value)
+        appreciation_assumption_list.append(f"{currency_name}{round(appreciation_assumption_value, 2)}")
+        net_income_list.append(f"{currency_name}{net_income_value}")
+        roi_list.append(f"{currency_name}{roi_value}")
+        roi_p_list.append(f"{roi_p_value}%")
+        roi_with_appreciation_list.append(f"{currency_name}{roi_with_appreciation_value}")
+        roi_p_with_appreciation_list.append(f"{roi_p_with_appreciation_value}%")
+        cap_rate_list.append(f"{cap_rate_value}%")
+        cap_rate_include_closing_cost_list.append(f"{cap_rate_include_closing_cost_value}%")
+        revenue_unit_1_list.append(f"{round(unit_1_value, 2)}")
+        mortgage_principle_list.append(f"{round(mortgage_principle, 2)}")
+        mortgage_interest_list.append(f"{round(mortgage_interest, 2)}")
+        property_tax_list.append(f"{round(property_tax, 2)}")
+        insurance_list.append(f"{round(insurance, 2)}")
+        maintenance_list.append(f"{round(maintenance, 2)}")
+        water_list.append(f"{round(water, 2)}")
+        gas_list.append(f"{round(gas, 2)}")
+        electricity_list.append(f"{round(electricity, 2)}")
+        water_heater_rental_list.append(f"{round(water_heater_rental, 2)}")
+        management_fee_list.append(f"{round(management_fee, 2)}")
+        vacancy_list.append(f"{round(vacancy, 2)}")
+        capital_expenditure_list.append(f"{round(capital_expenditure, 2)}")
+
+        total_revenue += revenue_increase_assumption
+        total_expense += expense_increase_assumption
+        unit_1_value += unit_1_value_increase
+        appreciation_assumption_value += appreciation_assumption_increase
+        property_tax += property_tax_increase
+        insurance += insurance_increase
+        maintenance += maintenance_increase
+        water += water_increase
+        gas += gas_increase
+        electricity += electricity_increase
+        water_heater_rental += water_heater_rental_increase
+        management_fee += management_fee_increase
+        vacancy += vacancy_increase
+        capital_expenditure += capital_expenditure_increase
+        start_index = end_index
+        end_index += 12
+
+    # Capex Budget data
+
+    capex_budget_obj = property_obj.capex_budget_details
+    roof_list = make_capex_budget(ast.literal_eval(capex_budget_obj.roof))
+    water_heater_list = make_capex_budget(ast.literal_eval(capex_budget_obj.water_heater))
+    all_appliances_list = make_capex_budget(ast.literal_eval(capex_budget_obj.all_appliances))
+    bathroom_fixtures_list = make_capex_budget(ast.literal_eval(capex_budget_obj.bathroom_fixtures))
+    drive_way_list = make_capex_budget(ast.literal_eval(capex_budget_obj.drive_way))
+    furnance_list = make_capex_budget(ast.literal_eval(capex_budget_obj.furnance))
+    air_conditioner_list = make_capex_budget(ast.literal_eval(capex_budget_obj.air_conditioner))
+    flooring_list = make_capex_budget(ast.literal_eval(capex_budget_obj.flooring))
+    plumbing_list = make_capex_budget(ast.literal_eval(capex_budget_obj.plumbing))
+    electrical_list = make_capex_budget(ast.literal_eval(capex_budget_obj.electrical))
+    windows_list = make_capex_budget(ast.literal_eval(capex_budget_obj.windows))
+    paint_list = make_capex_budget(ast.literal_eval(capex_budget_obj.paint))
+    kitchen_list = make_capex_budget(ast.literal_eval(capex_budget_obj.kitchen))
+    structure_list = make_capex_budget(ast.literal_eval(capex_budget_obj.structure))
+    components_list = make_capex_budget(ast.literal_eval(capex_budget_obj.components))
+    landscaping_list = make_capex_budget(ast.literal_eval(capex_budget_obj.landscaping))
+    others_budgets_dict = ast.literal_eval(capex_budget_obj.other_budgets)[0]
+    total_replacement_costs = capex_budget_obj.total_budget_cost
+    for key, value in others_budgets_dict.items():
+        make_capex_budget(value)
+
+    capex_budget_value = {
+                        'Roof': roof_list,
+                        'Water Heater': water_heater_list,
+                        'All Appliances': all_appliances_list,
+                        'Bathroom Fixtures (Showers, Vanities, Toilets etc.)': bathroom_fixtures_list,
+                        'Driveway/Parking Lot': drive_way_list,
+                        'Furnace': furnance_list,
+                        'Air Conditioner ': air_conditioner_list,
+                        'Flooring': flooring_list,
+                        'Plumbing': plumbing_list,
+                        'Electrical': electrical_list,
+                        'Windows': windows_list,
+                        'Paint': paint_list,
+                        'Kitchen Cabinets/Counters': kitchen_list,
+                        'Structure (foundation, framing)': structure_list,
+                        'Components (garage door, etc.)': components_list,
+                        'Landscaping': landscaping_list,
+                        }
+    if others_budgets_dict:
+        capex_budget_value.update(others_budgets_dict)
+    # Yearly projection
+    projection_value = {'Total Revenue': total_revenue_list,
+                        'Annual Cashflow': annual_cash_flow_list,
+                        'Cash on Cash Return (%)': cash_return_list,
+                        'Operating Expenses': operating_expenses_list,
+                        'Operating Expenses Ratio': operating_expenses_ratio_list,
+                        'Net Operating Income (NOI)': net_operating_income_list,
+                        'Debt Service Coverage Ratio': debt_cov_ratio_list,
+                        'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list,
+                        'Property Appreciation Assumption': appreciation_assumption_list,
+                        'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
+                        'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
+                        'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
+                        'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
+                        'Capitalization Rate (Cap Rate)': cap_rate_list,
+                        'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
+                        }
+
+    # yearly Revenues
+
+    revenue_yearly_data = {'Unit 1': revenue_unit_1_list}
+    other_unit_dict['Total Revenue'] = total_revenue_list
+    revenue_yearly_data.update(other_units_dict)
+    investment_data.update(other_cost_dict)
+
+    # Yearly Expenses
+    expenses_yearly_data1 = {'Mortgage Principle': mortgage_principle_list,
+                             'Mortgage Interest': mortgage_interest_list,
+                             'Property Taxes': property_tax_list,
+                             'Insurance': insurance_list,
+                             'Regular Maintenance': maintenance_list,
+                             'Water': water_list,
+                             'Gas': gas_list,
+                             'Electricity': electricity_list,
+                             'Water Heater Rental': water_heater_rental_list,
+                             }
+    expenses_yearly_data2 = {'Annual Cashflow': annual_cash_flow_list,
+                             'Cash on Cash Return (%)': cash_return_list,
+                             'Operating Expenses': operating_expenses_list,
+                             'Operating Expenses Ratio': operating_expenses_ratio_list,
+                             'Net Operating Income (NOI)': net_operating_income_list,
+                             'Debt Service Coverage Ratio': debt_cov_ratio_list,
+                             'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list
+                             }
+    expenses_yearly_data1.update(other_utilities_dict)
+    expenses_yearly_data1.update({"Capital Expenditure": capital_expenditure_list,
+                                  "Property Management Fees": management_fee_list, "Vacancy": vacancy_list})
+    expenses_yearly_data1.update(other_expenses_dict)
+
+    # Yearly Return On Investment
+    yearly_return_data = {
+                            'Property Appreciation Assumption': appreciation_assumption_list,
+                            'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
+                            'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
+                            'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
+                            'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
+                            'Capitalization Rate (Cap Rate)': cap_rate_list,
+                            'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
+                         }
+
+    # Stats and Graphs Data :-
+
+    cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)', 'data': cash_return_list}]
+    return_on_investment_data = [{'name': 'Return On Investment % (ROI) (Assuming No Appreciation)', 'data': roi_p_list},
+                                 {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
+                                  'data': roi_p_with_appreciation_list}]
+
+    change_annual_cash_flow_list = [float(x[1:]) for x in annual_cash_flow_list]
+    change_appreciation_assumption_list = [float(x[1:]) for x in appreciation_assumption_list]
+    change_mortgage_principle_list = [float(x) for x in mortgage_principle_list]
+
+    debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': debt_cov_ratio_list}]
+    return_investment_data = [{'name': 'Annual Cashflow', 'data': change_annual_cash_flow_list},
+                              {'name': 'Net Operating Income(NOI)', 'data': [x[1:] for x in net_operating_income_list]},
+                              {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
+                               'data': [x[1:] for x in roi_list]},
+                              {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
+                                  'data': [x[1:] for x in roi_with_appreciation_list]
+                              }]
+    property_expense_data = [{'name': 'Operating Expenses', 'data': [x[1:] for x in operating_expenses_list]}]
+
+    stats_graph_dict = {'cash_on_cash_return_data': cash_on_cash_return_data,
+                        'return_on_investment_data': return_on_investment_data,
+                        'debt_cov_ratio_data': debt_cov_ratio_data,
+                        'return_investment_data': return_investment_data,
+                        'property_expense_data': property_expense_data}
+
+    total_year_return = sum(change_annual_cash_flow_list) + sum(change_appreciation_assumption_list) +\
+                        sum(change_mortgage_principle_list)
+
+    for key, value in investors_dict.items():
+        update_value = float(value[1].replace("%", ""))
+        total_year_return_dict_investors[key] = [value[1], round(update_value * total_year_return, 2)]
+
+    print(total_year_return_dict_investors)
+    context = {
+               'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
+               'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
+               "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
+               "yearly_return_data": yearly_return_data, 'data': data, 'monthly_payment': monthly_payment,
+               'last_month': last_month, 'days': total_month, 'total_payment': total_payment, 'mortgage_key': mortgage_key,
+               'mortgage_key_dumbs': json.dumps(mortgage_key), 'mortgage_graph_data': mortgage_graph_data,
+               'mortgage_date_data': mortgage_date_data, "total_year_return": round(total_year_return, 2),
+               "annual_cash_flow_dict_investors": annual_cash_flow_dict_investors,
+               "net_operating_income_dict_investors": net_operating_income_dict_investors,
+               "roi_dict_investors": roi_dict_investors,
+               "roi_with_appreciation_dict_investors": roi_with_appreciation_dict_investors,
+               "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
+               "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
+               "total_financing": total_financing, "capex_budget_value": capex_budget_value,
+               "total_replacement_costs": total_replacement_costs, "total_return_investor_dict": total_year_return_dict_investors
+              }
+    context.update(stats_graph_dict)
+
+    return render(request, "property/property_detail.html", context=context)
+
+def others_costs_data(other_closing_cost):
+    cost_dict = dict.fromkeys(other_closing_cost[::2], 0)
+    cost_index = 1
+    for key in cost_dict:
+        print(other_closing_cost[cost_index])
+        cost_dict[key] = check_float(other_closing_cost[cost_index])
+        cost_index += 2
+
+    return cost_dict
 
 
-class PropertyAdd(LoginRequiredMixin, CreateView):
-    model = Property
-    form_class = PropertyForm
-    template_name = 'property/property_add.html'
+def property_add(request):
+    if request.method == 'POST':
+        property_name = request.POST['name_address'].title()
+        currency_name = request.POST['currency_name']
+        user_name = request.user
+        property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
+        if property_obj:
+            context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
+            return render(request, "property/property_add.html", context=context)
 
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
-        return super().form_valid(form)
+        rental_obj = RentalPropertyModel()
+        property_purchase_obj = PropertyPurchaseDetails()
+        mortgage_obj = MortgageDetails()
+        closing_cost_obj = ClosingCostDetails()
+        revenue_obj = RevenuesDetails()
+        expense_obj = ExpensesDetails()
+        capex_budget_obj = CapexBudgetDetails()
+        save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
+                             expense_obj, capex_budget_obj, property_name, currency_name, user_name)
+        return redirect("/property_list/")
+
+    else:
+        context = {'currency_dict': currency_dict, 'scenario_dict': scenario_dict,}
+        return render(request, "property/property_add.html", context=context)
 
 
-class PropertyUpdate(LoginRequiredMixin, UpdateView):
-    model = Property
-    form_class = PropertyForm
-    template_name = 'property/property_update.html'
+def property_update(request, pk):
+    user_name = request.user
+    if request.method == "POST":
+        rental_obj = RentalPropertyModel.objects.get(pk=pk)
+        property_purchase_obj = rental_obj.purchase_price_detail
+        mortgage_obj = rental_obj.mortgage_detail
+        closing_cost_obj = rental_obj.closing_cost_detail
+        revenue_obj = rental_obj.monthly_revenue
+        expense_obj = rental_obj.monthly_expenses
+        capex_budget_obj = rental_obj.capex_budget_details
+        property_name = request.POST['name_address'].title()
+        currency_name = request.POST['currency_name']
+        user_name = request.user
+        if rental_obj.name != property_name:
+            property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
+            if property_obj:
+                context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
+                return render(request, "property/property_add.html", context=context)
+
+        save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
+                             expense_obj, capex_budget_obj, property_name, currency_name, user_name)
+        return redirect("/property_list/")
+
+    else:
+        property_obj = RentalPropertyModel.objects.get(pk=pk)
+        roof_obj = ast.literal_eval(property_obj.capex_budget_details.roof)
+        water_heater = ast.literal_eval(property_obj.capex_budget_details.water_heater)
+        all_appliances = ast.literal_eval(property_obj.capex_budget_details.all_appliances)
+        bathroom_fixtures = ast.literal_eval(property_obj.capex_budget_details.bathroom_fixtures)
+        drive_way = ast.literal_eval(property_obj.capex_budget_details.drive_way)
+        furnance = ast.literal_eval(property_obj.capex_budget_details.furnance)
+        air_conditioner = ast.literal_eval(property_obj.capex_budget_details.air_conditioner)
+        flooring = ast.literal_eval(property_obj.capex_budget_details.flooring)
+        plumbing = ast.literal_eval(property_obj.capex_budget_details.plumbing)
+        electrical = ast.literal_eval(property_obj.capex_budget_details.electrical)
+        windows = ast.literal_eval(property_obj.capex_budget_details.windows)
+        paint = ast.literal_eval(property_obj.capex_budget_details.paint)
+        kitchen = ast.literal_eval(property_obj.capex_budget_details.kitchen)
+        structure = ast.literal_eval(property_obj.capex_budget_details.structure)
+        components = ast.literal_eval(property_obj.capex_budget_details.components)
+        landscaping = ast.literal_eval(property_obj.capex_budget_details.landscaping)
+        others_cost = ast.literal_eval(property_obj.closing_cost_detail.others_cost)[0]
+        others_revenue_cost = ast.literal_eval(property_obj.monthly_revenue.others_revenue_cost)[0]
+        other_utilities = ast.literal_eval(property_obj.monthly_expenses.other_utilities)[0]
+        other_expenses = ast.literal_eval(property_obj.monthly_expenses.other_expenses)[0]
+        investor_details = ast.literal_eval(property_obj.investor_details)[0]
+
+        context = {'currency_dict': currency_dict, 'scenario_dict': scenario_dict, 'property_obj': property_obj,
+                   'roof_obj': roof_obj, 'water_heater': water_heater, 'all_appliances': all_appliances,
+                   'bathroom_fixtures': bathroom_fixtures, 'drive_way': drive_way, 'furnance': furnance,
+                   'air_conditioner': air_conditioner, 'flooring': flooring, 'plumbing': plumbing,
+                   'electrical': electrical, 'windows': windows, 'paint': paint, 'kitchen': kitchen,
+                   'structure': structure, 'components': components, 'landscaping': landscaping,
+                   "others_cost": others_cost, "others_cost_len": len(others_cost),
+                   "others_revenue_cost": others_revenue_cost, "others_revenue_cost_len": len(others_revenue_cost),
+                   "other_utilities": other_utilities, "other_utilities_len": len(other_utilities),
+                   "other_expenses": other_expenses, "other_expenses_len": len(other_expenses),
+                   "investor_details": investor_details, "investor_details_len": len(investor_details)}
+
+        return render(request, "property/property_update.html", context=context)
 
 
-class PropertyDelete(LoginRequiredMixin, DeleteView):
-    def post(self, request, *args, **kwargs):
-        property_obj = Property.objects.get(pk=self.kwargs['pk'])
-        property_obj.delete()
-        return JsonResponse({"status": "Successfully", "path": "None"})
+def property_delete(request, pk):
+    property_obj = RentalPropertyModel.objects.get(pk=pk)
+    purchase_price_obj = property_obj.purchase_price_detail
+    mortgage_detail_obj = property_obj.mortgage_detail
+    closing_cost_obj = property_obj.closing_cost_detail
+    monthly_revenue_obj = property_obj.monthly_revenue
+    monthly_expenses_obj = property_obj.monthly_expenses
+    capex_budget_details_obj = property_obj.capex_budget_details
+    purchase_price_obj.delete()
+    mortgage_detail_obj.delete()
+    closing_cost_obj.delete()
+    monthly_revenue_obj.delete()
+    monthly_expenses_obj.delete()
+    capex_budget_details_obj.delete()
+
+    return JsonResponse({"status": "Successfully", "path": "/property_list/"})
 
 
 class PdfPrint:

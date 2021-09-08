@@ -31,6 +31,21 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Mortgage Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="start_date" value="{{form.mortgage_date.value}}" name="mortgage_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Amount</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -38,7 +53,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="amount"
+                                            <input type="text" id="fname-icon" value="{{form.amount.value}}" class="form-control" name="amount"
                                                    placeholder="Amount"/>
                                         </div>
                                     </div>
@@ -70,7 +85,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="interest"
+                                            <input type="text" id="email-icon" value="{{form.interest.value}}" class="form-control" name="interest"
                                                    placeholder="Interest"/>
                                         </div>
                                     </div>
@@ -79,7 +94,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="contact-icon">Interest Period (Yearly) </label>
+                                        <label for="contact-icon">Mortgage Amortization(Year) </label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -87,7 +102,7 @@
                                                 <span class="input-group-text"><i data-feather="smartphone"></i></span>
                                             </div>
                                             <input type="number" id="contact-icon" class="form-control" name="tenure"
-                                                   placeholder="Tenure" required/>
+                                                   value="{{form.tenure.value}}" placeholder="Tenure" required/>
                                         </div>
                                     </div>
                                 </div>
@@ -180,8 +195,9 @@
                                     <tr>
                                         <td>{{i.month}}</td>
                                         <td>{{i.initial_balance}}</td>
-                                        <td>{{i.principle}}</td>
+                                        <td>{{i.payment}}</td>
                                         <td>{{i.interest}}</td>
+                                        <td>{{i.principle}}</td>
                                         <td>{{i.ending_balance}}</td>
                                     </tr>
                                     {% endfor %}

@@ -20,9 +20,10 @@ def calculator(amount, interest, tenure):
     interest = np.ipmt(rate, periods, nper, pv)
     pmt = principal + interest  # Or: pmt = np.pmt(rate, nper, pv)
 
-    cols = ['initial_balance', 'principle', 'interest', 'ending_balance']
-    data = [balance(pv, rate, periods - 1, -pmt), principal, interest, balance(pv, rate, periods, -pmt)]
+    cols = ['initial_balance', 'payment', 'interest', 'principle', 'ending_balance']
+    data = [balance(pv, rate, periods - 1, -pmt), abs(principal + interest), abs(interest), abs(principal), balance(pv, rate, periods, -pmt)]
 
+    print()
     table = pd.DataFrame(data, columns=periods, index=cols).T
     table.index.name = 'month'
     return table.round(2)
