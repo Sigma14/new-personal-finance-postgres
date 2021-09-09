@@ -427,6 +427,7 @@ $("body").delegate(".add_unit_button", "click", function(event)
     class_name = "unit_div_" + div_number
     extra_div_number = parseInt(div_number) + 1
     parent_div =  parseInt(div_number) - 1
+    console.log(parent_div)
     var inputHtml = "<div class='col-12 " + class_name +" '>" + "<div class='form-group row'>" + "<div class='col-sm-3 col-form-label'>"
         inputHtml += "<label for='fname-icon'>" + "Unit" + div_number + "</label>" + "</div>" + "<div class='col-sm-7'>"
         inputHtml += "<div class='input-group input-group-merge'>" + "<input type='text' class='form-control' name='others_revenue_cost' required placeholder='Unit" + div_number + "' />"
@@ -442,7 +443,8 @@ $("body").delegate(".add_unit_button", "click", function(event)
 $("body").delegate(".remove_unit_button", "click", function(event)
 {
     div_number = parseInt($(this).attr('div_number'))
-    if(div_number > 2)
+    unit_number = parseInt($(".last_unit").attr('unit_number'))
+    if(div_number > unit_number)
     {
         extra_div_number = div_number + 1
         parent_div =  div_number - 1
@@ -491,7 +493,20 @@ $("body").delegate(".remove_other_cost", "click", function(event)
     extra_class = $(this).attr('extra_class')
     input_name = $(this).attr('input_name')
 
-    if(div_number > 1)
+    if(input_name == "other_utilities")
+    {
+        last_div = parseInt($(".last_utility").attr('last_div')) + 1
+    }
+    if(input_name == "other_cost")
+    {
+        last_div = parseInt($(".last_cost").attr('last_div')) + 1
+    }
+    if(input_name == "other_expenses")
+    {
+        last_div = parseInt($(".last_expenses").attr('last_div')) + 1
+    }
+
+    if(div_number >= last_div)
     {
         extra_div_number = div_number + 1
         parent_div =  div_number - 1
@@ -502,7 +517,7 @@ $("body").delegate(".remove_other_cost", "click", function(event)
     }
     else
     {
-        inputHtml = "<button class='btn btn-primary add_other_cost' input_name='" + input_name + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + 2 + "' title='Add Other'>"
+        inputHtml = "<button class='btn btn-primary add_other_cost' input_name='" + input_name + "' main_class='" + main_class + "' extra_class='" + extra_class + "' div_class='" + last_div + "' title='Add Other'>"
         inputHtml += "<i class='fa fa-plus'></i></button></div></div></div>"
     }
     $("."+extra_class+div_number).append(inputHtml)

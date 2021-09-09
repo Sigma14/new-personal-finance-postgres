@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load mathfilters %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -17,7 +18,7 @@
                                     <li class="breadcrumb-item"><a href="{% url 'rental_property_list' %}">Rental Properties</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        {{object.name}}
+                                        {{property_obj.name}}
                                     </li>
                                 </ol>
                             </div>
@@ -26,13 +27,32 @@
                 </div>
             </div>
             <div class="content-body" float="left">
-                <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'rental_property_update' pk=property_obj.id %}" class="btn btn-primary"><i
-                    data-feather="edit-2"></i>&nbsp;Edit Property</a>
-                    <button type="button" delete_name="{{ property_obj.name }} Property" url="{% url 'rental_property_delete' pk=property_obj.id %}" class="btn btn-danger delete_button"><i
-                                            data-feather="trash"></i>&nbsp;Delete </button>
+                <section id="dashboard-ecommrc">
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a>
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ property_obj.name }}</h2>
+                                    <h4 style="float: right;" class="text-info">
+                                        {{ property_obj.currency }}{{ property_obj.purchase_price_detail.selected_price }}
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding-bottom:40px;">
+                                    <h4 style="float: left;">Down Payment -: <strong class="text-warning">{{ property_obj.currency }}{{ property_obj.purchase_price_detail.selected_price|mul:property_obj.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>
+<!--                                    <h4 style="float: right;">{{ property_obj.updated_at }}</h4>-->
+                                    <div style="float: right;">
+                                        <a href="{% url 'rental_property_update' pk=property_obj.id %}" class="btn btn-primary"><i
+                                        data-feather="edit-2"></i>&nbsp;Edit Property</a>
+                                        <button type="button" delete_name="{{ property_obj.name }} Property" url="{% url 'rental_property_delete' pk=property_obj.id %}" class="btn btn-danger delete_button"><i
+                                                                data-feather="trash"></i>&nbsp;Delete </button>
+                                    </div>
 
-                </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
                 <br/>
                 <section class="app-user-edit">
                     <div class="card">

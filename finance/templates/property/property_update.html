@@ -312,10 +312,10 @@
                             {% if others_cost %}
                                 {% for key, data in others_cost.items %}
                                     {% if forloop.counter == others_cost_len %}
-                                        <div class="col-12 other_cost_div_1">
+                                        <div class="col-12 other_cost_div_{{forloop.counter}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <input type="text" class="form-control" value="{{key}}" name="other_cost" required
+                                                    <input type="text" class="form-control last_cost" last_div="{{forloop.counter}}" value="{{key}}" name="other_cost" required
                                                                placeholder="Other(Please Specify)"/>
                                                 </div>
                                                 <div class="col-sm-8" style="padding-top: 7px;">
@@ -324,13 +324,13 @@
                                                                placeholder="-"/>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-1 extra_other_cost_div_1" style="padding-top: 7px;">
-                                                    <button class="btn btn-primary add_other_cost" input_name="other_cost" main_class="other_cost_div_" extra_class="extra_other_cost_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                                <div class="col-sm-1 extra_other_cost_div_{{forloop.counter}}" style="padding-top: 7px;">
+                                                    <button class="btn btn-primary add_other_cost" input_name="other_cost" main_class="other_cost_div_" extra_class="extra_other_cost_div_" div_class="{{forloop.counter|add:1}}" title="Add other"><i class="fa fa-plus"></i></button>
                                                 </div>
                                             </div>
                                         </div>
                                     {% else %}
-                                        <div class="col-12">
+                                        <div class="col-12 other_cost_div_{{forloop.counter}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
                                                     <input type="text" class="form-control" value="{{key}}" name="other_cost" required
@@ -350,7 +350,7 @@
                             <div class="col-12 other_cost_div_1">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <input type="text" class="form-control" value="Other(Please Specify)" name="other_cost" required
+                                        <input type="text" class="form-control last_cost" last_div="1" value="Other(Please Specify)" name="other_cost" required
                                                    placeholder="Other(Please Specify)"/>
                                     </div>
                                     <div class="col-sm-8" style="padding-top: 7px;">
@@ -391,7 +391,7 @@
                                         <div class="col-12 unit_div_{{forloop.counter|add:1}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">{{key}}</label>
+                                                    <label class="last_unit" unit_number="{{forloop.counter|add:1}}">{{key}}</label>
                                                 </div>
                                                 <div class="col-sm-8">
                                                     <div class="input-group input-group-merge">
@@ -424,7 +424,7 @@
                             <div class="col-12 unit_div_2">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Unit 2</label>
+                                        <label class="last_unit" unit_number="2">Unit 2</label>
                                     </div>
                                     <div class="col-sm-8">
                                         <div class="input-group input-group-merge">
@@ -888,7 +888,7 @@
                                         <div class="col-12 other_utility_div_{{forloop.counter}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <input type="text" class="form-control" value="{{key}}" name="other_utilities" required
+                                                    <input type="text" class="form-control last_utility" last_div="{{forloop.counter}}" value="{{key}}" name="other_utilities" required
                                                                placeholder="{{key}}"/>
                                                 </div>
                                                 <div class="col-sm-8" style="padding-top: 7px;">
@@ -923,7 +923,7 @@
                             <div class="col-12 other_utility_div_1">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <input type="text" class="form-control" value="Other Utility(Please Specify)" name="other_utilities" required
+                                        <input type="text" class="form-control last_utility" last_div="1" value="Other Utility(Please Specify)" name="other_utilities" required
                                                    placeholder="Other Utility(Please Specify)"/>
                                     </div>
                                     <div class="col-sm-8" style="padding-top: 7px;">
@@ -982,7 +982,7 @@
                                         <div class="col-12 other_expenses_div_{{forloop.counter}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <input type="text" class="form-control" value="{{key}}" name="other_expenses" required
+                                                    <input type="text" class="form-control last_expenses" last_div="{{forloop.counter}}" value="{{key}}" name="other_expenses" required
                                                                placeholder="Other Expenses(Please Specify)"/>
                                                 </div>
                                                 <div class="col-sm-8" style="padding-top: 7px;">
@@ -1000,7 +1000,7 @@
                                         <div class="col-12 other_expenses_div_{{forloop.counter}}">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <input type="text" class="form-control" value="{{key}}" name="other_expenses" required
+                                                    <input type="text" class="form-control"  value="{{key}}" name="other_expenses" required
                                                                placeholder="Other Expenses(Please Specify)"/>
                                                 </div>
                                                 <div class="col-sm-8" style="padding-top: 7px;">
@@ -1017,7 +1017,7 @@
                             <div class="col-12 other_expenses_div_1">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <input type="text" class="form-control" value="Other Expenses(Please Specify)" name="other_expenses" required
+                                        <input type="text" class="form-control last_expenses" last_div="1" value="Other Expenses(Please Specify)" name="other_expenses" required
                                                    placeholder="Other Expenses(Please Specify)"/>
                                     </div>
                                     <div class="col-sm-8" style="padding-top: 7px;">

@@ -3253,7 +3253,7 @@ def property_delete(request, pk):
     monthly_expenses_obj.delete()
     capex_budget_details_obj.delete()
 
-    return JsonResponse({"status": "Successfully", "path": "/property_list/"})
+    return JsonResponse({"status": "Successfully", "path": "/rental_property_list/"})
 
 
 class PdfPrint:
