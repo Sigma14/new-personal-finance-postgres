@@ -93,9 +93,14 @@ urlpatterns = [
     path('fund_update/<int:pk>', fund_update, name='fund_update'),
     path('fund_overtime', fund_overtime, name='fund_overtime'),
 
+    # Calculators
+
+    path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
+    path('future-net-worth-calculator/', future_net_worth_calculator, name='future_net_worth_calculator'),
+
     path('login', user_login, name='user_login'),
     path('net_worth', net_worth, name='net_worth'),
-    path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
+
     # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
     # path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),
     # path('mortgagecalculator_add/', MortgageCalculatorAdd.as_view(), name='mortgagecalculator_add'),

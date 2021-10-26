@@ -168,7 +168,7 @@ def check_auto_budget(request):
                             budget_year_amount = budget_amount + (budget_amount - budget_year_spent)
                             start_year_date, end_year_date = start_end_date(today_date, budget_period)
                             year_list = list(OrderedDict(
-                                ((start_year_date + datetime.timedelta(_)).replace(day=1), None) for _ in
+                                ((start_year_date + timedelta(_)).replace(day=1), None) for _ in
                                 range((end_year_date - start_year_date).days + 1)).keys())
                             year_list = list(dict.fromkeys(year_list))
                             auto_month_obj(user_name, year_list, start_year_date, end_year_date, budget_name,
@@ -182,7 +182,7 @@ def check_auto_budget(request):
                             budget_quarter_amount = budget_amount + (budget_amount - budget_quarter_spent)
                             upcoming_quarter_date, quarter_value = start_end_date(today_date, budget_period)
                             quarter_list = list(OrderedDict(
-                                ((quarter_value + datetime.timedelta(_)).replace(day=1), None) for _ in
+                                ((quarter_value + timedelta(_)).replace(day=1), None) for _ in
                                 range((upcoming_quarter_date - quarter_value).days + 1)).keys())
                             quarter_list = list(dict.fromkeys(quarter_list))
                             auto_month_obj(user_name, quarter_list, quarter_value, upcoming_quarter_date, budget_name,

@@ -3,6 +3,7 @@ import csv
 import json
 import calendar
 import pandas as pd
+import numpy as np
 import datetime
 from io import BytesIO
 from collections import OrderedDict
@@ -714,14 +715,16 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
 
     for data in property_data:
         if data.include_net_worth:
+            print("data.currency===================>", data.currency)
+            print("data.purchase_price_detail.selected_price===================>", data.purchase_price_detail.selected_price)
             if data.currency in total_property_dict:
                 total_property_dict[data.currency] = round(total_property_dict[data.currency] +
-                                                           float(data.value), 2)
+                                                           float(data.purchase_price_detail.selected_price), 2)
             else:
                 currency_count_list.append(data.currency)
-                total_property_dict[data.currency] = round(float(data.value), 2)
+                total_property_dict[data.currency] = round(float(data.purchase_price_detail.selected_price), 2)
 
-            property_currency_balance.append({data.currency: data.value})
+            property_currency_balance.append({data.currency: data.purchase_price_detail.selected_price})
 
     total_currency_list = list(dict.fromkeys(currency_count_list))
 
@@ -826,7 +829,7 @@ def home(request):
         current_date = datetime.datetime.today().date()
         month_start, month_end = start_end_date(current_date, "Monthly")
         accounts_data = Account.objects.filter(user=user_name)
-        property_data = Property.objects.filter(user=user_name)
+        property_data = RentalPropertyModel.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name, start_date=month_start, end_date=month_end)
         budget_label = []
         budget_values = []
@@ -875,7 +878,9 @@ def home(request):
             account_date_list = []
 
         for data in property_data:
-            property_currency_balance.append({data.currency: data.value})
+            print("currency==>", data.currency)
+            print("data.purchase_price_detail.selected_price", data.purchase_price_detail.selected_price)
+            property_currency_balance.append({data.currency: data.purchase_price_detail.selected_price})
 
         category_spent_amount(categories, user_name, categories_name, categories_value)
         budget_currency = '$'
@@ -921,7 +926,7 @@ def home(request):
 def net_worth(request):
     user_name = request.user
     account_data = Account.objects.filter(user=user_name)
-    property_data = Property.objects.filter(user=user_name)
+    property_data = RentalPropertyModel.objects.filter(user=user_name)
     all_transaction_data = Transaction.objects.filter(user=user_name)
     if account_data:
         min_date = account_data[0].created_at.date()
@@ -2754,6 +2759,104 @@ def mortgagecalculator(request):
     return render(request, 'mortgagecalculator_add.html', context)
 
 
+# FUTURE NET WORTH CALCULATOR
+
+def future_net_worth_calculator(request):
+    if request.method == "POST":
+        home_value = check_float(request.POST['home_value'])
+        vehicle_value = check_float(request.POST['vehicle_value'])
+        cash_savings = check_float(request.POST['cash_savings'])
+        open_taxable_savings = check_float(request.POST['open_taxable_savings'])
+        non_taxable_savings = check_float(request.POST['non_taxable_savings'])
+        tax_deferred_savings = check_float(request.POST['tax_deferred_savings'])
+        other_asset_value = check_float(request.POST['other_asset_value'])
+        home_mortgage_owing = check_float(request.POST['home_mortgage_owing'])
+        vehicle_loan_owing = check_float(request.POST['vehicle_loan_owing'])
+        s_i_loan_owing = check_float(request.POST['s_i_loan_owing'])
+        credit_card_owing = check_float(request.POST['credit_card_owing'])
+        student_loan_owing = check_float(request.POST['student_loan_owing'])
+        other_loan_owing = check_float(request.POST['other_loan_owing'])
+        asset_rate = check_float(request.POST['asset_rate'])
+        income = check_float(request.POST['taxable_income'])
+        age = int(request.POST['age'])
+        currency = request.POST['currency']
+        other_liab = others_costs_data(request.POST.getlist('other_liab'))
+        other_cost = others_costs_data(request.POST.getlist('other_cost'))
+
+    else:
+        home_value = 1000000
+        vehicle_value = 25000
+        cash_savings = 3000
+        open_taxable_savings = 4000
+        non_taxable_savings = 1000
+        tax_deferred_savings = 2000
+        other_asset_value = 10000
+        home_mortgage_owing = 750000
+        vehicle_loan_owing = 15000
+        s_i_loan_owing = 0
+        credit_card_owing = 2000
+        student_loan_owing = 3000
+        other_loan_owing = 0
+        other_cost = {}
+        other_liab = {}
+        asset_rate = 3
+        age = 24
+        income = 50000
+        currency = '$'
+
+    future_list = []
+    total_worth = age * income / 10
+    total_asset = home_value + vehicle_value + cash_savings + open_taxable_savings + non_taxable_savings + tax_deferred_savings + other_asset_value
+    total_debt = home_mortgage_owing + vehicle_loan_owing + s_i_loan_owing + credit_card_owing + student_loan_owing + other_loan_owing
+    current_net_worth = total_asset - total_debt
+
+    for key, value in other_cost.items():
+        total_asset += value
+
+    for key, value in other_liab.items():
+        total_debt += value
+
+    for i in [5, 10, 25]:
+        r = asset_rate / 100
+        interest_rate = (1 + r) ** i
+        fv = round(current_net_worth * interest_rate, 0)
+        future_list.append(fv)
+
+    categories_name = ['5 Year', '10 Year', '25 Year']
+    categories_series = [{'name': 'Net Worth', 'data': future_list}]
+    context = {
+                'current_net_worth': current_net_worth,
+                'total_asset': total_asset,
+                'total_debt': total_debt,
+                'age': age,
+                'income': income,
+                'total_worth': total_worth,
+                'currency_dict': currency_dict,
+                'currency': currency,
+                'home_value': home_value,
+                'vehicle_value': vehicle_value,
+                'cash_savings': cash_savings,
+                'open_taxable_savings': open_taxable_savings,
+                'non_taxable_savings': non_taxable_savings,
+                'tax_deferred_savings': tax_deferred_savings,
+                'other_asset_value': other_asset_value,
+                'home_mortgage_owing': home_mortgage_owing,
+                'vehicle_loan_owing': vehicle_loan_owing,
+                's_i_loan_owing': s_i_loan_owing,
+                'credit_card_owing': credit_card_owing,
+                'student_loan_owing': student_loan_owing,
+                'other_loan_owing': other_loan_owing,
+                'other_asset': other_cost,
+                'other_liability': other_liab,
+                'age': age,
+                'taxable_income': income,
+                'asset_rate': asset_rate,
+                'categories_name': categories_name,
+                'categories_series': categories_series
+            }
+
+    return render(request, "future_net_worth.html", context=context)
+
 # Properties Views
 
 class PropertyList(LoginRequiredMixin, ListView):
@@ -3143,7 +3246,6 @@ def others_costs_data(other_closing_cost):
     cost_dict = dict.fromkeys(other_closing_cost[::2], 0)
     cost_index = 1
     for key in cost_dict:
-        print(other_closing_cost[cost_index])
         cost_dict[key] = check_float(other_closing_cost[cost_index])
         cost_index += 2
 

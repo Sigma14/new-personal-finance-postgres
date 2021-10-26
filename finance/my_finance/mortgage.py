@@ -23,7 +23,6 @@ def calculator(amount, interest, tenure):
     cols = ['initial_balance', 'payment', 'interest', 'principle', 'ending_balance']
     data = [balance(pv, rate, periods - 1, -pmt), abs(principal + interest), abs(interest), abs(principal), balance(pv, rate, periods, -pmt)]
 
-    print()
     table = pd.DataFrame(data, columns=periods, index=cols).T
     table.index.name = 'month'
     return table.round(2)

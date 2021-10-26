@@ -110,9 +110,10 @@ $('#expense_table').DataTable( {
                 return a + b;
                 }, 0 );
 
+            category_value = [{'name': 'Spent', 'data': category_value}]
             // Update footer
             $( api.column( 4 ).footer() ).html('$'+pageTotal);
-            CategorySpentChart(category_name, category_value);
+            CategorySpentChart(category_name, category_value, "#column-chart");
     },
     columnDefs: [
             { orderable: false, targets: 3 }
@@ -496,7 +497,7 @@ $("body").delegate(".remove_other_cost", "click", function(event)
     if(input_name == "other_utilities")
     {
         last_div = parseInt($(".last_utility").attr('last_div')) + 1
-    }
+        }
     if(input_name == "other_cost")
     {
         last_div = parseInt($(".last_cost").attr('last_div')) + 1
@@ -525,6 +526,7 @@ $("body").delegate(".remove_other_cost", "click", function(event)
     $("."+class_name).remove()
 });
 
+
 $("body").delegate(".investor_button", "click", function(event)
 {
     div_number = parseInt($(this).attr('div_class'))
@@ -539,6 +541,7 @@ $("body").delegate(".investor_button", "click", function(event)
 
     $(inputHtml).insertBefore("#investor_add_div");
 });
+
 
 $("body").delegate(".budget_button", "click", function(event)
 {
