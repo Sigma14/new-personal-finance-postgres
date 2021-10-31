@@ -645,6 +645,46 @@ $('.select_purchase_price').on("change", function(e)
     });
 
 
+// Add Property and Liability Data :-
+
+$("body").delegate(".add_property_liab", "click", function()
+{
+    form_id = "#" + $(this).attr('form_id')
+    buy_price = $('#buy_price').text().trim()
+    buy_price = parseFloat(buy_price.replace(buy_price[0], ''))
+    down_price = $('#down_price').text().trim()
+    down_price = parseFloat(down_price.replace(down_price[0], ''))
+    console.log(buy_price)
+    console.log(down_price)
+    console.log(buy_price - down_price)
+    $("#balance_mortgage").val(buy_price - down_price)
+    form_data = $(form_id).serialize()
+    console.log(form_id)
+    console.log(form_data)
+    $.ajax(
+        {
+            data: form_data, // get the form data
+            type: 'POST', // GET or POST
+            url: '/property_add/', // the file to call
+            success: function(response)
+            {
+                console.log("success")
+            }
+        });
+    $.ajax(
+        {
+            data: form_data, // get the form data
+            type: 'POST', // GET or POST
+            url: '/liability_add/', // the file to call
+            success: function(response)
+            {
+                console.log("success")
+            }
+        });
+
+        return false;
+});
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

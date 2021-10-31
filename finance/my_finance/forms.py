@@ -131,7 +131,7 @@ class AccountForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('user', 'available_balance', 'liability_type', 'interest_period', 'transaction_count', 'created_at', 'updated_at')
+        exclude = ('user', 'available_balance', 'liability_type', 'interest_period', 'transaction_count', 'mortgage_year', 'created_at', 'updated_at')
 
 
 # class FundForm(forms.ModelForm):
@@ -162,7 +162,7 @@ class LiabilityForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('user', 'balance', 'lock_amount', 'transaction_count', 'created_at', 'updated_at')
+        exclude = ('user', 'available_balance', 'lock_amount', 'transaction_count', 'created_at', 'updated_at')
 
 
 class MortgageCalculatorForm(forms.ModelForm):
@@ -180,6 +180,7 @@ class MortgageForm(forms.Form):
 
 
 class PropertyForm(forms.ModelForm):
+    include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     class Meta:
         model = Property

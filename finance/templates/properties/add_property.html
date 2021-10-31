@@ -9,15 +9,15 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Bill</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Property</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'property_list' %}">Properties</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Add Bill
+                                        Add Property
                                     </li>
                                 </ol>
                             </div>
@@ -28,23 +28,20 @@
             <div class="card">
                 <div class="card-body">
                     <form class="form form-horizontal" method="post">
-                        {% if error %}
-                            <p class="text-danger">{{error}}</p>
-                        {% endif %}
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Label</label>
+                                        <label>Name</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="label" required
-                                                   placeholder="Name"/>
+                                            <input type="text" class="form-control" name="name" required
+                                                   placeholder="Property Name"/>
                                         </div>
                                     </div>
                                 </div>
@@ -52,7 +49,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Currency</label>
+                                        <label>Currency</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -67,58 +64,45 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Amount</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
-                                            <input type="text" id="email-icon" class="form-control" name="amount" required
-                                                   placeholder="Amount"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Bill Date</label>
+                                        <label>Value</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" class="form-control" name="value" required
+                                                   placeholder="Property Value"/>
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Frequency</label>
+                                    <div class="input-group input-group-merge">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" />
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
                                     </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            {{ form.frequency }}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
                                 <button type="submit" class="btn btn-primary mr-1">Create</button>
-                                <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                <a href="{% url 'property_list' %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
+
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-{% endblock content%}
 
+<!--<form method="post">-->
+<!--    {% csrf_token %}-->
+<!--    {{form.as_p}}-->
+<!--    <input type="submit" value="Create">-->
+<!--</form>-->
+{% endblock content%}

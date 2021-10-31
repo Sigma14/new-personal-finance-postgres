@@ -157,9 +157,13 @@
                     class="d-flex align-items-center" href="{% url 'fund_list' %}"><i
                     data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
             </li>
-            <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+            <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a
+                    class="d-flex align-items-center" href="{% url 'property_list' %}"><i
+                    data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+            </li>
+            <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties Model</span></a>
                 <ul class="menu-content">
-                    <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list'  or request.resolver_match.view_name == 'property_add' or request.resolver_match.view_name == 'rental_property_detail' or request.resolver_match.view_name == 'rental_property_update' %}active{% endif %}"><a
+                    <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list'  or request.resolver_match.view_name == 'rental_property_add' or request.resolver_match.view_name == 'rental_property_detail' or request.resolver_match.view_name == 'rental_property_update' %}active{% endif %}"><a
                             class="d-flex align-items-center" href="{% url 'rental_property_list' %}"><i
                             data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Rental Properties</span></a>
                     </li>

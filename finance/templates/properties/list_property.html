@@ -1,0 +1,125 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Properties</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Properties
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'property_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Property</a>
+                </div>
+                <br/>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="download_csv_form"></div>
+                                    <div class="download_pdf_form"></div>
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">Properties</h4>
+                                        <div float="right">
+<!--                                        <button class="btn btn-primary download_csv" file_name="my_property.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>-->
+<!--                                        <button class="btn btn-primary download_csv" pdf_title="Categories" file_name="my_categories.pdf" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>-->
+<!--                                        <input type="hidden" id="download_graph_data" data_label="{{categories_name_dumbs}}" graph_type="bar" data_value="{{categories_value}}">-->
+                                        </div>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="categories">
+                                            <thead>
+                                                <tr>
+                                                    {% for name in property_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for object in property_data %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.name  }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.currency  }}{{ object.value  }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ object.updated_at }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'property_update' pk=object.id %}"
+                                                                       class="btn btn-success btn-sm rounded-0"><i
+                                                                            class="fa fa-edit"></i></a>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" delete_name="{{ object.name }} Property" url="{% url 'property_delete' pk=object.id %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="dashboard-ecommerce">
+                    <div class="row match-height">
+                        <div class="col-xl-12 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <h5>Properties</h5>
+                                    <div id="column-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+
+

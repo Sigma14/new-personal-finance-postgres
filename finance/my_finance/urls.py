@@ -70,12 +70,18 @@ urlpatterns = [
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),
     path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
 
+    # Rental Property Models Urls:-
+    path('rental_property_list/', RentalPropertyList.as_view(), name='rental_property_list'),
+    path('rental_property_detail/<int:pk>', rental_property_details, name='rental_property_detail'),
+    path('rental_property_add/', rental_property_add, name='rental_property_add'),
+    path('rental_property_update/<int:pk>', rental_property_update, name='rental_property_update'),
+    path('rental_property_delete/<int:pk>', rental_property_delete, name='rental_property_delete'),
+
     # Property Urls:-
-    path('rental_property_list/', PropertyList.as_view(), name='rental_property_list'),
-    path('rental_property_detail/<int:pk>', property_details, name='rental_property_detail'),
-    path('rental_property_add/', property_add, name='rental_property_add'),
-    path('rental_property_update/<int:pk>', property_update, name='rental_property_update'),
-    path('rental_property_delete/<int:pk>', property_delete, name='rental_property_delete'),
+    path('property_add/', PropertyAdd.as_view(), name='property_add'),
+    path('property_list/', PropertyList.as_view(), name='property_list'),
+    path('property_update/<int:pk>', PropertyUpdate.as_view(), name='property_update'),
+    path('property_delete/<int:pk>', PropertyDelete.as_view(), name='property_delete'),
 
     # Revenue Urls :-
     path('revenue_add/', revenue_add, name='revenue_add'),

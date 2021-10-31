@@ -94,7 +94,6 @@ def check_auto_budget(request):
                 next_bill_date = check_frequency_date(bill_period, bill_date)
                 data.date = next_bill_date
                 next_amount = float(bill_amount) + float(remaining_amount)
-                data.amount = next_amount
                 data.remaining_amount = next_amount
                 data.status = 'unpaid'
                 data.save()

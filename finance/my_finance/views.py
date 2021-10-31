@@ -98,7 +98,7 @@ def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_ob
 
     # Mortgage Details
     interest_rate = check_float(request.POST['interest_rate'])
-    amortization_year = check_float(request.POST['amortization_year'])
+    amortization_year = int(check_float(request.POST['amortization_year']))
     mortgage_start_date = request.POST['mortgage_start_date']
     mortgage_obj.user = user_name
     mortgage_obj.interest_rate = interest_rate
@@ -576,16 +576,15 @@ def transaction_summary(transaction_data, select_filter):
 def transaction_checks(username, transaction_amount, account, bill_name, budget_name, cleared_amount, out_flow,
                        transaction_date):
     if cleared_amount == "True":
-        print("account", account)
         account_obj = Account.objects.get(user=username, name=account)
-        print(account_obj)
+
         if bill_name:
             bill_name = bill_name.label
             bill_obj = Bill.objects.filter(user=username, label=bill_name)[0]
         else:
             bill_obj = False
 
-        if budget_name != "None":
+        if budget_name and budget_name != "None":
             date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
             start_month_date, end_month_date = start_end_date(date_check, "Monthly")
             budget_obj = Budget.objects.filter(user=username, name=budget_name, start_date=start_month_date,
@@ -605,7 +604,7 @@ def transaction_checks(username, transaction_amount, account, bill_name, budget_
                 bill_obj.remaining_amount = bill_amount - transaction_amount
             else:
                 bill_obj.status = "unpaid"
-                bill_obj.amount = bill_amount - transaction_amount
+                bill_obj.remaining_amount = bill_amount - transaction_amount
             bill_obj.save()
 
         if budget_obj:
@@ -715,16 +714,14 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
 
     for data in property_data:
         if data.include_net_worth:
-            print("data.currency===================>", data.currency)
-            print("data.purchase_price_detail.selected_price===================>", data.purchase_price_detail.selected_price)
             if data.currency in total_property_dict:
                 total_property_dict[data.currency] = round(total_property_dict[data.currency] +
-                                                           float(data.purchase_price_detail.selected_price), 2)
+                                                           float(data.value), 2)
             else:
                 currency_count_list.append(data.currency)
-                total_property_dict[data.currency] = round(float(data.purchase_price_detail.selected_price), 2)
+                total_property_dict[data.currency] = round(float(data.value), 2)
 
-            property_currency_balance.append({data.currency: data.purchase_price_detail.selected_price})
+            property_currency_balance.append({data.currency: data.value})
 
     total_currency_list = list(dict.fromkeys(currency_count_list))
 
@@ -829,7 +826,7 @@ def home(request):
         current_date = datetime.datetime.today().date()
         month_start, month_end = start_end_date(current_date, "Monthly")
         accounts_data = Account.objects.filter(user=user_name)
-        property_data = RentalPropertyModel.objects.filter(user=user_name)
+        property_data = Property.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name, start_date=month_start, end_date=month_end)
         budget_label = []
         budget_values = []
@@ -878,9 +875,7 @@ def home(request):
             account_date_list = []
 
         for data in property_data:
-            print("currency==>", data.currency)
-            print("data.purchase_price_detail.selected_price", data.purchase_price_detail.selected_price)
-            property_currency_balance.append({data.currency: data.purchase_price_detail.selected_price})
+            property_currency_balance.append({data.currency: data.value})
 
         category_spent_amount(categories, user_name, categories_name, categories_value)
         budget_currency = '$'
@@ -926,7 +921,7 @@ def home(request):
 def net_worth(request):
     user_name = request.user
     account_data = Account.objects.filter(user=user_name)
-    property_data = RentalPropertyModel.objects.filter(user=user_name)
+    property_data = Property.objects.filter(user=user_name)
     all_transaction_data = Transaction.objects.filter(user=user_name)
     if account_data:
         min_date = account_data[0].created_at.date()
@@ -1014,6 +1009,63 @@ def net_worth(request):
 
     }
     return render(request, "net_worth.html", context=context)
+
+
+# Property Views
+
+class PropertyAdd(LoginRequiredMixin, CreateView):
+    model = Property
+    form_class = PropertyForm
+    template_name = 'properties/add_property.html'
+
+    def form_valid(self, form):
+        name = form.cleaned_data.get('name').title()
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.name = name
+        obj.save()
+        return super().form_valid(form)
+
+
+class PropertyList(LoginRequiredMixin, ListView):
+    model = Property
+    template_name = 'properties/list_property.html'
+
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(PropertyList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        property_data = Property.objects.filter(user=user_name)
+        property_key = ['S.No.', 'Name', 'Value', 'Last Activity']
+        property_name = []
+        property_value = []
+
+        for obj in property_data:
+            property_name.append(obj.name)
+            property_value.append(obj.value)
+
+        data['property_data'] = property_data
+        data['property_key'] = property_key
+        data['categories_name'] = property_name
+        data['categories_name_dumbs'] = json.dumps(property_name)
+        data['category_key_dumbs'] = json.dumps(property_key)
+        data['categories_value'] = property_value
+        data['categories_series'] = [{'name': 'Value', 'data': property_value}]
+
+        return data
+
+
+class PropertyUpdate(LoginRequiredMixin, UpdateView):
+    model = Property
+    form_class = PropertyForm
+    template_name = 'properties/property_update.html'
+
+
+class PropertyDelete(DeleteView):
+    def post(self, request, *args, **kwargs):
+        property_obj = Property.objects.get(pk=self.kwargs['pk'])
+        property_obj.delete()
+        return JsonResponse({"status": "Successfully", "path": "None"})
 
 
 class CategoryList(LoginRequiredMixin, ListView):
@@ -1776,7 +1828,8 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         account_obj, budget_obj = transaction_checks(user_name, transaction_amount, account, bill_name,
                                                      budget_name, cleared_amount, out_flow, transaction_date)
         obj.remaining_amount = account_obj.available_balance
-        obj.budgets = budget_obj
+        if budget_obj:
+            obj.budgets = budget_obj
         obj.save()
         return super().form_valid(form)
 
@@ -2279,24 +2332,30 @@ class LiabilityAdd(LoginRequiredMixin, CreateView):
         name = request.POST['name']
         currency = request.POST['currency']
         liability_type = request.POST['liability_type']
-        balance = request.POST['available_balance']
-        interest_rate = request.POST['interest_rate']
+        balance = float(request.POST['balance'])
+        interest_rate = float(request.POST['interest_rate'])
         interest_period = request.POST['interest_period']
+        mortgage_year = int(request.POST['mortgage_year'])
         try:
             include_net_worth = request.POST['include_net_worth']
             include_net_worth = True
         except:
             include_net_worth = False
+
+        table = calculator(balance, interest_rate, mortgage_year)
+
+        total_payment = abs(table['principle'].sum() + table['interest'].sum())
         liability_obj = Account()
         liability_obj.user = request.user
         liability_obj.name = name
         liability_obj.currency = currency
         liability_obj.liability_type = liability_type
-        liability_obj.available_balance = balance
-        liability_obj.interest_rate = interest_rate
+        liability_obj.balance = round(balance, 2)
+        liability_obj.available_balance = round(total_payment, 2)
         liability_obj.interest_rate = interest_rate
         liability_obj.interest_period = interest_period
         liability_obj.include_net_worth = include_net_worth
+        liability_obj.mortgage_year = mortgage_year
         liability_obj.save()
         return redirect('/liability_list/')
 
@@ -2318,23 +2377,30 @@ class LiabilityUpdate(LoginRequiredMixin, UpdateView):
         name = request.POST['name']
         currency = request.POST['currency']
         liability_type = request.POST['liability_type']
-        balance = request.POST['available_balance']
-        interest_rate = request.POST['interest_rate']
+        balance = float(request.POST['balance'])
+        interest_rate = float(request.POST['interest_rate'])
         interest_period = request.POST['interest_period']
+        mortgage_year = int(request.POST['mortgage_year'])
         try:
             include_net_worth = request.POST['include_net_worth']
             include_net_worth = True
         except:
             include_net_worth = False
+
+        table = calculator(balance, interest_rate, mortgage_year)
+
+        total_payment = abs(table['principle'].sum() + table['interest'].sum())
         liability_obj = Account.objects.get(pk=self.kwargs['pk'])
+        liability_obj.user = request.user
         liability_obj.name = name
         liability_obj.currency = currency
         liability_obj.liability_type = liability_type
-        liability_obj.available_balance = balance
-        liability_obj.interest_rate = interest_rate
+        liability_obj.balance = round(balance, 2)
+        liability_obj.available_balance = round(total_payment, 2)
         liability_obj.interest_rate = interest_rate
         liability_obj.interest_period = interest_period
         liability_obj.include_net_worth = include_net_worth
+        liability_obj.mortgage_year = mortgage_year
         liability_obj.save()
         return redirect('/liability_list/')
 
@@ -2640,26 +2706,32 @@ def bill_detail(request, pk):
 
 def bill_add(request):
     form = BillForm(request.POST or None)
+    error = ''
     if form.is_valid():
-        label = form.cleaned_data.get('label')
+        label = form.cleaned_data.get('label').title()
         amount = form.cleaned_data.get('amount')
         bill_date = form.cleaned_data.get('date')
         frequency = form.cleaned_data.get('frequency')
         currency = form.cleaned_data.get('currency')
 
-        bill_obj = Bill()
-        bill_obj.user = request.user
-        bill_obj.label = label
-        bill_obj.amount = amount
-        bill_obj.date = bill_date
-        bill_obj.currency = currency
-        bill_obj.remaining_amount = amount
-        bill_obj.frequency = frequency
-        bill_obj.save()
-        return redirect("/bill_list")
+        check_bill_obj = Bill.objects.filter(user=request.user, label=label, currency=currency)
+        if check_bill_obj:
+            error = 'Bill Already Added!!'
+        else:
+            bill_obj = Bill()
+            bill_obj.user = request.user
+            bill_obj.label = label
+            bill_obj.amount = amount
+            bill_obj.date = bill_date
+            bill_obj.currency = currency
+            bill_obj.remaining_amount = amount
+            bill_obj.frequency = frequency
+            bill_obj.save()
+            return redirect("/bill_list")
 
     context = {
-        'form': form
+        'form': form,
+        'error': error
     }
     return render(request, "bill/bill_add.html", context=context)
 
@@ -2857,17 +2929,29 @@ def future_net_worth_calculator(request):
 
     return render(request, "future_net_worth.html", context=context)
 
-# Properties Views
+# Rental Property Model Views
 
-class PropertyList(LoginRequiredMixin, ListView):
+
+class RentalPropertyList(LoginRequiredMixin, ListView):
     model = RentalPropertyModel
     template_name = 'property/property_list.html'
 
-    def get_queryset(self):
-        return RentalPropertyModel.objects.filter(user=self.request.user)
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(RentalPropertyList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        rental_property_data = RentalPropertyModel.objects.filter(user=user_name)
+        property_data = Property.objects.filter(user=user_name)
+        property_dict = {}
+        for obj in property_data:
+            property_dict[obj.name] = obj.id
+
+        data['property_data'] = property_dict
+        data['rental_property_data'] = rental_property_data
+        return data
 
 
-def property_details(request, pk):
+def rental_property_details(request, pk):
     user_name = request.user
     property_obj = RentalPropertyModel.objects.get(user=user_name, pk=pk)
     down_payment_value = (float(property_obj.purchase_price_detail.selected_price) * float(
@@ -3252,7 +3336,7 @@ def others_costs_data(other_closing_cost):
     return cost_dict
 
 
-def property_add(request):
+def rental_property_add(request):
     if request.method == 'POST':
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
@@ -3278,7 +3362,7 @@ def property_add(request):
         return render(request, "property/property_add.html", context=context)
 
 
-def property_update(request, pk):
+def rental_property_update(request, pk):
     user_name = request.user
     if request.method == "POST":
         rental_obj = RentalPropertyModel.objects.get(pk=pk)
@@ -3340,7 +3424,7 @@ def property_update(request, pk):
         return render(request, "property/property_update.html", context=context)
 
 
-def property_delete(request, pk):
+def rental_property_delete(request, pk):
     property_obj = RentalPropertyModel.objects.get(pk=pk)
     purchase_price_obj = property_obj.purchase_price_detail
     mortgage_detail_obj = property_obj.mortgage_detail
@@ -3603,7 +3687,7 @@ def transaction_upload(request):
                             bill_obj.remaining_amount = bill_amount - transaction_amount
                         else:
                             bill_obj.status = "unpaid"
-                            bill_obj.amount = bill_amount - transaction_amount
+                            bill_obj.remaining_amount = bill_amount - transaction_amount
                         bill_obj.save()
                         my_transaction.bill = bill_obj
                     if budget_obj:

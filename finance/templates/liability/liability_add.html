@@ -79,15 +79,15 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Balance</label>
+                                        <label for="email-icon">Amount</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="available_balance" required
-                                                   placeholder="Balance"/>
+                                            <input type="text" id="email-icon" class="form-control" name="balance" required
+                                                   placeholder="Amount"/>
                                         </div>
                                     </div>
                                 </div>
@@ -103,7 +103,7 @@
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
                                              <input type="text" id="email-icon" class="form-control" name="interest_rate"
-                                                   placeholder="Interest Rate"/>
+                                                   placeholder="Interest Rate(%)"/>
                                         </div>
                                     </div>
                                 </div>
@@ -119,6 +119,22 @@
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
                                             {{ form.interest_period }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Amortization Year</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="mortgage_year"
+                                                   placeholder="Mortgage/Debt/Loan (Year)"/>
                                         </div>
                                     </div>
                                 </div>

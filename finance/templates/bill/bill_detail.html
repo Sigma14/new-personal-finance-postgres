@@ -53,6 +53,9 @@
                                 <div class="card-body" style="padding-bottom:30px;">
                                     <h4 style="float: left;">Due Date :- {{ bill_data.date }}</h4>
 <!--                                    <h4 style="float: right;">{{ object.updated_at }}</h4>-->
+                                    <div style="float: right;" class="col-sm-40 offset-sm-20">
+                                        <a href="{% url 'transaction_add' %}" class="btn btn-success">Pay Now</a>
+                                    </div>
                                 </div>
                             </a>
                         </div>

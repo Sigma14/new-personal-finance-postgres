@@ -131,6 +131,7 @@ class Account(models.Model):
     include_net_worth = models.BooleanField(default=True, blank=True, null=True)
     liability_type = models.CharField(max_length=10, choices=TYPES, blank=True, null=True)
     interest_period = models.CharField(max_length=10, choices=PERIODS, blank=True, null=True)
+    mortgage_year = models.CharField(max_length=10, blank=True, null=True)
     transaction_count = models.IntegerField(default=0, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

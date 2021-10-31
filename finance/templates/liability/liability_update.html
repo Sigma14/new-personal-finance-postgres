@@ -86,8 +86,8 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                           <input type="text" id="fname-icon" class="form-control" name="available_balance"
-                                                   placeholder="Balance" value="{{ form.available_balance.value }}">
+                                           <input type="text" id="fname-icon" class="form-control" name="balance"
+                                                   placeholder="Balance" value="{{ form.balance.value }}">
                                         </div>
                                     </div>
                                 </div>
@@ -119,6 +119,22 @@
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
                                             {{ form.interest_period }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Amortization Year</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="mortgage_year"
+                                                   placeholder="Mortgage/Debt/Loan (Year)" value="{{form.mortgage_year.value}}"/>
                                         </div>
                                     </div>
                                 </div>
