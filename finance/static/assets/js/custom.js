@@ -677,11 +677,10 @@ $("body").delegate(".add_property_liab", "click", function()
             success: function(response)
             {
                 console.log("success")
+                location.reload()
             }
         });
 
-        return false;
-        location.reload()
 });
 
 function getCookie(name) {
