@@ -654,12 +654,10 @@ $("body").delegate(".add_property_liab", "click", function()
     buy_price = parseFloat(buy_price.replace(buy_price[0], ''))
     down_price = $('#down_price').text().trim()
     down_price = parseFloat(down_price.replace(down_price[0], ''))
-    console.log(buy_price)
-    console.log(down_price)
-    console.log(buy_price - down_price)
-    $("#balance_mortgage").val(buy_price - down_price)
+    mortgage_price = buy_price - down_price
     form_data = $(form_id).serialize()
-    console.log(form_id)
+    console.log(mortgage_price)
+    form_data += "&balance=" + mortgage_price
     console.log(form_data)
     $.ajax(
         {
@@ -683,6 +681,7 @@ $("body").delegate(".add_property_liab", "click", function()
         });
 
         return false;
+        location.reload()
 });
 
 function getCookie(name) {

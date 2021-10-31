@@ -39,9 +39,8 @@
                                 <input type="text" name="currency" value="{{object.currency}}" hidden>
                                 <input type="text" name="interest_period" value="Per month" hidden>
                                 <input type="text" name="liability_type" value="Mortgage" hidden>
-                                <input type="text" name="balance" id="balance_mortgage" value="" hidden>
                                 <input type="text" name="interest_rate" value="{{object.mortgage_detail.interest_rate}}" hidden>
-                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:2}}" hidden>
+                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:0 }}" hidden>
                                 <input type="text" name="value" value="{{object.purchase_price_detail.selected_price}}" hidden>
                                 <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" hidden />
                                 <a href="{% url 'rental_property_detail' pk=object.id %}">
