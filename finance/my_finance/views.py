@@ -25,7 +25,7 @@ from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.pagesizes import A4, A0, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, PropertyForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
@@ -35,7 +35,10 @@ from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
+from reportlab.lib.units import inch
+from reportlab.platypus.flowables import Spacer
 from reportlab.lib.validators import Auto
+from reportlab.lib.enums import TA_CENTER
 
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
@@ -2963,11 +2966,6 @@ def rental_property_details(request, pk):
     mortgage_year = float(property_obj.mortgage_detail.amortization_year)
     other_cost_dict = ast.literal_eval(property_obj.closing_cost_detail.others_cost)[0]
     total_investement = float(property_obj.closing_cost_detail.total_investment)
-    for key in other_cost_dict:
-        other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
-    other_cost_dict["Total Investment Required"] = f"{currency_name}{total_investement}"
-    other_cost_dict["Interest Rate Financed at"] = f"{interest}%"
-
     table = calculator(amount, interest, mortgage_year)
     total_payment = abs(table['principle'].sum() + table['interest'].sum())
     total_month = int(mortgage_year * 12)
@@ -2976,8 +2974,12 @@ def rental_property_details(request, pk):
     mortgage_date = property_obj.mortgage_detail.start_date
     mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month, mortgage_date)
     monthly_payment = data[0]['principle'] + data[0]['interest']
-
+    for key in other_cost_dict:
+        other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
+    other_cost_dict["Total Investment Required"] = f"{currency_name}{total_investement}"
+    other_cost_dict["Interest Rate Financed at"] = f"{interest}%"
     other_cost_dict["Monthly Mortgage Payment (Principle & Interest)"] = f"{currency_name}{monthly_payment}"
+
     investment_data = {'Property Address': property_obj.name,
                        'Property Purchase Price': f"{currency_name}{selected_price}",
                        'Down Payment': f"{currency_name}{down_payment_value}",
@@ -2989,6 +2991,9 @@ def rental_property_details(request, pk):
                        'Purchase of Appliances': f"{currency_name}{property_obj.closing_cost_detail.appliances}",
                        'Renovation Cost': f"{currency_name}{property_obj.closing_cost_detail.renovation_cost}",
                        }
+
+    investment_data.update(other_cost_dict)
+
     projection_key = []
     total_revenue_list = []
     annual_cash_flow_list = []
@@ -3105,19 +3110,19 @@ def rental_property_details(request, pk):
 
         for key, value in annual_cash_flow_dict_investors.items():
             investor_value = round(cash_flow_value * value[0] / 100, 2)
-            value.append(investor_value)
+            value.append(f"{currency_name}{investor_value}")
 
         for key, value in net_operating_income_dict_investors.items():
             investor_value = round(income_value * value[0] / 100, 2)
-            value.append(investor_value)
+            value.append(f"{currency_name}{investor_value}")
 
         for key, value in roi_dict_investors.items():
             investor_value = round(roi_value * value[0] / 100, 2)
-            value.append(investor_value)
+            value.append(f"{currency_name}{investor_value}")
 
         for key, value in roi_with_appreciation_dict_investors.items():
             investor_value = round(roi_with_appreciation_value * value[0] / 100, 2)
-            value.append(investor_value)
+            value.append(f"{currency_name}{investor_value}")
 
         total_revenue_list.append(f"{currency_name}{round(total_revenue, 2)}")
         operating_expenses_list.append(f"{currency_name}{round(total_expense, 2)}")
@@ -3232,7 +3237,6 @@ def rental_property_details(request, pk):
     revenue_yearly_data = {'Unit 1': revenue_unit_1_list}
     other_unit_dict['Total Revenue'] = total_revenue_list
     revenue_yearly_data.update(other_units_dict)
-    investment_data.update(other_cost_dict)
 
     # Yearly Expenses
     expenses_yearly_data1 = {'Mortgage Principle': mortgage_principle_list,
@@ -3301,10 +3305,14 @@ def rental_property_details(request, pk):
 
     for key, value in investors_dict.items():
         update_value = float(value[1].replace("%", ""))
-        total_year_return_dict_investors[key] = [value[1], round(update_value * total_year_return, 2)]
+        total_year_return_dict_investors[key] = [value[1], f"{currency_name}{round(update_value * total_year_return, 2)}"]
 
-    print(total_year_return_dict_investors)
+    expenses_yearly_data_dumbs = {}
+    expenses_yearly_data_dumbs.update(expenses_yearly_data1)
+    expenses_yearly_data_dumbs.update(expenses_yearly_data2)
+    print("expenses_yearly_data_dumbs=============>", expenses_yearly_data_dumbs)
     context = {
+               'primary_key': pk,
                'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
                'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
                "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
@@ -3319,8 +3327,23 @@ def rental_property_details(request, pk):
                "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
                "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
                "total_financing": total_financing, "capex_budget_value": capex_budget_value,
-               "total_replacement_costs": total_replacement_costs, "total_return_investor_dict": total_year_return_dict_investors
-              }
+               "total_replacement_costs": total_replacement_costs, "total_return_investor_dict": total_year_return_dict_investors,
+               'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
+               "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
+               "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
+               "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
+               "roi_dict_investors_dumbs": json.dumps(roi_dict_investors),
+               "roi_with_appreciation_dict_investors_dumbs": json.dumps(roi_with_appreciation_dict_investors),
+               "cash_on_cash_return_data_dumbs": json.dumps(stats_graph_dict['cash_on_cash_return_data'][0]['data']),
+               "return_on_investment_data_dumbs": json.dumps(return_on_investment_data),
+               "debt_cov_ratio_data_dumbs": json.dumps(stats_graph_dict['debt_cov_ratio_data'][0]['data']),
+               "return_investment_data_dumbs": json.dumps(stats_graph_dict['return_investment_data']),
+               "property_expense_data_dumbs": json.dumps(stats_graph_dict['property_expense_data'][0]['data']),
+               "revenue_yearly_data_dumbs": json.dumps(revenue_yearly_data),
+               "expenses_yearly_data_dumbs": json.dumps(expenses_yearly_data_dumbs),
+               "yearly_return_data_dumbs":  json.dumps(yearly_return_data)
+
+    }
     context.update(stats_graph_dict)
 
     return render(request, "property/property_detail.html", context=context)
@@ -3442,6 +3465,50 @@ def rental_property_delete(request, pk):
     return JsonResponse({"status": "Successfully", "path": "/rental_property_list/"})
 
 
+class RentalPdf:
+    def __init__(self, buffer, pageSize):
+        self.buffer = buffer
+        # default format is A4
+        if pageSize == 'A4':
+            self.pageSize = A0
+        elif pageSize == 'Letter':
+            self.pageSize = letter
+        self.width, self.height = self.pageSize
+
+    def report(self, pdf_data_value, title, property_address, d=None):
+        doc = SimpleDocTemplate(self.buffer, pagesize=self.pageSize)
+        styles = getSampleStyleSheet()
+        title_style = styles['Heading1']
+        title_style.alignment = TA_CENTER
+        title_style.fontSize = 50
+        data = [Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(50, 50),
+                Paragraph(f"Address {property_address}", title_style), Spacer(250, 250)]
+        for key, values in pdf_data_value.items():
+            t = Table(values)
+            t.setStyle(TableStyle(
+                [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                 ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+                 ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+                 ('BACKGROUND', (0, 0), (-1, 0), colors.powderblue), ('FONTSIZE', (0, 0), (-1, -1), title)]))
+            # create other flowables
+            p = Paragraph(key, styles['Title'])
+            data.append(p)
+            data.append(t)
+            data.append(Spacer(80, 80))
+        if d:
+            for bar_key, bar_d in d.items():
+                data.append(Spacer(150, 150))
+                if bar_key == "Cash on Cash Return (%)" or bar_key == "Investment Returns":
+                    data.append(Spacer(350, 350))
+                data.append(Paragraph(bar_key, styles['Title']))
+                data.append(bar_d)
+
+        doc.build(data)
+        pdf = self.buffer.getvalue()
+        self.buffer.close()
+        return pdf
+
+
 class PdfPrint:
     def __init__(self, buffer, pageSize):
         self.buffer = buffer
@@ -3465,7 +3532,7 @@ class PdfPrint:
             [('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
              ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
              ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
-             ('BACKGROUND', (0, 0), (-1, 0), colors.gray)]))
+             ('BACKGROUND', (0, 0), (-1, 0), colors.powderblue)]))
         # create other flowables
 
         data.append(t)
@@ -3478,13 +3545,11 @@ class PdfPrint:
         return pdf
 
 
-def draw_bar_chart(bar_data, data_label, graph_type):
-    d = Drawing(200, 500)
+def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
+    d = Drawing(1000, 700)
     bar = VerticalBarChart()
-    bar.x = 100
-    bar.y = 85
-    bar.width = 300
-    bar.height = 300
+    bar.width = 1700
+    bar.height = 800
     bar.data = bar_data
     bar.valueAxis.valueMin = 0
     bar.barSpacing = 0.5
@@ -3493,16 +3558,21 @@ def draw_bar_chart(bar_data, data_label, graph_type):
     bar.categoryAxis.categoryNames = data_label
     bar.barLabels.nudge = 7
     bar.valueAxis.labels.fontName = 'Helvetica'
-    bar.valueAxis.labels.fontSize = 8
+    bar.valueAxis.labels.fontSize = 10
     bar.valueAxis.forceZero = 1
     bar.valueAxis.rangeRound = 'both'
     bar.valueAxis.valueMax = None  # 10#
     bar.categoryAxis.visible = 1
     bar.categoryAxis.visibleTicks = 0
-    bar.barLabels.fontSize = 6
-    bar.valueAxis.labels.fontSize = 6
+    bar.barLabels.fontSize = 10
+    bar.valueAxis.labels.fontSize = 10
     bar.strokeWidth = 0.1
     bar.bars.strokeWidth = 0.5
+    bar.bars[0].fillColor = PCMYKColor(46, 51, 0, 4)
+    bar.bars[1].fillColor = colors.red
+    bar.bars[2].fillColor = colors.darkgreen
+    bar.bars[3].fillColor = colors.yellow
+
     if graph_type == "bar":
         bar.bars[0].fillColor = PCMYKColor(46, 51, 0, 4)
         d.add(bar)
@@ -3510,21 +3580,209 @@ def draw_bar_chart(bar_data, data_label, graph_type):
         legend = Legend()
         legend.columnMaximum = 10
         legend.fontName = 'Helvetica'
-        legend.fontSize = 5.5
+        legend.fontSize = 14
         legend.boxAnchor = 'w'
-        legend.x = 400
-        legend.y = 400
+        legend.x = 300
+        legend.y = 650
         legend.dx = 16
         legend.dy = 16
         legend.alignment = 'left'
-        legend.colorNamePairs = [(colors.red, "Debit"), (colors.green, "Credit")]
+        legend.colorNamePairs = bar_legends
         d.add(bar)
         d.add(legend)
 
-    #
-    # bar.bars[1].fillColor = PCMYKColor(23, 51, 0, 4, alpha=85)
-    # bar.bars.fillColor = PCMYKColor(100, 0, 90, 50, alpha=85)
+
     return d
+
+
+def make_return_data(result_dict, result_value):
+    for key, val in result_dict.items():
+        result_list = [key]
+        for value in val[:5]:
+            result_list.append(value)
+        result_value.append(result_list)
+    return result_value
+
+
+@csrf_exempt
+def download_rental_pdf(request):
+    property_address = request.POST['property_name']
+    invest_summary_data = request.POST['invest_summary_data']
+    yearly_projection_data = request.POST['yearly_projection_data']
+    annual_cashflow_data = request.POST['annual_cashflow_data']
+    roi_with_appreciation_dict_investors_data = request.POST['roi_with_appreciation_dict_investors_data']
+    roi_dict_investors_data = request.POST['roi_dict_investors_data']
+    total_return_investor_data = request.POST['total_return_investor_data']
+    net_operating_income_data = request.POST['net_operating_income_data']
+    cash_on_cash_return_data = request.POST['cash_on_cash_return_data']
+    return_on_investment_data = request.POST['return_on_investment_data']
+    debt_cov_ratio_data = request.POST['debt_cov_ratio_data']
+    property_expense_data = request.POST['property_expense_data']
+    return_investment_data = request.POST['return_investment_data']
+    revenue_yearly_data = request.POST['revenue_yearly_data']
+    expenses_yearly_data = request.POST['expenses_yearly_data']
+    yearly_return_data = request.POST['yearly_return_data']
+
+    invest_summary_data = json.loads(invest_summary_data)
+    yearly_projection_data = json.loads(yearly_projection_data)
+    annual_cashflow_data = json.loads(annual_cashflow_data)
+    roi_with_appreciation_dict_investors_data = json.loads(roi_with_appreciation_dict_investors_data)
+    roi_dict_investors_data = json.loads(roi_dict_investors_data)
+    total_return_investor_data = json.loads(total_return_investor_data)
+    net_operating_income_data = json.loads(net_operating_income_data)
+    cash_on_cash_return_data = json.loads(cash_on_cash_return_data)
+    return_on_investment_data = json.loads(return_on_investment_data)
+    debt_cov_ratio_data = json.loads(debt_cov_ratio_data)
+    property_expense_data = json.loads(property_expense_data)
+    return_investment_data = json.loads(return_investment_data)
+    revenue_yearly_data = json.loads(revenue_yearly_data)
+    expenses_yearly_data = json.loads(expenses_yearly_data)
+    yearly_return_data = json.loads(yearly_return_data)
+    property_expense_data = [float(i) for i in property_expense_data]
+    file_name = f"{property_address}_Rental_Property.pdf"
+    investment_data_values = []
+    yearly_projection_data_values = []
+    annual_cashflow_data_values = []
+    cash_on_cash_return_data_values = []
+    revenue_yearly_data_values = []
+    expenses_yearly_data_values = []
+    yearly_return_data_values = []
+    yearly_keys = []
+    return_on_investment_data_list1 = []
+    return_on_investment_data_list2 = []
+    return_investment_data_list = return_investment_data[0]['data']
+    return_investment_data_list1 = []
+    return_investment_data_list2 = []
+    return_investment_data_list3 = []
+
+    year_index = 1
+    for key, val in invest_summary_data.items():
+        investment_data_values.append([key, val])
+
+    for key, val in revenue_yearly_data.items():
+        result_list = [key]
+        for value in val:
+            result_list.append(value)
+        revenue_yearly_data_values.append(result_list)
+
+    for key, val in expenses_yearly_data.items():
+        result_list = [key]
+        for value in val:
+            result_list.append(value)
+        expenses_yearly_data_values.append(result_list)
+
+    for key, val in yearly_return_data.items():
+        result_list = [key]
+        for value in val:
+            result_list.append(value)
+        yearly_return_data_values.append(result_list)
+
+    for key, val in yearly_projection_data.items():
+        result_list = [key]
+        for value in val:
+            result_list.append(value)
+            if year_index == 1:
+                yearly_keys.append(f"Year {len(yearly_keys) + 1}")
+
+        year_index = 2
+        yearly_projection_data_values.append(result_list)
+
+    return_dict = {"Annual Cashflow ": annual_cashflow_data, "Net Operating Income (NOI)": net_operating_income_data,
+                   "Return on Investment (ROI) ($) (Assuming NO Appreciation)": roi_dict_investors_data,
+                   "Return on Investment(ROI) ($) (WITH appreciation assumption)": roi_with_appreciation_dict_investors_data,
+                   f"Total {len(yearly_keys)} Year Return with Appreciation Assumption": total_return_investor_data}
+
+    for k, v in return_dict.items():
+        annual_cashflow_data_values.append([k])
+        if k == f"Total {len(yearly_keys)} Year Return with Appreciation Assumption":
+            for key, val in v.items():
+                result_list = [key]
+                for i in range(len(yearly_keys)):
+                    if i == 0:
+                        result_list.append(val[i].replace("%", ""))
+
+                    elif i == len(yearly_keys) - 1:
+                        result_list.append("")
+                        result_list.append(val[-1])
+                    else:
+                        result_list.append("")
+                annual_cashflow_data_values.append(result_list)
+        else:
+            for key, val in v.items():
+                result_list = [key]
+                for value in val:
+                    result_list.append(value)
+                annual_cashflow_data_values.append(result_list)
+
+    for name in cash_on_cash_return_data:
+        cash_on_cash_return_data_values.append(float(name.replace("%", "")))
+
+    for name in return_on_investment_data[0]['data']:
+        return_on_investment_data_list1.append(float(name.replace("%", "")))
+
+    for name in return_on_investment_data[1]['data']:
+        return_on_investment_data_list2.append(float(name.replace("%", "")))
+
+    for name in return_investment_data[1]['data']:
+        return_investment_data_list1.append(float(name.replace("%", "")))
+
+    for name in return_investment_data[2]['data']:
+        return_investment_data_list2.append(float(name.replace("%", "")))
+
+    for name in return_investment_data[3]['data']:
+        return_investment_data_list3.append(float(name.replace("%", "")))
+
+    bar_label = yearly_keys.copy()
+    cash_flow_keys = yearly_keys.copy()
+    cash_flow_keys.insert(0, "INVESTOR OWNERSHIP %")
+    cash_flow_keys.insert(0, "RETURN METRIC/INVESTOR")
+    annual_cashflow_data_values.insert(0, cash_flow_keys)
+    yearly_keys.insert(0, " ")
+    yearly_projection_data_values.insert(0, yearly_keys)
+    revenue_yearly_data_values.insert(0, yearly_keys)
+    expenses_yearly_data_values.insert(0, yearly_keys)
+    yearly_return_data_values.insert(0, yearly_keys)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename={file_name}'
+    buffer = BytesIO()
+    reporti = RentalPdf(buffer, 'A4')
+    bar_legends = [(PCMYKColor(46, 51, 0, 4), return_on_investment_data[0]['name']), (colors.red, return_on_investment_data[1]['name'])]
+    return_bar_legends = [(PCMYKColor(46, 51, 0, 4), return_investment_data[0]['name']),
+                          (colors.red, return_investment_data[1]['name']),
+                          (colors.darkgreen, return_investment_data[2]['name']),
+                          (colors.yellow, return_investment_data[3]['name']),
+                          ]
+    cash_on_cash_bar_chart = draw_bar_chart([cash_on_cash_return_data_values], bar_label, "bar")
+    debt_cov_ratio_bar_chart = draw_bar_chart([debt_cov_ratio_data], bar_label, "bar")
+    property_expense_data_bar_chart = draw_bar_chart([property_expense_data], bar_label, "bar")
+    return_on_investment_chart = draw_bar_chart([return_on_investment_data_list1, return_on_investment_data_list2],
+                                                bar_label, "return-bar", bar_legends)
+    return_investment_chart = draw_bar_chart([return_investment_data_list, return_investment_data_list1,
+                                              return_investment_data_list2, return_investment_data_list3],
+                                             bar_label, "return-bar", return_bar_legends)
+
+    d = {'Cash on Cash Return (%)': cash_on_cash_bar_chart, 'Return on Investment': return_on_investment_chart,
+         'Debt Service Coverage Ratio': debt_cov_ratio_bar_chart, 'Investment Returns': return_investment_chart,
+         'Property Operating Expenses': property_expense_data_bar_chart}
+
+    pdf_title = 14
+
+    if len(yearly_keys) > 45:
+        pdf_title = 6
+    else:
+        if len(yearly_keys) >= 35:
+            pdf_title = 7
+        if len(yearly_keys) >= 25:
+            pdf_title = 10
+
+    pdf = reporti.report({'INVESTMENT SUMMARY': investment_data_values,
+                          'YEARLY PROJECTION': yearly_projection_data_values,
+                          'INVESTOR RETURNS SUMMARY': annual_cashflow_data_values,
+                          'REVENUE': revenue_yearly_data_values, 'PROPERTY EXPENSES': expenses_yearly_data_values,
+                          'INVESTMENT METRICS': yearly_return_data_values}, pdf_title, property_address, d)
+    response.write(pdf)
+    return response
 
 
 @csrf_exempt
@@ -3541,6 +3799,7 @@ def download_pdf(request):
         response['Content-Disposition'] = f'attachment; filename={file_name}'
         buffer = BytesIO()
         reporti = PdfPrint(buffer, 'A4')
+        print("pdf_data_value--------->", pdf_data_value)
         try:
             graph_type = request.POST['graph_type']
             print("graph_type=======>", graph_type)
@@ -3554,11 +3813,11 @@ def download_pdf(request):
                 debit_value = data_value
                 credit_value = json.loads(credit_value)
                 bar_data = [debit_value, credit_value]
-                d = draw_bar_chart(bar_data, data_label, graph_type)
+                bar_legends = [(colors.red, "Debit"), (colors.green, "Credit")]
+                d = draw_bar_chart(bar_data, data_label, graph_type, bar_legends)
 
             if graph_type == 'bar':
                 bar_data = [data_value]
-                print(bar_data)
                 d = draw_bar_chart(bar_data, data_label, graph_type)
 
             if graph_type == 'line':

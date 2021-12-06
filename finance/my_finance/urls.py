@@ -121,4 +121,5 @@ urlpatterns = [
 
     path('download/pdf', download_pdf, name='download_pdf'),
     path('download/csv', download_csv, name='download_scv'),
+    path('download/rental_pdf', download_rental_pdf, name='download_rental_pdf'),
 ]

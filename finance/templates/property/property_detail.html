@@ -78,7 +78,13 @@
                                         <span class="d-none d-sm-block">Mortgage Analysis</span>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <button class="btn btn-primary text-nowrap waves-effect download_rental_pdf" property_name="{{property_obj.name}}" revenue_yearly_data="{{revenue_yearly_data_dumbs}}" expenses_yearly_data="{{expenses_yearly_data_dumbs}}" yearly_return_data="{{yearly_return_data_dumbs}}" debt_cov_ratio_data="{{debt_cov_ratio_data_dumbs}}" property_expense_data="{{property_expense_data_dumbs}}" return_investment_data="{{return_investment_data_dumbs}}" return_on_investment_data="{{return_on_investment_data_dumbs}}" cash_on_cash_return_data="{{cash_on_cash_return_data_dumbs}}" roi_with_appreciation_dict_investors_data="{{roi_with_appreciation_dict_investors_dumbs}}" roi_dict_investors_data="{{roi_dict_investors_dumbs}}" total_return_investor_data="{{total_return_investor_dict_dumbs}}" net_operating_income_data="{{net_operating_income_dict_investors_dumbs}}" annual_cashflow_data="{{annual_cash_flow_dict_investors_dumbs}}" invest_summary_data="{{investment_data_dumbs}}" yearly_projection_data="{{projection_value_dumbs}}" url="/download/rental_pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                </li>
                             </ul>
+                        </div>
+                        <div id="download_rental_pdf_form">
+
                         </div>
                     </div>
                 </section>
@@ -420,7 +426,7 @@
                                                                                                 {% else %}
                                                                                                     <td >
                                                                                                         <div class="d-flex align-items-center">
-                                                                                                            <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                            <span class="font-weight">{{data}}</span>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 {% endif %}
@@ -494,7 +500,7 @@
                                                                                                 {% else %}
                                                                                                     <td >
                                                                                                         <div class="d-flex align-items-center">
-                                                                                                            <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                            <span class="font-weight">{{data}}</span>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 {% endif %}
@@ -536,7 +542,7 @@
                                                                                                 {% else %}
                                                                                                     <td >
                                                                                                         <div class="d-flex align-items-center">
-                                                                                                            <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                            <span class="font-weight">{{data}}</span>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 {% endif %}
@@ -578,7 +584,7 @@
                                                                                                 {% else %}
                                                                                                     <td >
                                                                                                         <div class="d-flex align-items-center">
-                                                                                                            <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                            <span class="font-weight">{{data}}</span>
                                                                                                         </div>
                                                                                                     </td>
                                                                                                 {% endif %}

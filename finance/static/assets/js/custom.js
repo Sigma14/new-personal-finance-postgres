@@ -194,6 +194,60 @@ $('#expense_table').DataTable( {
         })
     });
 
+function inputHTML(formHtml, name, value)
+{
+    formHtml += "<input type='hidden' name='" + name +"' value='" + value + "' >"
+    return formHtml
+}
+// DOWNLOAD RENTAL MODEL PDF
+
+    $('.download_rental_pdf').on("click", function(e)
+    {
+       var download_url = $(this).attr('url');
+       var invest_summary_data = $(this).attr('invest_summary_data');
+       var yearly_projection_data = $(this).attr('yearly_projection_data');
+       var roi_with_appreciation_dict_investors_data = $(this).attr('roi_with_appreciation_dict_investors_data');
+       var roi_dict_investors_data = $(this).attr('roi_dict_investors_data');
+       var total_return_investor_data = $(this).attr('total_return_investor_data');
+       var net_operating_income_data = $(this).attr('net_operating_income_data');
+       var annual_cashflow_data = $(this).attr('annual_cashflow_data');
+       var cash_on_cash_return_data = $(this).attr('cash_on_cash_return_data');
+       var return_on_investment_data = $(this).attr('return_on_investment_data');
+       var debt_cov_ratio_data = $(this).attr('debt_cov_ratio_data');
+       var property_expense_data = $(this).attr('property_expense_data');
+       var return_investment_data = $(this).attr('return_investment_data');
+       var revenue_yearly_data = $(this).attr('revenue_yearly_data');
+       var expenses_yearly_data = $(this).attr('expenses_yearly_data');
+       var yearly_return_data = $(this).attr('yearly_return_data');
+       var property_name = $(this).attr('property_name');
+
+
+       formHtml = "<form action=" +  download_url + " method='post'>"
+       formHtml = inputHTML(formHtml, "invest_summary_data", invest_summary_data)
+       formHtml = inputHTML(formHtml, "yearly_projection_data", yearly_projection_data)
+       formHtml = inputHTML(formHtml, "roi_with_appreciation_dict_investors_data", roi_with_appreciation_dict_investors_data)
+       formHtml = inputHTML(formHtml, "roi_dict_investors_data", roi_dict_investors_data)
+       formHtml = inputHTML(formHtml, "total_return_investor_data", total_return_investor_data)
+       formHtml = inputHTML(formHtml, "net_operating_income_data", net_operating_income_data)
+       formHtml = inputHTML(formHtml, "annual_cashflow_data", annual_cashflow_data)
+       formHtml = inputHTML(formHtml, "cash_on_cash_return_data", cash_on_cash_return_data)
+       formHtml = inputHTML(formHtml, "return_on_investment_data", return_on_investment_data)
+       formHtml = inputHTML(formHtml, "debt_cov_ratio_data", debt_cov_ratio_data)
+       formHtml = inputHTML(formHtml, "property_expense_data", property_expense_data)
+       formHtml = inputHTML(formHtml, "return_investment_data", return_investment_data)
+       formHtml = inputHTML(formHtml, "revenue_yearly_data", revenue_yearly_data)
+       formHtml = inputHTML(formHtml, "expenses_yearly_data", expenses_yearly_data)
+       formHtml = inputHTML(formHtml, "yearly_return_data", yearly_return_data)
+       formHtml = inputHTML(formHtml, "property_name", property_name)
+
+       formHtml += "</form>"
+       console.log(formHtml)
+       var form = $(formHtml);
+       $('#download_rental_pdf_form').append(form);
+       form.submit();
+    });
+
+
 // DOWNLOAD CSV FILE
     $('.download_csv').on("click", function(e)
     {
