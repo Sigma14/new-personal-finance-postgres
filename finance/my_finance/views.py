@@ -3311,7 +3311,7 @@ def rental_property_details(request, pk):
     expenses_yearly_data_dumbs = {}
     expenses_yearly_data_dumbs.update(expenses_yearly_data1)
     expenses_yearly_data_dumbs.update(expenses_yearly_data2)
-    print("expenses_yearly_data_dumbs=============>", expenses_yearly_data_dumbs)
+
     context = {
                'primary_key': pk,
                'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
@@ -3485,9 +3485,13 @@ class RentalPdf:
         title_style = styles['Heading1']
         title_style.alignment = TA_CENTER
         title_style.fontSize = 50
-        data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
-                Paragraph(f"Address {property_address}", title_style), Spacer(100, 100),
-                Image(f"http://127.0.0.1:8000{property_image}", 25*inch, 15*inch), Spacer(200, 200)]
+        if property_image == "None":
+            data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
+                    Paragraph(f"Address {property_address}", title_style),  Spacer(300, 300)]
+        else:
+            data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
+                    Paragraph(f"Address {property_address}", title_style), Spacer(100, 100),
+                    Image(property_image, 25*inch, 15*inch), Spacer(200, 200)]
         for key, values in pdf_data_value.items():
             t = Table(values)
             t.setStyle(TableStyle(
@@ -3507,6 +3511,8 @@ class RentalPdf:
                 # if bar_key == "Cash on Cash Return (%)" or bar_key == "Investment Returns":
                 #     data.append(Spacer(200, 200))
                 data.append(Paragraph(bar_key, styles['Title']))
+                data.append(Spacer(50, 50))
+
                 data.append(bar_d)
 
         doc.build(data)
@@ -3589,7 +3595,7 @@ def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
         legend.fontSize = 14
         legend.boxAnchor = 'w'
         legend.x = 300
-        legend.y = 650
+        legend.y = 700
         legend.dx = 16
         legend.dy = 16
         legend.alignment = 'left'
@@ -3614,7 +3620,9 @@ def make_return_data(result_dict, result_value):
 def download_rental_pdf(request):
     property_address = request.POST['property_name']
     property_image = request.POST['property_image']
-    print("property_image======>", property_image)
+    scheme = request.scheme
+    if property_image != "None":
+        property_image = f"{scheme}://{request.META['HTTP_HOST']}{property_image}"
     invest_summary_data = request.POST['invest_summary_data']
     yearly_projection_data = request.POST['yearly_projection_data']
     annual_cashflow_data = request.POST['annual_cashflow_data']

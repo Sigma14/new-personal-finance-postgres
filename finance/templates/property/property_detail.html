@@ -32,7 +32,7 @@
                         <div class="item-img text-center">
                             <a>
                                 <div class="card-body">
-                                    <h6><img src="{{property_obj.property_image.url}}" height="200" widhth="200"></h6>
+                                    <h6>{% if property_obj.property_image %}<img src="{{property_obj.property_image.url}}" height="200" widhth="200">{% endif %}</h6>
                                     <h2 style="float: left;">Address :- {{ property_obj.name }}</h2>
                                     <h4 style="float: right;">
                                         Purchase Price :- <span class="text-info">{{ property_obj.currency }}{{ property_obj.purchase_price_detail.selected_price }}</span>
@@ -80,7 +80,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="btn btn-primary text-nowrap waves-effect download_rental_pdf" property_image="{{property_obj.property_image.url}}" property_name="{{property_obj.name}}" revenue_yearly_data="{{revenue_yearly_data_dumbs}}" expenses_yearly_data="{{expenses_yearly_data_dumbs}}" yearly_return_data="{{yearly_return_data_dumbs}}" debt_cov_ratio_data="{{debt_cov_ratio_data_dumbs}}" property_expense_data="{{property_expense_data_dumbs}}" return_investment_data="{{return_investment_data_dumbs}}" return_on_investment_data="{{return_on_investment_data_dumbs}}" cash_on_cash_return_data="{{cash_on_cash_return_data_dumbs}}" roi_with_appreciation_dict_investors_data="{{roi_with_appreciation_dict_investors_dumbs}}" roi_dict_investors_data="{{roi_dict_investors_dumbs}}" total_return_investor_data="{{total_return_investor_dict_dumbs}}" net_operating_income_data="{{net_operating_income_dict_investors_dumbs}}" annual_cashflow_data="{{annual_cash_flow_dict_investors_dumbs}}" invest_summary_data="{{investment_data_dumbs}}" yearly_projection_data="{{projection_value_dumbs}}" url="/download/rental_pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                    <button class="btn btn-primary text-nowrap waves-effect download_rental_pdf" property_image="{% if property_obj.property_image %}{{property_obj.property_image.url}}{% else %}None{% endif %}" property_name="{{property_obj.name}}" revenue_yearly_data="{{revenue_yearly_data_dumbs}}" expenses_yearly_data="{{expenses_yearly_data_dumbs}}" yearly_return_data="{{yearly_return_data_dumbs}}" debt_cov_ratio_data="{{debt_cov_ratio_data_dumbs}}" property_expense_data="{{property_expense_data_dumbs}}" return_investment_data="{{return_investment_data_dumbs}}" return_on_investment_data="{{return_on_investment_data_dumbs}}" cash_on_cash_return_data="{{cash_on_cash_return_data_dumbs}}" roi_with_appreciation_dict_investors_data="{{roi_with_appreciation_dict_investors_dumbs}}" roi_dict_investors_data="{{roi_dict_investors_dumbs}}" total_return_investor_data="{{total_return_investor_dict_dumbs}}" net_operating_income_data="{{net_operating_income_dict_investors_dumbs}}" annual_cashflow_data="{{annual_cash_flow_dict_investors_dumbs}}" invest_summary_data="{{investment_data_dumbs}}" yearly_projection_data="{{projection_value_dumbs}}" url="/download/rental_pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
                                 </li>
                             </ul>
                         </div>
