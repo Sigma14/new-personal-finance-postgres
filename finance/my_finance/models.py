@@ -267,6 +267,7 @@ class CapexBudgetDetails(models.Model):
 
 class RentalPropertyModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_rental')
+    property_image = models.ImageField(upload_to='property_pics', blank=True, null=True)
     name = models.CharField(max_length=30)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     purchase_price_detail = models.ForeignKey(PropertyPurchaseDetails, on_delete=models.CASCADE,

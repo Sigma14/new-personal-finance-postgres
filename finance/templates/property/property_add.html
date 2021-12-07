@@ -27,7 +27,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" action="{% url 'rental_property_add' %}" method="post">
+                    <form class="form form-horizontal" action="{% url 'rental_property_add' %}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
                             {% if error %}
@@ -48,6 +48,18 @@
                                         <div class="input-group input-group-merge">
                                             <input type="text" id="fname-icon" class="form-control" name="name_address" required
                                                    placeholder="Property Name / Address"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Property Image</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="file" class="form-control" name="property_image">
                                         </div>
                                     </div>
                                 </div>

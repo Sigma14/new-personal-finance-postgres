@@ -23,7 +23,7 @@ from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A0, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
@@ -46,7 +46,7 @@ scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case'
 
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
-                         expense_obj, capex_budget_obj, property_name, currency_name, user_name):
+                         expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image):
     # Investor Details
     investor_detail = others_costs_data(request.POST.getlist('investor_detail'))
 
@@ -203,6 +203,7 @@ def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_ob
 
     rental_obj.user = user_name
     rental_obj.name = property_name
+    rental_obj.property_image = property_image
     rental_obj.currency = currency_name
     rental_obj.purchase_price_detail = property_purchase_obj
     rental_obj.mortgage_detail = mortgage_obj
@@ -3361,6 +3362,7 @@ def others_costs_data(other_closing_cost):
 
 def rental_property_add(request):
     if request.method == 'POST':
+        property_image = request.FILES['property_image']
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
         user_name = request.user
@@ -3377,7 +3379,7 @@ def rental_property_add(request):
         expense_obj = ExpensesDetails()
         capex_budget_obj = CapexBudgetDetails()
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
-                             expense_obj, capex_budget_obj, property_name, currency_name, user_name)
+                             expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image)
         return redirect("/rental_property_list/")
 
     else:
@@ -3387,6 +3389,7 @@ def rental_property_add(request):
 
 def rental_property_update(request, pk):
     user_name = request.user
+    print(request.POST)
     if request.method == "POST":
         rental_obj = RentalPropertyModel.objects.get(pk=pk)
         property_purchase_obj = rental_obj.purchase_price_detail
@@ -3395,6 +3398,7 @@ def rental_property_update(request, pk):
         revenue_obj = rental_obj.monthly_revenue
         expense_obj = rental_obj.monthly_expenses
         capex_budget_obj = rental_obj.capex_budget_details
+        property_image = request.FILES['property_image']
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
         user_name = request.user
@@ -3405,7 +3409,7 @@ def rental_property_update(request, pk):
                 return render(request, "property/property_add.html", context=context)
 
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
-                             expense_obj, capex_budget_obj, property_name, currency_name, user_name)
+                             expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image)
         return redirect("/rental_property_list/")
 
     else:
@@ -3475,14 +3479,15 @@ class RentalPdf:
             self.pageSize = letter
         self.width, self.height = self.pageSize
 
-    def report(self, pdf_data_value, title, property_address, d=None):
+    def report(self, pdf_data_value, title, property_address, property_image, d=None):
         doc = SimpleDocTemplate(self.buffer, pagesize=self.pageSize)
         styles = getSampleStyleSheet()
         title_style = styles['Heading1']
         title_style.alignment = TA_CENTER
         title_style.fontSize = 50
-        data = [Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(50, 50),
-                Paragraph(f"Address {property_address}", title_style), Spacer(250, 250)]
+        data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
+                Paragraph(f"Address {property_address}", title_style), Spacer(100, 100),
+                Image(f"http://127.0.0.1:8000{property_image}", 25*inch, 15*inch), Spacer(200, 200)]
         for key, values in pdf_data_value.items():
             t = Table(values)
             t.setStyle(TableStyle(
@@ -3494,12 +3499,13 @@ class RentalPdf:
             p = Paragraph(key, styles['Title'])
             data.append(p)
             data.append(t)
-            data.append(Spacer(80, 80))
+            data.append(Spacer(150, 150))
         if d:
+            data.append(Paragraph(f"INVESTMENT SUMMARY GRAPHS AND STATISTICS", title_style))
             for bar_key, bar_d in d.items():
                 data.append(Spacer(150, 150))
-                if bar_key == "Cash on Cash Return (%)" or bar_key == "Investment Returns":
-                    data.append(Spacer(350, 350))
+                # if bar_key == "Cash on Cash Return (%)" or bar_key == "Investment Returns":
+                #     data.append(Spacer(200, 200))
                 data.append(Paragraph(bar_key, styles['Title']))
                 data.append(bar_d)
 
@@ -3607,6 +3613,8 @@ def make_return_data(result_dict, result_value):
 @csrf_exempt
 def download_rental_pdf(request):
     property_address = request.POST['property_name']
+    property_image = request.POST['property_image']
+    print("property_image======>", property_image)
     invest_summary_data = request.POST['invest_summary_data']
     yearly_projection_data = request.POST['yearly_projection_data']
     annual_cashflow_data = request.POST['annual_cashflow_data']
@@ -3780,7 +3788,8 @@ def download_rental_pdf(request):
                           'YEARLY PROJECTION': yearly_projection_data_values,
                           'INVESTOR RETURNS SUMMARY': annual_cashflow_data_values,
                           'REVENUE': revenue_yearly_data_values, 'PROPERTY EXPENSES': expenses_yearly_data_values,
-                          'INVESTMENT METRICS': yearly_return_data_values}, pdf_title, property_address, d)
+                          'INVESTMENT METRICS': yearly_return_data_values}, pdf_title, property_address,
+                         property_image, d)
     response.write(pdf)
     return response
 

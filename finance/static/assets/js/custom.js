@@ -220,6 +220,7 @@ function inputHTML(formHtml, name, value)
        var expenses_yearly_data = $(this).attr('expenses_yearly_data');
        var yearly_return_data = $(this).attr('yearly_return_data');
        var property_name = $(this).attr('property_name');
+       var property_image = $(this).attr('property_image');
 
 
        formHtml = "<form action=" +  download_url + " method='post'>"
@@ -239,6 +240,7 @@ function inputHTML(formHtml, name, value)
        formHtml = inputHTML(formHtml, "expenses_yearly_data", expenses_yearly_data)
        formHtml = inputHTML(formHtml, "yearly_return_data", yearly_return_data)
        formHtml = inputHTML(formHtml, "property_name", property_name)
+       formHtml = inputHTML(formHtml, "property_image", property_image)
 
        formHtml += "</form>"
        console.log(formHtml)
