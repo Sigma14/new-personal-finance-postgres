@@ -74,52 +74,23 @@
       data-menu="vertical-menu-modern" data-col="">
 
 <!-- BEGIN: Header-->
-<nav class="header-navbar navbar navbar-expand-lg align-items-center floating-nav navbar-light navbar-shadow">
-    <div class="navbar-container d-flex content">
-        <div class="bookmark-wrapper d-flex align-items-center">
-            <ul class="nav navbar-nav d-xl-none">
-                <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i class="ficon"
-                                                                                                   data-feather="menu"></i></a>
-
-                </li>
-            </ul>
-            {% if request.resolver_match.view_name == 'home' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Welcome to <strong>Personal Finance!</strong> On this page you get a quick overview of your finances. For more information, check out Accounts → <a href="{% url 'account_list' %}">Asset Accounts</a> and of course the <a href="{% url 'budget_list' %}">Budgets</a>, <a href="{% url 'bill_list' %}">Bills</a> and <a href="{% url 'transaction_list' %}">Transactions pages</a>. Or just take a look around and see where you end up.</div>
+<nav class="header-navbar navbar navbar-expand-lg align-items-left floating-nav navbar-light navbar-shadow">
+    <div class="navbar-container d-flex content col-12">
+        <ul class="nav navbar-nav align-items-left ml-auto">
+            {% if user.is_authenticated %}
+            <li class="nav-item dropdown dropdown-user">
+                <a class="nav-link">
+                    <div class="user-nav d-sm-flex d-none"><span class="user-name font-weight-bolder">Hi, {{user.first_name}}</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_logout' %}" data-placement="top"><div class="user-nav d-sm-flex d-none"><span class="user-name font-weight-bolder">Logout</span></div></a></li>
+            {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'user_login' %}" data-placement="top"><div class="user-nav d-sm-flex d-none"><span class="user-name font-weight-bolder"ss>Login</span></div></a></li>
             {% endif %}
-            {% if request.resolver_match.view_name == 'budget_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you an overview of your budgets. Budget table shows -> How many amount spent and left in budget</div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'bill_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows monthly weekly and daily bills and also shows which bill is <strong class="text-success">paid</strong> or <strong class="text-danger">unpaid</strong></div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'fund_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows an overview of your funds. Funds Table shows -> Amount of total funds, available funds, lock funds. You can use Lock Amount in the future and add extra funds if you receive</div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'account_detail' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Asset accounts are your personal bank accounts. This page shows your current balance and all transactions data of asset account </div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'liability_detail' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> Liabilities are your debts and loans such as old credit card debts or student loans. This page shows your current balance and all transactions data of liabilities account </div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'transaction_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you all accounts transactions. you can filter transactions by tags and make reports of transaction between two date range and also upload transactions file in your transactions</div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'category_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows you all categories list and also shows how many amount spent on particular category using bar graph</div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'goal_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page shows your goals and also shows goals are completed or not </div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'mortgagecalculator_list' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> This page calculate mortgage and shows your mortgage payments details according to interest periods</div>
-            {% endif %}
-            {% if request.resolver_match.view_name == 'future_net_worth_calculator' %}
-            <div class="icon-wrapper" style="font-size:16px;"><i data-feather="info"></i> future net worth calculator to get a net worth projection of what your actual net worth in future over age and time will be. Your future net worth calculation is primarily based on what you are currently worth, your future savings and expected rate of return put through our net worth growth calculator.</div>
-            {% endif %}
-        </div>
+        </ul>
     </div>
 </nav>
-
 
 <!-- BEGIN: Main Menu-->
 <div class="main-menu menu-fixed menu-light menu-accordion menu-shadow" data-scroll-to-active="true">
@@ -201,7 +172,6 @@
     </div>
 </div>
 <!-- END: Main Menu-->
-
 <!-- BEGIN: Content-->
     {% block content %}
     {% endblock content %}

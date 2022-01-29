@@ -917,9 +917,10 @@ def home(request):
             "max_value": acc_max_value,
             "min_value": acc_min_value
         }
+        return render(request, "dashboard.html", context=context)
     else:
-        context = {}
-    return render(request, 'dashboard.html', context=context)
+        next = None
+        return render(request, "login_page.html", context={'next': next})
 
 
 def net_worth(request):
@@ -1160,7 +1161,10 @@ class CategoryDelete(DeleteView):
 
 def user_login(request):
     if request.method == 'POST':
-        next = request.POST['next']
+        try:
+            next = request.POST['next']
+        except:
+            next = None
         username = request.POST['register-username']
         password = request.POST['register-password']
         user = authenticate(username=username, password=password)
@@ -1227,7 +1231,10 @@ def user_login(request):
             else:
                 return redirect('/')
     else:
-        next = request.GET['next']
+        try:
+            next = request.GET['next']
+        except:
+            next = None
         return render(request, "login_page.html", context={'next': next})
 
 

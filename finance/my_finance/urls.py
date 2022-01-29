@@ -105,6 +105,7 @@ urlpatterns = [
     path('future-net-worth-calculator/', future_net_worth_calculator, name='future_net_worth_calculator'),
 
     path('login', user_login, name='user_login'),
+    path('logout', user_logout, name='user_logout'),
     path('net_worth', net_worth, name='net_worth'),
 
     # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
