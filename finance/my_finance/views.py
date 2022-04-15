@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import datetime
 from io import BytesIO
+import base64
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
@@ -39,6 +40,8 @@ from reportlab.lib.units import inch
 from reportlab.platypus.flowables import Spacer
 from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
+from django.contrib.auth.models import User
+
 
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
@@ -822,6 +825,7 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
             balance_graph_data.append(round(current_balance, 2))
 
 
+@login_required(login_url="/login")
 def home(request):
     user_name = request.user
     if not request.user.is_anonymous:
@@ -923,6 +927,7 @@ def home(request):
         return render(request, "login_page.html", context={'next': next})
 
 
+@login_required(login_url="/login")
 def net_worth(request):
     user_name = request.user
     account_data = Account.objects.filter(user=user_name)
@@ -1066,7 +1071,7 @@ class PropertyUpdate(LoginRequiredMixin, UpdateView):
     template_name = 'properties/property_update.html'
 
 
-class PropertyDelete(DeleteView):
+class PropertyDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         property_obj = Property.objects.get(pk=self.kwargs['pk'])
         property_obj.delete()
@@ -1106,12 +1111,12 @@ class CategoryList(LoginRequiredMixin, ListView):
         return data
 
 
-class CategoryDetail(DetailView):
+class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
     template_name = 'category/category_detail.html'
 
 
-class CategoryAdd(CreateView):
+class CategoryAdd(LoginRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'category/category_add.html'
@@ -1146,13 +1151,13 @@ class CategoryAdd(CreateView):
         return url
 
 
-class CategoryUpdate(UpdateView):
+class CategoryUpdate(LoginRequiredMixin, UpdateView):
     model = Category
     form_class = CategoryForm
     template_name = 'category/category_update.html'
 
 
-class CategoryDelete(DeleteView):
+class CategoryDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         category_obj = Category.objects.get(pk=self.kwargs['pk'])
         category_obj.delete()
@@ -1160,84 +1165,144 @@ class CategoryDelete(DeleteView):
 
 
 def user_login(request):
-    if request.method == 'POST':
-        try:
-            next = request.POST['next']
-        except:
-            next = None
+    # if request.method == 'POST':
+    #     try:
+    #         next = request.POST['next']
+    #     except:
+    #         next = None
+    #     username = request.POST['register-username']
+    #     password = request.POST['register-password']
+    #     user = authenticate(username=username, password=password)
+    #     if user is None:
+    #         context = {'login_error': 'Username and Password Incorrect'}
+    #         return render(request, "login_page.html", context)
+    #     elif not user.is_active:
+    #         context = {'login_error': 'User is not active'}
+    #         return render(request, "login_page.html", context)
+    #     else:
+    #         login(request, user)
+    #         template_budget_data = TemplateBudget.objects.filter(user=user)
+    #         if template_budget_data:
+    #             budget_obj = TemplateBudget.objects.filter(user=user)
+    #             budget_obj.delete()
+    #         period_list = {'Daily': 'Going out', 'Weekly': 'Groceries', 'Monthly': 'Bills'}
+    #         date_value = datetime.datetime.today().date()
+    #         start_month_date, end_month_date = start_end_date(date_value, "Monthly")
+    #         for key, value in period_list.items():
+    #             template_obj = TemplateBudget()
+    #             template_obj.user = user
+    #             budget_name = value
+    #             template_obj.name = budget_name
+    #             template_obj.currency = "$"
+    #             template_obj.auto_budget = True
+    #             template_obj.budget_period = key
+    #
+    #             if key == 'Monthly':
+    #                 template_obj.start_date = start_month_date
+    #                 template_obj.end_date = end_month_date
+    #                 template_obj.initial_amount = 1500
+    #                 template_obj.amount = 1500
+    #                 template_obj.budget_spent = 1000
+    #                 template_obj.budget_left = 500
+    #                 template_obj.created_at = start_month_date
+    #                 template_obj.ended_at = end_month_date
+    #                 template_obj.save()
+    #
+    #             if key == 'Weekly':
+    #                 start_week_date, end_week_date = start_end_date(date_value, key)
+    #                 template_obj.start_date = start_month_date
+    #                 template_obj.end_date = end_month_date
+    #                 template_obj.initial_amount = 200
+    #                 template_obj.amount = 200
+    #                 template_obj.budget_spent = 150
+    #                 template_obj.budget_left = 50
+    #                 template_obj.created_at = start_week_date
+    #                 template_obj.ended_at = end_week_date
+    #                 template_obj.save()
+    #
+    #             if key == 'Daily':
+    #                 template_obj.start_date = start_month_date
+    #                 template_obj.end_date = end_month_date
+    #                 template_obj.initial_amount = 100
+    #                 template_obj.amount = 100
+    #                 template_obj.budget_spent = 120
+    #                 template_obj.budget_left = -20
+    #                 template_obj.created_at = date_value
+    #                 template_obj.ended_at = date_value
+    #                 template_obj.save()
+    #
+    #         if next:
+    #             return redirect(next)
+    #         else:
+    #             return redirect('/')
+    # else:
+    #     try:
+    #         next = request.GET['next']
+    #     except:
+    #         next = None
+    #     return render(request, "login_page.html", context={'next': next})
+    context = {}
+    if request.method == "POST":
         username = request.POST['register-username']
-        password = request.POST['register-password']
-        user = authenticate(username=username, password=password)
-        if user is None:
-            context = {'login_error': 'Username and Password Incorrect'}
-            return render(request, "login_page.html", context)
-        elif not user.is_active:
-            context = {'login_error': 'User is not active'}
-            return render(request, "login_page.html", context)
-        else:
-            login(request, user)
-            template_budget_data = TemplateBudget.objects.filter(user=user)
-            if template_budget_data:
-                budget_obj = TemplateBudget.objects.filter(user=user)
-                budget_obj.delete()
-            period_list = {'Daily': 'Going out', 'Weekly': 'Groceries', 'Monthly': 'Bills'}
-            date_value = datetime.datetime.today().date()
-            start_month_date, end_month_date = start_end_date(date_value, "Monthly")
-            for key, value in period_list.items():
-                template_obj = TemplateBudget()
-                template_obj.user = user
-                budget_name = value
-                template_obj.name = budget_name
-                template_obj.currency = "$"
-                template_obj.auto_budget = True
-                template_obj.budget_period = key
+        user_password = request.POST['register-password']
+        search_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch=z16E04BIOod7A1RqYcGaPPtjua7Jbfo1zKt&action=search_users&term_name=user_login&term_value={username}"
+        api_response = requests.get(search_api_url)
+        search_api_data = api_response.json()
+        user_details = ""
+        user = authenticate(username=username, password=user_password)
+        if user:
+            if user.is_superuser:
+                login(request, user)
+                try:
+                    redirect_url = request.POST['redirect_url']
+                    return redirect(redirect_url)
+                except:
+                    return redirect("/")
 
-                if key == 'Monthly':
-                    template_obj.start_date = start_month_date
-                    template_obj.end_date = end_month_date
-                    template_obj.initial_amount = 1500
-                    template_obj.amount = 1500
-                    template_obj.budget_spent = 1000
-                    template_obj.budget_left = 500
-                    template_obj.created_at = start_month_date
-                    template_obj.ended_at = end_month_date
-                    template_obj.save()
+        for data in search_api_data['response']:
+            user_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch=z16E04BIOod7A1RqYcGaPPtjua7Jbfo1zKt&action=user_get_details&uid={data['ID']}"
+            print(user_api_url)
+            user_api_response = requests.get(user_api_url)
+            user_data = user_api_response.json()['response']
+            print(user_password)
+            print(user_data['user_pass'])
+            print(username)
 
-                if key == 'Weekly':
-                    start_week_date, end_week_date = start_end_date(date_value, key)
-                    template_obj.start_date = start_month_date
-                    template_obj.end_date = end_month_date
-                    template_obj.initial_amount = 200
-                    template_obj.amount = 200
-                    template_obj.budget_spent = 150
-                    template_obj.budget_left = 50
-                    template_obj.created_at = start_week_date
-                    template_obj.ended_at = end_week_date
-                    template_obj.save()
-
-                if key == 'Daily':
-                    template_obj.start_date = start_month_date
-                    template_obj.end_date = end_month_date
-                    template_obj.initial_amount = 100
-                    template_obj.amount = 100
-                    template_obj.budget_spent = 120
-                    template_obj.budget_left = -20
-                    template_obj.created_at = date_value
-                    template_obj.ended_at = date_value
-                    template_obj.save()
-
-            if next:
-                return redirect(next)
+            if user_data['user_login'] == username and user_data['user_pass'] == user_password:
+                if user:
+                    login(request, user)
+                else:
+                    try:
+                        user = User.objects.get(username=username)
+                        user.set_password(user_password)
+                        user.first_name = user_data['user_nicename']
+                        user.email = user_data['user_email']
+                        user.save()
+                    except:
+                        user = User.objects.create_user(username, user_data['user_email'], user_password)
+                        user.first_name = user_data['user_nicename']
+                        user.save()
+                    login(request, user)
+                try:
+                    redirect_url = request.POST['redirect_url']
+                    return redirect(redirect_url)
+                except:
+                    return redirect("/")
             else:
-                return redirect('/')
+                user_details = "False"
+        if user_details == "False":
+            context['login_error'] = 'Username and Password Incorrect'
+            return render(request, "login_page.html", context=context)
     else:
         try:
-            next = request.GET['next']
+            context['redirect_url'] = request.GET['next']
         except:
-            next = None
-        return render(request, "login_page.html", context={'next': next})
+            pass
+
+        return render(request, "login_page.html", context=context)
 
 
+@login_required(login_url="/login")
 def user_logout(request):
     logout(request)
     return redirect('/login')
@@ -1755,7 +1820,7 @@ def transaction_list(request):
     context = transaction_summary(transaction_data, select_filter)
     return render(request, 'transaction/transaction_list.html', context=context)
 
-
+@login_required(login_url="/login")
 def transaction_report(request):
     user_name = request.user
     if request.method == "POST":
@@ -2078,7 +2143,7 @@ def calculate_available_lock_amount(user_name, account_obj):
     available_lock_amount = float(lock_amount) - total_allocate_amount
     return available_lock_amount
 
-
+@login_required(login_url="/login")
 def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     label = request.POST['label']
     goal_amount = request.POST['goal_amount']
@@ -2148,6 +2213,8 @@ class GoalDetail(LoginRequiredMixin, DetailView):
 #     form_class = GoalForm
 #     template_name = 'goal/goal_update.html'
 
+
+@login_required(login_url="/login")
 def goal_add(request):
     user_name = request.user
     if request.method == 'POST':
@@ -2159,7 +2226,7 @@ def goal_add(request):
         context = {'currency_dict': currency_dict, 'account_data': account_data}
         return render(request, 'goal/goal_add.html', context=context)
 
-
+@login_required(login_url="/login")
 def goal_update(request, pk):
     user_name = request.user
     goal_data = Goal.objects.get(pk=pk)
@@ -2547,6 +2614,7 @@ class FundList(LoginRequiredMixin, ListView):
         return data
 
 
+@login_required(login_url="/login")
 def fund_overtime(request):
     if request.method == 'POST' and request.is_ajax():
         user_name = request.user
@@ -2615,6 +2683,7 @@ def fund_overtime(request):
                          'max_value': max_value, 'min_value': min_value})
 
 
+@login_required(login_url="/login")
 def fund_update(request, pk):
     fund_obj = AvailableFunds.objects.get(pk=pk)
     total_fund = float(fund_obj.total_fund)
@@ -2687,6 +2756,7 @@ def fund_update(request, pk):
 
 # BILL VIEWS
 
+@login_required(login_url="/login")
 def bill_list(request):
     bill_data = Bill.objects.filter(user=request.user)
 
@@ -2708,6 +2778,7 @@ def bill_list(request):
     return render(request, "bill/bill_list.html", context)
 
 
+@login_required(login_url="/login")
 def bill_detail(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     transaction_data = Transaction.objects.filter(bill=bill_obj)
@@ -2715,6 +2786,7 @@ def bill_detail(request, pk):
     return render(request, "bill/bill_detail.html", context)
 
 
+@login_required(login_url="/login")
 def bill_add(request):
     form = BillForm(request.POST or None)
     error = ''
@@ -2747,6 +2819,7 @@ def bill_add(request):
     return render(request, "bill/bill_add.html", context=context)
 
 
+@login_required(login_url="/login")
 def bill_update(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     form = BillForm(request.POST or None)
@@ -2776,12 +2849,14 @@ def bill_update(request, pk):
     return render(request, "bill/bill_update.html", context=context)
 
 
+@login_required(login_url="/login")
 def bill_delete(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     bill_obj.delete()
     return JsonResponse({"status": "Successfully", "path": "/bill_list/"})
 
 
+@login_required(login_url="/login")
 def bill_automatic_amount(request):
     bill_id = request.POST['bill_id']
     bill_obj = Bill.objects.get(pk=bill_id)
@@ -2808,6 +2883,7 @@ def make_mortgage_data(data, total_month, mortgage_date):
     return mortgage_key, mortgage_graph_data, last_month, mortgage_date_data
 
 
+@login_required(login_url="/login")
 def mortgagecalculator(request):
     form = MortgageForm(request.POST or None)
     if form.is_valid():
@@ -2844,6 +2920,7 @@ def mortgagecalculator(request):
 
 # FUTURE NET WORTH CALCULATOR
 
+@login_required(login_url="/login")
 def future_net_worth_calculator(request):
     if request.method == "POST":
         home_value = check_float(request.POST['home_value'])
@@ -2962,6 +3039,7 @@ class RentalPropertyList(LoginRequiredMixin, ListView):
         return data
 
 
+@login_required(login_url="/login")
 def rental_property_details(request, pk):
     user_name = request.user
     property_obj = RentalPropertyModel.objects.get(user=user_name, pk=pk)
@@ -3367,9 +3445,10 @@ def others_costs_data(other_closing_cost):
     return cost_dict
 
 
+@login_required(login_url="/login")
 def rental_property_add(request):
     if request.method == 'POST':
-        property_image = request.FILES['property_image']
+        property_image = request.FILES['file']
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
         user_name = request.user
@@ -3390,10 +3469,19 @@ def rental_property_add(request):
         return redirect("/rental_property_list/")
 
     else:
-        context = {'currency_dict': currency_dict, 'scenario_dict': scenario_dict,}
+        context = {
+                    'currency_dict': currency_dict,
+                    'scenario_dict': scenario_dict,
+                    'action_url': "/rental_property_add/",
+                    'heading_name': "Add Rental Property",
+                    'heading_url': "Add Property",
+                    'property_url': "/rental_property_list/",
+
+        }
         return render(request, "property/property_add.html", context=context)
 
 
+@login_required(login_url="/login")
 def rental_property_update(request, pk):
     user_name = request.user
     print(request.POST)
@@ -3417,7 +3505,7 @@ def rental_property_update(request, pk):
 
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                              expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image)
-        return redirect("/rental_property_list/")
+        return redirect(f"rental_property_detail/{pk}")
 
     else:
         property_obj = RentalPropertyModel.objects.get(pk=pk)
@@ -3453,11 +3541,17 @@ def rental_property_update(request, pk):
                    "others_revenue_cost": others_revenue_cost, "others_revenue_cost_len": len(others_revenue_cost),
                    "other_utilities": other_utilities, "other_utilities_len": len(other_utilities),
                    "other_expenses": other_expenses, "other_expenses_len": len(other_expenses),
-                   "investor_details": investor_details, "investor_details_len": len(investor_details)}
+                   "investor_details": investor_details, "investor_details_len": len(investor_details),
+                   'action_url': f"/rental_property_update/{pk}",
+                   'heading_name': "Update Rental Property",
+                   'heading_url': "Update Property",
+                   'property_url': "/rental_property_detail/{pk}",
+                   }
 
-        return render(request, "property/property_update.html", context=context)
+        return render(request, "property/property_add.html", context=context)
 
 
+@login_required(login_url="/login")
 def rental_property_delete(request, pk):
     property_obj = RentalPropertyModel.objects.get(pk=pk)
     purchase_price_obj = property_obj.purchase_price_detail
@@ -3623,6 +3717,7 @@ def make_return_data(result_dict, result_value):
     return result_value
 
 
+@login_required(login_url="/login")
 @csrf_exempt
 def download_rental_pdf(request):
     property_address = request.POST['property_name']
@@ -3809,6 +3904,7 @@ def download_rental_pdf(request):
     return response
 
 
+@login_required(login_url="/login")
 @csrf_exempt
 def download_pdf(request):
     if request.method == 'POST':
@@ -3868,6 +3964,7 @@ def download_pdf(request):
 
 # Download CSV file
 
+@login_required(login_url="/login")
 @csrf_exempt
 def download_csv(request):
     """
@@ -3894,6 +3991,7 @@ def download_csv(request):
         return response
 
 
+@login_required(login_url="/login")
 def transaction_upload(request):
     if request.method == "POST" and request.is_ajax:
         try:
@@ -4026,6 +4124,7 @@ def revenue_save(revenue_object, user_name, name, amount, month_name, currency):
     revenue_object.save()
 
 
+@login_required(login_url="/login")
 def revenue_add(request):
     if request.method == 'POST':
         revenue_obj = Revenues()
@@ -4077,6 +4176,7 @@ def revenue_add(request):
 
 # REVENUE UPDATE
 
+@login_required(login_url="/login")
 def revenue_update(request, pk):
     revenue_obj = Revenues.objects.get(pk=int(pk))
 
@@ -4125,10 +4225,12 @@ def revenue_update(request, pk):
 
 # REVENUE DELETE
 
+@login_required(login_url="/login")
 def revenue_delete(request):
     return render(request, "revenue/revenue_add.html")
 
 
+@login_required(login_url="/login")
 def revenue_update_name(request, pk):
     if request.method == 'POST':
         name = request.POST['name']
@@ -4176,6 +4278,7 @@ def expense_save(request, user_name, expenses_obj):
     expenses_obj.save()
 
 
+@login_required(login_url="/login")
 def expenses_add(request):
     user_name = request.user
     if request.method == 'POST':
@@ -4194,6 +4297,7 @@ def expenses_add(request):
 
 # EXPENSES UPDATE
 
+@login_required(login_url="/login")
 def expenses_update(request, pk):
     user_name = request.user
     expense_obj = Expenses.objects.get(pk=pk)
@@ -4211,7 +4315,13 @@ def expenses_update(request, pk):
 
 # EXPENSES DELETE
 
+@login_required(login_url="/login")
 def expenses_delete(request, pk):
     expense_obj = Expenses.objects.get(pk=pk)
     expense_obj.delete()
     return JsonResponse({"status": "Successfully", "path": "None"})
+
+
+def process_image(request):
+    print("ll")
+    return render(request, "test.html")

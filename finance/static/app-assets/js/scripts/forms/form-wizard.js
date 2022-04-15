@@ -120,11 +120,14 @@ $(function () {
     $(horizontalWizard)
       .find('.btn-next')
       .each(function () {
-        $(this).on('click', function (e) {
-          var isValid = $(this).parent().siblings('form').valid();
+        $(this).on('click', function (e)
+        {
+          var isValid = $('form').valid();
           if (isValid) {
             numberedStepper.next();
-          } else {
+            e.preventDefault();
+          }
+          else {
             e.preventDefault();
           }
         });
@@ -139,9 +142,10 @@ $(function () {
     $(horizontalWizard)
       .find('.btn-submit')
       .on('click', function () {
-        var isValid = $(this).parent().siblings('form').valid();
-        if (isValid) {
-          alert('Submitted..!!');
+        var isValid = $('form').valid();
+        if (isValid)
+        {
+            $('#frm1').submit();
         }
       });
   }

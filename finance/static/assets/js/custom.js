@@ -1,5 +1,6 @@
 $(document).ready(function()
 {
+    $('#rental_prop_form').hide();
     $('.edit_income').on('click', function(event)
     {
         location.assign($(this).attr('href'))
@@ -221,7 +222,6 @@ function inputHTML(formHtml, name, value)
        var yearly_return_data = $(this).attr('yearly_return_data');
        var property_name = $(this).attr('property_name');
        var property_image = $(this).attr('property_image');
-
 
        formHtml = "<form action=" +  download_url + " method='post'>"
        formHtml = inputHTML(formHtml, "invest_summary_data", invest_summary_data)
@@ -738,6 +738,28 @@ $("body").delegate(".add_property_liab", "click", function()
         });
 
 });
+
+// Property Next Functionality
+$("body").delegate(".next_click_prop", "click", function()
+{
+    curr_id = $(this).attr('curr_id')
+    next_id = $(this).attr('next_id')
+    next_trigger_id = $(this).attr('next_trigger_id')
+    next_data = $(this).attr('next_data')
+
+    $(curr_id).removeClass('active')
+    $('.content').removeClass('active')
+    $('.content').removeClass('dstepper-block')
+    $(".step-trigger").attr('aria-selected', 'false')
+    $(next_id).addClass('active')
+    $(next_trigger_id).attr('aria-selected', 'true')
+    $(next_id).removeClass('dstepper-block')
+    $('.step').removeClass('crossed')
+    $(curr_id).addClass('crossed')
+    $(next_data).addClass('active')
+
+});
+
 
 function getCookie(name) {
     let cookieValue = null;
