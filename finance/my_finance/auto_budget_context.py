@@ -64,7 +64,8 @@ def check_auto_budget(request):
         pass
     else:
         user_name = request.user
-        budget_data = Budget.objects.filter(user=user_name)
+        budget_data = Budget.objects.filter(user=user_name, ended_at__lt=datetime.today().date(), auto_budget=True)
+        print("budget_data-===========>", budget_data)
         bill_data = Bill.objects.filter(user=user_name)
         revenue_data = Revenues.objects.filter(user=user_name, primary=True).order_by('-month')
         today_date = datetime.today().date()
@@ -141,7 +142,7 @@ def check_auto_budget(request):
                             data.budget_status = True
                             data.save()
                             budgets_save(user_name, start_month_date, end_month_date, budget_name, budget_period,
-                                         budget_currency, budget_amount, budget_auto, today_date, today_date, initial_amount)
+                                         budget_currency, budget_amount, budget_auto, start_week_date, end_week_date, initial_amount)
 
                     if budget_period == 'Daily':
                         if start_month_date > data.start_date:
