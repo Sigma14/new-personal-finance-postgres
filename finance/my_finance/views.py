@@ -3448,7 +3448,10 @@ def others_costs_data(other_closing_cost):
 @login_required(login_url="/login")
 def rental_property_add(request):
     if request.method == 'POST':
-        property_image = request.FILES['file']
+        try:
+            property_image = request.FILES['file']
+        except:
+            property_image = ""
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
         user_name = request.user
