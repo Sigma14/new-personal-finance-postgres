@@ -1001,7 +1001,8 @@ $("body").delegate(".select_terms", "click", function(event)
     lease_end_date = $("#lease_end_date").val()
     var result_start_date = make_date_str(new Date(lease_start_date))
     var result_end_date = make_date_str(new Date(lease_end_date))
-
+    $("#invoice_body_div").empty()
+    $("#rental_invoice").empty()
     if(select_id == "month_term_tab")
     {
         $(".lease_end_date_remove").hide();
@@ -1009,7 +1010,6 @@ $("body").delegate(".select_terms", "click", function(event)
         $(".rent_start_date").text(result_start_date)
         $(".rent_end_date").text('Month-to-Month')
         $("#rent_duration").text("1 Month")
-        $("#rental_invoice").empty()
         $(".change_very_month_date").val('Select')
         month_start_data = new Date(lease_start_date)
         month_year = month_start_data.getFullYear() + 1
@@ -1032,13 +1032,12 @@ $("body").delegate(".select_terms", "click", function(event)
 
     }
 });
-
 //Deposit Amount Changes
 
 $("body").delegate(".deposit_amount_input", "change", function(event)
 {
     deposit_amount = $(this).val();
-    currency_symbol = $(".currency_code_class").text()
+    currency_symbol = $("#currency_name").val()
     $(".deposit_amount_field").text(currency_symbol + deposit_amount)
 });
 
@@ -1060,7 +1059,7 @@ $('#already_deposit_check').on('click', function(event)
 $("body").delegate(".change_rent_amount", "change", function(event)
 {
     rental_amount = $(this).val();
-    currency_symbol = $(".currency_code_class").text()
+    currency_symbol = $("#currency_name").val()
     $(".rent_amount_month").text(currency_symbol + rental_amount + "/month")
     $("#rental_invoice").empty()
     $(".change_every_month_date").val('Select')
@@ -1185,7 +1184,7 @@ $("body").delegate("#rental_invoice", "change", function(event)
         }
 
     }
-    currency_symbol = $(".currency_code_class").text()
+    currency_symbol = $("#currency_name").val()
     $(".total_invoices_no").text(invoice_total_record)
     $(".total_rental_amount").text(currency_symbol + invoice_total_amount)
     $("#invoice_body_div").append(tableHtml)
@@ -1331,6 +1330,12 @@ $('.select_property').on('change', function(e)
         });
 
     });
+
+$("body").delegate(".select_currency_symbol", "change", function(event)
+{
+    currency_value = $(this).val();
+    $(".currency_code_class").text(currency_value);
+});
 
 $('#unit_options').on('change', function(e)
 {

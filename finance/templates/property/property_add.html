@@ -151,7 +151,7 @@
                                                 <div class="col-lg-4 col-md-6">
                                                     <div class="form-group">
                                                         <label for="currency_name">Currency</label>
-                                                        <select name="currency_name" class="form-control" id="currency_name">
+                                                        <select name="currency_name" class="form-control select_currency_symbol" id="currency_name">
                                                             {% for key, value in currency_dict.items %}
                                                                 {% if currency == key %}
                                                                     <option value="{{key}}" selected>{{value}}</option>
@@ -653,7 +653,7 @@
                                                         <label>Rent</label>
                                                         <div class="input-group md-4">
                                                             <div class="input-group-prepend">
-                                                                <span class="input-group-text" style="border:2px solid #6E6B7B; height:38px;">{{currency_symbol}}</span>
+                                                                <span class="input-group-text currency_code_class" style="border:2px solid #6E6B7B; height:38px;">{{currency_symbol}}</span>
                                                             </div>
                                                             <input type="text" name="rent" id="rent" value="{{rent}}" class="form-control change_rent_amount" placeholder="" required>
                                                         </div>
@@ -693,7 +693,7 @@
                                                         </div>
                                                         <hr/>
                                                         <div class="text-center">
-                                                            <h1 class="mb-1 text-white total_rental_amount">{{currency_symbol}}0.00</h1>
+                                                            <h1 class="mb-1 text-white total_rental_amount"><span class="currency_code_class">{{currency_symbol}}</span>0.00</h1>
                                                             <p class="card-text m-auto w-75">
                                                                 Total rent from lease for <span id="rent_duration">1 Year </span>
                                                             </p>
@@ -735,7 +735,7 @@
                                                                 <div class="card">
                                                                     <div class="card-header flex-column align-items-start pb-0">
                                                                         <h4 class="font-weight-bolder mt-1">Deposit</h4>
-                                                                        <p class="card-text deposit_amount_field">{{currency_symbol}}0</p>
+                                                                        <p class="card-text deposit_amount_field"><span class="currency_code_class">{{currency_symbol}}</span>0</p>
                                                                         <p class="card-text text-success deposit_check"></p>
                                                                     </div>
                                                                 </div>

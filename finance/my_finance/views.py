@@ -4652,16 +4652,20 @@ def add_property(request):
         rental_info_save(request, user_name, rental_obj, property_obj, invoice_obj, rent, 'add')
         return redirect("/property_list/")
     else:
-        file_name = request.GET['file_name']
-        name = request.GET['name']
-        currency = request.GET['currency']
-        value = request.GET['value']
-        context = {
-                   'file_name': file_name,
-                   'name': name,
-                   'currency': currency,
-                   'value': value,
-                  }
+        try:
+            file_name = request.GET['file_name']
+            name = request.GET['name']
+            currency = request.GET['currency']
+            value = request.GET['value']
+            context = {
+                       'file_name': file_name,
+                       'name': name,
+                       'currency': currency,
+                       'value': value,
+                      }
+
+        except:
+            context = {'file_name': 'False', 'currency_symbol': '$'}
     today_date = datetime.date.today()
     p = pd.Period(str(today_date))
     if p.is_leap_year:

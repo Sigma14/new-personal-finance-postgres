@@ -867,6 +867,7 @@
                                                     </div>
                                                     <div class="col-lg-6 col-md-6">
                                                         <input type="hidden" name="term_name" id="rental_term_name" value='{{result_obj.rental_term}}'>
+                                                        <input type="hidden" name="currency_name" id="currency_name" value='{{result_obj.property_address.currency}}'>
                                                         <input type="hidden" name="invoice_date_list" id="invoice_date_list" value='{{invoice_date_list|safe}}'>
                                                         <input type="hidden" name="invoice_amount_list" id="invoice_amount_list" value='{{invoice_amount_list|safe}}'>
                                                         <div class="form-group">
@@ -926,7 +927,7 @@
                                                             <label>Rent</label>
                                                             <div class="input-group md-4">
                                                                 <div class="input-group-prepend">
-                                                                    <span class="input-group-text" style="border:2px solid #6E6B7B; height:38px;">{{result_obj.property_address.currency}}</span>
+                                                                    <span class="input-group-text currency_code_class" style="border:2px solid #6E6B7B; height:38px;">{{result_obj.property_address.currency}}</span>
                                                                 </div>
                                                                 <input type="text" name="rent" id="rent" value="{{result_obj.rent_amount}}" class="form-control change_rent_amount" placeholder="" required>
                                                             </div>
@@ -970,7 +971,7 @@
                                                             </div>
                                                             <hr/>
                                                             <div class="text-center">
-                                                                <h1 class="mb-1 text-white total_rental_amount">{{result_obj.property_address.currency}}{{total_invoice_amount}}</h1>
+                                                                <h1 class="mb-1 text-white total_rental_amount"><span class="currency_code_class">{{result_obj.property_address.currency}}</span>{{total_invoice_amount}}</h1>
                                                                 <p class="card-text m-auto w-75">
                                                                     Total rent from lease for <span id="rent_duration"></span>
                                                                 </p>
@@ -988,7 +989,7 @@
                                                                     <div class="card">
                                                                         <div class="card-header flex-column align-items-start pb-0">
                                                                             <h4 class="font-weight-bolder mt-1">Rent</h4>
-                                                                            <p class="card-text rent_amount_month">{{result_obj.property_address.currency}}{{result_obj.rent_amount}}</p>
+                                                                            <p class="card-text rent_amount_month"><span class="currency_code_class">{{result_obj.property_address.currency}}</span>{{result_obj.rent_amount}}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1038,7 +1039,7 @@
                                                                     <div class="card">
                                                                         <div class="card-header flex-column align-items-start pb-0">
                                                                             <h4 class="font-weight-bolder mt-1">To Be Collected</h4>
-                                                                            <p class="card-text total_rental_amount">{{result_obj.property_address.currency}}{{total_invoice_amount}}</p>
+                                                                            <p class="card-text total_rental_amount"><span class="currency_code_class">{{result_obj.property_address.currency}}</span>{{total_invoice_amount}}</p>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -2002,6 +2003,7 @@
                                                 </div>
                                                 <div class="col-lg-6 col-md-6">
                                                     <input type="hidden" name="term_name" id="rental_term_name" value="Fixed Term">
+                                                    <input type="hidden" name="currency_name" id="currency_name" value='{{result_obj.currency}}'>
                                                     <input type="hidden" name="invoice_date_list" id="invoice_date_list" value=''>
                                                     <input type="hidden" name="invoice_amount_list" id="invoice_amount_list" value=''>
                                                     <div class="form-group">
@@ -2057,7 +2059,7 @@
                                                         <label>Rent</label>
                                                         <div class="input-group md-4">
                                                             <div class="input-group-prepend">
-                                                                <span class="input-group-text" style="border:2px solid #6E6B7B; height:38px;">{{result_obj.currency}}</span>
+                                                                <span class="input-group-text currency_code_class" style="border:2px solid #6E6B7B; height:38px;">{{result_obj.currency}}</span>
                                                             </div>
                                                             <input type="text" name="rent" id="rent" value="{{rent}}" class="form-control change_rent_amount" placeholder="" required>
                                                         </div>
@@ -2097,7 +2099,7 @@
                                                         </div>
                                                         <hr/>
                                                         <div class="text-center">
-                                                            <h1 class="mb-1 text-white total_rental_amount">{{result_obj.currency}}0.00</h1>
+                                                            <h1 class="mb-1 text-white total_rental_amount"><span class="currency_code_class">{{result_obj.currency}}</span>0.00</h1>
                                                             <p class="card-text m-auto w-75">
                                                                 Total rent from lease for <span id="rent_duration">1 Year </span>
                                                             </p>
@@ -2139,7 +2141,7 @@
                                                                 <div class="card">
                                                                     <div class="card-header flex-column align-items-start pb-0">
                                                                         <h4 class="font-weight-bolder mt-1">Deposit</h4>
-                                                                        <p class="card-text deposit_amount_field">{{result_obj.currency}}0</p>
+                                                                        <p class="card-text deposit_amount_field"><span class="currency_code_class">{{result_obj.currency}}</span>0</p>
                                                                         <p class="card-text text-success deposit_check"></p>
                                                                     </div>
                                                                 </div>
