@@ -32,6 +32,120 @@ BUDGET_PERIODS = (
     ("Yearly", 'Yearly'),
 )
 
+PROPERTY_TYPE = (
+    ("Apartment", 'Apartment'),
+    ("Commercial", 'Commercial'),
+    ("Condo", 'Condo'),
+    ("Duplex", 'Duplex'),
+    ("House", 'House'),
+    ("Mixed-Use", 'Mixed-Use'),
+    ("Other", 'Other'),
+)
+
+MAINTENANCE_CATEGORY = (
+    ("A/C", 'A/C'),
+    ("Appliance ", 'Appliance '),
+    ("Electrical", 'Electrical'),
+    ("Heat", 'Heat'),
+    ("Kitchen", 'Kitchen'),
+    ("Plumbing", 'Plumbing'),
+    ("Other", 'Other'),
+)
+
+MAINTENANCE_STATUS = (
+    ("Unresolved", 'Unresolved'),
+    ("Resolved", 'Resolved'),)
+
+
+class Property(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
+    property_name = models.CharField(max_length=255, blank=True, null=True)
+    property_image = models.ImageField(upload_to='property_pics', blank=True, null=True)
+    property_type = models.CharField(max_length=10, choices=PROPERTY_TYPE, blank=True, null=True)
+    address_line1 = models.CharField(max_length=255, blank=True, null=True)
+    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    post_code = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=255, blank=True, null=True)
+    state = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=255, blank=True, null=True)
+    unit_details = models.CharField(max_length=100 ** 6, blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    value = models.CharField(max_length=255, blank=True, null=True)
+    include_net_worth = models.BooleanField(default=False, blank=True, null=True)
+    units_no = models.CharField(max_length=255, blank=True, null=True)
+    total_monthly_rent = models.CharField(max_length=255, blank=True, null=True)
+    total_tenants = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.property_name)
+
+
+class PropertyRentalInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_rental_user')
+    property_address = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_address')
+    unit_name = models.CharField(max_length=255, blank=True, null=True)
+    rental_term = models.CharField(max_length=255, blank=True, null=True)
+    rental_start_date = models.DateField(blank=True, null=True)
+    rental_end_date = models.DateField(blank=True, null=True)
+    deposit_amount = models.CharField(max_length=255, blank=True, null=True)
+    deposit_due_date = models.DateField(blank=True, null=True)
+    deposit_check = models.CharField(max_length=255, blank=True, null=True)
+    rent_amount = models.CharField(max_length=255, blank=True, null=True)
+    rent_due_every_month = models.CharField(max_length=255, blank=True, null=True)
+    rent_due_date = models.DateField(blank=True, null=True)
+    rental_summary = models.CharField(max_length=100 ** 100, blank=True, null=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    mobile_number = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.first_name + " " + self.property_address.property_name + " " + self.unit_name)
+
+
+class PropertyInvoice(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_invoice_user')
+    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_details')
+    tenant_name = models.CharField(max_length=255, blank=True, null=True)
+    unit_name = models.CharField(max_length=255, blank=True, null=True)
+    item_type = models.CharField(max_length=255, blank=True, null=True)
+    item_description = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.CharField(max_length=255, blank=True, null=True)
+    item_amount = models.CharField(max_length=255, blank=True, null=True)
+    already_paid = models.CharField(max_length=255, blank=True, null=True)
+    balance_due = models.CharField(max_length=255, blank=True, null=True)
+    invoice_due_date = models.DateField(blank=True, null=True)
+    invoice_paid_date = models.DateField(blank=True, null=True)
+    invoice_status = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.tenant_name + " " + self.property_details.property_name + " " + self.unit_name + str(self.id))
+
+
+class PropertyMaintenance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_maintenance_user')
+    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_maintenance_details')
+    unit_name = models.CharField(max_length=255, blank=True, null=True)
+    tenant_name = models.CharField(max_length=255, blank=True, null=True)
+    category = models.CharField(max_length=10, choices=MAINTENANCE_CATEGORY, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=10, choices=MAINTENANCE_STATUS, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.name + " " + self.property_details.property_name + " " + self.unit_name )
+
+    def get_absolute_url(self):
+        return reverse('property_maintenance_list')
+
 
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -170,22 +284,6 @@ class Goal(models.Model):
         return str(self.label)
 
 
-class Property(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
-    name = models.CharField(max_length=30)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    value = models.CharField(max_length=12)
-    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.name)
-
-    def get_absolute_url(self):
-        return reverse('property_list')
-
-
 class PropertyPurchaseDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_purchase_user')
     best_case_price = models.CharField(max_length=30)
@@ -289,6 +387,7 @@ class RentalPropertyModel(models.Model):
 
     def __str__(self):
         return str(self.name)
+
 
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')

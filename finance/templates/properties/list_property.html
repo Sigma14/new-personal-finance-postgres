@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load mathfilters %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -9,12 +10,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Properties</h2>
+                            <h2 class="content-header-title float-left mb-0">Rental Properties</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Properties
+                                    <li class="breadcrumb-item">Rental Properties
                                     </li>
                                 </ol>
                             </div>
@@ -24,102 +25,56 @@
             </div>
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'property_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Property</a>
+                    <a href="{% url 'rental_property_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Rental Property</a>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
-                    <div class="row match-height">
-                        <div class="col-12">
-                            <div class="card card-congratulation-medal">
-                                <div class="card-body">
-                                    <div class="download_csv_form"></div>
-                                    <div class="download_pdf_form"></div>
-                                    <div class="card-header border-bottom">
-                                        <h4 class="card-title mb-25">Properties</h4>
-                                        <div float="right">
-<!--                                        <button class="btn btn-primary download_csv" file_name="my_property.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>-->
-<!--                                        <button class="btn btn-primary download_csv" pdf_title="Categories" file_name="my_categories.pdf" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>-->
-<!--                                        <input type="hidden" id="download_graph_data" data_label="{{categories_name_dumbs}}" graph_type="bar" data_value="{{categories_value}}">-->
-                                        </div>
+                    {% for object in rental_property_data %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <form id="form{{object.id}}" action="{% url 'property_add' %}" method="get" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% if object.property_image %}
+                                    <input type="text" name="file_name" value="{{object.property_image.url}}" hidden>
+                                {% else %}
+                                    <input type="text" name="file_name" value="False" hidden>
+                                {% endif %}
+                                <input type="text" name="name" value="{{object.name}}" hidden>
+                                <input type="text" name="currency" value="{{object.currency}}" hidden>
+                                <input type="text" name="interest_period" value="Per month" hidden>
+                                <input type="text" name="liability_type" value="Mortgage" hidden>
+                                <input type="text" name="interest_rate" value="{{object.mortgage_detail.interest_rate}}" hidden>
+                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:0 }}" hidden>
+                                <input type="text" name="value" value="{{object.purchase_price_detail.selected_price}}" hidden>
+                                <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" hidden />
+                                <a href="{% url 'rental_property_detail' pk=object.id %}">
+                                    <div class="card-body">
+                                        <h2 style="float: left;">{{ object.name }}</h2>
+                                        <h4 style="float: right;" class="text-info" id="buy_price">
+                                            {{ object.currency }}{{ object.purchase_price_detail.selected_price }}
+                                        </h4>
                                     </div>
-                                    <div class="card-datatable">
-                                        <table class="dt-row-grouping table" id="categories">
-                                            <thead>
-                                                <tr>
-                                                    {% for name in property_key %}
-                                                        <th>{{name}}</th>
-                                                    {% endfor %}
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for object in property_data %}
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.name  }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.currency  }}{{ object.value  }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">{{ object.updated_at }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">
-                                                            <ul class="list-inline m-0">
-                                                                <li class="list-inline-item">
-                                                                    <a href="{% url 'property_update' pk=object.id %}"
-                                                                       class="btn btn-success btn-sm rounded-0"><i
-                                                                            class="fa fa-edit"></i></a>
-                                                                </li>
-                                                                <li class="list-inline-item">
-                                                                    <button type="button" delete_name="{{ object.name }} Property" url="{% url 'property_delete' pk=object.id %}"
-                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                            class="fa fa-trash"></i></button>
-                                                                </li>
-                                                            </ul>
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
+                                    <div class="card-body" style="padding-bottom:40px;">
+                                        <h4 style="float: left;">Down Payment -: <strong class="text-warning" id="down_price">{{ object.currency }}{{ object.purchase_price_detail.selected_price|mul:object.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>
+                                        {% if object.name in liability_data %}
+                                            <a style="float: right;" href="{% url 'liability_list' %}" class="btn btn-primary mr-1">Liability List</a>
+                                        {% else %}
+                                            <a style="float: right;" form_id="form{{object.id}}" method_type="add_liab" id="liab_added_check" action_type="not_added" class="btn btn-success mr-1 add_property_liab">Add to Liability</a>
+                                        {% endif %}
+                                        {% if object.name in property_data %}
+                                            <a style="float: right;" href="{% url 'property_list' %}" class="btn btn-primary mr-1">Property List</a>
+                                        {% else %}
+                                            <a style="float: right;" form_id="form{{object.id}}" method_type="add_prop" class="btn btn-success mr-1 add_property_liab">Add to Personal Property</a>
+                                        {% endif %}
                                     </div>
-                                </div>
-                            </div>
+                                </a>
+                            </form>
                         </div>
                     </div>
-                </section>
-                <section id="dashboard-ecommerce">
-                    <div class="row match-height">
-                        <div class="col-xl-12 col-md-12 col-12">
-                            <div class="card card-congratulation-medal">
-                                <div class="card-body">
-                                    <h5>Properties</h5>
-                                    <div id="column-chart"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </section>
             </div>
         </div>
     </div>
 {% endblock content%}
-
-

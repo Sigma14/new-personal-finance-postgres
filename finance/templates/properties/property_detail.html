@@ -1,0 +1,1012 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Rental Property</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'rental_property_list' %}">Rental Properties</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        {{property_obj.name}}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <section id="dashboard-ecommrc">
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a>
+                                <div class="card-body">
+                                    <h6>{% if property_obj.property_image %}<img src="{{property_obj.property_image.url}}" height="200" widhth="200">{% endif %}</h6>
+                                    <h2 style="float: left;">Address :- {{ property_obj.name }}</h2>
+                                    <h4 style="float: right;">
+                                        Purchase Price :- <span class="text-info">{{ property_obj.currency }}{{ property_obj.purchase_price_detail.selected_price }}</span>
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding-bottom:40px;">
+                                    <h4 style="float: left;">Down Payment -: <strong class="text-warning">{{ property_obj.currency }}{{ property_obj.purchase_price_detail.selected_price|mul:property_obj.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>
+<!--                                    <h4 style="float: right;">{{ property_obj.updated_at }}</h4>-->
+                                    <div style="float: right;">
+                                        <a href="{% url 'rental_property_update' pk=property_obj.id %}" class="btn btn-primary"><i
+                                        data-feather="edit-2"></i>&nbsp;Edit Property</a>
+                                        <button type="button" delete_name="{{ property_obj.name }} Property" url="{% url 'rental_property_delete' pk=property_obj.id %}" class="btn btn-danger delete_button"><i
+                                                                data-feather="trash"></i>&nbsp;Delete </button>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <br/>
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="investment_tab" data-toggle="tab" href="#investment_data" aria-controls="investment_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Investment Summary</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="stats_graph_tab" data-toggle="tab" href="#stats_graph_data" aria-controls="stats_graph_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Stats & Graphs</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="income_statement_tab" data-toggle="tab" href="#income_statement_data" aria-controls="income_statement_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Income Statement</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="mortgage_analysis_tab" data-toggle="tab" href="#mortgage_analysis_data" aria-controls="mortgage_analysis_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Mortgage Analysis</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="btn btn-success text-nowrap waves-effect download_rental_pdf" property_image="{% if property_obj.property_image %}{{property_obj.property_image.url}}{% else %}None{% endif %}" property_name="{{property_obj.name}}" revenue_yearly_data="{{revenue_yearly_data_dumbs}}" expenses_yearly_data="{{expenses_yearly_data_dumbs}}" yearly_return_data="{{yearly_return_data_dumbs}}" debt_cov_ratio_data="{{debt_cov_ratio_data_dumbs}}" property_expense_data="{{property_expense_data_dumbs}}" return_investment_data="{{return_investment_data_dumbs}}" return_on_investment_data="{{return_on_investment_data_dumbs}}" cash_on_cash_return_data="{{cash_on_cash_return_data_dumbs}}" roi_with_appreciation_dict_investors_data="{{roi_with_appreciation_dict_investors_dumbs}}" roi_dict_investors_data="{{roi_dict_investors_dumbs}}" total_return_investor_data="{{total_return_investor_dict_dumbs}}" net_operating_income_data="{{net_operating_income_dict_investors_dumbs}}" annual_cashflow_data="{{annual_cash_flow_dict_investors_dumbs}}" invest_summary_data="{{investment_data_dumbs}}" yearly_projection_data="{{projection_value_dumbs}}" url="/download/rental_pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="download_rental_pdf_form">
+
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="investment_data" aria-labelledby="investment_tab" role="tabpanel">
+                                <section>
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card card-congratulation-medal">
+                                                <div class="card-body">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <ul class="nav nav-pills" role="tablist">
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center active" id="property_summary_tab" data-toggle="tab" href="#property_summary_data" aria-controls="property_summary_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Property Summary</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="capex_budget_tab" data-toggle="tab" href="#capex_budget_data" aria-controls="capex_budget_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Capital Expenditure budget</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="projection_tab" data-toggle="tab" href="#projection_data" aria-controls="projection_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Yearly Projection</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="investors_d_tab" data-toggle="tab" href="#investors_d_data" aria-controls="investors_d_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Investors Contribution</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="investors_tab" data-toggle="tab" href="#investors_data" aria-controls="investors_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Investors Return Summary</span>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                    <section>
+                                                        <div class="tab-content">
+                                                            <div class="tab-pane active" id="property_summary_data" aria-labelledby="property_summary_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table table-hover" id="rental_investment_table">
+                                                                                            <tbody>
+                                                                                            {% for key, value in investment_data.items %}
+                                                                                            {% if key == 'Total Investment Required' %}
+                                                                                            <tr style="background-color:#F3F2F7;">
+                                                                                                <th colspan="2">
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder mr-1">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                <td >
+                                                                                                    {{value}}
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <th colspan="2">&nbsp;</th>
+                                                                                                <td>&nbsp;</td>
+                                                                                            </tr>
+                                                                                            {% else %}
+                                                                                            <tr>
+                                                                                                <th colspan="2">
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder mr-1">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                <td >
+                                                                                                    {{value}}
+                                                                                                </td>
+                                                                                            </tr>
+
+                                                                                            {% endif %}
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="capex_budget_data" aria-labelledby="capex_budget_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table" id="capex_budget">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Capital Expense</th>
+                                                                                                <th>Total Replacement Cost</th>
+                                                                                                <th>Lifespan (years)</th>
+                                                                                                <th>Cost per Year</th>
+                                                                                                <th>Cost per Month</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in capex_budget_value.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+
+                                                                                                    {% if forloop.counter == 2 %}
+                                                                                                        <td>{{data}}</td>
+                                                                                                    {% else %}
+                                                                                                        <td>{{property_obj.currency}}{{data}}</td>
+                                                                                                    {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                            <tfoot>
+                                                                                            <tr>
+                                                                                                <th>Total</th>
+                                                                                                <th></th>
+                                                                                                <th></th>
+                                                                                                <th></th>
+                                                                                                <th></th>
+                                                                                            </tr>
+                                                                                            </tfoot>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="projection_data" aria-labelledby="projection_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>&nbsp;</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in projection_value.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                <td >
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight">{{data}}</span>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                            <tfoot>
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    Total {{projection_key | length }} Year Return With Appreciation Assumption
+                                                                                                </th>
+                                                                                                {% for data in projection_key %}
+                                                                                                {% if forloop.counter != 1 %}
+                                                                                                    <th>&nbsp;</th>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                                <th>{{property_obj.currency}}{{total_year_return}}</th>
+                                                                                            </tr>
+                                                                                            </tfoot>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="investors_d_data" aria-labelledby="investors_d_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Investor Name</th>
+                                                                                                <th>Investor Capital Contribution</th>
+                                                                                                <th>Ownership %</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, data in investors_dict.items %}
+                                                                                                <tr>
+                                                                                                    <td>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{key}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data.0}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    <td>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data.1}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                            </tbody>
+                                                                                            {% endfor %}
+                                                                                            <tfoot>
+                                                                                            <tr>
+                                                                                                <th>Total Equity Capital Contributions</th>
+                                                                                                <th>{{property_obj.currency}}{{total_investor_contributions}}</th>
+                                                                                                <th>100%</th>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <th>Excess/Short Fall </th>
+                                                                                                {% if excess_short_fall > 0 %}
+                                                                                                    <th class="text-success">{{property_obj.currency}}{{excess_short_fall}}</th>
+                                                                                                {% else %}
+                                                                                                    <th class="text-danger">{{property_obj.currency}}{{excess_short_fall}}</th>
+                                                                                                {% endif %}
+                                                                                                <th>0%</th>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <th>Total Mortgage/Debt Financing</th>
+                                                                                                <th>{{property_obj.currency}}{{debt_financing}}</th>
+                                                                                                <th></th>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <th>Total Financing</th>
+                                                                                                <th>{{property_obj.currency}}{{total_financing}}</th>
+                                                                                                <th></th>
+                                                                                            </tr>
+                                                                                            </tfoot>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="investors_data" aria-labelledby="investors_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <ul class="nav nav-pills" role="tablist">
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link d-flex align-items-center active" id="annual_cashflow_tab" data-toggle="tab" href="#annual_cashflow_data" aria-controls="annual_cashflow_data" role="tab" aria-selected="false">
+                                                                                                <span class="d-none d-sm-block">Annual Cashflow</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link d-flex align-items-center" id="op_income_tab" data-toggle="tab" href="#op_income_data" aria-controls="op_income_data" role="tab" aria-selected="false">
+                                                                                                <span class="d-none d-sm-block">Net Operating Income (NOI)</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link d-flex align-items-center" id="roi_tab" data-toggle="tab" href="#roi_data" aria-controls="roi_data" role="tab" aria-selected="false">
+                                                                                                <span class="d-none d-sm-block">ROI(NO Appreciation)</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link d-flex align-items-center" id="roi_with_tab" data-toggle="tab" href="#roi_with_data" aria-controls="roi_with_data" role="tab" aria-selected="false">
+                                                                                                <span class="d-none d-sm-block">ROI(With Appreciation)</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <a class="nav-link d-flex align-items-center" id="total_return_tab" data-toggle="tab" href="#total_return_data" aria-controls="total_return_data" role="tab" aria-selected="false">
+                                                                                                <span class="d-none d-sm-block">Total {{projection_key | length }} Year Return With Appreciation Assumption</span>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                                <div class="tab-content">
+                                                                                    <div class="tab-pane active" id="annual_cashflow_data" aria-labelledby="annual_cashflow_tab" role="tabpanel">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Return Metric/Investor</th>
+                                                                                                <th>Investor Ownership %</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in annual_cash_flow_dict_investors.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                {% if forloop.counter == 1 %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}%</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% else %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                    <div class="tab-pane" id="total_return_data" aria-labelledby="total_return_tab" role="tabpanel">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Return Metric/Investor</th>
+                                                                                                <th>Investor Ownership %</th>
+                                                                                                <th>Total Return({{projection_key | length}} Year)</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in total_return_investor_dict.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                <td >
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight">{{data}}</span>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                    <div class="tab-pane" id="op_income_data" aria-labelledby="op_income_tab" role="tabpanel">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Return Metric/Investor</th>
+                                                                                                <th>Investor Ownership %</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in net_operating_income_dict_investors.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                {% if forloop.counter == 1 %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}%</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% else %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                    <div class="tab-pane" id="roi_data" aria-labelledby="roi_tab" role="tabpanel">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Return Metric/Investor</th>
+                                                                                                <th>Investor Ownership %</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in roi_dict_investors.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                {% if forloop.counter == 1 %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}%</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% else %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                    <div class="tab-pane" id="roi_with_data" aria-labelledby="roi_with_tab" role="tabpanel">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Return Metric/Investor</th>
+                                                                                                <th>Investor Ownership %</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in roi_with_appreciation_dict_investors.items %}
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    <div class="d-flex align-items-center">
+                                                                                                        <span class="font-weight-bolder">{{key}}</span>
+                                                                                                    </div>
+                                                                                                </th>
+                                                                                                {% for data in value %}
+                                                                                                {% if forloop.counter == 1 %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}%</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% else %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="tab-pane" id="stats_graph_data" aria-labelledby="stats_graph_tab" role="tabpanel">
+                                <section>
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card card-congratulation-medal">
+                                                <div class="card-body">
+                                                    <ul class="nav nav-pills" role="tablist">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link d-flex align-items-center active" id="cash-bar_tab" data-toggle="tab" href="#cash-bar_data" aria-controls="cash-bar_data" role="tab" aria-selected="false">
+                                                                <span class="d-none d-sm-block">Cash on Cash Return(%)</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link d-flex align-items-center" id="return-bar_tab" data-toggle="tab" href="#return-bar_data" aria-controls="return-bar_data" role="tab" aria-selected="false">
+                                                                <span class="d-none d-sm-block">Return on Investment</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link d-flex align-items-center" id="coverage-ratio_tab" data-toggle="tab" href="#coverage-ratio_data" aria-controls="coverage-ratio_data" role="tab" aria-selected="false">
+                                                                <span class="d-none d-sm-block">Debt Service Coverage Ratio</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link d-flex align-items-center" id="investment_returns_tab" data-toggle="tab" href="#investment_returns_data" aria-controls="investment_returns_data" role="tab" aria-selected="false">
+                                                                <span class="d-none d-sm-block">Investment Returns</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link d-flex align-items-center" id="expense_bar_tab" data-toggle="tab" href="#expense_bar_data" aria-controls="expense_bar_data" role="tab" aria-selected="false">
+                                                                <span class="d-none d-sm-block">Property Operating Expenses</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                        <div class="tab-pane active" id="cash-bar_data" aria-labelledby="cash-bar_tab" role="tabpanel">
+                                                            <div id="cash-bar-chart"></div>
+                                                        </div>
+                                                        <div class="tab-pane" id="return-bar_data" aria-labelledby="return-bar_tab" role="tabpanel">
+                                                            <div id="return-bar"></div>
+                                                        </div>
+                                                        <div class="tab-pane" id="coverage-ratio_data" aria-labelledby="coverage-ratio_tab" role="tabpanel">
+                                                            <div id="coverage-ratio-bar"></div>
+                                                        </div>
+                                                        <div class="tab-pane" id="investment_returns_data" aria-labelledby="investment_returns_tab role="tabpanel">
+                                                            <div id="investment-return-bar"></div>
+                                                        </div>
+                                                        <div class="tab-pane" id="expense_bar_data" aria-labelledby="expense_bar_tab" role="tabpanel">
+                                                            <div id="expense-bar"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </section>
+                            </div>
+                            <div class="tab-pane" id="income_statement_data" aria-labelledby="income_statement_tab" role="tabpanel">
+                                <section>
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card card-congratulation-medal">
+                                                <div class="card-body">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <ul class="nav nav-pills" role="tablist">
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center active" id="yearly_revenues_tab" data-toggle="tab" href="#yearly_revenues_data" aria-controls="yearly_revenues_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Revenues(Yearly)</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="yearly_expenses_tab" data-toggle="tab" href="#yearly_expenses_data" aria-controls="yearly_expenses_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Property Expenses(Yearly)</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="nav-item">
+                                                                        <a class="nav-link d-flex align-items-center" id="yearly_return_tab" data-toggle="tab" href="#yearly_return_data" aria-controls="yearly_return_data" role="tab" aria-selected="false">
+                                                                            <span class="d-none d-sm-block">Return on Investment(Yearly)</span>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                    <section>
+                                                        <div class="tab-content">
+                                                            <div class="tab-pane active" id="yearly_revenues_data" aria-labelledby="yearly_revenues_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Annual Rent Increase Assumption ( {{property_obj.monthly_revenue.rent_increase_assumption}}% )</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                        </table>
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>&nbsp;</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in revenue_yearly_data.items %}
+                                                                                                {% if key == 'Total Revenue' %}
+                                                                                                    <tr style="background-color:#F3F2F7;">
+                                                                                                        <th>
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <span class="font-weight-bolder">{{key}}</span>
+                                                                                                            </div>
+                                                                                                        </th>
+                                                                                                        {% for data in value %}
+                                                                                                        <td >
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <span class="font-weight">{{data}}</span>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        {% endfor %}
+                                                                                                    </tr>
+                                                                                                {% else %}
+                                                                                                    <tr>
+                                                                                                        <th>
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <span class="font-weight-bolder">{{key}}</span>
+                                                                                                            </div>
+                                                                                                        </th>
+                                                                                                        {% for data in value %}
+                                                                                                        <td >
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                        {% endfor %}
+                                                                                                    </tr>
+                                                                                            {% endif %}
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="yearly_expenses_data" aria-labelledby="yearly_expenses_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Inflation Assumption ( {{property_obj.monthly_expenses.inflation_assumption}}% )</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                        </table>
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>&nbsp;</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in expenses_yearly_data1.items %}
+                                                                                                <tr>
+                                                                                                    <th>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight-bolder">{{key}}</span>
+                                                                                                        </div>
+                                                                                                    </th>
+                                                                                                    {% for data in value %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{property_obj.currency}}{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    {% endfor %}
+                                                                                                </tr>
+                                                                                            {% endfor %}
+                                                                                            {% for key, value in expenses_yearly_data2.items %}
+                                                                                                <tr>
+                                                                                                    <th>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight-bolder">{{key}}</span>
+                                                                                                        </div>
+                                                                                                    </th>
+                                                                                                    {% for data in value %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    {% endfor %}
+                                                                                                </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                            <div class="tab-pane" id="yearly_return_data" aria-labelledby="yearly_return_tab" role="tabpanel">
+                                                                <section>
+                                                                    <div class="row match-height">
+                                                                        <div class="col-12">
+                                                                            <div class="card card-congratulation-medal">
+                                                                                <div class="card-body">
+                                                                                    <div class="download_csv_form"></div>
+                                                                                    <div class="card-datatable table-responsive">
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>Annual Appreciation Assumption ( {{property_obj.monthly_expenses.appreciation_assumption}}% )</th>
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                        </table>
+                                                                                        <table class="table">
+                                                                                            <thead>
+                                                                                            <tr>
+                                                                                                <th>&nbsp;</th>
+                                                                                                {% for data in projection_key %}
+                                                                                                <th>{{data}}</th>
+                                                                                                {% endfor %}
+                                                                                            </tr>
+                                                                                            </thead>
+                                                                                            <tbody>
+                                                                                            {% for key, value in yearly_return_data.items %}
+                                                                                                <tr>
+                                                                                                    <th>
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight-bolder">{{key}}</span>
+                                                                                                        </div>
+                                                                                                    </th>
+                                                                                                    {% for data in value %}
+                                                                                                    <td >
+                                                                                                        <div class="d-flex align-items-center">
+                                                                                                            <span class="font-weight">{{data}}</span>
+                                                                                                        </div>
+                                                                                                    </td>
+                                                                                                    {% endfor %}
+                                                                                                </tr>
+                                                                                            {% endfor %}
+                                                                                            </tbody>
+                                                                                            <tfoot>
+                                                                                            <tr>
+                                                                                                <th>
+                                                                                                    Total {{projection_key | length }} Year Return With Appreciation Assumption
+                                                                                                </th>
+                                                                                                {% for data in projection_key %}
+                                                                                                {% if forloop.counter != 1 %}
+                                                                                                    <th>&nbsp;</th>
+                                                                                                {% endif %}
+                                                                                                {% endfor %}
+                                                                                                <th>{{property_obj.currency}}{{total_year_return}}</th>
+                                                                                            </tr>
+                                                                                            </tfoot>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </section>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="tab-pane" id="mortgage_analysis_data" aria-labelledby="mortgage_analysis_tab" role="tabpanel">
+                                <section>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card card-statistics">
+                                                <div class="card-header">
+                                                    <h4 class="card-title">Statistics</h4>
+                                                </div>
+                                                <div class="card-body statistics-body">
+                                                    <div class="row">
+                                                        <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+                                                            <div class="media">
+                                                                <div class="avatar bg-light-danger mr-2">
+                                                                    <div class="avatar-content">
+                                                                        <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body my-auto">
+                                                                    <h4 class="font-weight-bolder mb-0">{{monthly_payment|floatformat:2}}</h4>
+                                                                    <p class="card-text font-small-3 mb-0">Monthly Payment</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+                                                            <div class="media">
+                                                                <div class="avatar bg-light-success mr-2">
+                                                                    <div class="avatar-content">
+                                                                        <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body my-auto">
+                                                                    <h4 class="font-weight-bolder mb-0">{{total_payment|floatformat:2}}</h4>
+                                                                    <p class="card-text font-small-3 mb-0">Total of {{days}} payments</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-sm-0">
+                                                            <div class="media">
+                                                                <div class="avatar bg-light-info mr-2">
+                                                                    <div class="avatar-content">
+                                                                        <i data-feather="calendar" class="avatar-icon"></i>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body my-auto">
+                                                                    <h4 class="font-weight-bolder mb-0">{{last_month}}</h4>
+                                                                    <p class="card-text font-small-3 mb-0">Payoff date</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <!-- Responsive Datatable -->
+                                <section id="responsive-datatable">
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="download_csv_form"></div>
+                                                <div class="card-header border-bottom">
+                                                    <h4 class="card-title">Calculation Result</h4>
+                                                    <button class="btn btn-primary download_csv" file_name="mortgage_calculation.csv" table_heading="{{mortgage_key_dumbs}}" table_length="{{mortgage_key | length}}" table_id="#mortgage" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                                </div>
+                                                <div class="card-datatable">
+                                                    <table class="table table-striped" id="mortgage">
+                                                        <thead>
+                                                        <tr>
+                                                            {% for name in mortgage_key %}
+                                                                <th>{{name}}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <!-- jinja2 Technique -->
+                                                        {% for i in data %}
+                                                        <tr>
+                                                            <td>{{i.month}}</td>
+                                                            <td>{{i.initial_balance}}</td>
+                                                            <td>{{i.payment}}</td>
+                                                            <td>{{i.interest}}</td>
+                                                            <td>{{i.principle}}</td>
+                                                            <td>{{i.ending_balance}}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="line-area-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+

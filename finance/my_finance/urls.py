@@ -78,10 +78,20 @@ urlpatterns = [
     path('rental_property_delete/<int:pk>', rental_property_delete, name='rental_property_delete'),
 
     # Property Urls:-
-    path('property_add/', PropertyAdd.as_view(), name='property_add'),
-    path('property_list/', PropertyList.as_view(), name='property_list'),
-    path('property_update/<int:pk>', PropertyUpdate.as_view(), name='property_update'),
-    path('property_delete/<int:pk>', PropertyDelete.as_view(), name='property_delete'),
+    path('property_add/', add_property, name='property_add'),
+    path('property_list/', list_property, name='property_list'),
+    path('update/<int:pk>/<str:method_name>', update_property, name='property_update'),
+    path('property_details/<int:pk>', property_details, name='property_details'),
+    path('property_delete/<int:pk>', delete_property, name='property_delete'),
+    path('lease_add/<int:pk>/<str:unit_name>', add_lease, name='add_lease'),
+
+    # Property Maintenance
+    path('property/maintenance/add/', MaintenanceAdd.as_view(), name='property_maintenance_add'),
+    path('property/maintenance/list/', MaintenanceList.as_view(), name='property_maintenance_list'),
+    path('property/maintenance/details/<int:pk>', MaintenanceDetail.as_view(), name='property_maintenance_details'),
+    path('property/maintenance/update/<int:pk>', MaintenanceUpdate.as_view(), name='property_maintenance_update'),
+    path('property/maintenance/delete/<int:pk>', delete_maintenance, name='property_maintenance_delete'),
+    path('property/property_info/', property_info, name='property_info'),
 
     # Revenue Urls :-
     path('revenue_add/', revenue_add, name='revenue_add'),

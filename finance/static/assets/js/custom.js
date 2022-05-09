@@ -1,10 +1,47 @@
 $(document).ready(function()
 {
-    $('#rental_prop_form').hide();
+    if($("#page_url").attr('page_type') == 'update_property')
+    {
+        var every_month_value = parseInt($(".change_every_month_date").val())
+        make_month_list(every_month_value);
+        duration_calculate();
+        due_date = $(".change_every_month_date").attr('update_rental_date')
+        $('#rental_invoice').val(due_date);
+        method_name = $("#page_url").attr('method_name')
+        if(method_name == 'tenant')
+        {
+            $(".step").removeClass('active')
+            $("#personal-info").removeClass('active')
+            $("#personal-info").removeClass('dstepper-block')
+            $(".step").addClass('crossed')
+
+            $("#tenant_info").addClass('active')
+            $("#tenant_info").removeClass('crossed')
+            $(".step-trigger").removeAttr('disabled')
+            $("#address-step").addClass('active')
+            $("#address-step").addClass('dstepper-block')
+        }
+    }
+    else
+    {
+        $('#rental_prop_form').hide();
+        $(".invoice_div").hide();
+        $("#first_rental_div").hide();
+        $("#edit_invoice_div").hide();
+        $("#rental_due_on_div").hide();
+
+    }
+    $('.rental_edit_invoice_div').hide();
+
     $('.edit_income').on('click', function(event)
     {
         location.assign($(this).attr('href'))
     });
+
+    if($("#page_name").attr('name') == 'Add')
+    {
+        $(".property_relate").hide();
+    }
 
     $('#capex_budget').DataTable( {
     "footerCallback": function ( row, data, start, end, display ) {
@@ -705,38 +742,34 @@ $('.select_purchase_price').on("change", function(e)
 
 $("body").delegate(".add_property_liab", "click", function()
 {
+    var method_type = $(this).attr('method_type')
     form_id = "#" + $(this).attr('form_id')
-    buy_price = $('#buy_price').text().trim()
-    buy_price = parseFloat(buy_price.replace(buy_price[0], ''))
-    down_price = $('#down_price').text().trim()
-    down_price = parseFloat(down_price.replace(down_price[0], ''))
-    mortgage_price = buy_price - down_price
-    form_data = $(form_id).serialize()
-    console.log(mortgage_price)
-    form_data += "&balance=" + mortgage_price
-    console.log(form_data)
-    $.ajax(
-        {
-            data: form_data, // get the form data
-            type: 'POST', // GET or POST
-            url: '/property_add/', // the file to call
-            success: function(response)
-            {
-                console.log("success")
-            }
-        });
-    $.ajax(
-        {
-            data: form_data, // get the form data
-            type: 'POST', // GET or POST
-            url: '/liability_add/', // the file to call
-            success: function(response)
-            {
-                console.log("success")
-                location.reload()
-            }
-        });
+    var form_data = $(form_id).serialize()
 
+    if(method_type == 'add_prop')
+    {
+        $(form_id).submit();
+    }
+    else
+    {
+        buy_price = $('#buy_price').text().trim()
+        buy_price = parseFloat(buy_price.replace(buy_price[0], ''))
+        down_price = $('#down_price').text().trim()
+        down_price = parseFloat(down_price.replace(down_price[0], ''))
+        mortgage_price = buy_price - down_price
+        console.log(form_data)
+        form_data += "&balance=" + mortgage_price
+        $.ajax(
+            {
+                data: form_data, // get the form data
+                type: 'POST', // GET or POST
+                url: '/liability_add/', // the file to call
+                success: function(response)
+                {
+                    location.reload()
+                }
+            });
+     }
 });
 
 // Property Next Functionality
@@ -757,6 +790,559 @@ $("body").delegate(".next_click_prop", "click", function()
     $('.step').removeClass('crossed')
     $(curr_id).addClass('crossed')
     $(next_data).addClass('active')
+
+});
+
+
+// Property Unit Details
+
+    $("body").delegate(".change_quantity", "change", function(event)
+    {
+       quantity_id = $(this).attr('st_id')
+       input_value = $(this).val()
+       $(quantity_id).text(input_value)
+
+    });
+
+$("body").delegate(".remove_another_prop_unit", "click", function(event)
+{
+    var div_class = "." + $(this).attr('div_class')
+    $(".add_another_prop_unit").attr('div_class', div_class[parseInt(div_class.length) - 1])
+    $(div_class).remove();
+});
+
+// ADD Another Property Units
+$("body").delegate(".add_another_prop_unit", "click", function(event)
+{
+    div_class = parseInt($(this).attr('div_class'))
+    var check_id = div_class - 1
+    var detailHtml = ""
+    detailHtml += "<div class='col-lg-3 col-md-3 unit_ex" + div_class + "'><div class='form-group'><input type='text' class='form-control unit_names' name='unit_name' placeholder='Suite 101' required/></div></div>"
+    detailHtml += "<div class='col-lg-8 col-md-8 unit_ex" + div_class + "'><div class='form-group'><div class='collapse-default'><div class='card'>"
+    detailHtml += "<div id='headingCollapse" + div_class + "' class='card-header' data-toggle='collapse' role='button' data-target='#collapse" + div_class + "' aria-expanded='false' aria-controls='collapse1'><span><i class='fa fa-bed' aria-hidden='true'></i><strong id='bed_quantity" + div_class + "'>1</strong></span><span><i class='fa fa-bath' aria-hidden='true'></i><strong id='bath_quantity" + div_class + "'>1</strong></span><span><i class='fa fa-area-chart' aria-hidden='true'></i><strong id='feet_quantity" + div_class + "'>1</strong></span></div>"
+    detailHtml += "<div id='collapse" + div_class + "' role='tabpanel' aria-labelledby='headingCollapse1' class='collapse'><div class='card-body'><div class='col-12'><div class='row match-height'>"
+    detailHtml += "<div class='col-lg-4 col-md-12'><div class='form-group'><label for='bed_room_quantity'>BedRooms</label><input id='bed_room_quantity' type='text' value='1' st_id='#bed_quantity" + div_class + "' class='form-control change_quantity' name='bed_room_quantity' required/></div></div>"
+    detailHtml += "<div class='col-lg-4 col-md-12'><div class='form-group'><label for='bath_room_quantity'>Bathrooms</label><input id='bath_room_quantity' type='text' class='form-control change_quantity' st_id='#bath_quantity" + div_class + "' value='1' name='bath_room_quantity' required/></div></div>"
+    detailHtml += "<div class='col-lg-4 col-md-12'><div class='form-group'><label for='square_feet'>Square Feet</label><input id='square_feet' type='text' class='form-control change_quantity' st_id='#feet_quantity" + div_class + "' value='1' name='square_feet' required/></div></div><div class='col-12'><div class='form-group'><label for='square_feet'>Rent Includes</label></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='electricity_check" + check_id + "' class='custom-control-input select_category' id='customCheck1" + div_class + "' /><label class='custom-control-label' for='customCheck1" + div_class + "'>Electricity</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='gas_check" + check_id + "' class='custom-control-input select_category' id='customCheck2" + div_class + "' /><label class='custom-control-label' for='customCheck2" + div_class + "'>Gas</label></div></div></div><div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='water_check' class='custom-control-input select_category' id='customCheck3" + div_class + "' /><label class='custom-control-label' for='customCheck3" + div_class + "'>Water</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='int_cable_check" + check_id + "' class='custom-control-input select_category' id='customCheck4" + div_class + "' /><label class='custom-control-label' for='customCheck4" + div_class + "'>Internet and Cable</label></div></div></div><div class='col-12'><div class='form-group'><label>Amenities</label></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='ac_check" + check_id + "' class='custom-control-input select_category' id='customCheck5" + div_class + "' /><label class='custom-control-label' for='customCheck5" + div_class + "'>A/C</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='pool_check" + check_id + "' class='custom-control-input select_category' id='customCheck6" + div_class + "' /><label class='custom-control-label' for='customCheck6" + div_class + "'>Pool</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='pets_check" + check_id + "' class='custom-control-input select_category' id='customCheck7" + div_class + "' /><label class='custom-control-label' for='customCheck7" + div_class + "'>Pets Allowed</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='furnished_check" + check_id + "' class='custom-control-input select_category' id='customCheck8" + div_class + "' /><label class='custom-control-label' for='customCheck8" + div_class + "'>Furnished</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='balcony_check" + check_id + "' class='custom-control-input select_category' id='customCheck9" + div_class + "' /><label class='custom-control-label' for='customCheck9" + div_class + "'>Balcony/Deck</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='hardwood_check" + check_id + "' class='custom-control-input select_category' id='customCheck10" + div_class + "' /><label class='custom-control-label' for='customCheck10" + div_class + "'>Hardwood Floor</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='wheel_check" + check_id + "' class='custom-control-input select_category' id='customCheck11" + div_class + "' /><label class='custom-control-label' for='customCheck11" + div_class + "'>Wheelchair Access</label></div></div></div>"
+    detailHtml += "<div class='col-lg-3 col-md-3'><div class='form-group'><div class='custom-control custom-checkbox'><input type='checkbox' name='parking_check" + check_id + "' class='custom-control-input select_category' id='customCheck12" + div_class + "' /><label class='custom-control-label' for='customCheck12" + div_class + "'>Off-street Parking</label></div></div></div></div></div></div></div></div></div></div></div></div></div>"
+    detailHtml += "<div class='col-lg-1 col-md-1 unit_ex" + div_class + "'><div class='form-group'><button type='button' class='btn btn-danger remove_another_prop_unit' div_class='unit_ex" + div_class + "' title='Delete Unit' style='margin-left:5px;' ><i class='fa fa-minus'></i></button></div></div>"
+    $("#add_property_unit").before(detailHtml)
+    $(this).attr('div_class', div_class+1)
+
+});
+
+// Selected Terms Changes
+
+function make_date_str(date_value)
+{
+    var month_date = date_value.toLocaleString('default', { month: 'long' });
+    var result_date = month_date + " " + date_value.getDate() + ", " + date_value.getFullYear()
+    console.log(result_date)
+    return result_date
+}
+
+function make_month_list(every_month_value)
+{
+    $("#rental_invoice").empty()
+    lease_start_date = new Date($("#lease_start_date").val())
+    lease_end_date = new Date($("#lease_end_date").val())
+    var result_start_date = make_date_str(lease_start_date)
+    var result_end_date = make_date_str(lease_end_date)
+    var actualDate = new Date(result_start_date);
+    var nextMonth = new Date(actualDate.getFullYear(), actualDate.getMonth() + 1, every_month_value);
+    optionHtml = "<option>Select</option>"
+    var invoice_length = []
+    if(nextMonth < lease_end_date)
+    {
+        for(var i=0; nextMonth < lease_end_date; i++)
+        {
+            if(i == 0)
+            {
+                console.log("iii", i)
+                optionHtml += "<option>" + result_start_date + "</option>"
+                invoice_length.push(result_start_date)
+            }
+            var actualDate = make_date_str(nextMonth)
+            optionHtml += "<option>" + actualDate + "</option>"
+            invoice_length.push(actualDate)
+            var actualDate = new Date(actualDate);
+            var nextMonth = new Date(actualDate.getFullYear(), actualDate.getMonth() + 1, every_month_value);
+        }
+    }
+    else
+    {
+        optionHtml += "<option>" + result_start_date + "</option>"
+        invoice_length.push(result_start_date)
+        var nextMonth = new Date(actualDate.getFullYear(), actualDate.getMonth(), every_month_value);
+        if(nextMonth < lease_end_date)
+        {
+            var actualDate = make_date_str(nextMonth)
+            optionHtml += "<option>" + actualDate + "</option>"
+            invoice_length.push(actualDate)
+        }
+
+    }
+
+    $("#rental_invoice").append(optionHtml)
+    $("#rental_invoice").attr('invoice_list', JSON.stringify(invoice_length))
+    $("#first_rental_div").show();
+    return invoice_length;
+}
+
+$("body").delegate(".change_every_month_date", "change", function(event)
+{
+    var every_month_value = parseInt($(this).val())
+    make_month_list(every_month_value);
+
+});
+
+function make_rent_duration(lease_start_date, lease_end_date)
+{
+    var date1 = new Date(lease_start_date);
+    var date2 = new Date(lease_end_date);
+    var diff = new Date(date2.getTime() - date1.getTime());
+    year_no = diff.getUTCFullYear() - 1970
+    month_no = diff.getUTCMonth()
+    day_no = diff.getUTCDate() - 1
+    rent_duration = ""
+    if(year_no > 0)
+    {
+        if(year_no > 1)
+        {
+            rent_duration += year_no + " Years "
+        }
+        else
+        {
+            rent_duration += year_no + " Year "
+        }
+
+    }
+    if(month_no > 0)
+    {
+        if(month_no > 1)
+        {
+            rent_duration += month_no + " Months "
+        }
+        else
+        {
+            rent_duration += month_no + " Month "
+        }
+    }
+    if(day_no > 0)
+    {
+        if(day_no > 1)
+        {
+            rent_duration += day_no + " Days "
+        }
+        else
+        {
+            rent_duration += day_no + " Day "
+        }
+    }
+    return rent_duration
+}
+
+function duration_calculate()
+{
+    lease_start_date = $("#lease_start_date").val()
+    lease_end_date = $("#lease_end_date").val()
+    var result_start_date = make_date_str(new Date(lease_start_date))
+    var result_end_date = make_date_str(new Date(lease_end_date))
+    $(".rent_start_date").text(result_start_date)
+
+    if (new Date(lease_start_date) >= new Date(lease_end_date))
+    {
+       $("#rent_duration").text("Oops! Could not calculate duration!")
+       $("#rent_duration").addClass("text-danger")
+       $(".rent_end_date").text("*Please choose greater date from start date")
+       $(".rent_end_date").addClass("text-danger")
+    }
+    else
+    {
+        $("#rent_duration").removeClass("text-danger")
+        $(".rent_end_date").removeClass("text-danger")
+        if($(".rent_end_date").text() != "Month-to-Month")
+        {
+            $(".rent_end_date").text(result_end_date)
+            rent_duration = make_rent_duration(lease_start_date, lease_end_date)
+            $("#rent_duration").text(rent_duration)
+        }
+        else
+        {
+            $("#rent_duration").text("1 Month")
+        }
+    }
+
+}
+
+$("body").delegate(".change_date", "change", function(event)
+{
+    $("#rental_invoice").empty()
+    $(".due_date_rental").text("N/A")
+    $(".change_every_month_date").val('Select')
+    duration_calculate();
+});
+
+$("body").delegate(".select_terms", "click", function(event)
+{
+    $(".select_terms").removeClass('active')
+    select_id = $(this).attr('id')
+    lease_start_date = $("#lease_start_date").val()
+    lease_end_date = $("#lease_end_date").val()
+    var result_start_date = make_date_str(new Date(lease_start_date))
+    var result_end_date = make_date_str(new Date(lease_end_date))
+
+    if(select_id == "month_term_tab")
+    {
+        $(".lease_end_date_remove").hide();
+        $(".term_name").text('Month-to-Month')
+        $(".rent_start_date").text(result_start_date)
+        $(".rent_end_date").text('Month-to-Month')
+        $("#rent_duration").text("1 Month")
+        $("#rental_invoice").empty()
+        $(".change_very_month_date").val('Select')
+        month_start_data = new Date(lease_start_date)
+        month_year = month_start_data.getFullYear() + 1
+        month_no = month_start_data.getMonth()
+        month_date = month_start_data.getDate()
+        var month_end_date =  month_year + "-" + month_no + "-" + month_date
+        $("#lease_end_date").val(month_end_date)
+        $("#rental_term_name").val("Month-to-Month")
+
+    }
+    else
+    {
+        $(".lease_end_date_remove").show();
+        $(".term_name").text('Fixed Term')
+        $(".rent_start_date").text(result_start_date)
+        $(".rent_end_date").text(result_end_date)
+        rent_duration = make_rent_duration(lease_start_date, lease_end_date)
+        $("#rent_duration").text(rent_duration)
+        $("#rental_term_name").val("Fixed Term")
+
+    }
+});
+
+//Deposit Amount Changes
+
+$("body").delegate(".deposit_amount_input", "change", function(event)
+{
+    deposit_amount = $(this).val();
+    currency_symbol = $(".currency_code_class").text()
+    $(".deposit_amount_field").text(currency_symbol + deposit_amount)
+});
+
+$('#already_deposit_check').on('click', function(event)
+    {
+        var check = $(this).prop("checked")
+        if(check)
+        {
+            $(".deposit_check").text("Already Collected")
+        }
+        else
+        {
+            $(".deposit_check").text("")
+        }
+});
+
+//Rental Amount Changes
+
+$("body").delegate(".change_rent_amount", "change", function(event)
+{
+    rental_amount = $(this).val();
+    currency_symbol = $(".currency_code_class").text()
+    $(".rent_amount_month").text(currency_symbol + rental_amount + "/month")
+    $("#rental_invoice").empty()
+    $(".change_every_month_date").val('Select')
+    $(".due_date_rental").text("N/A")
+    $("#rental_due_on_div").show();
+
+
+
+});
+
+// Add Units Options
+$("body").delegate(".unit_names", "change", function(event)
+{
+    var inputs = $(".unit_names");
+    var input_unit_val = $(this).val();
+    $("#unit_options").empty();
+    optionHtml = ""
+    for(var i = 0; i < inputs.length; i++)
+    {
+        var unit_val = $(inputs[i]).val()
+        if(input_unit_val == unit_val && i < inputs.length - 1)
+        {
+            $(this).val("")
+            Swal.fire({
+                    title: 'Unit name already added',
+                    icon: 'error',
+                    customClass: {
+                      confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                  });
+
+        }
+        else
+        {
+            optionHtml += "<option>" + unit_val + "</option>"
+        }
+    }
+
+    $("#unit_options").append(optionHtml);
+    var unit_name = $("#unit_options").val()
+    $(".unit_heading").text(unit_name)
+});
+
+
+// Select Units For Tenants and Rental
+$("body").delegate(".unit_selected", "change", function(event)
+{
+    var unit_name = $(this).val()
+    $(".unit_heading").text(unit_name)
+});
+
+// Select First Rental Amount Due
+$("body").delegate("#rental_invoice", "change", function(event)
+{
+    var due_date = $(this).val()
+    var term_name = $(".term_name").text()
+    var rent_amount = parseFloat($(".change_rent_amount").val())
+//    var due_date = $("#rental_invoice option:selected").html();
+    $(".due_date_rental").text(due_date)
+    var invoice_arr = JSON.parse($("#rental_invoice").attr('invoice_list'))
+    var invoice_total_amount = 0
+    var invoice_total_record = 0
+    $("#invoice_body_div").empty()
+    tableHtml = ""
+    var invoice_date_list = []
+    var invoice_amount_list = []
+
+    if(term_name == "Fixed Term")
+    {
+        for (i = 0; i < invoice_arr.length; i++)
+        {
+            if(invoice_total_record >= 1)
+            {
+                invoice_total_record += 1
+                invoice_total_amount += rent_amount
+                invoice_date_list.push(invoice_arr[i])
+                invoice_amount_list.push(parseFloat(rent_amount))
+                tableHtml += "<tr><td><input type='text' invoice_length_index='" + invoice_total_record + "'  class='form-control flatpickr-human-friendly record"+ i +"' value='" + invoice_arr[i] +  "' name='invoice_due_date' disabled/></td><td><input type='text' id='" + invoice_total_record + "' class='form-control record" + i + "' value='" + rent_amount +  "' name='invoice_amount' disabled/></td>"
+                tableHtml += "<td id='record"+ i + "'><a href='javascript:void(0);' title='Edit' input_class='record"+ i +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record"+ i +"'><i class='fa fa-trash' style='font-size:13px;'></i></a></td></tr>"
+
+            }
+
+            if(invoice_arr[i] == due_date)
+            {
+                invoice_total_record += 1
+                invoice_total_amount += rent_amount
+                invoice_date_list.push(invoice_arr[i])
+                invoice_amount_list.push(parseFloat(rent_amount))
+                tableHtml += "<tr><td><input type='text' invoice_length_index='" + invoice_total_record + "'  class='form-control flatpickr-human-friendly record"+ i +"' value='" + invoice_arr[i] +  "' name='invoice_due_date' disabled/></td><td><input type='text' id='" + invoice_total_record + "' class='form-control record" + i + "' value='" + rent_amount +  "' name='invoice_amount' disabled/></td>"
+                tableHtml += "<td id='record"+ i + "'><a href='javascript:void(0);' title='Edit' input_class='record"+ i +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record"+ i +"'><i class='fa fa-trash' style='font-size:13px;'></i></a></td></tr>"
+
+            }
+
+        }
+    }
+    else
+    {
+        var every_month_value = parseInt($(".change_every_month_date").val())
+        var actualDate = new Date(due_date);
+        var nextMonth = new Date(actualDate.getFullYear(), actualDate.getMonth() + 1, every_month_value);
+        invoice_total_record += 1
+        invoice_total_amount += rent_amount
+        invoice_date_list.push(due_date)
+        invoice_amount_list.push(parseFloat(rent_amount))
+
+        tableHtml += "<tr><td><input type='text' invoice_length_index='" + invoice_total_record + "'  class='form-control flatpickr-human-friendly record0' value='" + due_date +  "' name='invoice_due_date' disabled/></td><td><input type='text' id='" + invoice_total_record + "' class='form-control record0' value='" + rent_amount +  "' name='invoice_amount' disabled/></td>"
+        tableHtml += "<td id='record0'><a href='javascript:void(0);' title='Edit' input_class='record0' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record0'><i class='fa fa-trash' style='font-size:13px;'></i></a></td></tr>"
+
+        for(var i=1; i < 12; i++)
+        {
+            var actualDate = make_date_str(nextMonth)
+            invoice_total_record += 1
+            invoice_total_amount += rent_amount
+            invoice_date_list.push(actualDate)
+            invoice_amount_list.push(parseFloat(rent_amount))
+            tableHtml += "<tr><td><input type='text' invoice_length_index='" + invoice_total_record + "'  class='form-control flatpickr-human-friendly record"+ i +"' value='" + actualDate +  "' name='invoice_due_date' disabled/></td><td><input type='text' id='" + invoice_total_record + "' class='form-control record" + i + "' value='" + rent_amount +  "' name='invoice_amount' disabled/></td>"
+            tableHtml += "<td id='record"+ i + "'><a href='javascript:void(0);' title='Edit' input_class='record"+ i +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record"+ i +"'><i class='fa fa-trash' style='font-size:13px;'></i></a></td></tr>"
+            var actualDate = new Date(actualDate);
+            var nextMonth = new Date(actualDate.getFullYear(), actualDate.getMonth() + 1, every_month_value);
+
+        }
+
+    }
+    currency_symbol = $(".currency_code_class").text()
+    $(".total_invoices_no").text(invoice_total_record)
+    $(".total_rental_amount").text(currency_symbol + invoice_total_amount)
+    $("#invoice_body_div").append(tableHtml)
+    $(".invoice_div").show();
+    $("#edit_invoice_div").show();
+    $("#invoice_date_list").val(JSON.stringify(invoice_date_list));
+    $("#invoice_amount_list").val(JSON.stringify(invoice_amount_list));
+
+    humanFriendlyPickr = $('.flatpickr-human-friendly')
+    if (humanFriendlyPickr.length) {
+        humanFriendlyPickr.flatpickr({
+          altInput: true,
+          altFormat: 'F j, Y',
+          dateFormat: 'F j, Y',
+        });
+      }
+
+});
+
+// Enable and disabled
+$("body").delegate(".edit_schedule", "click", function(event)
+{
+    class_attr = $(this).attr('input_class')
+    input_class = "." + class_attr
+    input_id = "#" + class_attr
+    title_name = $(this).attr('title')
+    $(input_id).empty();
+
+      if(title_name == "Edit")
+      {
+        $(input_class).removeAttr('disabled');
+        saveHtml = "<a href='javascript:void(0);' title='Save' input_class='record"+ input_class[7] +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-file' style='font-size:10px;'></i></a>"
+
+      }
+      if(title_name == "Save" || title_name == "Delete" || title_name == "Undo")
+      {
+        var amount_id = $(input_class).attr('invoice_length_index')
+        list_index = parseInt(amount_id) - 1
+        var invoice_date_list = JSON.parse($("#invoice_date_list").val());
+        var invoice_amount_list = JSON.parse($("#invoice_amount_list").val());
+        var input_list = $(input_class)
+
+        new_date_value = input_list[0].getAttribute('value')
+        new_amount_value = parseFloat($("#" + amount_id).val())
+        old_date_value = invoice_date_list[list_index]
+        old_amount_value = parseFloat(invoice_amount_list[list_index])
+
+        var total_rental_amount_str = $(".total_rental_amount")[0].getInnerHTML();
+        total_rental_amount = total_rental_amount_str.replace(total_rental_amount_str[0], "")
+
+        $(input_class).attr('disabled', 'disabled');
+        if(title_name == "Save")
+        {
+            total_rental_amount = parseFloat(total_rental_amount) - old_amount_value + new_amount_value
+            invoice_date_list.splice(list_index, 1)
+            invoice_date_list.splice(list_index, 0, new_date_value)
+            invoice_amount_list.splice(list_index, 1)
+            invoice_amount_list.splice(list_index, 0, new_amount_value)
+            saveHtml = "<a href='javascript:void(0);' title='Edit' input_class='record"+ input_class[7] +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record"+ input_class[7] +"'><i class='fa fa-trash' style='font-size:13px;'></i></a>"
+
+        }
+
+        if(title_name == "Delete")
+        {
+            total_rental_amount = parseFloat(total_rental_amount) - new_amount_value
+            invoice_date_list.splice(list_index, 1)
+            invoice_date_list.splice(list_index, 0, 'None')
+            invoice_amount_list.splice(list_index, 1)
+            invoice_amount_list.splice(list_index, 0, 'None')
+
+            $(input_class).addClass('is-invalid');
+            saveHtml = "<a href='javascript:void(0);' title='Undo' input_class='record"+ input_class[7] +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-undo' style='font-size:10px;'></i></a>"
+        }
+
+        if(title_name == "Undo")
+        {
+            total_rental_amount = parseFloat(total_rental_amount) + new_amount_value
+            invoice_date_list.splice(list_index, 1)
+            invoice_date_list.splice(list_index, 0, new_date_value)
+            invoice_amount_list.splice(list_index, 1)
+            invoice_amount_list.splice(list_index, 0, new_amount_value)
+            $(input_class).removeClass('is-invalid');
+            saveHtml = "<a href='javascript:void(0);' title='Edit' input_class='record"+ input_class[7] +"' class='btn btn-success btn-sm rounded-0 edit_schedule'><i class='fa fa-edit' style='font-size:10px;'></i></a><a href='javascript:void(0);' title='Delete' class='btn btn-danger btn-sm rounded-0 edit_schedule' input_class='record"+ input_class[7] + "'><i class='fa fa-trash' style='font-size:13px;'></i></a>"
+
+        }
+
+        $(".total_rental_amount").text(total_rental_amount_str[0] + total_rental_amount)
+        $("#invoice_date_list").val(JSON.stringify(invoice_date_list));
+        $("#invoice_amount_list").val(JSON.stringify(invoice_amount_list));
+
+      }
+      $(input_id).append(saveHtml)
+});
+
+// Show Invoices Div Data
+$("body").delegate(".view_invoices_div", "click", function(event)
+{
+    $('.rental_edit_invoice_div').toggle();
+    $('.rental_summary_div').toggle();
+
+});
+
+// Propert Details Page Click Functionality
+$("body").delegate(".property_tr", "click", function(event)
+{
+    var prop_url = $(this).attr('property_detail_url')
+    location.assign(prop_url)
+});
+
+// Property Select Info
+
+$('.select_property').on('change', function(e)
+    {
+        $("#unit_options").empty();
+        $("#tenant_n").val("")
+        property_name = $(this).val();
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            type: 'POST',
+            url:'/property/property_info/',
+            data: {
+                    'property_name': property_name,
+                    'csrfmiddlewaretoken': csrftoken
+                  },
+            dataType: 'json',
+            success: function(data)
+            {
+                var unit_list = data.unit_list
+                var tenant_dict = data.tenant_dict
+                var optionHtml = ""
+                for(let i=0; i < unit_list.length; i++)
+                {
+                    if(i == 0)
+                    {
+                        $("#tenant_n").val(tenant_dict[unit_list[i]['name']]);
+                        $("#tenant_n").attr('tenant_dict', JSON.stringify(tenant_dict));
+                    }
+                    optionHtml += "<option>" + unit_list[i]['name'] + "</option>"
+                }
+                $("#unit_options").append(optionHtml)
+                $(".property_relate").show();
+            }
+        });
+
+    });
+
+$('#unit_options').on('change', function(e)
+{
+    unit_value = $(this).val();
+    tenant_dict = JSON.parse($("#tenant_n").attr('tenant_dict'))
+    $.each(tenant_dict, function(key, value)
+    {
+        if(key == unit_value)
+        {
+            $("#tenant_n").val(value);
+        }
+    });
 
 });
 

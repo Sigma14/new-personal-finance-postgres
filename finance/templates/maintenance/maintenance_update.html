@@ -7,17 +7,17 @@
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-9 col-12 mb-2">
-                    <div class="row breadcrmbs-top">
+                    <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Account</h2>
+                            <h2 class="content-header-title float-left mb-0">Update Bill</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'account_list' %}">Account</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Add Account
+                                        Update Bill
                                     </li>
                                 </ol>
                             </div>
@@ -33,31 +33,15 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Name</label>
+                                        <label for="fname-icon">Label</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="name" required
+                                            <input value="{{bill_data.label}}" type="text" id="fname-icon" class="form-control" name="label" required
                                                    placeholder="Name"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="balance">Balance</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
-                                            <input type="text" id="balance" class="form-control" name="balance" required
-                                                   placeholder="Balance"/>
                                         </div>
                                     </div>
                                 </div>
@@ -72,7 +56,15 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.currency }}
+                                            <select class="form-control" name="currency">
+                                                {% for key, value in currency_dict.items %}
+                                                {% if key == bill_data.currency %}
+                                                <option selected value="{{key}}">{{value}}</option>
+                                                {% else %}
+                                                <option value="{{key}}">{{value}}</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -80,72 +72,58 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Interest Rate</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                             <input type="text" id="email-icon" class="form-control" name="interest_rate"
-                                                   placeholder="Interest Rate"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" />
-                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" name="lock_check" class="custom-control-input " id="lock_amount_check" />
-                                        <label class="custom-control-label" for="lock_amount_check">&nbsp;&nbsp;Lock Amount</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12" id="lock_amount_div">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Lock Amount</label>
+                                        <label for="email-icon">Amount</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="lock_amount"
-                                                   placeholder="Lock Amount"/>
+                                            <input value="{{bill_data.amount}}" type="text" id="email-icon" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bill Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input value="{{bill_data.date|date:'c'}}" type="text" id="email-icon" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Frequency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input value="{{bill_data.frequency}}" type="number" id="email-icon" class="form-control" name="frequency" required
+                                                   placeholder="Frequency"/>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Create</button>
-                                <a href="{% url 'account_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                <a href="{% url 'bill_detail' pk=bill_data.id %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
-
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
-<!--<form method="post">-->
-<!--    {% csrf_token %}-->
-<!--    {{form.as_p}}-->
-<!--    <input type="submit" value="Create">-->
-<!--</form>-->
 {% endblock content%}

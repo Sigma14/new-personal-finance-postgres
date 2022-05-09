@@ -54,6 +54,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/pickers/form-pickadate.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-wizard.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-calendar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-sweet-alerts.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-validation.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/page-auth.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-toastr.css' %}">
@@ -125,7 +126,7 @@
                                     </g>
                                 </g>
                             </svg></span>
-                        <h2 class="brand-text">TradingTech</h2>
+                        <h2 class="brand-text">PersonalFinance</h2>
                     </a></li>
                 <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i class="d-block d-xl-none text-primary toggle-icon font-medium-4" data-feather="x"></i><i class="d-none d-xl-block collapse-toggle-icon font-medium-4  text-primary" data-feather="disc" data-ticon="disc"></i></a></li>
             </ul>
@@ -157,9 +158,17 @@
                         class="d-flex align-items-center" href="{% url 'fund_list' %}"><i
                         data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
                 </li>
-                <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a
-                        class="d-flex align-items-center" href="{% url 'property_list' %}"><i
-                        data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties Information">Properties Information</span></a>
+                    <ul class="menu-content">
+                        <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a
+                                class="d-flex align-items-center" href="{% url 'property_list' %}"><i
+                                data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+                        </li>
+                        <li class=" nav-item {% if request.resolver_match.view_name == 'property_maintenance_list' or request.resolver_match.view_name == 'property_maintenance_add'  %}active{% endif %}"><a
+                                class="d-flex align-items-center" href="{% url 'property_maintenance_list' %}"><i
+                                data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Maintenace</span></a>
+                        </li>
+                    </ul>
                 </li>
                 <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties Model</span></a>
                     <ul class="menu-content">
@@ -211,8 +220,8 @@
 
 <!-- BEGIN: Footer-->
 <footer class="footer footer-static footer-light">
-    <p class="clearfix mb-0"><span class="float-md-left d-block d-md-inline-block mt-25">COPYRIGHT &copy; 2021<a
-            class="ml-25" href="https://1.envato.market/pixinvent_portfolio" target="_blank">Pixinvent</a><span
+    <p class="clearfix mb-0"><span class="float-md-left d-block d-md-inline-block mt-25">COPYRIGHT &copy; 2022<a
+            class="ml-25" href="{% url 'home' %}" target="_blank">PersonalFinance</a><span
             class="d-none d-sm-inline-block">, All rights Reserved</span></span><span
             class="float-md-right d-none d-md-block">Hand-crafted & Made with<i data-feather="heart"></i></span></p>
 </footer>
@@ -257,10 +266,12 @@
 <script src="{% static 'assets/js/app-calendars-events.js' %}"></script>
 <script src="{% static 'assets/js/app-calendars.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/pages/page-auth-register.js' %}"></script>
+<script src="{% static 'app-assets/js/scripts/extensions/ext-component-sweet-alerts.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/pages/app-ecommerce-checkout.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/forms/form-wizard.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/pages/app-user-edit.js' %}"></script>
 <script src="{% static 'app-assets/js/scripts/components/components-navs.js' %}"></script>
+<script src="{% static 'app-assets/js/scripts/components/components-collapse.js' %}"></script>
 
 
 <!-- END: Page JS-->
@@ -304,6 +315,7 @@
 <script>showPortfolioRange({{close_year | safe }}, "{{ year_1_id }}");</script>
 
 
+<script>$('#property_table').DataTable({"aaSorting": []});</script>
 <script>$('#categories').DataTable({"aaSorting": []});</script>
 <script>$('#accounts').DataTable({"aaSorting": []});</script>
 <script>$('#bills').DataTable({"aaSorting": []});</script>

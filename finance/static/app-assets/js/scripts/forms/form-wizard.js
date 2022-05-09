@@ -123,7 +123,8 @@ $(function () {
         $(this).on('click', function (e)
         {
           var isValid = $('form').valid();
-          if (isValid) {
+          if (isValid)
+          {
             numberedStepper.next();
             e.preventDefault();
           }
@@ -135,17 +136,22 @@ $(function () {
 
     $(horizontalWizard)
       .find('.btn-prev')
-      .on('click', function () {
+      .on('click', function ()
+      {
         numberedStepper.previous();
+        e.preventDefault();
       });
 
     $(horizontalWizard)
       .find('.btn-submit')
       .on('click', function () {
+
         var isValid = $('form').valid();
+
         if (isValid)
         {
             $('#frm1').submit();
+            e.preventDefault();
         }
       });
   }

@@ -28,10 +28,11 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A0, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
-    MortgageForm, LiabilityForm, PropertyForm
+    MortgageForm, LiabilityForm, MaintenanceForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
-    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails
+    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice,\
+    PropertyMaintenance
 from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
@@ -42,11 +43,11 @@ from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
 from django.contrib.auth.models import User
 
-
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
-
+property_type_list = ['Apartment', 'Commercial', 'Condo', 'Duplex', 'House', 'Mixed-Use', 'Other']
+month_date_dict = {'1': '1st ', '2': '2nd ', '3': '3rd ', '4': '4th ', '5': '5th ', '6': '6th ', '7': '7th ', '8': '8th ', '9': '9th ', '10': '10th', '11': '11th', '12': '12th', '13': '13th', '14': '14th', '15': '15th', '16': '16th', '17': '17th', '18': '18th', '19': '19th', '20': '20th', '21': '21st', '22': '22nd', '23': '23rd', '24': '24th', '25': '25th', '26': '26th', '27': '27th', '28': '28th', '29': '29th', '30': '30th'}
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                          expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image):
@@ -263,7 +264,7 @@ def make_capex_budget(result_list):
     cost_per_month = cost_per_year / 12
     result_list.append(round(cost_per_year, 2))
     result_list.append(round(cost_per_month, 2))
-    return  result_list
+    return result_list
 
 
 def make_others_dict(other_unit_dict):
@@ -1021,61 +1022,61 @@ def net_worth(request):
     return render(request, "net_worth.html", context=context)
 
 
-# Property Views
-
-class PropertyAdd(LoginRequiredMixin, CreateView):
-    model = Property
-    form_class = PropertyForm
-    template_name = 'properties/add_property.html'
-
-    def form_valid(self, form):
-        name = form.cleaned_data.get('name').title()
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.name = name
-        obj.save()
-        return super().form_valid(form)
-
-
-class PropertyList(LoginRequiredMixin, ListView):
-    model = Property
-    template_name = 'properties/list_property.html'
-
-    def get_context_data(self, **kwargs):
-        # self.request = kwargs.pop('request')
-        data = super(PropertyList, self).get_context_data(**kwargs)
-        user_name = self.request.user
-        property_data = Property.objects.filter(user=user_name)
-        property_key = ['S.No.', 'Name', 'Value', 'Last Activity']
-        property_name = []
-        property_value = []
-
-        for obj in property_data:
-            property_name.append(obj.name)
-            property_value.append(obj.value)
-
-        data['property_data'] = property_data
-        data['property_key'] = property_key
-        data['categories_name'] = property_name
-        data['categories_name_dumbs'] = json.dumps(property_name)
-        data['category_key_dumbs'] = json.dumps(property_key)
-        data['categories_value'] = property_value
-        data['categories_series'] = [{'name': 'Value', 'data': property_value}]
-
-        return data
-
-
-class PropertyUpdate(LoginRequiredMixin, UpdateView):
-    model = Property
-    form_class = PropertyForm
-    template_name = 'properties/property_update.html'
-
-
-class PropertyDelete(LoginRequiredMixin, DeleteView):
-    def post(self, request, *args, **kwargs):
-        property_obj = Property.objects.get(pk=self.kwargs['pk'])
-        property_obj.delete()
-        return JsonResponse({"status": "Successfully", "path": "None"})
+# # Property Views
+#
+# class PropertyAdd(LoginRequiredMixin, CreateView):
+#     model = Property
+#     form_class = PropertyForm
+#     template_name = 'properties/add_property.html'
+#
+#     def form_valid(self, form):
+#         name = form.cleaned_data.get('name').title()
+#         obj = form.save(commit=False)
+#         obj.user = self.request.user
+#         obj.name = name
+#         obj.save()
+#         return super().form_valid(form)
+#
+#
+# class PropertyList(LoginRequiredMixin, ListView):
+#     model = Property
+#     template_name = 'properties/list_property.html'
+#
+#     def get_context_data(self, **kwargs):
+#         # self.request = kwargs.pop('request')
+#         data = super(PropertyList, self).get_context_data(**kwargs)
+#         user_name = self.request.user
+#         property_data = Property.objects.filter(user=user_name)
+#         property_key = ['S.No.', 'Name', 'Value', 'Last Activity']
+#         property_name = []
+#         property_value = []
+#
+#         for obj in property_data:
+#             property_name.append(obj.name)
+#             property_value.append(obj.value)
+#
+#         data['property_data'] = property_data
+#         data['property_key'] = property_key
+#         data['categories_name'] = property_name
+#         data['categories_name_dumbs'] = json.dumps(property_name)
+#         data['category_key_dumbs'] = json.dumps(property_key)
+#         data['categories_value'] = property_value
+#         data['categories_series'] = [{'name': 'Value', 'data': property_value}]
+#
+#         return data
+#
+#
+# class PropertyUpdate(LoginRequiredMixin, UpdateView):
+#     model = Property
+#     form_class = PropertyForm
+#     template_name = 'properties/property_update.html'
+#
+#
+# class PropertyDelete(LoginRequiredMixin, DeleteView):
+#     def post(self, request, *args, **kwargs):
+#         property_obj = Property.objects.get(pk=self.kwargs['pk'])
+#         property_obj.delete()
+#         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
 class CategoryList(LoginRequiredMixin, ListView):
@@ -1820,6 +1821,7 @@ def transaction_list(request):
     context = transaction_summary(transaction_data, select_filter)
     return render(request, 'transaction/transaction_list.html', context=context)
 
+
 @login_required(login_url="/login")
 def transaction_report(request):
     user_name = request.user
@@ -2143,6 +2145,7 @@ def calculate_available_lock_amount(user_name, account_obj):
     available_lock_amount = float(lock_amount) - total_allocate_amount
     return available_lock_amount
 
+
 @login_required(login_url="/login")
 def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     label = request.POST['label']
@@ -2225,6 +2228,7 @@ def goal_add(request):
         account_data = Account.objects.filter(user=user_name)
         context = {'currency_dict': currency_dict, 'account_data': account_data}
         return render(request, 'goal/goal_add.html', context=context)
+
 
 @login_required(login_url="/login")
 def goal_update(request, pk):
@@ -2897,7 +2901,8 @@ def mortgagecalculator(request):
         json_records = table.reset_index().to_json(orient='records')
         data = json.loads(json_records)
         monthly_payment = abs(data[0]['principle'] + data[0]['interest'])
-        mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month, mortgage_date)
+        mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month,
+                                                                                               mortgage_date)
         context = {
             'form': form,
             'data': data,
@@ -2985,44 +2990,45 @@ def future_net_worth_calculator(request):
     categories_name = ['5 Year', '10 Year', '25 Year']
     categories_series = [{'name': 'Net Worth', 'data': future_list}]
     context = {
-                'current_net_worth': current_net_worth,
-                'total_asset': total_asset,
-                'total_debt': total_debt,
-                'age': age,
-                'income': income,
-                'total_worth': total_worth,
-                'currency_dict': currency_dict,
-                'currency': currency,
-                'home_value': home_value,
-                'vehicle_value': vehicle_value,
-                'cash_savings': cash_savings,
-                'open_taxable_savings': open_taxable_savings,
-                'non_taxable_savings': non_taxable_savings,
-                'tax_deferred_savings': tax_deferred_savings,
-                'other_asset_value': other_asset_value,
-                'home_mortgage_owing': home_mortgage_owing,
-                'vehicle_loan_owing': vehicle_loan_owing,
-                's_i_loan_owing': s_i_loan_owing,
-                'credit_card_owing': credit_card_owing,
-                'student_loan_owing': student_loan_owing,
-                'other_loan_owing': other_loan_owing,
-                'other_asset': other_cost,
-                'other_liability': other_liab,
-                'age': age,
-                'taxable_income': income,
-                'asset_rate': asset_rate,
-                'categories_name': categories_name,
-                'categories_series': categories_series
-            }
+        'current_net_worth': current_net_worth,
+        'total_asset': total_asset,
+        'total_debt': total_debt,
+        'age': age,
+        'income': income,
+        'total_worth': total_worth,
+        'currency_dict': currency_dict,
+        'currency': currency,
+        'home_value': home_value,
+        'vehicle_value': vehicle_value,
+        'cash_savings': cash_savings,
+        'open_taxable_savings': open_taxable_savings,
+        'non_taxable_savings': non_taxable_savings,
+        'tax_deferred_savings': tax_deferred_savings,
+        'other_asset_value': other_asset_value,
+        'home_mortgage_owing': home_mortgage_owing,
+        'vehicle_loan_owing': vehicle_loan_owing,
+        's_i_loan_owing': s_i_loan_owing,
+        'credit_card_owing': credit_card_owing,
+        'student_loan_owing': student_loan_owing,
+        'other_loan_owing': other_loan_owing,
+        'other_asset': other_cost,
+        'other_liability': other_liab,
+        'age': age,
+        'taxable_income': income,
+        'asset_rate': asset_rate,
+        'categories_name': categories_name,
+        'categories_series': categories_series
+    }
 
     return render(request, "future_net_worth.html", context=context)
+
 
 # Rental Property Model Views
 
 
 class RentalPropertyList(LoginRequiredMixin, ListView):
     model = RentalPropertyModel
-    template_name = 'property/property_list.html'
+    template_name = 'properties/list_property.html'
 
     def get_context_data(self, **kwargs):
         # self.request = kwargs.pop('request')
@@ -3030,11 +3036,17 @@ class RentalPropertyList(LoginRequiredMixin, ListView):
         user_name = self.request.user
         rental_property_data = RentalPropertyModel.objects.filter(user=user_name)
         property_data = Property.objects.filter(user=user_name)
+        account_obj = Account.objects.filter(user=user_name, liability_type='Mortgage')
         property_dict = {}
+        liability_dict = {}
         for obj in property_data:
-            property_dict[obj.name] = obj.id
+            property_dict[obj.property_name] = obj.id
+
+        for obj in account_obj:
+            liability_dict[obj.name] = obj.id
 
         data['property_data'] = property_dict
+        data['liability_data'] = liability_dict
         data['rental_property_data'] = rental_property_data
         return data
 
@@ -3058,7 +3070,8 @@ def rental_property_details(request, pk):
     json_records = table.reset_index().to_json(orient='records')
     data = json.loads(json_records)
     mortgage_date = property_obj.mortgage_detail.start_date
-    mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month, mortgage_date)
+    mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month,
+                                                                                           mortgage_date)
     monthly_payment = data[0]['principle'] + data[0]['interest']
     for key in other_cost_dict:
         other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
@@ -3281,23 +3294,23 @@ def rental_property_details(request, pk):
         make_capex_budget(value)
 
     capex_budget_value = {
-                        'Roof': roof_list,
-                        'Water Heater': water_heater_list,
-                        'All Appliances': all_appliances_list,
-                        'Bathroom Fixtures (Showers, Vanities, Toilets etc.)': bathroom_fixtures_list,
-                        'Driveway/Parking Lot': drive_way_list,
-                        'Furnace': furnance_list,
-                        'Air Conditioner ': air_conditioner_list,
-                        'Flooring': flooring_list,
-                        'Plumbing': plumbing_list,
-                        'Electrical': electrical_list,
-                        'Windows': windows_list,
-                        'Paint': paint_list,
-                        'Kitchen Cabinets/Counters': kitchen_list,
-                        'Structure (foundation, framing)': structure_list,
-                        'Components (garage door, etc.)': components_list,
-                        'Landscaping': landscaping_list,
-                        }
+        'Roof': roof_list,
+        'Water Heater': water_heater_list,
+        'All Appliances': all_appliances_list,
+        'Bathroom Fixtures (Showers, Vanities, Toilets etc.)': bathroom_fixtures_list,
+        'Driveway/Parking Lot': drive_way_list,
+        'Furnace': furnance_list,
+        'Air Conditioner ': air_conditioner_list,
+        'Flooring': flooring_list,
+        'Plumbing': plumbing_list,
+        'Electrical': electrical_list,
+        'Windows': windows_list,
+        'Paint': paint_list,
+        'Kitchen Cabinets/Counters': kitchen_list,
+        'Structure (foundation, framing)': structure_list,
+        'Components (garage door, etc.)': components_list,
+        'Landscaping': landscaping_list,
+    }
     if others_budgets_dict:
         capex_budget_value.update(others_budgets_dict)
     # Yearly projection
@@ -3350,21 +3363,22 @@ def rental_property_details(request, pk):
 
     # Yearly Return On Investment
     yearly_return_data = {
-                            'Property Appreciation Assumption': appreciation_assumption_list,
-                            'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
-                            'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
-                            'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
-                            'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
-                            'Capitalization Rate (Cap Rate)': cap_rate_list,
-                            'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
-                         }
+        'Property Appreciation Assumption': appreciation_assumption_list,
+        'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
+        'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
+        'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
+        'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
+        'Capitalization Rate (Cap Rate)': cap_rate_list,
+        'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
+    }
 
     # Stats and Graphs Data :-
 
     cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)', 'data': cash_return_list}]
-    return_on_investment_data = [{'name': 'Return On Investment % (ROI) (Assuming No Appreciation)', 'data': roi_p_list},
-                                 {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
-                                  'data': roi_p_with_appreciation_list}]
+    return_on_investment_data = [
+        {'name': 'Return On Investment % (ROI) (Assuming No Appreciation)', 'data': roi_p_list},
+        {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
+         'data': roi_p_with_appreciation_list}]
 
     change_annual_cash_flow_list = [float(x[1:]) for x in annual_cash_flow_list]
     change_appreciation_assumption_list = [float(x[1:]) for x in appreciation_assumption_list]
@@ -3376,8 +3390,8 @@ def rental_property_details(request, pk):
                               {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
                                'data': [x[1:] for x in roi_list]},
                               {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
-                                  'data': [x[1:] for x in roi_with_appreciation_list]
-                              }]
+                               'data': [x[1:] for x in roi_with_appreciation_list]
+                               }]
     property_expense_data = [{'name': 'Operating Expenses', 'data': [x[1:] for x in operating_expenses_list]}]
 
     stats_graph_dict = {'cash_on_cash_return_data': cash_on_cash_return_data,
@@ -3386,53 +3400,55 @@ def rental_property_details(request, pk):
                         'return_investment_data': return_investment_data,
                         'property_expense_data': property_expense_data}
 
-    total_year_return = sum(change_annual_cash_flow_list) + sum(change_appreciation_assumption_list) +\
+    total_year_return = sum(change_annual_cash_flow_list) + sum(change_appreciation_assumption_list) + \
                         sum(change_mortgage_principle_list)
 
     for key, value in investors_dict.items():
         update_value = float(value[1].replace("%", ""))
-        total_year_return_dict_investors[key] = [value[1], f"{currency_name}{round(update_value * total_year_return, 2)}"]
+        total_year_return_dict_investors[key] = [value[1],
+                                                 f"{currency_name}{round(update_value * total_year_return, 2)}"]
 
     expenses_yearly_data_dumbs = {}
     expenses_yearly_data_dumbs.update(expenses_yearly_data1)
     expenses_yearly_data_dumbs.update(expenses_yearly_data2)
 
     context = {
-               'primary_key': pk,
-               'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
-               'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
-               "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
-               "yearly_return_data": yearly_return_data, 'data': data, 'monthly_payment': monthly_payment,
-               'last_month': last_month, 'days': total_month, 'total_payment': total_payment, 'mortgage_key': mortgage_key,
-               'mortgage_key_dumbs': json.dumps(mortgage_key), 'mortgage_graph_data': mortgage_graph_data,
-               'mortgage_date_data': mortgage_date_data, "total_year_return": round(total_year_return, 2),
-               "annual_cash_flow_dict_investors": annual_cash_flow_dict_investors,
-               "net_operating_income_dict_investors": net_operating_income_dict_investors,
-               "roi_dict_investors": roi_dict_investors,
-               "roi_with_appreciation_dict_investors": roi_with_appreciation_dict_investors,
-               "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
-               "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
-               "total_financing": total_financing, "capex_budget_value": capex_budget_value,
-               "total_replacement_costs": total_replacement_costs, "total_return_investor_dict": total_year_return_dict_investors,
-               'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
-               "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
-               "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
-               "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
-               "roi_dict_investors_dumbs": json.dumps(roi_dict_investors),
-               "roi_with_appreciation_dict_investors_dumbs": json.dumps(roi_with_appreciation_dict_investors),
-               "cash_on_cash_return_data_dumbs": json.dumps(stats_graph_dict['cash_on_cash_return_data'][0]['data']),
-               "return_on_investment_data_dumbs": json.dumps(return_on_investment_data),
-               "debt_cov_ratio_data_dumbs": json.dumps(stats_graph_dict['debt_cov_ratio_data'][0]['data']),
-               "return_investment_data_dumbs": json.dumps(stats_graph_dict['return_investment_data']),
-               "property_expense_data_dumbs": json.dumps(stats_graph_dict['property_expense_data'][0]['data']),
-               "revenue_yearly_data_dumbs": json.dumps(revenue_yearly_data),
-               "expenses_yearly_data_dumbs": json.dumps(expenses_yearly_data_dumbs),
-               "yearly_return_data_dumbs":  json.dumps(yearly_return_data)
+        'primary_key': pk,
+        'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
+        'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
+        "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
+        "yearly_return_data": yearly_return_data, 'data': data, 'monthly_payment': monthly_payment,
+        'last_month': last_month, 'days': total_month, 'total_payment': total_payment, 'mortgage_key': mortgage_key,
+        'mortgage_key_dumbs': json.dumps(mortgage_key), 'mortgage_graph_data': mortgage_graph_data,
+        'mortgage_date_data': mortgage_date_data, "total_year_return": round(total_year_return, 2),
+        "annual_cash_flow_dict_investors": annual_cash_flow_dict_investors,
+        "net_operating_income_dict_investors": net_operating_income_dict_investors,
+        "roi_dict_investors": roi_dict_investors,
+        "roi_with_appreciation_dict_investors": roi_with_appreciation_dict_investors,
+        "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
+        "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
+        "total_financing": total_financing, "capex_budget_value": capex_budget_value,
+        "total_replacement_costs": total_replacement_costs,
+        "total_return_investor_dict": total_year_return_dict_investors,
+        'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
+        "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
+        "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
+        "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
+        "roi_dict_investors_dumbs": json.dumps(roi_dict_investors),
+        "roi_with_appreciation_dict_investors_dumbs": json.dumps(roi_with_appreciation_dict_investors),
+        "cash_on_cash_return_data_dumbs": json.dumps(stats_graph_dict['cash_on_cash_return_data'][0]['data']),
+        "return_on_investment_data_dumbs": json.dumps(return_on_investment_data),
+        "debt_cov_ratio_data_dumbs": json.dumps(stats_graph_dict['debt_cov_ratio_data'][0]['data']),
+        "return_investment_data_dumbs": json.dumps(stats_graph_dict['return_investment_data']),
+        "property_expense_data_dumbs": json.dumps(stats_graph_dict['property_expense_data'][0]['data']),
+        "revenue_yearly_data_dumbs": json.dumps(revenue_yearly_data),
+        "expenses_yearly_data_dumbs": json.dumps(expenses_yearly_data_dumbs),
+        "yearly_return_data_dumbs": json.dumps(yearly_return_data)
 
     }
     context.update(stats_graph_dict)
 
-    return render(request, "property/property_detail.html", context=context)
+    return render(request, "properties/property_detail.html", context=context)
 
 
 def others_costs_data(other_closing_cost):
@@ -3458,7 +3474,7 @@ def rental_property_add(request):
         property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
         if property_obj:
             context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
-            return render(request, "property/property_add.html", context=context)
+            return render(request, "properties/add_property.html", context=context)
 
         rental_obj = RentalPropertyModel()
         property_purchase_obj = PropertyPurchaseDetails()
@@ -3473,21 +3489,20 @@ def rental_property_add(request):
 
     else:
         context = {
-                    'currency_dict': currency_dict,
-                    'scenario_dict': scenario_dict,
-                    'action_url': "/rental_property_add/",
-                    'heading_name': "Add Rental Property",
-                    'heading_url': "Add Property",
-                    'property_url': "/rental_property_list/",
+            'currency_dict': currency_dict,
+            'scenario_dict': scenario_dict,
+            'action_url': "/rental_property_add/",
+            'heading_name': "Add Rental Property",
+            'heading_url': "Add Property",
+            'property_url': "/rental_property_list/",
 
         }
-        return render(request, "property/property_add.html", context=context)
+        return render(request, "properties/add_property.html", context=context)
 
 
 @login_required(login_url="/login")
 def rental_property_update(request, pk):
     user_name = request.user
-    print(request.POST)
     if request.method == "POST":
         rental_obj = RentalPropertyModel.objects.get(pk=pk)
         property_purchase_obj = rental_obj.purchase_price_detail
@@ -3504,7 +3519,7 @@ def rental_property_update(request, pk):
             property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
             if property_obj:
                 context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
-                return render(request, "property/property_add.html", context=context)
+                return render(request, "properties/add_property.html", context=context)
 
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                              expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image)
@@ -3551,7 +3566,7 @@ def rental_property_update(request, pk):
                    'property_url': "/rental_property_detail/{pk}",
                    }
 
-        return render(request, "property/property_add.html", context=context)
+        return render(request, "properties/add_property.html", context=context)
 
 
 @login_required(login_url="/login")
@@ -3591,11 +3606,11 @@ class RentalPdf:
         title_style.fontSize = 50
         if property_image == "None":
             data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
-                    Paragraph(f"Address {property_address}", title_style),  Spacer(300, 300)]
+                    Paragraph(f"Address {property_address}", title_style), Spacer(300, 300)]
         else:
             data = [Spacer(50, 50), Paragraph(f"RENTAL PROPERTY INVESTMENT PROPOSAL", title_style), Spacer(100, 100),
                     Paragraph(f"Address {property_address}", title_style), Spacer(100, 100),
-                    Image(property_image, 25*inch, 15*inch), Spacer(200, 200)]
+                    Image(property_image, 25 * inch, 15 * inch), Spacer(200, 200)]
         for key, values in pdf_data_value.items():
             t = Table(values)
             t.setStyle(TableStyle(
@@ -3706,7 +3721,6 @@ def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
         legend.colorNamePairs = bar_legends
         d.add(bar)
         d.add(legend)
-
 
     return d
 
@@ -3868,7 +3882,8 @@ def download_rental_pdf(request):
     response['Content-Disposition'] = f'attachment; filename={file_name}'
     buffer = BytesIO()
     reporti = RentalPdf(buffer, 'A4')
-    bar_legends = [(PCMYKColor(46, 51, 0, 4), return_on_investment_data[0]['name']), (colors.red, return_on_investment_data[1]['name'])]
+    bar_legends = [(PCMYKColor(46, 51, 0, 4), return_on_investment_data[0]['name']),
+                   (colors.red, return_on_investment_data[1]['name'])]
     return_bar_legends = [(PCMYKColor(46, 51, 0, 4), return_investment_data[0]['name']),
                           (colors.red, return_investment_data[1]['name']),
                           (colors.darkgreen, return_investment_data[2]['name']),
@@ -4325,6 +4340,585 @@ def expenses_delete(request, pk):
     return JsonResponse({"status": "Successfully", "path": "None"})
 
 
+def add_checkbox_value(result_check, result_dict, result_type, result_name):
+    if result_check:
+        electric_value = result_check[0]
+    else:
+        electric_value = 'off'
+
+    result_dict[result_type][result_name] = electric_value
+
+
 def process_image(request):
-    print("ll")
-    return render(request, "test.html")
+    if request.method == 'POST':
+        # -------------- Property Details ---------------------- #
+        try:
+            property_image = request.FILES['property_image']
+        except:
+            property_image = ""
+
+        property_name = request.POST['property_name']
+        address_line1 = request.POST['address_line1']
+        address_line2 = request.POST['address_line2']
+        postcode = request.POST['postcode']
+        city = request.POST['city']
+        state = request.POST['state']
+        country = request.POST['country']
+        property_type = request.POST['property_type']
+        unit_name = request.POST.getlist('unit_name')
+        bed_room_quantity = request.POST.getlist('bed_room_quantity')
+        bath_room_quantity = request.POST.getlist('bath_room_quantity')
+        square_feet = request.POST.getlist('square_feet')
+
+        unit_details = []
+        for i in range(len(unit_name)):
+            unit_dict = {'name': unit_name[i],
+                         'details': {'bed_room': bed_room_quantity[i], 'bath_room': bath_room_quantity[i],
+                                     'square_feet': square_feet[i], 'rent_includes': {},
+                                     'Amenities': {}}}
+            electricity_check = request.POST.getlist(f'electricity_check{i}', [])
+            gas_check = request.POST.getlist(f'gas_check{i}', [])
+            water_check = request.POST.getlist(f'water_check{i}', [])
+            int_cable_check = request.POST.getlist(f'int_cable_check{i}', [])
+            ac_check = request.POST.getlist(f'ac_check{i}', [])
+            pool_check = request.POST.getlist(f'pool_check{i}', [])
+            pets_check = request.POST.getlist(f'pets_check{i}', [])
+            furnished_check = request.POST.getlist(f'furnished_check{i}', [])
+            balcony_check = request.POST.getlist(f'balcony_check{i}', [])
+            hardwood_check = request.POST.getlist(f'hardwood_check{i}', [])
+            wheel_check = request.POST.getlist(f'wheel_check{i}', [])
+            parking_check = request.POST.getlist(f'parking_check{i}', [])
+
+            add_checkbox_value(electricity_check, unit_dict['details'], 'rent_includes', 'electricity_check')
+            add_checkbox_value(gas_check, unit_dict['details'], 'rent_includes', 'gas_check')
+            add_checkbox_value(water_check, unit_dict['details'], 'rent_includes', 'water_check')
+            add_checkbox_value(int_cable_check, unit_dict['details'], 'rent_includes', 'int_cable_check')
+            add_checkbox_value(ac_check, unit_dict['details'], 'Amenities', 'ac_check')
+            add_checkbox_value(pool_check, unit_dict['details'], 'Amenities', 'pool_check')
+            add_checkbox_value(pets_check, unit_dict['details'], 'Amenities', 'pets_check')
+            add_checkbox_value(furnished_check, unit_dict['details'], 'Amenities', 'furnished_check')
+            add_checkbox_value(balcony_check, unit_dict['details'], 'Amenities', 'balcony_check')
+            add_checkbox_value(hardwood_check, unit_dict['details'], 'Amenities', 'hardwood_check')
+            add_checkbox_value(wheel_check, unit_dict['details'], 'Amenities', 'wheel_check')
+            add_checkbox_value(parking_check, unit_dict['details'], 'Amenities', 'parking_check')
+            unit_details.append(unit_dict)
+
+        property_obj = Property()
+
+        # -------------- Rental Details ---------------------- #
+        select_unit = request.POST['select_unit']
+        term_name = request.POST['term_name']
+        lease_start_date = request.POST['lease_start_date']
+        lease_end_date = request.POST['lease_end_date']
+        deposit = request.POST['deposit']
+        due_on = request.POST['due_on']
+        already_deposit = request.POST.getlist('already_deposit', [])
+        rent = request.POST['rent']
+        select_due_date = request.POST['select_due_date']
+        select_due_date = request.POST['select_due_date']
+        first_rental_due_date = request.POST['first_rental_due_date']
+        invoice_date_list = request.POST['invoice_date_list']
+        invoice_amount_list = request.POST['invoice_amount_list']
+
+        if already_deposit:
+            deposit_check = already_deposit[0]
+        else:
+            deposit_check = 'off'
+
+        # -------------- Tenants Details ---------------------- #
+        tenant_f_name = request.POST['tenant_f_name']
+        tenant_l_name = request.POST['tenant_l_name']
+        tenant_email = request.POST['tenant_email']
+        tenant_mobile_number = request.POST['tenant_mobile_number']
+
+    today_date = datetime.date.today()
+    p = pd.Period(str(today_date))
+    if p.is_leap_year:
+        one_year_date = today_date + datetime.timedelta(days=366)
+    else:
+        one_year_date = today_date + datetime.timedelta(days=365)
+
+    currency_symbol = "$"
+    return render(request, "test.html", context={'today_date': today_date, 'one_year_date': one_year_date,
+                                                 'today_date_str': str(today_date),
+                                                 'one_year_date_str': str(one_year_date),
+                                                 "currency_symbol": currency_symbol})
+
+
+def property_save_fun(request, property_obj, user_name, rent, total_tenants):
+    # -------------- Property Details ---------------------- #
+    try:
+        property_image = request.FILES['property_image']
+    except:
+        property_image = ""
+
+    try:
+        net_worth_check = request.POST['net_worth_check']
+    except:
+        net_worth_check = False
+
+    property_name = request.POST['property_name']
+    address_line1 = request.POST['address_line1']
+    address_line2 = request.POST['address_line2']
+    postcode = request.POST['postcode']
+    city = request.POST['city']
+    state = request.POST['state']
+    country = request.POST['country']
+    currency_name = request.POST['currency_name']
+    property_amount = request.POST['property_amount']
+    property_type = request.POST['property_type']
+    unit_name = request.POST.getlist('unit_name')
+    bed_room_quantity = request.POST.getlist('bed_room_quantity')
+    bath_room_quantity = request.POST.getlist('bath_room_quantity')
+    square_feet = request.POST.getlist('square_feet')
+    unit_details = []
+
+    if net_worth_check:
+        net_worth_check = True
+    else:
+        net_worth_check = False
+
+    for i in range(len(unit_name)):
+        unit_dict = {'name': unit_name[i],
+                     'details': {'bed_room': bed_room_quantity[i], 'bath_room': bath_room_quantity[i],
+                                 'square_feet': square_feet[i], 'rent_includes': {},
+                                 'Amenities': {}}}
+        electricity_check = request.POST.getlist(f'electricity_check{i}', [])
+        gas_check = request.POST.getlist(f'gas_check{i}', [])
+        water_check = request.POST.getlist(f'water_check{i}', [])
+        int_cable_check = request.POST.getlist(f'int_cable_check{i}', [])
+        ac_check = request.POST.getlist(f'ac_check{i}', [])
+        pool_check = request.POST.getlist(f'pool_check{i}', [])
+        pets_check = request.POST.getlist(f'pets_check{i}', [])
+        furnished_check = request.POST.getlist(f'furnished_check{i}', [])
+        balcony_check = request.POST.getlist(f'balcony_check{i}', [])
+        hardwood_check = request.POST.getlist(f'hardwood_check{i}', [])
+        wheel_check = request.POST.getlist(f'wheel_check{i}', [])
+        parking_check = request.POST.getlist(f'parking_check{i}', [])
+
+        add_checkbox_value(electricity_check, unit_dict['details'], 'rent_includes', 'electricity_check')
+        add_checkbox_value(gas_check, unit_dict['details'], 'rent_includes', 'gas_check')
+        add_checkbox_value(water_check, unit_dict['details'], 'rent_includes', 'water_check')
+        add_checkbox_value(int_cable_check, unit_dict['details'], 'rent_includes', 'int_cable_check')
+        add_checkbox_value(ac_check, unit_dict['details'], 'Amenities', 'ac_check')
+        add_checkbox_value(pool_check, unit_dict['details'], 'Amenities', 'pool_check')
+        add_checkbox_value(pets_check, unit_dict['details'], 'Amenities', 'pets_check')
+        add_checkbox_value(furnished_check, unit_dict['details'], 'Amenities', 'furnished_check')
+        add_checkbox_value(balcony_check, unit_dict['details'], 'Amenities', 'balcony_check')
+        add_checkbox_value(hardwood_check, unit_dict['details'], 'Amenities', 'hardwood_check')
+        add_checkbox_value(wheel_check, unit_dict['details'], 'Amenities', 'wheel_check')
+        add_checkbox_value(parking_check, unit_dict['details'], 'Amenities', 'parking_check')
+        unit_details.append(unit_dict)
+
+    property_obj.user = user_name
+    property_obj.property_image = property_image
+    property_obj.property_name = property_name
+    property_obj.property_type = property_type
+    property_obj.address_line1 = address_line1
+    property_obj.address_line2 = address_line2
+    property_obj.post_code = postcode
+    property_obj.city = city
+    property_obj.state = state
+    property_obj.country = country
+    property_obj.unit_details = unit_details
+    property_obj.value = property_amount
+    property_obj.currency = currency_name
+    property_obj.include_net_worth = net_worth_check
+    property_obj.units_no = len(unit_name)
+    property_obj.total_monthly_rent = rent
+    property_obj.total_tenants = total_tenants
+    property_obj.save()
+
+
+def rental_info_save(request, user_name, rental_obj, property_obj, invoice_data, rent, method_name):
+    # -------------- Rental Details ---------------------- #
+    select_unit = request.POST['select_unit']
+    term_name = request.POST['term_name']
+    lease_start_date = request.POST['lease_start_date']
+    lease_end_date = request.POST['lease_end_date']
+    deposit = request.POST['deposit']
+    due_on = request.POST['due_on']
+    already_deposit = request.POST.getlist('already_deposit', [])
+    select_due_date = request.POST['select_due_date']
+    first_rental_due_date = request.POST['first_rental_due_date']
+    invoice_date_list = ast.literal_eval(request.POST['invoice_date_list'])
+    invoice_amount_list = ast.literal_eval(request.POST['invoice_amount_list'])
+    first_rental_due_date = str(datetime.datetime.strptime(first_rental_due_date, "%B %d, %Y").date())
+
+    # -------------- Tenants Details ---------------------- #
+    tenant_f_name = request.POST['tenant_f_name']
+    tenant_l_name = request.POST['tenant_l_name']
+    tenant_email = request.POST['tenant_email']
+    tenant_mobile_number = request.POST['tenant_mobile_number']
+
+    if already_deposit:
+
+        deposit_check = already_deposit[0]
+    else:
+        deposit_check = 'off'
+
+    if float(deposit) > 0:
+        if method_name == "update":
+            if float(rental_obj.deposit_amount) > 0:
+                invoice_obj = invoice_data[0]
+            else:
+                invoice_obj = PropertyInvoice()
+        else:
+            invoice_obj = invoice_data
+
+        invoice_obj.user = user_name
+        invoice_obj.property_details = property_obj
+        invoice_obj.tenant_name = tenant_f_name + " " + tenant_l_name
+        invoice_obj.unit_name = select_unit
+        invoice_obj.item_type = "Rent"
+        invoice_obj.item_description = f"Rent Deposit Due on"
+        invoice_obj.quantity = 1
+        invoice_obj.item_amount = deposit
+        invoice_obj.invoice_due_date = due_on
+        if deposit_check == 'off':
+            invoice_obj.invoice_status = "Unpaid"
+            invoice_obj.already_paid = 0
+            invoice_obj.balance_due = deposit
+        else:
+            invoice_obj.invoice_status = "Fully Paid"
+            invoice_obj.already_paid = deposit
+            invoice_obj.balance_due = 0
+        invoice_obj.save()
+
+    rental_summary = []
+    date_list_len = len(invoice_date_list)
+    for i in range(date_list_len):
+        if invoice_date_list[i] != "None":
+            date_value = datetime.datetime.strptime(invoice_date_list[i], "%B %d, %Y")
+            if method_name == "update":
+                invoice_update_len = len(invoice_data)
+                if date_list_len == invoice_update_len:
+                    invoice_obj = invoice_data[i]
+                elif date_list_len < invoice_update_len:
+                    invoice_obj = invoice_data[i + 1]
+                else:
+                    if i > invoice_update_len:
+                        invoice_obj = PropertyInvoice()
+                    else:
+                        invoice_obj = invoice_data[i]
+            else:
+                invoice_obj = PropertyInvoice()
+
+            invoice_obj.user = user_name
+            invoice_obj.property_details = property_obj
+            invoice_obj.tenant_name = tenant_f_name + " " + tenant_l_name
+            invoice_obj.unit_name = select_unit
+            invoice_obj.item_type = "Rent"
+            invoice_obj.item_description = f"Rent Due on {invoice_date_list[i]}"
+            invoice_obj.quantity = "1"
+            invoice_obj.item_amount = invoice_amount_list[i]
+            invoice_obj.already_paid = 0
+            invoice_obj.balance_due = invoice_amount_list[i]
+            invoice_obj.invoice_due_date = date_value
+            invoice_obj.invoice_status = "Unpaid"
+            invoice_obj.save()
+            rental_summary.append({'due': invoice_date_list[i], 'amount': invoice_amount_list[i]})
+
+    rental_obj.user = user_name
+    rental_obj.property_address = property_obj
+    rental_obj.unit_name = select_unit
+    rental_obj.rental_term = term_name
+    rental_obj.rental_start_date = lease_start_date
+    rental_obj.rental_end_date = lease_end_date
+    rental_obj.deposit_amount = deposit
+    rental_obj.deposit_due_date = due_on
+    rental_obj.deposit_check = deposit_check
+    rental_obj.rent_amount = rent
+    rental_obj.rent_due_every_month = select_due_date
+    rental_obj.rent_due_date = first_rental_due_date
+    rental_obj.rental_summary = rental_summary
+    rental_obj.first_name = tenant_f_name
+    rental_obj.last_name = tenant_l_name
+    rental_obj.email = tenant_email
+    rental_obj.mobile_number = tenant_mobile_number
+    rental_obj.save()
+
+
+def add_property(request):
+    context = {}
+    if request.method == 'POST':
+        user_name = request.user
+        property_obj = Property()
+        rental_obj = PropertyRentalInfo()
+        invoice_obj = PropertyInvoice()
+        rent = request.POST['rent']
+        total_tenants = 1
+        property_save_fun(request, property_obj, user_name, rent, total_tenants)
+        rental_info_save(request, user_name, rental_obj, property_obj, invoice_obj, rent, 'add')
+        return redirect("/property_list/")
+    else:
+        file_name = request.GET['file_name']
+        name = request.GET['name']
+        currency = request.GET['currency']
+        value = request.GET['value']
+        context = {
+                   'file_name': file_name,
+                   'name': name,
+                   'currency': currency,
+                   'value': value,
+                  }
+    today_date = datetime.date.today()
+    p = pd.Period(str(today_date))
+    if p.is_leap_year:
+        one_year_date = today_date + datetime.timedelta(days=366)
+    else:
+        one_year_date = today_date + datetime.timedelta(days=365)
+
+    context.update({'today_date': today_date, 'one_year_date': one_year_date,
+               'today_date_str': str(today_date),
+               'one_year_date_str': str(one_year_date),
+               'month_date_dict': month_date_dict,
+               'currency_dict': currency_dict
+                    })
+    return render(request, "property/property_add.html", context=context)
+
+
+def update_property(request, pk, method_name):
+    user_name = request.user
+    context = {'method_type': method_name,
+               'currency_dict': currency_dict, 'property_type_list': property_type_list,
+               'month_date_dict': month_date_dict, 'url_type': "Update"
+              }
+    if method_name == "property":
+        result_obj = Property.objects.get(user=user_name, pk=pk)
+        if request.method == 'POST':
+            property_save_fun(request, result_obj, user_name, result_obj.total_monthly_rent, result_obj.total_tenants)
+            return redirect(f"/property_details/{result_obj.id}")
+        unit_details = ast.literal_eval(result_obj.unit_details)
+        context['unit_details'] = unit_details
+    else:
+        result_obj = PropertyRentalInfo.objects.get(user=user_name, pk=pk)
+        if request.method == 'POST':
+            invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=result_obj.property_address,
+                                                         unit_name=result_obj.unit_name)
+            rental_info_save(request, user_name, result_obj, result_obj.property_address, invoice_obj,
+                             result_obj.rent_amount, 'update')
+            return redirect(f"/property_details/{result_obj.property_address.id}")
+
+        rent_invoice_list = ast.literal_eval(result_obj.rental_summary)
+        invoice_date_list = []
+        invoice_amount_list = []
+
+        for invoice_data in rent_invoice_list:
+            invoice_date_list.append(invoice_data['due'])
+            invoice_amount_list.append(invoice_data['amount'])
+
+        context['invoice_date_list'] = json.dumps(invoice_date_list)
+        context['invoice_amount_list'] = json.dumps(invoice_amount_list)
+        context['total_invoice_amount'] = sum(invoice_amount_list)
+        context['rent_invoice_list'] = rent_invoice_list
+
+    context['result_obj'] = result_obj
+    return render(request, "property/property_update.html", context=context)
+
+
+def list_property(request):
+    property_obj = Property.objects.filter(user=request.user)
+    maintenance_dict = {}
+    for data in property_obj:
+        maintenance_obj = PropertyMaintenance.objects.filter(property_details__property_name=data.property_name,
+                                                             status='Unresolved')
+        maintenance_dict[data.property_name] = len(maintenance_obj)
+
+    context = {'property_obj': property_obj, 'maintenance_dict': maintenance_dict}
+    return render(request, "property/property_list.html", context=context)
+
+
+def property_details(request, pk):
+    property_obj = Property.objects.get(user=request.user, pk=pk)
+    unit_list = ast.literal_eval(property_obj.unit_details)
+    maintenance_obj = PropertyMaintenance.objects.filter(property_details=property_obj)
+    unit_details = PropertyRentalInfo.objects.filter(user=request.user, property_address=property_obj)
+    remaining_unit_list = [i['name'] for i in unit_list]
+    total_rent_amount_collected = 0
+    other_amount_collected = 0
+    collection_list = {}
+    maintenance_dict = {}
+    today_date = datetime.date.today()
+    for data in unit_details:
+        name_unit = data.unit_name
+        remaining_unit_list.remove(name_unit)
+        invoice_obj = PropertyInvoice.objects.filter(user=request.user, property_details=property_obj,
+                                                     unit_name=data.unit_name)
+        for maintenance_data in maintenance_obj:
+            if maintenance_data.unit_name == name_unit:
+                if name_unit in maintenance_dict:
+                    maintenance_dict[name_unit].append(maintenance_data)
+                else:
+                    maintenance_dict[name_unit] = [maintenance_data]
+        overdue_list = []
+        for data_obj in invoice_obj:
+            paid_amount = float(data_obj.already_paid)
+            invoice_status = data_obj.invoice_status
+            due_date = data_obj.invoice_due_date
+            days_diff = due_date - today_date
+            if days_diff.days <= 30:
+                day_diff = data_obj.id
+            if invoice_status == "Overdue":
+                overdue_list.append(data_obj.id)
+            if data_obj.item_type == "Rent":
+                total_rent_amount_collected += paid_amount
+            else:
+                other_amount_collected += paid_amount
+
+        total_amount = total_rent_amount_collected + other_amount_collected
+        collection_list[data.unit_name] = [total_rent_amount_collected, other_amount_collected, total_amount,
+                                           day_diff, overdue_list]
+
+    currency_symbol = property_obj.currency
+    context = {'property_obj': property_obj,
+               'unit_details': unit_details,
+               'currency_symbol': currency_symbol,
+               'collection_list': collection_list,
+               'today_date': today_date,
+               'unit_list': unit_list,
+               'remaining_unit_list': remaining_unit_list,
+               'maintenance_dict': maintenance_dict
+              }
+    return render(request, "property/property_detail.html", context=context)
+
+
+def add_lease(request, pk, unit_name):
+    username = request.user
+    result_obj = Property.objects.get(user=username, pk=pk)
+
+    if request.method == 'POST':
+        rental_obj = PropertyRentalInfo()
+        invoice_obj = PropertyInvoice()
+        rent = request.POST['rent']
+        rental_info_save(request, username, rental_obj, result_obj, invoice_obj, rent, 'add')
+        total_amount = float(result_obj.total_monthly_rent) + float(rent)
+        result_obj.total_monthly_rent = total_amount
+        tenants_no = int(result_obj.total_tenants) + 1
+        result_obj.total_tenants = tenants_no
+        result_obj.save()
+
+        return redirect("/property_list/")
+
+    else:
+        today_date = datetime.date.today()
+        p = pd.Period(str(today_date))
+        if p.is_leap_year:
+            one_year_date = today_date + datetime.timedelta(days=366)
+        else:
+            one_year_date = today_date + datetime.timedelta(days=365)
+
+        context = {'today_date': today_date, 'one_year_date': one_year_date,
+                   'today_date_str': str(today_date),
+                   'one_year_date_str': str(one_year_date),
+                   'method_type': 'Rental Lease',
+                   'url_type': "Add",
+                   'result_obj': result_obj,
+                   'currency_dict': currency_dict,
+                   'property_type_list': property_type_list,
+                   'month_date_dict': month_date_dict,
+                   'unit_name': unit_name
+                   }
+        unit_details = ast.literal_eval(result_obj.unit_details)
+        context['unit_details'] = unit_details
+
+        return render(request, "property/property_update.html", context=context)
+
+
+def delete_property(request, pk):
+    property_obj = Property.objects.get(pk=pk)
+    property_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": "/property_list/"})
+
+
+# Property Maintenance
+
+class MaintenanceList(LoginRequiredMixin, ListView):
+    model = PropertyMaintenance
+    template_name = 'maintenance/maintenance_list.html'
+
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(MaintenanceList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        property_data = PropertyMaintenance.objects.filter(user=user_name)
+        data['maintenance_obj'] = property_data
+        return data
+
+
+class MaintenanceDetail(LoginRequiredMixin, DetailView):
+    model = PropertyMaintenance
+    template_name = 'maintenance/maintenance_detail.html'
+
+
+class MaintenanceAdd(LoginRequiredMixin, CreateView):
+    model = PropertyMaintenance
+    form_class = MaintenanceForm
+    template_name = 'maintenance/maintenance_add.html'
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+
+        kwargs = super(MaintenanceAdd, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        data = super(MaintenanceAdd, self).get_context_data(**kwargs)
+        data['page'] = 'Add'
+        return data
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return super().form_valid(form)
+
+
+class MaintenanceUpdate(LoginRequiredMixin, UpdateView):
+    model = PropertyMaintenance
+    form_class = MaintenanceForm
+    template_name = 'maintenance/maintenance_add.html'
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+        kwargs = super(MaintenanceUpdate, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        data = super(MaintenanceUpdate, self).get_context_data(**kwargs)
+        property_id = data['propertymaintenance'].property_details.pk
+        user_name = self.request.user
+        unit_list, tenant_dict = get_units(user_name, property_id)
+        data['unit_list'] = unit_list
+        data['page'] = 'Update'
+        data['maintenance_id'] = self.kwargs['pk']
+        return data
+
+
+def delete_maintenance(request, pk):
+    maintenance_obj = PropertyMaintenance.objects.get(pk=pk)
+    maintenance_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": "/property/maintenance/list/"})
+
+
+def get_units(user_name, property_name):
+    property_info = Property.objects.get(user=user_name, pk=property_name)
+    rental_info = PropertyRentalInfo.objects.filter(user=user_name, property_address=property_info)
+    tenant_dict = {}
+    for data in rental_info:
+        tenant_dict[data.unit_name] = data.first_name + " " + data.last_name
+
+    unit_list = ast.literal_eval(property_info.unit_details)
+    return unit_list, tenant_dict
+
+
+def property_info(request):
+    if request.method == 'POST' and request.is_ajax():
+        property_name = request.POST['property_name']
+        user_name = request.user
+        unit_list, tenant_dict = get_units(user_name, property_name)
+        return JsonResponse({'unit_list': unit_list, 'tenant_dict': tenant_dict})

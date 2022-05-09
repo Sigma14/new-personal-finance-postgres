@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds,\
-    TemplateBudget
+    TemplateBudget, PropertyMaintenance
 
 CURRENCIES = (
     ("$", 'US Dollar ($)'),
@@ -19,6 +19,20 @@ BUDGET_PERIODS = (
                 ("Quarterly", 'Quarterly'),
                 ("Yearly", 'Yearly'),
             )
+
+MAINTENANCE_CATEGORY = (
+    ("A/C", 'A/C'),
+    ("Appliance ", 'Appliance '),
+    ("Electrical", 'Electrical'),
+    ("Heat", 'Heat'),
+    ("Kitchen", 'Kitchen'),
+    ("Plumbing", 'Plumbing'),
+    ("Other", 'Other'),
+)
+
+MAINTENANCE_STATUS = (
+    ("Unresolved", 'Unresolved'),
+    ("Resolved", 'Resolved'),)
 
 
 class CategoryForm(forms.ModelForm):
@@ -63,6 +77,31 @@ class LoginForm(forms.Form):
         elif not user.is_active:
             raise forms.ValidationError('User is not active')
         return super(LoginForm, self).clean()
+
+
+class MaintenanceForm(forms.ModelForm):
+    category = forms.CharField(widget=forms.Select(choices=MAINTENANCE_CATEGORY, attrs={'class': 'form-control'}),
+                               required=True)
+    unit_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    tenant_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=True)
+    status = forms.CharField(widget=forms.Select(choices=MAINTENANCE_STATUS, attrs={'class': 'form-control'}),
+                             required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        user_name = self.request.user
+        super(MaintenanceForm, self).__init__(*args, **kwargs)
+        self.fields['property_details'] = forms.ModelChoiceField(queryset=Property.objects.filter(user=user_name),
+                                                                 empty_label="Select Property",
+                                                                 widget=forms.Select(
+                                                                 attrs={'class': 'form-control select_property'}),
+                                                                 required=True)
+
+    class Meta:
+        model = PropertyMaintenance
+        exclude = ('user', 'created_at', 'updated_at')
 
 
 class BudgetForm(forms.ModelForm):
@@ -179,9 +218,9 @@ class MortgageForm(forms.Form):
     tenure = forms.IntegerField(required=True)
 
 
-class PropertyForm(forms.ModelForm):
-    include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
-    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-    class Meta:
-        model = Property
-        exclude = ('user', 'created_at', 'updated_at')
+# class PropertyForm(forms.ModelForm):
+#     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+#     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
+#     class Meta:
+#         model = Property
+#         exclude = ('user', 'created_at', 'updated_at')
