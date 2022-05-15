@@ -1,5 +1,9 @@
 $(document).ready(function()
 {
+    $("#save_div").hide();
+    $("#edit_tr").hide();
+    $(".remove_td").hide();
+
     if($("#page_url").attr('page_type') == 'update_property')
     {
         var every_month_value = parseInt($(".change_every_month_date").val())
@@ -1010,7 +1014,7 @@ $("body").delegate(".select_terms", "click", function(event)
         $(".rent_start_date").text(result_start_date)
         $(".rent_end_date").text('Month-to-Month')
         $("#rent_duration").text("1 Month")
-        $(".change_very_month_date").val('Select')
+        $(".change_every_month_date").val('Select')
         month_start_data = new Date(lease_start_date)
         month_year = month_start_data.getFullYear() + 1
         month_no = month_start_data.getMonth()
@@ -1231,7 +1235,6 @@ $("body").delegate(".edit_schedule", "click", function(event)
         new_amount_value = parseFloat($("#" + amount_id).val())
         old_date_value = invoice_date_list[list_index]
         old_amount_value = parseFloat(invoice_amount_list[list_index])
-
         var total_rental_amount_str = $(".total_rental_amount")[0].getInnerHTML();
         total_rental_amount = total_rental_amount_str.replace(total_rental_amount_str[0], "")
 
@@ -1324,8 +1327,10 @@ $('.select_property').on('change', function(e)
                     }
                     optionHtml += "<option>" + unit_list[i]['name'] + "</option>"
                 }
+                console.log()
                 $("#unit_options").append(optionHtml)
                 $(".property_relate").show();
+                $(".currency_symbol").text(data.currency_symbol)
             }
         });
 
@@ -1348,6 +1353,78 @@ $('#unit_options').on('change', function(e)
             $("#tenant_n").val(value);
         }
     });
+
+});
+
+// EDIT INVOICE DETAILS
+
+$("body").delegate(".edit_invoice_button", "click", function(event)
+{
+    $("#edit_div").hide();
+    $("#save_div").show();
+    $("#edit_tr").show();
+    $(".remove_td").show();
+    $("#default_tr").hide();
+});
+
+$("body").delegate(".save_invoice_button", "click", function(event)
+{
+    method_type = $(this).attr('method_type')
+    if(method_type == 'save')
+    {
+        $("#invoice_edit_form").submit();
+    }
+    else
+    {
+        $("#edit_div").show();
+        $("#save_div").hide();
+        $("#edit_tr").hide();
+        $(".remove_td").hide();
+        $("#default_tr").show();
+    }
+});
+
+$("body").delegate(".total_amount_event", "change", function(event)
+{
+    item_amount = $("#item_amount").val()
+    quantity = $("#quantity").val()
+    paid_amount =parseFloat($(".invoices-paid-amount").text())
+    console.log(paid_amount)
+    if(isNaN(paid_amount))
+    {
+        paid_amount =parseFloat($(".invoices-paid-amount").val())
+    }
+    total_amount = parseFloat(item_amount) * parseFloat(quantity)
+    remaining_amount = total_amount - paid_amount
+    $(".invoices-total-amount").text(total_amount)
+    $(".invoices-remaining-amount").text(remaining_amount)
+
+});
+
+$("body").delegate(".paid_amount_check", "change", function(event)
+{
+    item_amount = parseFloat($(this).val())
+    check_amount = parseFloat($(".invoices-remaining-amount").text())
+    if(item_amount > check_amount)
+    {
+        $(this).val("")
+        $(".paid_amount_error").text('You entered an amount greater than the balance due.')
+    }
+    if(item_amount <= 0)
+    {
+        $(this).val("")
+        $(".paid_amount_error").text('You entered an wrong amount.')
+    }
+
+});
+$("body").delegate(".delete_payment", "click", function(event)
+{
+    var currentRow=$(this).closest("tr");
+    var payment_index = currentRow.find("td:eq(0)").text();
+    var paid_amount = currentRow.find("td:eq(4)").text();
+    var invoice_id = $("#invoice_id").val()
+    location_url = "/property/invoice/payment_delete/" + invoice_id + "/" + payment_index + "/" + paid_amount
+    location.assign(location_url)
 
 });
 

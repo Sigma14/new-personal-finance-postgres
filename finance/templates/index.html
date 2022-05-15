@@ -43,7 +43,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/dark-layout.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/bordered-layout.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/semi-dark-layout.css' %}">
-
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-invoice.css' %}">
 
     <!-- BEGIN: Page CSS-->
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/core/menu/menu-types/vertical-menu.css' %}">
@@ -138,43 +138,47 @@
                 </li>
                 <li class=" nav-item {% if request.resolver_match.view_name == 'home' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'home' %}"><i
-                        data-feather="home"></i><span class="menu-title text-truncate"
+                        data-feather="inbox"></i><span class="menu-title text-truncate"
                                                       data-i18n="Dashboard">Dashboard</span></a>
                 </li>
                 <li class=" nav-item {% if request.resolver_match.view_name == 'category_list' or request.resolver_match.view_name == 'category_add' or request.resolver_match.view_name == 'category_detail' or request.resolver_match.view_name == 'category_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'category_list' %}"><i
-                        data-feather="mail"></i><span class="menu-title text-truncate" data-i18n="Category">Category</span></a>
+                        data-feather="grid"></i><span class="menu-title text-truncate" data-i18n="Category">Category</span></a>
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'budget_list' or request.resolver_match.view_name == 'budget_add' or request.resolver_match.view_name == 'budget_detail' or request.resolver_match.view_name == 'budget_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'budget_list' %}"><i
-                        data-feather="message-square"></i><span class="menu-title text-truncate"
+                        data-feather="pie-chart"></i><span class="menu-title text-truncate"
                                                                 data-i18n="Budget">Budget</span></a>
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' or request.resolver_match.view_name == 'bill_add' or request.resolver_match.view_name == 'bill_detail' or request.resolver_match.view_name == 'bill_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
-                        data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Bill">Bill</span></a>
+                        data-feather="file-text"></i><span class="menu-title text-truncate" data-i18n="Bill">Bill</span></a>
                 </li>
                 <li class=" nav-item {% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_add' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'fund_list' %}"><i
-                        data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
+                        data-feather="briefcase"></i><span class="menu-title text-truncate" data-i18n="Available Funds">Available Funds</span></a>
                 </li>
-                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties Information">Properties Information</span></a>
+                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="home"></i><span class="menu-title text-truncate" data-i18n="Properties Information">Properties Information</span></a>
                     <ul class="menu-content">
                         <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a
                                 class="d-flex align-items-center" href="{% url 'property_list' %}"><i
-                                data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+                                data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties</span></a>
+                        </li>
+                        <li class=" nav-item {% if request.resolver_match.view_name == 'property_income_list' or request.resolver_match.view_name == 'property_invoice_list'  %}active{% endif %}"><a
+                                class="d-flex align-items-center" href="{% url 'property_income_list' %}"><i
+                                data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Income</span></a>
                         </li>
                         <li class=" nav-item {% if request.resolver_match.view_name == 'property_maintenance_list' or request.resolver_match.view_name == 'property_maintenance_add'  %}active{% endif %}"><a
                                 class="d-flex align-items-center" href="{% url 'property_maintenance_list' %}"><i
-                                data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Maintenace</span></a>
+                                data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Maintenace</span></a>
                         </li>
                     </ul>
                 </li>
-                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties Model</span></a>
+                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="home"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties Model</span></a>
                     <ul class="menu-content">
                         <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list'  or request.resolver_match.view_name == 'rental_property_add' or request.resolver_match.view_name == 'rental_property_detail' or request.resolver_match.view_name == 'rental_property_update' %}active{% endif %}"><a
                                 class="d-flex align-items-center" href="{% url 'rental_property_list' %}"><i
-                                data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Properties">Rental Properties</span></a>
+                                data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Rental Properties</span></a>
                         </li>
                     </ul>
                 </li>
@@ -188,13 +192,13 @@
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'transaction_list' or request.resolver_match.view_name == 'transaction_add' or request.resolver_match.view_name == 'transaction_detail' or request.resolver_match.view_name == 'transaction_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'transaction_list' %}"><i
-                        data-feather="check-square"></i><span class="menu-title text-truncate" data-i18n="Transaction">Transaction</span></a>
+                        data-feather="credit-card"></i><span class="menu-title text-truncate" data-i18n="Transaction">Transaction</span></a>
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' or request.resolver_match.view_name == 'goal_add' or request.resolver_match.view_name == 'goal_detail' or request.resolver_match.view_name == 'goal_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
                         data-feather="target"></i><span class="menu-title text-truncate" data-i18n="Goal">Goal</span></a>
                 </li>
-                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Calculators">Calculators</span></a>
+                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i class="fa fa-calculator fa-1"></i><span class="menu-title text-truncate" data-i18n="Calculators">Calculators</span></a>
                     <ul class="menu-content">
                         <li class="{% if request.resolver_match.view_name == 'mortgagecalculator_list' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
                         </li>
@@ -204,7 +208,7 @@
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_analysis' %}active{% endif %}">
                     <a class="d-flex align-items-center" href="{% url 'stock_analysis' %}"><i
-                            data-feather="save"></i><span class="menu-title text-truncate" data-i18n="Stock Analysis">Stock Analysis</span></a>
+                            data-feather="bar-chart"></i><span class="menu-title text-truncate" data-i18n="Stock Analysis">Stock Analysis</span></a>
                 </li>
             </ul>
         </div>

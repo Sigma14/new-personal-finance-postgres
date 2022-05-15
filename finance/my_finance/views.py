@@ -48,6 +48,8 @@ scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case'
                  'worst_case': 'Worst Case Scenario Purchase Price'}
 property_type_list = ['Apartment', 'Commercial', 'Condo', 'Duplex', 'House', 'Mixed-Use', 'Other']
 month_date_dict = {'1': '1st ', '2': '2nd ', '3': '3rd ', '4': '4th ', '5': '5th ', '6': '6th ', '7': '7th ', '8': '8th ', '9': '9th ', '10': '10th', '11': '11th', '12': '12th', '13': '13th', '14': '14th', '15': '15th', '16': '16th', '17': '17th', '18': '18th', '19': '19th', '20': '20th', '21': '21st', '22': '22nd', '23': '23rd', '24': '24th', '25': '25th', '26': '26th', '27': '27th', '28': '28th', '29': '29th', '30': '30th'}
+today_date = datetime.date.today()
+
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
                          expense_obj, capex_budget_obj, property_name, currency_name, user_name, property_image):
@@ -521,8 +523,7 @@ def start_end_date(date_value, period):
         return start_date, end_date
 
     if period == "Weekly":
-        today = datetime.date.today()
-        week_start = today - datetime.timedelta(days=today.weekday())
+        week_start = today_date - datetime.timedelta(days=today_date.weekday())
         week_end = week_start + datetime.timedelta(days=6)
         return week_start, week_end
 
@@ -4431,7 +4432,6 @@ def process_image(request):
         tenant_email = request.POST['tenant_email']
         tenant_mobile_number = request.POST['tenant_mobile_number']
 
-    today_date = datetime.date.today()
     p = pd.Period(str(today_date))
     if p.is_leap_year:
         one_year_date = today_date + datetime.timedelta(days=366)
@@ -4575,6 +4575,7 @@ def rental_info_save(request, user_name, rental_obj, property_obj, invoice_data,
         invoice_obj.quantity = 1
         invoice_obj.item_amount = deposit
         invoice_obj.invoice_due_date = due_on
+        invoice_obj.record_payment = []
         if deposit_check == 'off':
             invoice_obj.invoice_status = "Unpaid"
             invoice_obj.already_paid = 0
@@ -4583,42 +4584,81 @@ def rental_info_save(request, user_name, rental_obj, property_obj, invoice_data,
             invoice_obj.invoice_status = "Fully Paid"
             invoice_obj.already_paid = deposit
             invoice_obj.balance_due = 0
+            invoice_obj.invoice_paid_date = today_date
+            deposit_date = datetime.datetime.strftime(today_date, "%B %d, %Y")
+            invoice_obj.record_payment = [[0, invoice_obj.tenant_name, deposit_date, 'Cash', deposit]]
         invoice_obj.save()
 
     rental_summary = []
     date_list_len = len(invoice_date_list)
+    if method_name == "update":
+        invoice_update_len = len(invoice_data)
+
+    print("invoice_date_list======>", invoice_date_list)
     for i in range(date_list_len):
         if invoice_date_list[i] != "None":
-            date_value = datetime.datetime.strptime(invoice_date_list[i], "%B %d, %Y")
+            date_value = datetime.datetime.strptime(invoice_date_list[i], "%B %d, %Y").date()
+            total_amount = float(invoice_amount_list[i])
             if method_name == "update":
-                invoice_update_len = len(invoice_data)
                 if date_list_len == invoice_update_len:
                     invoice_obj = invoice_data[i]
                 elif date_list_len < invoice_update_len:
-                    invoice_obj = invoice_data[i + 1]
+                    invoice_obj = invoice_data[i]
+                    diff_len = invoice_update_len - date_list_len
+                    for obj_index in range(diff_len):
+                        invoice_update_len -= 1
+                        invoice_data[invoice_update_len].delete()
                 else:
-                    if i > invoice_update_len:
+                    if i + 1 > invoice_update_len:
                         invoice_obj = PropertyInvoice()
                     else:
                         invoice_obj = invoice_data[i]
+
             else:
                 invoice_obj = PropertyInvoice()
 
+            if first_rental_due_date == str(rental_obj.rent_due_date):
+                paid_already = float(invoice_obj.already_paid)
+                quantity = int(invoice_obj.quantity)
+                total_due = total_amount * quantity
+                tenant_name = invoice_obj.tenant_name
+                item_type = invoice_obj.item_type
+                item_description = f"Rent Due on {invoice_date_list[i]}"
+                invoice_status = invoice_obj.invoice_status
+                record_payment_list = ""
+                already_paid = 0
+                if invoice_obj.record_payment:
+                    if paid_already <= total_due:
+                        already_paid = paid_already
+                        record_payment_list = ast.literal_eval(invoice_obj.record_payment)
+                balance_due = total_due - already_paid
+            else:
+                already_paid = 0
+                quantity = "1"
+                tenant_name = tenant_f_name + " " + tenant_l_name
+                item_type = "Rent"
+                item_description = f"Rent Due on {invoice_date_list[i]}"
+                invoice_status = "Unpaid"
+                balance_due = total_amount
+                record_payment_list = ""
+
             invoice_obj.user = user_name
             invoice_obj.property_details = property_obj
-            invoice_obj.tenant_name = tenant_f_name + " " + tenant_l_name
+            invoice_obj.tenant_name = tenant_name
             invoice_obj.unit_name = select_unit
-            invoice_obj.item_type = "Rent"
-            invoice_obj.item_description = f"Rent Due on {invoice_date_list[i]}"
-            invoice_obj.quantity = "1"
-            invoice_obj.item_amount = invoice_amount_list[i]
-            invoice_obj.already_paid = 0
-            invoice_obj.balance_due = invoice_amount_list[i]
+            invoice_obj.item_type = item_type
+            invoice_obj.item_description = item_description
+            invoice_obj.quantity = quantity
+            invoice_obj.item_amount = total_amount
+            invoice_obj.already_paid = already_paid
+            invoice_obj.balance_due = balance_due
             invoice_obj.invoice_due_date = date_value
-            invoice_obj.invoice_status = "Unpaid"
+            invoice_obj.invoice_status = invoice_status
+            invoice_obj.record_payment = record_payment_list
             invoice_obj.save()
-            rental_summary.append({'due': invoice_date_list[i], 'amount': invoice_amount_list[i]})
+            rental_summary.append({'due': invoice_date_list[i], 'amount': total_amount})
 
+    print("rent--------->", rent)
     rental_obj.user = user_name
     rental_obj.property_address = property_obj
     rental_obj.unit_name = select_unit
@@ -4666,7 +4706,7 @@ def add_property(request):
 
         except:
             context = {'file_name': 'False', 'currency_symbol': '$'}
-    today_date = datetime.date.today()
+
     p = pd.Period(str(today_date))
     if p.is_leap_year:
         one_year_date = today_date + datetime.timedelta(days=366)
@@ -4697,21 +4737,25 @@ def update_property(request, pk, method_name):
         context['unit_details'] = unit_details
     else:
         result_obj = PropertyRentalInfo.objects.get(user=user_name, pk=pk)
+        invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=result_obj.property_address,
+                                                     unit_name=result_obj.unit_name)
         if request.method == 'POST':
-            invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=result_obj.property_address,
-                                                         unit_name=result_obj.unit_name)
+            rent = request.POST['rent']
             rental_info_save(request, user_name, result_obj, result_obj.property_address, invoice_obj,
-                             result_obj.rent_amount, 'update')
+                             rent, 'update')
             return redirect(f"/property_details/{result_obj.property_address.id}")
 
-        rent_invoice_list = ast.literal_eval(result_obj.rental_summary)
         invoice_date_list = []
         invoice_amount_list = []
+        rent_invoice_list = []
+        for invoice_detail in invoice_obj:
+            due_date = datetime.datetime.strftime(invoice_detail.invoice_due_date, "%B %d, %Y")
+            item_amount = float(invoice_detail.item_amount)
+            rent_invoice_list.append({'due': due_date, 'amount': item_amount})
+            invoice_date_list.append(due_date)
+            invoice_amount_list.append(item_amount)
 
-        for invoice_data in rent_invoice_list:
-            invoice_date_list.append(invoice_data['due'])
-            invoice_amount_list.append(invoice_data['amount'])
-
+        print(invoice_date_list)
         context['invoice_date_list'] = json.dumps(invoice_date_list)
         context['invoice_amount_list'] = json.dumps(invoice_amount_list)
         context['total_invoice_amount'] = sum(invoice_amount_list)
@@ -4743,7 +4787,7 @@ def property_details(request, pk):
     other_amount_collected = 0
     collection_list = {}
     maintenance_dict = {}
-    today_date = datetime.date.today()
+
     for data in unit_details:
         name_unit = data.unit_name
         remaining_unit_list.remove(name_unit)
@@ -4763,6 +4807,8 @@ def property_details(request, pk):
             days_diff = due_date - today_date
             if days_diff.days <= 30:
                 day_diff = data_obj.id
+            else:
+                day_diff = invoice_obj[0].id
             if invoice_status == "Overdue":
                 overdue_list.append(data_obj.id)
             if data_obj.item_type == "Rent":
@@ -4805,7 +4851,7 @@ def add_lease(request, pk, unit_name):
         return redirect("/property_list/")
 
     else:
-        today_date = datetime.date.today()
+
         p = pd.Period(str(today_date))
         if p.is_leap_year:
             one_year_date = today_date + datetime.timedelta(days=366)
@@ -4896,7 +4942,7 @@ class MaintenanceUpdate(LoginRequiredMixin, UpdateView):
         data = super(MaintenanceUpdate, self).get_context_data(**kwargs)
         property_id = data['propertymaintenance'].property_details.pk
         user_name = self.request.user
-        unit_list, tenant_dict = get_units(user_name, property_id)
+        unit_list, tenant_dict, currency = get_units(user_name, property_id)
         data['unit_list'] = unit_list
         data['page'] = 'Update'
         data['maintenance_id'] = self.kwargs['pk']
@@ -4909,6 +4955,200 @@ def delete_maintenance(request, pk):
     return JsonResponse({"status": "Successfully", "path": "/property/maintenance/list/"})
 
 
+def property_income_list(request):
+    user_name = request.user
+    unit_obj = PropertyRentalInfo.objects.filter(user=user_name)
+    income_list = []
+    for data in unit_obj:
+        invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=data.property_address,
+                                                     unit_name=data.unit_name)
+        data_list = [data.property_address.currency, data.property_address.property_name, data.unit_name]
+        total_amount = 0
+        total_paid = 0
+
+        for item in invoice_obj:
+            total_amount += float(item.item_amount) * float(item.quantity)
+            total_paid += float(item.already_paid)
+
+        total_balance = total_amount - total_paid
+        data_list += [total_amount, total_paid, total_balance]
+        income_list.append(data_list)
+    context = {'income_obj': income_list}
+    return render(request, "property_invoice/property_income_list.html", context=context)
+
+
+def property_invoice_add(request):
+    user_name = request.user
+    if request.method == 'POST':
+        property_name = request.POST['property_name']
+        invoice_due_date = request.POST['invoice_due_date']
+        unit_name = request.POST['unit_name']
+        tenant_name = request.POST['tenant_name']
+        item_type = request.POST['item_type']
+        item_description = request.POST['item_description']
+        quantity = request.POST['quantity']
+        item_amount = request.POST['item_amount']
+        already_paid = float(request.POST['already_paid'])
+        total_paid = int(quantity) * float(item_amount)
+        balance_due = total_paid - already_paid
+
+        due_date = datetime.datetime.strptime(invoice_due_date, "%Y-%m-%d").date()
+        property_obj = Property.objects.get(user=user_name, pk=property_name)
+        try:
+            invoice_id = request.POST['invoice_id']
+            invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=invoice_id)
+            record_payment_list = ast.literal_eval(invoice_obj.record_payment)
+            redirect_url = f'/property/invoice/details/{invoice_id}'
+        except:
+            invoice_obj = PropertyInvoice()
+            redirect_url = f"/property/invoice/list/{property_obj.property_name}/{unit_name}"
+            record_payment_list = ""
+
+        invoice_obj.user = user_name
+        invoice_obj.property_details = property_obj
+        invoice_obj.tenant_name = tenant_name
+        invoice_obj.unit_name = unit_name
+        invoice_obj.item_type = item_type
+        invoice_obj.item_description = item_description
+        invoice_obj.quantity = quantity
+        invoice_obj.item_amount = item_amount
+        invoice_obj.invoice_due_date = invoice_due_date
+        invoice_obj.already_paid = already_paid
+        invoice_obj.balance_due = balance_due
+        invoice_obj.record_payment = []
+
+        if already_paid > 0:
+            invoice_obj.invoice_status = 'Partially Paid'
+            deposit_date = datetime.datetime.strftime(today_date, "%B %d, %Y")
+            invoice_obj.invoice_paid_date = today_date
+            if record_payment_list:
+                pass
+            else:
+                record_payment_list.append([0, tenant_name, deposit_date, 'Cash', already_paid])
+            invoice_obj.record_payment = record_payment_list
+
+        elif already_paid == total_paid:
+            invoice_obj.invoice_status = 'Fully Paid'
+
+        else:
+            invoice_obj.invoice_status = 'Unpaid'
+
+        if due_date < today_date:
+            invoice_obj.invoice_status = 'Overdue'
+
+        invoice_obj.save()
+        return redirect(redirect_url)
+    else:
+        property_list = Property.objects.filter(user=user_name)
+        context = {'property_list': property_list}
+
+    return render(request, "property_invoice/property_invoice_add.html",  context=context)
+
+
+def property_invoice_list(request, property_name, unit_name):
+    user_name = request.user
+    invoice_details = PropertyInvoice.objects.filter(user=user_name, property_details__property_name=property_name,
+                                                     unit_name=unit_name).order_by('invoice_due_date')
+    context = {'invoice_details': invoice_details, 'property_name': property_name, 'unit_name': unit_name}
+    return render(request, "property_invoice/property_invoice_list.html", context=context)
+
+
+def property_invoice_detail(request, pk):
+    user_name = request.user
+    invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
+    if invoice_obj.record_payment:
+        record_payment_detail = ast.literal_eval(invoice_obj.record_payment)
+    else:
+        record_payment_detail = []
+
+    days_diff = (today_date - invoice_obj.invoice_due_date).days
+    print(days_diff)
+    if days_diff < 0:
+        text_message = f"Payment expected in about {abs(days_diff)} days"
+        text_class = 'text-success'
+
+    if days_diff > 0:
+        text_message = f"Payment late {abs(days_diff)} days"
+        text_class = 'text-danger'
+    if days_diff == 0:
+        text_message = f"Payment expected at today"
+        text_class = 'text-warning'
+
+    context = {'invoice_obj': invoice_obj, 'record_payment_detail': record_payment_detail,
+               'today_date': str(today_date), 'text_message': text_message, 'text_class': text_class}
+    return render(request, "property_invoice/property_invoice_detail.html", context=context)
+
+
+def property_invoice_update(request, pk):
+    user_name = request.user
+    invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
+    context = {'invoice_obj': invoice_obj}
+    return render(request, "property_invoice/property_invoice_update.html", context=context)
+
+
+def record_payment_save(request, pk, method_type, paid_amount, payment_index=None):
+    user_name = request.user
+    invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
+    if invoice_obj.record_payment:
+        record_payments = ast.literal_eval(invoice_obj.record_payment)
+    else:
+        record_payments = []
+    balance_due = float(invoice_obj.balance_due)
+    redirect_url = f'/property/invoice/details/{invoice_obj.id}'
+    if method_type == "delete_payment":
+        record_payments.remove(record_payments[payment_index - 1])
+        invoice_obj.already_paid = float(invoice_obj.already_paid) - paid_amount
+        invoice_obj.balance_due = float(invoice_obj.balance_due) + paid_amount
+        if invoice_obj.already_paid == 0:
+            invoice_obj.invoice_status = 'Unpaid'
+        else:
+            invoice_obj.invoice_status = 'Partially Paid'
+    else:
+        payment_no = len(record_payments)
+        payer_name = request.POST['payer_name']
+        payment_method = request.POST['payment_method']
+        deposit_date = request.POST['deposit_date']
+        invoice_obj.invoice_paid_date = deposit_date
+        deposit_date = datetime.datetime.strptime(deposit_date, "%Y-%m-%d").date()
+        deposit_date = datetime.datetime.strftime(deposit_date, "%B %d, %Y")
+        record_payments.append([payment_no, payer_name, deposit_date, payment_method, paid_amount])
+        invoice_obj.already_paid = float(invoice_obj.already_paid) + paid_amount
+        invoice_obj.balance_due = balance_due - paid_amount
+
+        if paid_amount > 0:
+            invoice_obj.invoice_status = 'Partially Paid'
+
+        if paid_amount == balance_due:
+            invoice_obj.invoice_status = 'Fully Paid'
+
+    invoice_obj.record_payment = record_payments
+    if invoice_obj.invoice_due_date < today_date:
+        invoice_obj.invoice_status = 'Overdue'
+
+    invoice_obj.save()
+    return redirect_url
+
+
+def delete_invoice_payment(request, pk, payment_index, paid_amount):
+    paid_amount = float(paid_amount)
+    redirect_url = record_payment_save(request, pk, 'delete_payment', paid_amount, payment_index)
+    return redirect(redirect_url)
+
+
+def property_invoice_payment(request, pk):
+    paid_amount = float(request.POST['paid_amount'])
+    redirect_url = record_payment_save(request, pk, 'record_payment', paid_amount)
+    return redirect(redirect_url)
+
+
+def property_invoice_delete(request, pk):
+    user_name = request.user
+    invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
+    redirect_url = f"/property/invoice/list/{invoice_obj.property_details.property_name}/{invoice_obj.unit_name}"
+    invoice_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": redirect_url})
+
+
 def get_units(user_name, property_name):
     property_info = Property.objects.get(user=user_name, pk=property_name)
     rental_info = PropertyRentalInfo.objects.filter(user=user_name, property_address=property_info)
@@ -4917,12 +5157,13 @@ def get_units(user_name, property_name):
         tenant_dict[data.unit_name] = data.first_name + " " + data.last_name
 
     unit_list = ast.literal_eval(property_info.unit_details)
-    return unit_list, tenant_dict
+    return unit_list, tenant_dict, property_info.currency
 
 
 def property_info(request):
     if request.method == 'POST' and request.is_ajax():
         property_name = request.POST['property_name']
         user_name = request.user
-        unit_list, tenant_dict = get_units(user_name, property_name)
-        return JsonResponse({'unit_list': unit_list, 'tenant_dict': tenant_dict})
+        unit_list, tenant_dict, currency_symbol = get_units(user_name, property_name)
+        return JsonResponse({'unit_list': unit_list, 'tenant_dict': tenant_dict, 'currency_symbol': currency_symbol})
+

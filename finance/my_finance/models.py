@@ -121,6 +121,7 @@ class PropertyInvoice(models.Model):
     invoice_due_date = models.DateField(blank=True, null=True)
     invoice_paid_date = models.DateField(blank=True, null=True)
     invoice_status = models.CharField(max_length=255, blank=True, null=True)
+    record_payment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 

@@ -1,0 +1,351 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Invoice Detail</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'property_invoice_list' property_name=invoice_obj.property_details.property_name unit_name=invoice_obj.unit_name %}">Invoices</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Invoice: {{invoice_obj.id}}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <!-- Statistics Card -->
+                        <div class="col-12">
+                            <div class="card card-statistics">
+                                <div class="card-body statistics-body">
+                                    <div class="row">
+                                        <div class="col-xl-3 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <h2 class="font-weight-bolder mb-0">INVOICE - {{invoice_obj.id}}</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-primary mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="home" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{invoice_obj.property_details.property_name}} | {{invoice_obj.unit_name}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <h2 class="font-weight-bolder mb-0">Generated On</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-info mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="calendar" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{invoice_obj.created_at.date}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <h2 class="font-weight-bolder mb-0">Due on</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-danger mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="calendar" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{invoice_obj.invoice_due_date}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <h2 class="font-weight-bolder mb-0">Status</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="font-medium-4">
+                                                                {% if invoice_obj.invoice_status == "Fully Paid" %}
+                                                                <div class="badge badge-glow badge-success">{{invoice_obj.invoice_status}}</div>
+                                                                {% endif %}
+                                                                {% if invoice_obj.invoice_status == "Partially Paid" %}
+                                                                <div class="badge badge-glow badge-info">{{invoice_obj.invoice_status}}</div>
+                                                                {% endif %}
+                                                                {% if invoice_obj.invoice_status == "Unpaid" %}
+                                                                <div class="badge badge-glow badge-warning">{{invoice_obj.invoice_status}}</div>
+                                                                {% endif %}
+                                                                {% if invoice_obj.invoice_status == "Overdue" %}
+                                                                <div class="badge badge-glow badge-danger">{{invoice_obj.invoice_status}}</div>
+                                                                {% endif %}
+                                                                <p class="{{text_class}}" style="padding-top:6px;">{{text_message}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <form action="{% url 'property_invoice_add' %}" method="post" id="invoice_edit_form">
+                {% csrf_token %}
+                <input type="hidden" class="form-control" value="{{invoice_obj.property_details.id}}" name="property_name">
+                <input type="hidden" class="form-control" value="{{invoice_obj.unit_name}}" name="unit_name">
+                <input type="hidden" class="form-control" value="{{invoice_obj.tenant_name}}" name="tenant_name" >
+                <input type="hidden" class="form-control" value="{{invoice_obj.already_paid}}" name="already_paid">
+                <input type="hidden" class="form-control" value="{{invoice_obj.id}}" name="invoice_id" id="invoice_id">
+
+                <section class="invoice-edit-wrapper">
+                    <div class="row invoice-edit">
+                        <!-- Invoice Edit Left starts -->
+                        <div class="col-12">
+                            <div class="card invoice-preview-card">
+                                <div class="card-body">
+                                    <div style="float: right;" id="edit_div">
+                                        {% if invoice_obj.invoice_status != "Fully Paid" %}
+                                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#portfolio_toggle">
+                                            Record Payment
+                                        </button>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-primary edit_invoice_button"><i data-feather="edit-2"></i>&nbsp;Edit Invoice</button>
+                                        <button type="button" delete_name="Invoice - {{invoice_obj.id}}" url="{% url 'property_invoice_delete' pk=invoice_obj.id %}" class="btn btn-danger delete_button"><i data-feather="trash"></i>&nbsp;Delete </button>
+                                        <br/>
+                                        <br/>
+                                        <br/>
+                                    </div>
+                                    <div class="col-12" id="save_div">
+                                        <div style="float: right;" >
+                                            {% if invoice_obj.invoice_status != "Fully Paid" %}
+                                            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#portfolio_toggle">
+                                                Record Payment
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" method_type="save" class="btn btn-primary save_invoice_button">&nbsp;Save </button>
+                                            <button type="button" method_type="cancel" class="btn btn-danger save_invoice_button">&nbsp;Cancel </button>
+                                        </div>
+                                        <br/>
+                                        <br/>
+                                        <div class="form-group">
+                                            <label>Due on</label>
+                                            <input type="text" name="invoice_due_date" id="invoice_due_date" value='{{invoice_obj.invoice_due_date|date:"Y-m-d"}}' class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" style="font-size:16px;">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Description</th>
+                                                    <th>Quantity</th>
+                                                    <th>Rate</th>
+                                                    <th>Amount</th>
+                                                </tr>
+
+                                                <tr id="default_tr">
+                                                    <td>
+                                                        <span class="font-weight-bold">{{invoice_obj.item_type}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="font-weight-bold">{{invoice_obj.item_description}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="font-weight-bold">{{invoice_obj.quantity}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="font-weight-bold">{{invoice_obj.property_details.currency}}{{invoice_obj.item_amount}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="font-weight-bolder">{{invoice_obj.property_details.currency}}{{invoice_obj.item_amount|mul:invoice_obj.quantity}}</span>
+                                                    </td>
+                                                </tr>
+                                                <tr id="edit_tr">
+                                                    <td>
+                                                        <input  list="browsers" value="{{invoice_obj.item_type}}" type="text" class="form-control" name="item_type" required data-validation-required-message="This field is required"/>
+                                                            <datalist id="browsers" name="">
+                                                                <option value="Rent" data-id="1">Rent</option>
+                                                                <option value="Water" data-id="2">Water</option>
+                                                                <option value="Late Fee Charge" data-id="3">Late Fee Charge</option>
+                                                                <option value="Maintenance Request" data-id="4">Maintenance Request</option>
+                                                                <option value="Parking" data-id="5">Parking</option>
+                                                                <option value="Pet Deposit" data-id="6">Pet Deposit</option>
+                                                                <option value="Pet Fee" data-id="7">Pet Fee</option>
+                                                                <option value="Security Deposit" data-id="8">Security Deposit</option>
+                                                            </datalist>
+                                                    </td>
+                                                    <td><input type="text" class="form-control" value="{{invoice_obj.item_description}}" name="item_description"></td>
+                                                    <td><input type="number" class="form-control total_amount_event" id="quantity" value="{{invoice_obj.quantity}}" name="quantity"></td>
+                                                    <td><input type="number" class="form-control total_amount_event" id="item_amount" value="{{invoice_obj.item_amount}}" name="item_amount"></td>
+                                                    <td>
+                                                        <span class="font-weight-bolder">{{invoice_obj.property_details.currency}}<span class="invoices-total-amount">{{invoice_obj.item_amount|mul:invoice_obj.quantity}}</span></span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <br/>
+                                        <table class="table" style="font-size:16px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Payment No.</th>
+                                                    <th>Payer</th>
+                                                    <th>Deposited On</th>
+                                                    <th>Payment Method</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for record_payment in record_payment_detail %}
+                                            <tr>
+                                                {% for data in record_payment %}
+                                                    {% if forloop.counter == 1 %}
+                                                        <td>{{forloop.parentloop.counter}}</td>
+                                                    {% else %}
+                                                        <td>{{data}}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <td class="remove_td"><button type="button" class="btn btn-danger delete_payment"><i data-feather="trash"></i></button></td>
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-body invoice-padding">
+                                    <div class="row invoice-sales-total-wrapper">
+                                        <div class="col-12 d-flex justify-content-end order-md-2 order-1" style="font-size:16px;">
+                                            <div class="invoice-total-wrapper" style="max-width:20em">
+                                                <div class="invoice-total-item">
+                                                    <p class="invoice-total-title">Total Due:</p>
+                                                    <p class="invoice-total-amount">{{invoice_obj.property_details.currency}}<span class="invoices-total-amount">{{invoice_obj.item_amount|mul:invoice_obj.quantity}}</span></p>
+                                                </div>
+                                                <div class="invoice-total-item">
+                                                    <p class="invoice-total-title">Total Paid:</p>
+                                                    <p class="invoice-total-amount">{{invoice_obj.property_details.currency}}<span class="invoices-paid-amount">{{invoice_obj.already_paid}}</span></p>
+                                                </div>
+                                                <hr class="my-50" />
+                                                <div class="invoice-total-item">
+                                                    <p class="invoice-total-title">Remaining Balance:</p>
+                                                    <p class="invoice-total-amount">{{invoice_obj.property_details.currency}}<span class="invoices-remaining-amount">{{invoice_obj.balance_due}}</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                </form>
+                <!-- PORTFOLIO -->
+                    <div class="modal fade text-left" id="portfolio_toggle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <form class="form form-vertical" action="{% url 'property_invoice_payment' pk=invoice_obj.id %}" method="post">
+                                {% csrf_token %}
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel1">RECORD PAYMENT</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Basic Vertical form layout section start -->
+                                <section id="basic-vertical-layouts" >
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <div class="form-group">
+                                                                <h5>Select Payer</h5>
+                                                                <input type="text" id="payer_name" value="{{invoice_obj.tenant_name}}" name="payer_name" class="form-control" required/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="form-group">
+                                                                <h5>Payment Method</h5>
+                                                                <select name="payment_method" class="form-control" required>
+                                                                    <option>Cash</option>
+                                                                    <option>Check</option>
+                                                                    <option>Money Order</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="form-group">
+                                                                <h5>Deposit Date</h5>
+                                                                <input type="text" name="deposit_date" class="form-control flatpickr-basic"  value="{{today_date}}" required data-validation-required-message="This field is required" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="form-group">
+                                                                <h5>Amount Paid</h5>
+                                                                <input type="number" name="paid_amount" class="form-control paid_amount_check"  value="{{invoice_obj.balance_due}}" required data-validation-required-message="This field is required" />
+                                                                <label class="text-danger paid_amount_error"></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <!-- Basic Vertical form layout section end -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- PORTFOLIO -->
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+

@@ -157,7 +157,11 @@
                                                     <div class="card">
                                                         <div class="card-header flex-column align-items-start pb-0">
                                                             <h4 class="font-weight-bolder mt-1">End</h4>
-                                                            <p class="card-text rent_amount_month">{{data.rental_end_date}}</p>
+                                                            {% if data.rental_term == 'Month-to-Month' %}
+                                                                        <p class="card-text rent_amount_month">M to M</p>
+                                                            {% else %}
+                                                                <p class="card-text rent_amount_month">{{data.rental_end_date}}</p>
+                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -173,8 +177,12 @@
                                                     <div class="card">
                                                         <div class="card-header flex-column align-items-start pb-0">
                                                             <h4 class="font-weight-bolder mt-1">Days Remaining</h4>
-                                                            {% firstof data.rental_end_date|sub:today_date as my_variable %}
-                                                            <p class="card-text rent_end_date">{{my_variable.split.0}}</p>
+                                                            {% if data.rental_term == 'Month-to-Month' %}
+                                                                <p class="card-text rent_amount_month">M to M</p>
+                                                            {% else %}
+                                                                {% firstof data.rental_end_date|sub:today_date as my_variable %}
+                                                                <p class="card-text rent_end_date">{{my_variable.split.0}}</p>
+                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -317,6 +325,7 @@
                                             <div class="card-body">
                                                 <div class="card-header">
                                                     <h3 class="card-title">Maintenance</h3>
+                                                    <a href="{% url 'property_maintenance_add' %}" class="btn btn-primary"><i data-feather="plus"></i>&nbsp;Add Maintenance</a>
                                                 </div>
                                             </div>
                                             <div class="card-datatable">

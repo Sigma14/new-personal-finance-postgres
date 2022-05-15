@@ -93,6 +93,16 @@ urlpatterns = [
     path('property/maintenance/delete/<int:pk>', delete_maintenance, name='property_maintenance_delete'),
     path('property/property_info/', property_info, name='property_info'),
 
+    # Property Invoice
+    path('property/income/list/', property_income_list, name='property_income_list'),
+    path('property/invoice/list/<str:property_name>/<str:unit_name>', property_invoice_list, name='property_invoice_list'),
+    path('property/invoice/details/<int:pk>', property_invoice_detail, name='property_invoice_details'),
+    path('property/invoice/update/<int:pk>', property_invoice_update, name='property_invoice_update'),
+    path('property/invoice/add', property_invoice_add, name='property_invoice_add'),
+    path('property/invoice/delete/<int:pk>', property_invoice_delete, name='property_invoice_delete'),
+    path('property/invoice/payment/<int:pk>', property_invoice_payment, name='property_invoice_payment'),
+    path('property/invoice/payment_delete/<int:pk>/<int:payment_index>/<str:paid_amount>', delete_invoice_payment, name='delete_invoice_payment'),
+
     # Revenue Urls :-
     path('revenue_add/', revenue_add, name='revenue_add'),
     path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
