@@ -148,6 +148,25 @@ class PropertyMaintenance(models.Model):
         return reverse('property_maintenance_list')
 
 
+class PropertyExpense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_expense_user')
+    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_info')
+    payee_name = models.CharField(max_length=255, blank=True, null=True)
+    expense_date = models.DateField(blank=True, null=True)
+    unit_name = models.CharField(max_length=255, blank=True, null=True)
+    category = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.payee_name + " " + self.property_details.property_name + " " + self.unit_name + str(self.id))
+
+    def get_absolute_url(self):
+        return reverse('property_expense_list')
+
+
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)

@@ -2,8 +2,8 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
-from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds,\
-    TemplateBudget, PropertyMaintenance
+from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds, \
+    TemplateBudget, PropertyMaintenance, PropertyExpense
 
 CURRENCIES = (
     ("$", 'US Dollar ($)'),
@@ -101,6 +101,29 @@ class MaintenanceForm(forms.ModelForm):
 
     class Meta:
         model = PropertyMaintenance
+        exclude = ('user', 'created_at', 'updated_at')
+
+
+class ExpenseForm(forms.ModelForm):
+    unit_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    payee_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    description = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    expense_date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control flatpickr-basic',
+                                                                 'placeholder': 'YYYY-MM-DD'}), required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        user_name = self.request.user
+        super(ExpenseForm, self).__init__(*args, **kwargs)
+        self.fields['property_details'] = forms.ModelChoiceField(queryset=Property.objects.filter(user=user_name),
+                                                                 empty_label="Select Property",
+                                                                 widget=forms.Select(
+                                                                 attrs={'class': 'form-control select_property'}),
+                                                                 required=True)
+
+    class Meta:
+        model = PropertyExpense
         exclude = ('user', 'created_at', 'updated_at')
 
 

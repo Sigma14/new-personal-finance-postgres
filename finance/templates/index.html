@@ -168,6 +168,10 @@
                                 class="d-flex align-items-center" href="{% url 'property_income_list' %}"><i
                                 data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Income</span></a>
                         </li>
+                        <li class=" nav-item {% if request.resolver_match.view_name == 'property_expense_list' or request.resolver_match.view_name == 'property_expense_add'  %}active{% endif %}"><a
+                                class="d-flex align-items-center" href="{% url 'property_expense_list' %}"><i
+                                data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Expenses</span></a>
+                        </li>
                         <li class=" nav-item {% if request.resolver_match.view_name == 'property_maintenance_list' or request.resolver_match.view_name == 'property_maintenance_add'  %}active{% endif %}"><a
                                 class="d-flex align-items-center" href="{% url 'property_maintenance_list' %}"><i
                                 data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Maintenace</span></a>

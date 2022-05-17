@@ -1,0 +1,147 @@
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{page}} Expense</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'property_expense_list' %}">Expense</a>
+                                    </li>
+                                    <li class="breadcrumb-item" id="page_name"  name="{{page}}">
+                                        {{page}} Expense
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <!-- Statistics Card -->
+                        <div class="col-12">
+                            <div class="card card-statistics">
+                                <div class="card-body statistics-body">
+                                    <form action="{% url 'property_expense_add' %}" method="post">
+                                        {% csrf_token %}
+                                    <section>
+                                        <div class="row match-height">
+                                        <div class="col-xl-8 col-md-6 col-12">
+                                            <div class="row">
+                                            <div class="col-12">
+                                                <h4 class="mb-1 mt-2">
+                                                    <i data-feather="home" class="font-medium-4 mr-25"></i>
+                                                    <span class="align-middle">Property Details</span>
+                                                </h4>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6">
+                                                <div class="form-group">
+                                                    <label>PROPERTY</label>
+                                                    {{ form.property_details }}
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 property_relate">
+                                                <div class="form-group">
+                                                    <label for="unit_options">UNIT</label>
+                                                    <select class="form-control" name="unit_name" id="unit_options" required>
+                                                        {% for unit_data in unit_list %}
+                                                            {% if unit_data.name == form.unit_name.value %}
+                                                                <option selected>{{unit_data.name}}</option>
+                                                            {% else %}
+                                                                <option>{{unit_data.name}}</option>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 property_relate">
+                                                <div class="form-group">
+                                                    <label for="tenant_n">Payee</label>
+                                                    <input type="text" id="tenant_n" value="{{form.payee_name.value}}" class="form-control" name="payee_name" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                        </div>
+                                    </section>
+                                    <section class="invoice-edit-wrapper">
+                                            <div class="row invoice-edit">
+                                                <!-- Invoice Edit Left starts -->
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i data-feather="credit-card" class="font-medium-4 mr-25"></i>
+                                                        <span class="align-middle">Expenses</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="card invoice-preview-card">
+                                                        <div class="card-body">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-bordered" style="font-size:16px;">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <th>Date</th>
+                                                                            <th>Category</th>
+                                                                            <th>Description</th>
+                                                                            <th>Amount</th>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>{{form.expense_date}}</td>
+                                                                            <td>
+                                                                                <input  list="browsers" type="text" value="{{ form.category.value }}" class="form-control" name="category" required data-validation-required-message="This field is required"/>
+                                                                                    <datalist id="browsers" name="">
+                                                                                        <option>Category</option><option>Advertising</option><option>Appliance</option><option>Bank Fees</option>
+                                                                                        <option>Capital Improvements</option><option>Cleaning</option><option>Commissions</option>
+                                                                                        <option>Depreciation</option><option>Eviction</option><option>Insurance</option>
+                                                                                        <option>Legal and Professional Fees</option><option>Licenses and Permits</option>
+                                                                                        <option>Maintenance and Repairs</option><option>Management fees</option>
+                                                                                        <option>Mortgage and Loans</option><option>Mortgage Interest</option><option>Office</option>
+                                                                                        <option>Other Expense</option><option>Other Interest</option><option>Supplies</option>
+                                                                                        <option>Taxes</option><option>Travel and Transportation</option><option>Utilities</option>
+                                                                                        <option>Vehicles</option><option>Wages and Salaries</option>
+                                                                                    </datalist>
+                                                                            </td>
+                                                                            <td>{{form.description}}</td>
+                                                                            <td>{{form.amount}}</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div style="float: right;">
+                                                        {% if page == 'Add' %}
+                                                            <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                                        {% else %}
+                                                            <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                                            <button type="button" delete_name="{{ form.category.value }} Exepense" url="{% url 'property_expense_delete' pk=expense_id %}" class="btn btn-danger delete_button"><i data-feather="trash"></i>&nbsp;Delete </button>
+                                                        {% endif %}
+                                                        <a href="{% url 'property_expense_list' %}" class="btn btn-outline-secondary">&nbsp;Cancel </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <br/>
+                                    </section>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+

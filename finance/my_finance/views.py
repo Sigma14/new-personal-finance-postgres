@@ -28,11 +28,11 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A0, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
-    MortgageForm, LiabilityForm, MaintenanceForm
+    MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
-    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice,\
-    PropertyMaintenance
+    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
+    PropertyMaintenance, PropertyExpense
 from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
@@ -4953,6 +4953,75 @@ def delete_maintenance(request, pk):
     maintenance_obj = PropertyMaintenance.objects.get(pk=pk)
     maintenance_obj.delete()
     return JsonResponse({"status": "Successfully", "path": "/property/maintenance/list/"})
+
+
+# Property Expenses Views
+class ExpenseAdd(LoginRequiredMixin, CreateView):
+    model = PropertyExpense
+    form_class = ExpenseForm
+    template_name = 'property/expense_add.html'
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+
+        kwargs = super(ExpenseAdd, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        data = super(ExpenseAdd, self).get_context_data(**kwargs)
+        data['page'] = 'Add'
+        return data
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return super().form_valid(form)
+
+
+class ExpenseList(LoginRequiredMixin, ListView):
+    model = PropertyExpense
+    template_name = 'property/expense_list.html'
+
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        data = super(ExpenseList, self).get_context_data(**kwargs)
+        user_name = self.request.user
+        property_data = PropertyExpense.objects.filter(user=user_name)
+        data['expense_obj'] = property_data
+        return data
+
+
+class ExpenseUpdate(LoginRequiredMixin, UpdateView):
+    model = PropertyExpense
+    form_class = ExpenseForm
+    template_name = 'property/expense_add.html'
+
+    def get_form_kwargs(self):
+        kwargs = super(ExpenseUpdate, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        data = super(ExpenseUpdate, self).get_context_data(**kwargs)
+        property_id = data['propertyexpense'].property_details.pk
+        user_name = self.request.user
+        unit_list, tenant_dict, currency = get_units(user_name, property_id)
+        data['unit_list'] = unit_list
+        data['page'] = 'Update'
+        data['expense_id'] = self.kwargs['pk']
+        return data
+
+
+def delete_expense(request, pk):
+    expense_obj = PropertyExpense.objects.get(pk=pk)
+    expense_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": "/property/expense/list/"})
+
+
+# Income & Invoices
 
 
 def property_income_list(request):

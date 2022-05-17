@@ -93,6 +93,12 @@ urlpatterns = [
     path('property/maintenance/delete/<int:pk>', delete_maintenance, name='property_maintenance_delete'),
     path('property/property_info/', property_info, name='property_info'),
 
+    # Property Expenses
+    path('property/expense/add/', ExpenseAdd.as_view(), name='property_expense_add'),
+    path('property/expense/list/', ExpenseList.as_view(), name='property_expense_list'),
+    path('property/expense/update/<int:pk>', ExpenseUpdate.as_view(), name='property_expense_update'),
+    path('property/expense/delete/<int:pk>', delete_expense, name='property_expense_delete'),
+
     # Property Invoice
     path('property/income/list/', property_income_list, name='property_income_list'),
     path('property/invoice/list/<str:property_name>/<str:unit_name>', property_invoice_list, name='property_invoice_list'),
