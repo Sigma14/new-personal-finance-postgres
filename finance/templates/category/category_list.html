@@ -23,23 +23,28 @@
                 </div>
             </div>
             <div class="content-body" float="left">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                            <div class="card">
+                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Category PageInfo</span>
+                                </div>
+                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                    <div class="card-body">
+                                        This page shows you all categories list and also shows how many amount spent on particular category using bar graph.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'category_add' %}" class="btn btn-primary"><i
                             class="fa fa-plus"></i> Add Category</a>
                 </div>
                 <br/>
-                <section id="dashboard-ecommee">
-                    <div class="row match-height">
-                        <!-- Statistics Card -->
-                        <div class="col-12">
-                            <div class="card card-statistics">
-                                <div class="card-header">
-                                    <h4 class="card-title"><i data-feather="info"></i> This page shows you all categories list and also shows how many amount spent on particular category using bar graph.</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
                 <section id="dashboard-ecommrc">
                     <div class="row match-height">
                         <div class="col-12">

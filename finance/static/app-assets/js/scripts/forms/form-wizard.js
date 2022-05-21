@@ -156,6 +156,82 @@ $(function () {
       });
   }
 
+  // Modern Wizard
+  // --------------------------------------------------------------------
+
+  if (typeof modernWizard !== undefined && modernWizard !== null) {
+    var modernStepper = new Stepper(modernWizard, {
+      linear: false
+    });
+    $(modernWizard)
+      .find('.btn-next')
+      .on('click', function ()
+      {
+          var isValid = $('form').valid();
+          if (isValid)
+          {
+            modernStepper.next();
+            e.preventDefault();
+          }
+          else
+          {
+            e.preventDefault();
+          }
+
+      });
+    $(modernWizard)
+      .find('.btn-prev')
+      .on('click', function () {
+        modernStepper.previous();
+        e.preventDefault();
+
+      });
+
+    $(modernWizard)
+      .find('.btn-submit')
+      .on('click', function (e)
+      {
+        var form_list = ["true"]
+        $("form#frm1 :input.form-control").each(function()
+        {
+            var d = $(this)[0]
+            var required_check = d['required']
+            console.log('log=>', required_check)
+            console.log('log=>', d.value)
+            if(required_check)
+            {
+                var required_value = d.value
+                if(required_value)
+                {
+                    console.log("true")
+                }
+                else
+                {
+                    form_list[0] = 'false'
+
+                }
+            }
+        });
+        if (form_list[0] == 'true')
+        {
+            $('#frm1').submit();
+            e.preventDefault();
+        }
+        else
+        {
+            Swal.fire({
+                        title: 'Please Fill Previous Required Details',
+                        icon: 'error',
+                        customClass: {
+                          confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                      });
+            e.preventDefault();
+        }
+      });
+  }
+
   // Vertical Wizard
   // --------------------------------------------------------------------
   if (typeof verticalWizard !== undefined && verticalWizard !== null) {
@@ -174,30 +250,6 @@ $(function () {
       });
 
     $(verticalWizard)
-      .find('.btn-submit')
-      .on('click', function () {
-        alert('Submitted..!!');
-      });
-  }
-
-  // Modern Wizard
-  // --------------------------------------------------------------------
-  if (typeof modernWizard !== undefined && modernWizard !== null) {
-    var modernStepper = new Stepper(modernWizard, {
-      linear: false
-    });
-    $(modernWizard)
-      .find('.btn-next')
-      .on('click', function () {
-        modernStepper.next();
-      });
-    $(modernWizard)
-      .find('.btn-prev')
-      .on('click', function () {
-        modernStepper.previous();
-      });
-
-    $(modernWizard)
       .find('.btn-submit')
       .on('click', function () {
         alert('Submitted..!!');

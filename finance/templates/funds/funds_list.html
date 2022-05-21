@@ -23,23 +23,29 @@
                 </div>
             </div>
             <div class="content-body" float="left">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                            <div class="card">
+                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i>Funds PageInfo</span>
+                                </div>
+                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                    <div class="card-body">
+                                        This page shows an overview of your funds. Funds Table shows -> Amount of total funds, available funds, lock funds. You can use Lock Amount in the future and add extra funds if you receive.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'account_add' %}" class="btn btn-primary"><i
                             class="fa fa-plus"></i> Add Funds</a>
                 </div>
                 <br/>
-                <section id="dashboard-ecommee">
-                    <div class="row match-height">
-                        <!-- Statistics Card -->
-                        <div class="col-12">
-                            <div class="card card-statistics">
-                                <div class="card-header">
-                                    <h4 class="card-title"><i data-feather="info"></i> This page shows an overview of your funds. Funds Table shows -> Amount of total funds, available funds, lock funds. You can use Lock Amount in the future and add extra funds if you receive.</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
                 <section id="dashboard-ecommrc">
                     <div class="row match-height">
                         <div class="col-12">

@@ -1137,10 +1137,8 @@ class CategoryAdd(LoginRequiredMixin, CreateView):
         return data
 
     def form_valid(self, form):
-        name = form.cleaned_data.get('name').title()
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.name = name
         obj.save()
         return super().form_valid(form)
 
@@ -5028,6 +5026,12 @@ def property_income_list(request):
     user_name = request.user
     unit_obj = PropertyRentalInfo.objects.filter(user=user_name)
     income_list = []
+    income_label = ['Total Open Invoices', 'Overdue', 'Partially Paid', 'Fully Paid']
+    total_open_invoice = 0
+    total_overdue = 0
+    total_partially_paid = 0
+    total_fully_paid = 0
+
     for data in unit_obj:
         invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=data.property_address,
                                                      unit_name=data.unit_name)
@@ -5036,13 +5040,32 @@ def property_income_list(request):
         total_paid = 0
 
         for item in invoice_obj:
-            total_amount += float(item.item_amount) * float(item.quantity)
-            total_paid += float(item.already_paid)
+            item_amount = float(item.item_amount) * float(item.quantity)
+            item_paid = float(item.already_paid)
+            total_amount += item_amount
+            total_paid += item_paid
+            if item.invoice_status == 'Unpaid':
+                total_open_invoice += item_amount
+            if item.invoice_status == 'Partially Paid':
+                total_partially_paid += item_paid
+                total_open_invoice += float(item.balance_due)
+            if item.invoice_status == 'Fully Paid':
+                total_fully_paid += item_amount
+            if item.invoice_status == 'Overdue':
+                over_due_amount = float(item.balance_due)
+                total_overdue += over_due_amount
 
         total_balance = total_amount - total_paid
         data_list += [total_amount, total_paid, total_balance]
         income_list.append(data_list)
-    context = {'income_obj': income_list}
+
+    income_values = [total_open_invoice, total_overdue, total_partially_paid, total_fully_paid]
+    context = {'income_obj': income_list,
+               "graph_label": income_label,
+               "graph_value": income_values,
+               "graph_currency": '$',
+               'graph_id': '#income_pie_chart'
+               }
     return render(request, "property_invoice/property_income_list.html", context=context)
 
 
@@ -5131,7 +5154,6 @@ def property_invoice_detail(request, pk):
         record_payment_detail = []
 
     days_diff = (today_date - invoice_obj.invoice_due_date).days
-    print(days_diff)
     if days_diff < 0:
         text_message = f"Payment expected in about {abs(days_diff)} days"
         text_class = 'text-success'
@@ -5142,6 +5164,9 @@ def property_invoice_detail(request, pk):
     if days_diff == 0:
         text_message = f"Payment expected at today"
         text_class = 'text-warning'
+
+    if invoice_obj.invoice_status == 'Fully Paid':
+        text_message = ""
 
     context = {'invoice_obj': invoice_obj, 'record_payment_detail': record_payment_detail,
                'today_date': str(today_date), 'text_message': text_message, 'text_class': text_class}

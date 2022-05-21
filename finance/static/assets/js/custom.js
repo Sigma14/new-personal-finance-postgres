@@ -369,7 +369,7 @@ function inputHTML(formHtml, name, value)
         form.submit();
 
     });
-    $('.delete_button').on("click", function(e)
+    $("body").delegate(".delete_button", "click", function(event)
     {
         name = $(this).attr('delete_name');
         text_msg = "Once deleted the " + name + ", cannot be recovered."
@@ -1427,7 +1427,6 @@ $("body").delegate(".delete_payment", "click", function(event)
     location.assign(location_url)
 
 });
-
 
 function getCookie(name) {
     let cookieValue = null;

@@ -36,9 +36,11 @@ MAINTENANCE_STATUS = (
 
 
 class CategoryForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+
     class Meta:
         model = Category
-        exclude = ('user',)
+        exclude = ('user', 'created_at', 'updated_at')
 
 
 class RegisterForm(forms.ModelForm):

@@ -45,7 +45,7 @@ function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
       series: graph_data,
       colors: [
         chartColors.donut.series1,
-        chartColors.donut.series5,
+        '#FF5733',
         chartColors.donut.series3,
         chartColors.donut.series2,
         chartColors.donut.series7,
@@ -77,7 +77,7 @@ function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
                 fontSize: '1rem',
                 fontFamily: 'Montserrat',
                 formatter: function (val) {
-                  return parseInt(val) + graph_currency;
+                  return graph_currency + parseInt(val);
                 }
               },
               total: {
@@ -85,7 +85,7 @@ function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
                 fontSize: '1.5rem',
                 label: graph_label[0],
                 formatter: function (w) {
-                  return parseInt(graph_data[0]) + graph_currency;
+                  return graph_currency + parseInt(graph_data[0]);
                 }
               }
             }

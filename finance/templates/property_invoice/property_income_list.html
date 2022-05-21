@@ -26,13 +26,14 @@
             </div>
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
+                    <button class="btn btn-primary download_csv" file_name="my_property_income.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                     <a href="{% url 'property_invoice_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Invoice</a>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
                     <div class="row match-height">
                         <!-- Company Table Card -->
-                        <div class="col-lg-12 col-12">
+                        <div class="col-lg-9 col-12">
                             <div class="card card-company-table">
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
@@ -93,6 +94,74 @@
                                                 {% endfor %}
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <h5 class="text-center">TOTAL INVOICE AMOUNT<strong>( {{graph_currency}}{{graph_value.0|add:graph_value.1|add:graph_value.2|add:graph_value.3}} ) </strong></h5>
+                                    <div id="income_pie_chart"></div>
+                                    <div class="row">
+                                        <div class="col-xl-6 col-sm-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Total Open Invoices</h4>
+                                                    <p class="card-text" style="color:#ffe700">{{graph_currency}}{{graph_value.0}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-sm-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Overdue</h4>
+                                                    <p class="card-text" style="color:#FF5733">{{graph_currency}}{{graph_value.1}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <hr/>
+                                        </div>
+                                        <div class="col-xl-12 col-sm-12 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Total Due Amount</h4>
+                                                    <p class="card-text">{{graph_currency}}{{graph_value.0|add:graph_value.1}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <hr/>
+                                        </div>
+                                        <div class="col-xl-6 col-sm-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Partially Paid</h4>
+                                                    <p class="card-text" style="color:#826bf8">{{graph_currency}}{{graph_value.2}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-6 col-sm-6 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Fully Paid</h4>
+                                                    <p class="card-text" style="color:#00d4bd">{{graph_currency}}{{graph_value.3}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <hr/>
+                                        </div>
+
+                                        <div class="col-xl-12 col-sm-12 col-12">
+                                            <div class="card">
+                                                <div class="card-header flex-column align-items-start pb-0">
+                                                    <h4 class="font-weight-bolder mt-1">Total Paid Amount</h4>
+                                                    <p class="card-text">{{graph_currency}}{{graph_value.2|add:graph_value.3}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
