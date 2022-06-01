@@ -292,7 +292,7 @@ function inputHTML(formHtml, name, value)
 
 
 // DOWNLOAD CSV FILE
-    $('.download_csv').on("click", function(e)
+    $("body").delegate(".download_csv", "click", function(event)
     {
         var table_id = $(this).attr('table_id')
         $(table_id).DataTable().destroy();
@@ -348,7 +348,7 @@ function inputHTML(formHtml, name, value)
                         "<input type='hidden' name='data_value' value='" + debit_value + "' >" +
                         "<input type='hidden' name='credit_value' value='" + credit_value + "' >"
         }
-        if(graph_type == 'bar' || graph_type == 'line')
+        if(graph_type == 'bar' || graph_type == 'line' || graph_type == 'pie')
         {
             var data_label = $('#download_graph_data').attr('data_label');
             var data_value = $('#download_graph_data').attr('data_value');
@@ -360,12 +360,15 @@ function inputHTML(formHtml, name, value)
         var form = $(formHtml);
         if(fun_name == "download_csv")
         {
+
             $('.download_csv_form').append(form);
         }
         else
         {
             $('.download_pdf_form').append(form);
         }
+        console.log(formHtml)
+
         form.submit();
 
     });
@@ -425,19 +428,18 @@ function inputHTML(formHtml, name, value)
       });
 
     });
-});
 
 // SAVE UPLOAD TRANSACTION FILe
 
-    $('#upload_transaction_form').submit(function()
+$('#upload_transaction_form').submit(function()
     {
         var form = $('#upload_transaction_form')[0];
         var data = new FormData(form);
         $.ajax(
         {
-            type: $(this).attr('method'),
+            type: 'post',
             enctype: 'multipart/form-data',
-            url: $(this).attr('action'),
+            url: '/transaction_upload',
             data: data,
             processData: false,
             contentType: false,
@@ -1443,3 +1445,4 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+});

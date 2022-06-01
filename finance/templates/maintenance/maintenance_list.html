@@ -24,10 +24,12 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body" float="left">
+            <div class="content-body">
                 <div class="col-sm-40 offset-sm-20">
+                    <div class="download_csv_form"></div>
                     <a href="{% url 'property_maintenance_add' %}" class="btn btn-primary"><i
                             class="fa fa-plus"></i> Add Maintenance</a>
+                    <button style="float: right;" class="btn btn-primary download_csv" file_name="property_maintenance.csv" table_heading="{{maintenance_key_dumps}}" table_length="{{maintenance_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
@@ -40,11 +42,9 @@
                                         <table class="table table-hover" id="property_table">
                                             <thead>
                                                 <tr>
-                                                    <th>Properties</th>
-                                                    <th>Address</th>
-                                                    <th>Request</th>
-                                                    <th>Category</th>
-                                                    <th>Status</th>
+                                                    {% for name in maintenance_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
                                                 </tr>
                                             </thead>
                                             <tbody>

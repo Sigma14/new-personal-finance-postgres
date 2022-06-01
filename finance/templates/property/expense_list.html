@@ -24,10 +24,11 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body" float="left">
+            <div class="content-body">
                 <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'property_expense_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Expense</a>
+                    <div class="download_csv_form"></div>
+                    <a href="{% url 'property_expense_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Expense</a>
+                    <button style="float: right;" class="btn btn-primary download_csv" file_name="property_expenses.csv" table_heading="{{expense_key_dumps}}" table_length="{{expense_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
@@ -40,11 +41,9 @@
                                         <table class="table table-hover" id="property_table">
                                             <thead>
                                                 <tr>
-                                                    <th>Properties</th>
-                                                    <th>Category</th>
-                                                    <th>Date</th>
-                                                    <th>Request</th>
-                                                    <th>Amount</th>
+                                                    {% for name in expense_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
                                                 </tr>
                                             </thead>
                                             <tbody>

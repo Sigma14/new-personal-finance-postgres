@@ -24,9 +24,11 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body" float="left">
+            <div class="content-body">
+                <div class="download_csv_form"></div>
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'property_invoice_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Invoice</a>
+                    <button style="float: right;" class="btn btn-primary download_csv" file_name="{{property_name}}_{{unit_name}}_invoices.csv" table_heading="{{invoice_key_dumps}}" table_length="{{invoice_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
@@ -48,13 +50,9 @@
                                         <table class="table table-hover" id="property_table">
                                             <thead>
                                                 <tr>
-                                                    <th>Invoice Id</th>
-                                                    <th>Due on</th>
-                                                    <th>Paid on</th>
-                                                    <th>Amount</th>
-                                                    <th>Paid</th>
-                                                    <th>Balance</th>
-                                                    <th>Status</th>
+                                                    {% for name in invoice_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
                                                 </tr>
                                             </thead>
                                             <tbody>

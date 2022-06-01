@@ -186,10 +186,11 @@ class TransactionForm(forms.ModelForm):
 
 
 class AccountForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
-    interest_rate = forms.FloatField(required=False)
-    balance = forms.FloatField(required=True)
-    lock_amount = forms.FloatField(required=True)
+    interest_rate = forms.FloatField(widget=forms.TextInput(attrs={'class': 'form-control'}),required=False)
+    balance = forms.FloatField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+    lock_amount = forms.FloatField(required=False)
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}), required=False)
 

@@ -24,10 +24,14 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body" float="left">
+            <div class="content-body">
+                <div class="download_csv_form"></div>
+                <div class="download_pdf_form"></div>
                 <div class="col-sm-40 offset-sm-20">
-                    <button class="btn btn-primary download_csv" file_name="my_property_income.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                     <a href="{% url 'property_invoice_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> New Invoice</a>
+                    <button style="float:right; margin-left:5px;" class="btn btn-primary download_csv" pdf_title="INCOME" file_name="my_income.pdf" table_heading="{{income_key_dumps}}" table_length="{{income_key | length}}" table_id="#property_table" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                    <button style="float:right;" class="btn btn-primary download_csv" file_name="my_income.csv" table_heading="{{income_key_dumps}}" table_length="{{income_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                    <input type="hidden" id="download_graph_data" data_label="{{graph_label_dumps}}" graph_type="pie" data_value="{{graph_value_dumps}}" >
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
@@ -40,11 +44,9 @@
                                         <table class="table table-hover" id="property_table">
                                             <thead>
                                                 <tr>
-                                                    <th>Property</th>
-                                                    <th>Unit</th>
-                                                    <th>Amount</th>
-                                                    <th>Paid</th>
-                                                    <th>Balance</th>
+                                                    {% for name in income_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
                                                 </tr>
                                             </thead>
                                             <tbody>

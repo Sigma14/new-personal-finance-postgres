@@ -24,33 +24,33 @@
                 </div>
             </div>
             <div class="content-body" float="left">
-                <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Transaction</a>
-                </div>
-                <br/>
                 <section>
                     <div class="row match-height">
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <form action="{% url 'transaction_upload' %}" id="upload_transaction_form" method="post" enctype="multipart/form-data">
+                                    <div class="col-sm-40 offset-sm-20">
+                                        <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
+                                                class="fa fa-plus"></i> Add Transaction</a>
+                                    </div>
+                                    <br/>
+                                    <form id="upload_transaction_form">
                                         {% csrf_token %}
-                                    <div class="form-validate">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label>Transaction File</label>
-                                                    <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
+                                        <div>
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label>Transaction File</label>
+                                                        <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect analyse_tab">Upload</button>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                     </form>
                                     <p>{{message}}</p>
                                     <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
@@ -64,34 +64,32 @@
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-									<form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">
-										{% csrf_token %}
+                                    <form action="{% url 'transaction_report' %}" id="date_filter_form">
+                                    {% csrf_token %}
                                     <!-- users edit account form start -->
-                                    <div class="form-validate">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-													<label for="start_date">From</label>
-                                    				<input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD">
-                                                </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>From</label>
+                                                <input type="text" name="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD" required>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-													<label for="end_date">To</label>
-                                    				<input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" >
-                                                </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>To</label>
+                                                <input type="text" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" required>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
-                                                </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
                                             </div>
                                         </div>
                                     </div>
                                     </form>
-                                    <div class="download_csv_form"></div>
-                                    <div class="download_pdf_form"></div>
                                     <div class="card-header border-bottom">
+                                        <div class="download_csv_form"></div>
+                                        <div class="download_pdf_form"></div>
                                         <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>
                                         <div class="basic-modal">
                                             {% if start_date %}
@@ -113,12 +111,16 @@
                                                 {% endif %}
                                                 {% endfor %}
                                             </select>
+                                            {% if start_date %}
                                             </form>
+                                            {% else %}
+                                            </form>
+                                            {% endif %}
                                         </div>
                                         <div float="right">
                                         <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                         <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
-                                        <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data}}" credit_value="{{credit_graph_data}}">
+                                        <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data_dumbs}}" credit_value="{{credit_graph_data_dumbs}}">
                                         </div>
                                     </div>
                                     <div class="card-datatable table-responsive">
@@ -266,6 +268,272 @@
                         </div>
                     </div>
                 </section>
+<!--				<section class="app-user-edit">-->
+<!--					<div class="card">-->
+<!--						<div class="card-body">-->
+<!--							<ul class="nav nav-pills" role="tablist">-->
+<!--								<li class="nav-item">-->
+<!--									<a class="nav-link d-flex align-items-center active" id="manually_tab" data-toggle="tab" href="#manually_data" aria-controls="manually_data" role="tab" aria-selected="false">-->
+<!--										<span class="d-none d-sm-block">Manually Transactions</span>-->
+<!--									</a>-->
+<!--								</li>-->
+<!--								<li class="nav-item">-->
+<!--									<a class="nav-link d-flex align-items-center" id="import_tab" data-toggle="tab" href="#import_data" aria-controls="import_data" role="tab" aria-selected="false">-->
+<!--										<span class="d-none d-sm-block">Import Transactions</span>-->
+<!--									</a>-->
+<!--								</li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </section>-->
+<!--                <div class="tab-content">-->
+<!--                    <div class="tab-pane active" id="manually_data" aria-labelledby="manually_tab" role="tabpanel">-->
+<!--                        <section>-->
+<!--                            <div class="row match-height">-->
+<!--                                <div class="col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <div class="col-sm-40 offset-sm-20">-->
+<!--                                                <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i-->
+<!--                                                        class="fa fa-plus"></i> Add Transaction</a>-->
+<!--                                            </div>-->
+<!--                                            <br/>-->
+<!--                                            <form action="{% url 'transaction_upload' %}" id="upload_transaction_form" method="post" enctype="multipart/form-data">-->
+<!--                                                {% csrf_token %}-->
+<!--                                            <div class="form-validate">-->
+<!--                                                <div class="row">-->
+<!--                                                    <div class="col-md-2">-->
+<!--                                                        <div class="form-group">-->
+<!--                                                            <label>Transaction File</label>-->
+<!--                                                            <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                    <div class="col-md-2">-->
+<!--                                                        <div class="form-group">-->
+<!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect analyse_tab">Upload</button>-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            </form>-->
+<!--                                            <p>{{message}}</p>-->
+<!--                                            <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </section>-->
+<!--                        <section>-->
+<!--                            <div class="row match-height">-->
+<!--                                <div class="col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">-->
+<!--                                                {% csrf_token %}-->
+<!--                                            &lt;!&ndash; users edit account form start &ndash;&gt;-->
+<!--                                            <div class="form-validate">-->
+<!--                                                <div class="row">-->
+<!--                                                    <div class="col-md-3">-->
+<!--                                                        <div class="form-group">-->
+<!--                                                            <label for="start_date">From</label>-->
+<!--                                                            <input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD">-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                    <div class="col-md-3">-->
+<!--                                                        <div class="form-group">-->
+<!--                                                            <label for="end_date">To</label>-->
+<!--                                                            <input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" >-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                    <div class="col-md-3">-->
+<!--                                                        <div class="form-group">-->
+<!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>-->
+<!--                                                        </div>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            </form>-->
+<!--                                            <div class="download_csv_form"></div>-->
+<!--                                            <div class="download_pdf_form"></div>-->
+<!--                                            <div class="card-header border-bottom">-->
+<!--                                                <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>-->
+<!--                                                <div class="basic-modal">-->
+<!--                                                    {% if start_date %}-->
+<!--                                                        <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">-->
+<!--                                                            <input type="hidden" name="start_date" value="{{start_date}}">-->
+<!--                                                            <input type="hidden" name="end_date" value="{{end_date}}">-->
+<!--                                                    {% else %}-->
+<!--                                                    <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">-->
+<!--                                                    {% endif %}-->
+<!--                                                        {% csrf_token %}-->
+<!--                                                    <input type="hidden" name="tags_data" value="{{tags_data}}">-->
+<!--                                                    <label>Filter By Tags</label>-->
+<!--                                                    <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags" style="width:200px">-->
+<!--                                                        {% for name in tags_data %}-->
+<!--                                                        {% if select_filter == name %}-->
+<!--                                                            <option selected>{{name}}</option>-->
+<!--                                                        {% else %}-->
+<!--                                                            <option>{{name}}</option>-->
+<!--                                                        {% endif %}-->
+<!--                                                        {% endfor %}-->
+<!--                                                    </select>-->
+<!--                                                    </form>-->
+<!--                                                </div>-->
+<!--                                                <div float="right">-->
+<!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>-->
+<!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>-->
+<!--                                                <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data}}" credit_value="{{credit_graph_data}}">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="card-datatable table-responsive">-->
+<!--                                                    <table class="dt-row-grouping table" id="transactions">-->
+<!--                                                    <thead>-->
+<!--                                                    <tr>-->
+<!--                                                        {% for name in transaction_key %}-->
+<!--                                                        <th>{{name}}</th>-->
+<!--                                                        {% endfor %}-->
+<!--                                                        <th>Actions</th>-->
+<!--                                                    </tr>-->
+<!--                                                    </thead>-->
+<!--                                                    <tbody>-->
+<!--                                                    {% for data in transaction_data %}-->
+<!--                                                    <tr>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                {% if data.out_flow %}-->
+<!--                                                                <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>-->
+<!--                                                                {% else %}-->
+<!--                                                                <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>-->
+<!--                                                                {% endif %}-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.payee}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.account.name}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.categories}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% if data.bill.label %}-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% else %}-->
+<!--                                                         <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% endif %}-->
+<!--                                                        {% if data.budgets.name %}-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% else %}-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% endif %}-->
+<!--                                                        {% if data.cleared == True %}-->
+<!--                                                            <td>-->
+<!--                                                                <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder text-success mr-1">-->
+<!--                                                                    <input type="hidden" value="True" class="cleared{{forloop.counter}}">-->
+<!--                                                                    <i class="fa fa-check" aria-hidden="true"></i>-->
+<!--                                                                </span>-->
+<!--                                                                </div>-->
+<!--                                                            </td>-->
+<!--                                                            {% else %}-->
+<!--                                                            <td>-->
+<!--                                                                <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder text-danger mr-1">-->
+<!--                                                                    <input type="hidden" value="False" class="cleared{{forloop.counter}}">-->
+<!--                                                                    <i class="fa fa-times" aria-hidden="true"></i>-->
+<!--                                                                </span>-->
+<!--                                                                </div>-->
+<!--                                                            </td>-->
+<!--                                                            {% endif %}-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">-->
+<!--                                                                    <ul class="list-inline m-0">-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <a href="{% url 'transaction_update' pk=data.id %}"-->
+<!--                                                                               class="btn btn-success btn-sm rounded-0" type="button"-->
+<!--                                                                               data-toggle="tooltip" data-placement="top" title="Edit"><i-->
+<!--                                                                                    class="fa fa-edit"></i></a>-->
+<!--                                                                        </li>-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"-->
+<!--                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"-->
+<!--                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i-->
+<!--                                                                                    class="fa fa-trash"></i></button>-->
+<!--                                                                        </li>-->
+<!--                                                                    </ul>-->
+<!--                                                                </span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                    </tr>-->
+<!--                                                    {% endfor %}-->
+<!--                                                    </tbody>-->
+<!--                                                </table>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </section>-->
+<!--                        <section id="dashboard-ecommrc">-->
+<!--                            <div class="row match-height">-->
+<!--                                <div class="col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <div class="card-header border-bottom">-->
+<!--                                                <h4 class="card-title mb-25">Transactions</h4>-->
+<!--                                            </div>-->
+<!--                                            <br/>-->
+<!--                                            <br/>-->
+<!--                                            <div class="col-12">-->
+<!--                                                <div class="card">-->
+<!--                                                    <div class="card-body">-->
+<!--                                                        <div id="transaction-chart"></div>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; Line Chart Ends &ndash;&gt;-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </section>-->
+<!--                    </div>-->
+<!--                    <div class="tab-pane" id="import_data" aria-labelledby="import_tab" role="tabpanel">-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
     </div>

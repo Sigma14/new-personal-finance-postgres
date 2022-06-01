@@ -25,6 +25,7 @@ from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image
+from reportlab.graphics.charts.piecharts import Pie
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A0, letter
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
@@ -43,6 +44,7 @@ from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
 from django.contrib.auth.models import User
 
+wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
@@ -578,7 +580,13 @@ def transaction_summary(transaction_data, select_filter):
         'credit_graph_data': credit_date_list,
         'transaction_date_data': date_list,
         'transaction_date_data_dumbs': json.dumps(date_list),
+        'debit_graph_data_dumbs': json.dumps(debit_date_list),
+        'credit_graph_data_dumbs': json.dumps(credit_date_list),
     }
+    if date_list:
+        context['start_date'] = date_list[0],
+        context['end_date'] = date_list[-1],
+
     return context
 
 
@@ -1245,9 +1253,14 @@ def user_login(request):
     if request.method == "POST":
         username = request.POST['register-username']
         user_password = request.POST['register-password']
-        search_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch=z16E04BIOod7A1RqYcGaPPtjua7Jbfo1zKt&action=search_users&term_name=user_login&term_value={username}"
-        api_response = requests.get(search_api_url)
-        search_api_data = api_response.json()
+        search_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch={wordpress_api_key}&action=search_users&term_name=user_login&term_value={username}"
+        try:
+            api_response = requests.get(search_api_url)
+            search_api_data = api_response.json()
+        except:
+            context['login_error'] = 'User data not accessed. Something Went Wrong!!'
+            return render(request, "login_page.html", context=context)
+
         user_details = ""
         user = authenticate(username=username, password=user_password)
         if user:
@@ -1842,10 +1855,13 @@ def transaction_report(request):
     else:
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
-        transaction_data = Transaction.objects.filter(user=user_name,
-                                                      transaction_date__range=(start_date, end_date)).order_by(
-            'transaction_date')
-        select_filter = 'All'
+        if start_date != "" and end_date != "":
+            transaction_data = Transaction.objects.filter(user=user_name,
+                                                          transaction_date__range=(start_date, end_date)).order_by(
+                'transaction_date')
+            select_filter = 'All'
+        else:
+            return redirect("/transaction_list/")
 
     context = transaction_summary(transaction_data, select_filter)
     context['start_date'] = start_date
@@ -3676,10 +3692,10 @@ class PdfPrint:
 
 
 def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
-    d = Drawing(1000, 700)
+    d = Drawing(400, 500)
     bar = VerticalBarChart()
-    bar.width = 1700
-    bar.height = 800
+    bar.width = 400
+    bar.height = 400
     bar.data = bar_data
     bar.valueAxis.valueMin = 0
     bar.barSpacing = 0.5
@@ -3698,13 +3714,13 @@ def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
     bar.valueAxis.labels.fontSize = 10
     bar.strokeWidth = 0.1
     bar.bars.strokeWidth = 0.5
-    bar.bars[0].fillColor = PCMYKColor(46, 51, 0, 4)
-    bar.bars[1].fillColor = colors.red
-    bar.bars[2].fillColor = colors.darkgreen
-    bar.bars[3].fillColor = colors.yellow
 
     if graph_type == "bar":
         bar.bars[0].fillColor = PCMYKColor(46, 51, 0, 4)
+        bar.bars[1].fillColor = colors.red
+        bar.bars[2].fillColor = colors.darkgreen
+        bar.bars[3].fillColor = colors.yellow
+
         d.add(bar)
     else:
         legend = Legend()
@@ -3712,12 +3728,15 @@ def draw_bar_chart(bar_data, data_label, graph_type, bar_legends=None):
         legend.fontName = 'Helvetica'
         legend.fontSize = 14
         legend.boxAnchor = 'w'
-        legend.x = 300
-        legend.y = 700
+        legend.x = 200
+        legend.y = 600
         legend.dx = 16
         legend.dy = 16
         legend.alignment = 'left'
+        print("bar_legends===>", bar_legends)
         legend.colorNamePairs = bar_legends
+        bar.bars[0].fillColor = colors.red
+        bar.bars[1].fillColor = colors.darkgreen
         d.add(bar)
         d.add(legend)
 
@@ -3940,25 +3959,30 @@ def download_pdf(request):
         try:
             graph_type = request.POST['graph_type']
             print("graph_type=======>", graph_type)
-            print(type(graph_type))
             data_label = request.POST['data_label']
             data_value = request.POST['data_value']
             data_label = json.loads(data_label)
             data_value = json.loads(data_value)
+            print("graph_data_labels====>", data_label)
+            print("graph_data_values====>", data_value)
+
             if graph_type == 'transaction-bar':
                 credit_value = request.POST['credit_value']
                 debit_value = data_value
                 credit_value = json.loads(credit_value)
                 bar_data = [debit_value, credit_value]
+                print("colors.red========>", colors.red)
+                print("colors.green========>", colors.green)
+
                 bar_legends = [(colors.red, "Debit"), (colors.green, "Credit")]
                 d = draw_bar_chart(bar_data, data_label, graph_type, bar_legends)
 
             if graph_type == 'bar':
+                print("barr")
                 bar_data = [data_value]
                 d = draw_bar_chart(bar_data, data_label, graph_type)
-
+                print(d)
             if graph_type == 'line':
-                print("Line===", data_value)
                 d = Drawing(200, 500)
                 chart = HorizontalLineChart()
                 chart.data = [tuple(data_value[::-1])]
@@ -3970,6 +3994,23 @@ def download_pdf(request):
                 chart.lines[0].fillColor = colors.orange
                 chart.categoryAxis.categoryNames = data_label[::-1]
                 d.add(chart)
+
+            if graph_type == 'pie':
+                d = Drawing(400, 500)
+                pie = Pie()
+                pie.x = 200
+                pie.y = 65
+                pie.width = 200
+                pie.height = 300
+                pie.data = data_value
+                pie.labels = data_label
+                pie.slices.strokeWidth = 0.5
+                pie.slices[0].fillColor = colors.yellow
+                pie.slices[1].fillColor = colors.red
+                pie.slices[2].fillColor = PCMYKColor(46, 51, 0, 4)
+                pie.slices[3].fillColor = colors.darkgreen
+                d.add(pie)
+
             pdf = reporti.report(pdf_data_value, pdf_title, d)
         except:
             pdf = reporti.report(pdf_data_value, pdf_title)
@@ -4771,7 +4812,11 @@ def list_property(request):
                                                              status='Unresolved')
         maintenance_dict[data.property_name] = len(maintenance_obj)
 
-    context = {'property_obj': property_obj, 'maintenance_dict': maintenance_dict}
+    property_key = ['Properties', 'Address', 'Property Value', 'Total Monthly Rent', 'Tenants/Owners',
+                    'Open Maintenance']
+
+    context = {'property_obj': property_obj, 'maintenance_dict': maintenance_dict,
+               'property_key': property_key, 'property_key_dumps': json.dumps(property_key)}
     return render(request, "property/property_list.html", context=context)
 
 
@@ -4890,6 +4935,9 @@ class MaintenanceList(LoginRequiredMixin, ListView):
         data = super(MaintenanceList, self).get_context_data(**kwargs)
         user_name = self.request.user
         property_data = PropertyMaintenance.objects.filter(user=user_name)
+        maintenance_key = ['Properties', 'Address', 'Request', 'Category', 'Status']
+        data['maintenance_key'] = maintenance_key
+        data['maintenance_key_dumps'] = json.dumps(maintenance_key)
         data['maintenance_obj'] = property_data
         return data
 
@@ -4988,6 +5036,9 @@ class ExpenseList(LoginRequiredMixin, ListView):
         data = super(ExpenseList, self).get_context_data(**kwargs)
         user_name = self.request.user
         property_data = PropertyExpense.objects.filter(user=user_name)
+        expense_key = ['Properties', 'Category', 'Date', 'Request', 'Amount']
+        data['expense_key'] = expense_key
+        data['expense_key_dumps'] = json.dumps(expense_key)
         data['expense_obj'] = property_data
         return data
 
@@ -5031,11 +5082,13 @@ def property_income_list(request):
     total_overdue = 0
     total_partially_paid = 0
     total_fully_paid = 0
+    graph_currency = '$'
 
     for data in unit_obj:
         invoice_obj = PropertyInvoice.objects.filter(user=user_name, property_details=data.property_address,
                                                      unit_name=data.unit_name)
         data_list = [data.property_address.currency, data.property_address.property_name, data.unit_name]
+        graph_currency = data.property_address.currency
         total_amount = 0
         total_paid = 0
 
@@ -5060,11 +5113,18 @@ def property_income_list(request):
         income_list.append(data_list)
 
     income_values = [total_open_invoice, total_overdue, total_partially_paid, total_fully_paid]
+    income_key = ['Property', 'Unit', 'Amount', 'Paid', 'Balance']
+
     context = {'income_obj': income_list,
                "graph_label": income_label,
                "graph_value": income_values,
-               "graph_currency": '$',
-               'graph_id': '#income_pie_chart'
+               "graph_currency": graph_currency,
+               'graph_id': '#income_pie_chart',
+               'income_key': income_key,
+               'income_key_dumps': json.dumps(income_key),
+               "graph_label_dumps": json.dumps(income_label),
+               "graph_value_dumps": json.dumps(income_values),
+
                }
     return render(request, "property_invoice/property_income_list.html", context=context)
 
@@ -5141,7 +5201,11 @@ def property_invoice_list(request, property_name, unit_name):
     user_name = request.user
     invoice_details = PropertyInvoice.objects.filter(user=user_name, property_details__property_name=property_name,
                                                      unit_name=unit_name).order_by('invoice_due_date')
-    context = {'invoice_details': invoice_details, 'property_name': property_name, 'unit_name': unit_name}
+
+    invoice_key = ['Invoice Id', 'Due on', 'Paid on', 'Amount', 'Paid', 'Balance', 'Status']
+    context = {'invoice_details': invoice_details, 'property_name': property_name, 'unit_name': unit_name,
+               'invoice_key': invoice_key, 'invoice_key_dumps': json.dumps(invoice_key)
+               }
     return render(request, "property_invoice/property_invoice_list.html", context=context)
 
 
