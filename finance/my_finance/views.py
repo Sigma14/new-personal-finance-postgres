@@ -28,13 +28,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, A0, letter
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
-    MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
-from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
-    Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
-    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense
-from .mortgage import calculator
 from reportlab.lib.colors import PCMYKColor
 from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
@@ -42,6 +35,14 @@ from reportlab.lib.units import inch
 from reportlab.platypus.flowables import Spacer
 from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
+
+from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
+    MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
+from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
+    Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
+    ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
+    PropertyMaintenance, PropertyExpense
+from .mortgage import calculator
 from django.contrib.auth.models import User
 
 wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
@@ -1172,140 +1173,165 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
+# def user_login(request):
+#     # if request.method == 'POST':
+#     #     try:
+#     #         next = request.POST['next']
+#     #     except:
+#     #         next = None
+#     #     username = request.POST['register-username']
+#     #     password = request.POST['register-password']
+#     #     user = authenticate(username=username, password=password)
+#     #     if user is None:
+#     #         context = {'login_error': 'Username and Password Incorrect'}
+#     #         return render(request, "login_page.html", context)
+#     #     elif not user.is_active:
+#     #         context = {'login_error': 'User is not active'}
+#     #         return render(request, "login_page.html", context)
+#     #     else:
+#     #         login(request, user)
+#     #         template_budget_data = TemplateBudget.objects.filter(user=user)
+#     #         if template_budget_data:
+#     #             budget_obj = TemplateBudget.objects.filter(user=user)
+#     #             budget_obj.delete()
+#     #         period_list = {'Daily': 'Going out', 'Weekly': 'Groceries', 'Monthly': 'Bills'}
+#     #         date_value = datetime.datetime.today().date()
+#     #         start_month_date, end_month_date = start_end_date(date_value, "Monthly")
+#     #         for key, value in period_list.items():
+#     #             template_obj = TemplateBudget()
+#     #             template_obj.user = user
+#     #             budget_name = value
+#     #             template_obj.name = budget_name
+#     #             template_obj.currency = "$"
+#     #             template_obj.auto_budget = True
+#     #             template_obj.budget_period = key
+#     #
+#     #             if key == 'Monthly':
+#     #                 template_obj.start_date = start_month_date
+#     #                 template_obj.end_date = end_month_date
+#     #                 template_obj.initial_amount = 1500
+#     #                 template_obj.amount = 1500
+#     #                 template_obj.budget_spent = 1000
+#     #                 template_obj.budget_left = 500
+#     #                 template_obj.created_at = start_month_date
+#     #                 template_obj.ended_at = end_month_date
+#     #                 template_obj.save()
+#     #
+#     #             if key == 'Weekly':
+#     #                 start_week_date, end_week_date = start_end_date(date_value, key)
+#     #                 template_obj.start_date = start_month_date
+#     #                 template_obj.end_date = end_month_date
+#     #                 template_obj.initial_amount = 200
+#     #                 template_obj.amount = 200
+#     #                 template_obj.budget_spent = 150
+#     #                 template_obj.budget_left = 50
+#     #                 template_obj.created_at = start_week_date
+#     #                 template_obj.ended_at = end_week_date
+#     #                 template_obj.save()
+#     #
+#     #             if key == 'Daily':
+#     #                 template_obj.start_date = start_month_date
+#     #                 template_obj.end_date = end_month_date
+#     #                 template_obj.initial_amount = 100
+#     #                 template_obj.amount = 100
+#     #                 template_obj.budget_spent = 120
+#     #                 template_obj.budget_left = -20
+#     #                 template_obj.created_at = date_value
+#     #                 template_obj.ended_at = date_value
+#     #                 template_obj.save()
+#     #
+#     #         if next:
+#     #             return redirect(next)
+#     #         else:
+#     #             return redirect('/')
+#     # else:
+#     #     try:
+#     #         next = request.GET['next']
+#     #     except:
+#     #         next = None
+#     #     return render(request, "login_page.html", context={'next': next})
+#     context = {}
+#     if request.method == "POST":
+#         username = request.POST['register-username']
+#         user_password = request.POST['register-password']
+#         search_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch={wordpress_api_key}&action=search_users&term_name=user_login&term_value={username}"
+#         try:
+#             api_response = requests.get(search_api_url)
+#             search_api_data = api_response.json()
+#         except:
+#             context['login_error'] = 'User data not accessed. Something Went Wrong!!'
+#             return render(request, "login_page.html", context=context)
+#
+#         user_details = ""
+#         user = authenticate(username=username, password=user_password)
+#         if user:
+#             if user.is_superuser:
+#                 login(request, user)
+#                 try:
+#                     redirect_url = request.POST['redirect_url']
+#                     return redirect(redirect_url)
+#                 except:
+#                     return redirect("/")
+#
+#         for data in search_api_data['response']:
+#             user_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch={wordpress_api_key}&action=user_get_details&uid={data['ID']}"
+#             print(user_api_url)
+#             user_api_response = requests.get(user_api_url)
+#             user_data = user_api_response.json()['response']
+#             print(user_password)
+#             print(user_data['user_pass'])
+#             print(username)
+#
+#             if user_data['user_login'] == username and user_data['user_pass'] == user_password:
+#                 if user:
+#                     login(request, user)
+#                 else:
+#                     try:
+#                         user = User.objects.get(username=username)
+#                         user.set_password(user_password)
+#                         user.first_name = user_data['user_nicename']
+#                         user.email = user_data['user_email']
+#                         user.save()
+#                     except:
+#                         user = User.objects.create_user(username, user_data['user_email'], user_password)
+#                         user.first_name = user_data['user_nicename']
+#                         user.save()
+#                     login(request, user)
+#                 try:
+#                     redirect_url = request.POST['redirect_url']
+#                     return redirect(redirect_url)
+#                 except:
+#                     return redirect("/")
+#             else:
+#                 user_details = "False"
+#         if user_details == "False":
+#             context['login_error'] = 'Username and Password Incorrect'
+#             return render(request, "login_page.html", context=context)
+#     else:
+#         try:
+#             context['redirect_url'] = request.GET['next']
+#         except:
+#             pass
+#
+#         return render(request, "login_page.html", context=context)
+
 def user_login(request):
-    # if request.method == 'POST':
-    #     try:
-    #         next = request.POST['next']
-    #     except:
-    #         next = None
-    #     username = request.POST['register-username']
-    #     password = request.POST['register-password']
-    #     user = authenticate(username=username, password=password)
-    #     if user is None:
-    #         context = {'login_error': 'Username and Password Incorrect'}
-    #         return render(request, "login_page.html", context)
-    #     elif not user.is_active:
-    #         context = {'login_error': 'User is not active'}
-    #         return render(request, "login_page.html", context)
-    #     else:
-    #         login(request, user)
-    #         template_budget_data = TemplateBudget.objects.filter(user=user)
-    #         if template_budget_data:
-    #             budget_obj = TemplateBudget.objects.filter(user=user)
-    #             budget_obj.delete()
-    #         period_list = {'Daily': 'Going out', 'Weekly': 'Groceries', 'Monthly': 'Bills'}
-    #         date_value = datetime.datetime.today().date()
-    #         start_month_date, end_month_date = start_end_date(date_value, "Monthly")
-    #         for key, value in period_list.items():
-    #             template_obj = TemplateBudget()
-    #             template_obj.user = user
-    #             budget_name = value
-    #             template_obj.name = budget_name
-    #             template_obj.currency = "$"
-    #             template_obj.auto_budget = True
-    #             template_obj.budget_period = key
-    #
-    #             if key == 'Monthly':
-    #                 template_obj.start_date = start_month_date
-    #                 template_obj.end_date = end_month_date
-    #                 template_obj.initial_amount = 1500
-    #                 template_obj.amount = 1500
-    #                 template_obj.budget_spent = 1000
-    #                 template_obj.budget_left = 500
-    #                 template_obj.created_at = start_month_date
-    #                 template_obj.ended_at = end_month_date
-    #                 template_obj.save()
-    #
-    #             if key == 'Weekly':
-    #                 start_week_date, end_week_date = start_end_date(date_value, key)
-    #                 template_obj.start_date = start_month_date
-    #                 template_obj.end_date = end_month_date
-    #                 template_obj.initial_amount = 200
-    #                 template_obj.amount = 200
-    #                 template_obj.budget_spent = 150
-    #                 template_obj.budget_left = 50
-    #                 template_obj.created_at = start_week_date
-    #                 template_obj.ended_at = end_week_date
-    #                 template_obj.save()
-    #
-    #             if key == 'Daily':
-    #                 template_obj.start_date = start_month_date
-    #                 template_obj.end_date = end_month_date
-    #                 template_obj.initial_amount = 100
-    #                 template_obj.amount = 100
-    #                 template_obj.budget_spent = 120
-    #                 template_obj.budget_left = -20
-    #                 template_obj.created_at = date_value
-    #                 template_obj.ended_at = date_value
-    #                 template_obj.save()
-    #
-    #         if next:
-    #             return redirect(next)
-    #         else:
-    #             return redirect('/')
-    # else:
-    #     try:
-    #         next = request.GET['next']
-    #     except:
-    #         next = None
-    #     return render(request, "login_page.html", context={'next': next})
-    context = {}
+    context = {'page': 'login_page'}
     if request.method == "POST":
         username = request.POST['register-username']
         user_password = request.POST['register-password']
-        search_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch={wordpress_api_key}&action=search_users&term_name=user_login&term_value={username}"
-        try:
-            api_response = requests.get(search_api_url)
-            search_api_data = api_response.json()
-        except:
-            context['login_error'] = 'User data not accessed. Something Went Wrong!!'
-            return render(request, "login_page.html", context=context)
-
-        user_details = ""
         user = authenticate(username=username, password=user_password)
         if user:
-            if user.is_superuser:
-                login(request, user)
-                try:
-                    redirect_url = request.POST['redirect_url']
-                    return redirect(redirect_url)
-                except:
-                    return redirect("/")
-
-        for data in search_api_data['response']:
-            user_api_url = f"https://tradingtech.org/wp-content/plugins/indeed-membership-pro/apigate.php?ihch=z16E04BIOod7A1RqYcGaPPtjua7Jbfo1zKt&action=user_get_details&uid={data['ID']}"
-            print(user_api_url)
-            user_api_response = requests.get(user_api_url)
-            user_data = user_api_response.json()['response']
-            print(user_password)
-            print(user_data['user_pass'])
-            print(username)
-
-            if user_data['user_login'] == username and user_data['user_pass'] == user_password:
-                if user:
-                    login(request, user)
-                else:
-                    try:
-                        user = User.objects.get(username=username)
-                        user.set_password(user_password)
-                        user.first_name = user_data['user_nicename']
-                        user.email = user_data['user_email']
-                        user.save()
-                    except:
-                        user = User.objects.create_user(username, user_data['user_email'], user_password)
-                        user.first_name = user_data['user_nicename']
-                        user.save()
-                    login(request, user)
-                try:
-                    redirect_url = request.POST['redirect_url']
-                    return redirect(redirect_url)
-                except:
-                    return redirect("/")
-            else:
-                user_details = "False"
-        if user_details == "False":
+            login(request, user)
+            try:
+                redirect_url = request.POST['redirect_url']
+                return redirect(redirect_url)
+            except:
+                return redirect("/")
+        else:
             context['login_error'] = 'Username and Password Incorrect'
             return render(request, "login_page.html", context=context)
+
     else:
         try:
             context['redirect_url'] = request.GET['next']
