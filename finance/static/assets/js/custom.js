@@ -201,7 +201,7 @@ $('#expense_table').DataTable( {
             dataType: 'json',
             success: function(data)
             {
-                 $("#transaction_amount").val(data.bill_amount)
+                 $("#id_amount").val(data.bill_amount)
             }
         })
 
@@ -375,7 +375,21 @@ function inputHTML(formHtml, name, value)
     $("body").delegate(".delete_button", "click", function(event)
     {
         name = $(this).attr('delete_name');
+        del_method = $(this).attr('del_method')
         text_msg = "Once deleted the " + name + ", cannot be recovered."
+        if(del_method == 'category_delete')
+        {
+            text_msg += 'All transactions, bills and budgets related to this category also deleted.'
+        }
+        if(del_method == 'bill_delete')
+        {
+            text_msg += 'All transactions and budgets related to this bill also deleted.'
+        }
+        if(del_method == 'budget_delete')
+        {
+            text_msg += 'All transactions and bill related to this budget also deleted.'
+        }
+
         delete_url = $(this).attr('url');
         Swal.fire({
         title: 'Delete Screener',
@@ -1429,6 +1443,31 @@ $("body").delegate(".delete_payment", "click", function(event)
     location.assign(location_url)
 
 });
+
+// get Transactions
+$("body").delegate(".get_transaction_btn", "click", function(event)
+{
+    start_date = $("#start_date").val()
+    end_date = $("#end_date").val()
+    if(start_date && end_date)
+    {
+        $("#import-transaction-form").submit()
+    }
+    else
+    {
+        Swal.fire({
+                    title: 'Please Choose Date Range',
+                    icon: 'error',
+                    customClass: {
+                      confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                  });
+        return false;
+    }
+
+});
+
 
 function getCookie(name) {
     let cookieValue = null;

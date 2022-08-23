@@ -29,7 +29,7 @@
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'bill_update' pk=bill_data.id %}" class="btn btn-primary"><i
                     data-feather="edit-2"></i>&nbsp;Edit Bill</a>
-                    <button type="button" delete_name="{{ bill_data.label }} Bill" url="{% url 'bill_delete' pk=bill_data.id %}" class="btn btn-danger delete_button"><i
+                    <button type="button" del_method="bill_delete"  delete_name="{{ bill_data.label }} Bill" url="{% url 'bill_delete' pk=bill_data.id %}" class="btn btn-danger delete_button"><i
                                             data-feather="trash"></i>&nbsp;Delete</button>
 
                 </div>

@@ -165,6 +165,7 @@ class TransactionForm(forms.ModelForm):
     in_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     out_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     cleared = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request')
@@ -182,7 +183,7 @@ class TransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        exclude = ('user', 'remaining_amount', 'created_at', 'budgets')
+        exclude = ('user', 'plaid_account_id', 'plaid_transaction_id',  'remaining_amount', 'created_at', 'budgets')
 
 
 class AccountForm(forms.ModelForm):
@@ -196,7 +197,8 @@ class AccountForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('user', 'available_balance', 'liability_type', 'interest_period', 'transaction_count', 'mortgage_year', 'created_at', 'updated_at')
+        exclude = ('user', 'plaid_account_id', 'mask', 'sub_type', 'account_type', 'item', 'available_balance',
+                   'liability_type', 'interest_period', 'transaction_count', 'mortgage_year', 'created_at', 'updated_at')
 
 
 # class FundForm(forms.ModelForm):
@@ -227,7 +229,7 @@ class LiabilityForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('user', 'available_balance', 'lock_amount', 'transaction_count', 'created_at', 'updated_at')
+        exclude = ('user', 'plaid_account_id', 'mask', 'sub_type', 'account_type', 'item', 'available_balance', 'lock_amount', 'transaction_count', 'created_at', 'updated_at')
 
 
 class MortgageCalculatorForm(forms.ModelForm):

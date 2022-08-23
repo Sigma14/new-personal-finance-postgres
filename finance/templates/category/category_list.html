@@ -98,7 +98,7 @@
                                                                             class="fa fa-edit"></i></a>
                                                                 </li>
                                                                 <li class="list-inline-item">
-                                                                    <button type="button" delete_name="{{ object.name }} Category" url="{% url 'category_delete' pk=object.id %}"
+                                                                    <button type="button" del_method="category_delete" delete_name="{{ object.name }} Category" url="{% url 'category_delete' pk=object.id %}"
                                                                        class="btn btn-danger btn-sm rounded-0 delete_button"
                                                                        data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                                             class="fa fa-trash"></i></button>

@@ -203,7 +203,7 @@
                                                                             class="fa fa-edit"></i></a>
                                                                 </li>
                                                                 <li class="list-inline-item">
-                                                                    <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"
+                                                                    <button type="button" del_method="budget_delete" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"
                                                                        class="btn btn-danger btn-sm rounded-0 delete_button"
                                                                        data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                                             class="fa fa-trash"></i></button>

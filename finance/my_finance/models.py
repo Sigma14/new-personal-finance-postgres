@@ -254,6 +254,12 @@ class Bill(models.Model):
         return reverse('bill_list')
 
 
+class PlaidItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    access_token = models.CharField(max_length=255)
+    item_id = models.CharField(max_length=255)
+
+
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
     name = models.CharField(max_length=50, null=True)
@@ -267,6 +273,11 @@ class Account(models.Model):
     interest_period = models.CharField(max_length=10, choices=PERIODS, blank=True, null=True)
     mortgage_year = models.CharField(max_length=10, blank=True, null=True)
     transaction_count = models.IntegerField(default=0, blank=True, null=True)
+    plaid_account_id = models.CharField(max_length=200, blank=True, null=True)
+    mask = models.CharField(max_length=200, blank=True, null=True)
+    subtype = models.CharField(max_length=200, blank=True, null=True)
+    account_type = models.CharField(max_length=200, blank=True, null=True)
+    item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -411,7 +422,7 @@ class RentalPropertyModel(models.Model):
 
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
-    amount = models.CharField(max_length=5)
+    amount = models.CharField(max_length=255)
     remaining_amount = models.CharField(max_length=10)
     transaction_date = models.DateField(blank=True, null=True)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -422,6 +433,8 @@ class Transaction(models.Model):
     tags = models.CharField(max_length=225, blank=True, null=True)
     in_flow = models.BooleanField(default=False)
     out_flow = models.BooleanField(default=True)
+    plaid_account_id = models.CharField(max_length=255, blank=True, null=True)
+    plaid_transaction_id = models.CharField(max_length=255, blank=True, null=True)
     cleared = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

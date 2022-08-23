@@ -20,6 +20,9 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.widgets.markers import makeMarker
@@ -41,17 +44,209 @@ from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionFor
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense
+    PropertyMaintenance, PropertyExpense, PlaidItem
 from .mortgage import calculator
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 
 wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
 property_type_list = ['Apartment', 'Commercial', 'Condo', 'Duplex', 'House', 'Mixed-Use', 'Other']
-month_date_dict = {'1': '1st ', '2': '2nd ', '3': '3rd ', '4': '4th ', '5': '5th ', '6': '6th ', '7': '7th ', '8': '8th ', '9': '9th ', '10': '10th', '11': '11th', '12': '12th', '13': '13th', '14': '14th', '15': '15th', '16': '16th', '17': '17th', '18': '18th', '19': '19th', '20': '20th', '21': '21st', '22': '22nd', '23': '23rd', '24': '24th', '25': '25th', '26': '26th', '27': '27th', '28': '28th', '29': '29th', '30': '30th'}
+month_date_dict = {'1': '1st ', '2': '2nd ', '3': '3rd ', '4': '4th ', '5': '5th ', '6': '6th ', '7': '7th ',
+                   '8': '8th ', '9': '9th ', '10': '10th', '11': '11th', '12': '12th', '13': '13th', '14': '14th',
+                   '15': '15th', '16': '16th', '17': '17th', '18': '18th', '19': '19th', '20': '20th', '21': '21st',
+                   '22': '22nd', '23': '23rd', '24': '24th', '25': '25th', '26': '26th', '27': '27th', '28': '28th',
+                   '29': '29th', '30': '30th'}
 today_date = datetime.date.today()
+
+# plaid Intergration
+import plaid
+from plaid import ApiClient
+from plaid.api import plaid_api
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.products import Products
+from plaid.model.country_code import CountryCode
+
+configuration = plaid.Configuration(
+    host=plaid.Environment.Sandbox,
+    api_key={
+        'clientId': "628518dd9002d30018305066",
+        'secret': "e14271c91cbc26e38782ed74bfa0cf",
+    }
+)
+api_client = plaid.ApiClient(configuration)
+client = plaid_api.PlaidApi(api_client)
+
+
+@ensure_csrf_cookie
+def create_link_token(request):
+    user = request.user
+    client_user_id = user.id
+    if user.is_authenticated:
+        # Create a link_token for the given user
+        request = LinkTokenCreateRequest(
+            products=[Products("transactions")],
+            client_name="Personal Finance App",
+            country_codes=[CountryCode('US')],
+            language='en',
+            user=LinkTokenCreateRequestUser(
+                client_user_id=str(client_user_id)
+            )
+        )
+        response = client.link_token_create(request)
+        response = response.to_dict()
+        print("response==========>", response)
+        link_token = response['link_token']
+        print("link_token====>", link_token)
+        return JsonResponse({'link_token': link_token})
+    else:
+        return HttpResponseRedirect('/login')
+
+
+def get_access_token(request):
+    global access_token
+    user = request.user
+
+    if user.is_authenticated:
+        body_data = json.loads(request.body.decode())
+        public_token = body_data["public_token"]
+        accounts = body_data["accounts"]
+        request = ItemPublicTokenExchangeRequest(public_token=public_token)
+        exchange_response = client.item_public_token_exchange(request)
+        access_token = exchange_response['access_token']
+        item_id = exchange_response['item_id']
+        plaid_item = None
+
+        try:
+            plaid_item = user.plaiditem_set.get(item_id=item_id)
+        except:
+            new_plaid_item = PlaidItem(user=user, access_token=access_token, item_id=item_id)
+            new_plaid_item.save()
+            plaid_item = user.plaiditem_set.get(item_id=item_id)
+
+        print('accounts=============>', accounts)
+        for account in accounts:
+            try:
+                existing_acct = user.account_set.get(plaid_account_id=account['account_id'])
+                continue
+            except:
+                new_acct = Account()
+                new_acct.plaid_account_id = account['id']
+                new_acct.balance = account['balances']['current']
+                new_acct.available_balance = account['balances']['available']
+                new_acct.mask = account['mask']
+                new_acct.name = account['name']
+                new_acct.subtype = account['subtype']
+                new_acct.account_type = account['type']
+                new_acct.user = user
+                new_acct.item = plaid_item
+                new_acct.save()
+
+        # Pretty printing in development
+        json.dumps(exchange_response, sort_keys=True, indent=4)
+        print(exchange_response)
+
+    return redirect('/login')
+
+
+def get_transactions(request):
+    user = request.user
+    if user.is_authenticated:
+        transactions = []
+        plaid_items = user.plaiditem_set.all()
+        if request.method == 'POST':
+            start_date = request.POST['start_date']
+            end_date = request.POST['end_date']
+        else:
+            timespan_weeks = 4 * 24  # Plaid only goes back 24 months
+            start_date = '{:%Y-%m-%d}'.format(datetime.now() + datetime.timedelta(weeks=(-timespan_weeks)))
+            end_date = '{:%Y-%m-%d}'.format(datetime.now())
+        for item in plaid_items:
+            try:
+                access_token = item.access_token
+                request = TransactionsGetRequest(
+                    access_token=access_token,
+                    start_date=start_date,
+                    end_date=end_date,
+                    options=TransactionsGetRequestOptions()
+                )
+                response = client.transactions_get(request)
+
+                transactions = response['transactions']
+                accounts = response['accounts']
+                error = None
+
+                for account in accounts:
+                    try:
+                        existing_acct = user.account_set.get(plaid_account_id=account['account_id'])
+                        continue
+                    except:
+                        new_acct = Account()
+                        new_acct.plaid_account_id = account['id']
+                        new_acct.balance = account['balances']['current']
+                        new_acct.available_balance = account['balances']['available']
+                        new_acct.mask = account['mask']
+                        new_acct.name = account['name']
+                        new_acct.subtype = account['subtype']
+                        new_acct.account_type = account['type']
+                        new_acct.user = user
+                        new_acct.item = item
+                        new_acct.save()
+
+                while len(transactions) < response['total_transactions']:
+                    request = TransactionsGetRequest(
+                        access_token=access_token,
+                        start_date=start_date,
+                        end_date=end_date,
+                        options=TransactionsGetRequestOptions(
+                            offset=len(transactions)
+                        )
+                    )
+                    response = client.transactions_get(request)
+                    transactions.extend(response['transactions'])
+
+                for transaction in transactions:
+                    try:
+                        existing_trans = user.transaction_set.get(plaid_transaction_id=transaction['transaction_id'])
+                        print("Transaction already exist")
+                        continue
+                    except Transaction.DoesNotExist:
+                        category_name = transaction['category']
+                        if category_name:
+                            try:
+                                category_obj = Category.objects.get(user=user, name=category_name[-1])
+                            except:
+                                category_obj = Category()
+                                category_obj.user = user
+                                category_obj.name = category_name[-1]
+                                category_obj.save()
+                        else:
+                            category_obj = Category()
+                            category_obj.user = user
+                            category_obj.name = 'Account Summary'
+                            category_obj.save()
+
+                        transaction_obj = Transaction()
+                        transaction_obj.user = user
+                        transaction_obj.amount = transaction['amount']
+                        transaction_obj.transaction_date = transaction['date']
+                        transaction_obj.categories = category_obj
+                        transaction_obj.account = user.account_set.get(plaid_account_id=transaction['account_id'])
+                        transaction_obj.payee = transaction.get('name', '')
+                        transaction_obj.tags = 'Account Summary'
+                        transaction_obj.cleared = True
+
+                        transaction_obj.save()
+            except Exception as e:
+                print(e)
+            # error = {'display_message': 'You need to link your account.' }
+        json.dumps(transactions, sort_keys=True, indent=4)
+        return HttpResponseRedirect('/', {'error': error, 'transactions': transactions})
+    else:
+        return redirect('/login')
 
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
@@ -1169,6 +1364,10 @@ class CategoryUpdate(LoginRequiredMixin, UpdateView):
 class CategoryDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         category_obj = Category.objects.get(pk=self.kwargs['pk'])
+        user_name = self.request.user
+        transaction_details = Transaction.objects.filter(user=user_name, categories=category_obj)
+        for data in transaction_details:
+            delete_transaction_details(data.pk, user_name)
         category_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
 
@@ -1689,6 +1888,10 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         budget_obj = Budget.objects.get(pk=self.kwargs['pk'])
         user_name = self.request.user
+        transaction_details = Transaction.objects.filter(user=user_name, budgets=budget_obj)
+        for data in transaction_details:
+            delete_transaction_details(data.pk, user_name)
+
         all_obj = Budget.objects.filter(user=user_name, name=budget_obj.name)
         for budget_data in all_obj:
             budget_data.delete()
@@ -1941,6 +2144,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         out_flow = form.cleaned_data.get('out_flow')
         cleared_amount = form.cleaned_data.get('cleared')
         bill_name = form.cleaned_data.get('bill')
+        print("bill_name=======>", bill_name)
         budget_name = self.request.POST['budget_name']
         transaction_date = form.cleaned_data.get('transaction_date')
         account = account.name
@@ -2126,51 +2330,56 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
+def delete_transaction_details(pk, user_name):
+    transaction_obj = Transaction.objects.get(pk=pk)
+    out_flow = transaction_obj.out_flow
+    cleared_amount = transaction_obj.cleared
+    account = transaction_obj.account
+    try:
+        bill_name = transaction_obj.bill
+    except:
+        bill_name = False
+    try:
+        budget_name = transaction_obj.budgets
+    except:
+        budget_name = False
+
+    transaction_amount = float(transaction_obj.amount)
+
+    if cleared_amount:
+        account_obj = Account.objects.get(user=user_name, name=account.name)
+
+        if bill_name:
+            bill_name = bill_name.label
+            bill_obj = Bill.objects.filter(user=user_name, label=bill_name)[0]
+            if out_flow:
+                bill_obj.amount = round(float(bill_obj.amount) + transaction_amount, 2)
+            else:
+                bill_obj.amount = round(float(bill_obj.amount) - transaction_amount, 2)
+
+            bill_obj.amount = bill_obj.amount
+            bill_obj.save()
+
+        if budget_name:
+            budget_obj = update_budget_items(user_name, budget_name, transaction_amount, out_flow)
+            budget_obj.save()
+
+        if out_flow:
+            account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
+        else:
+            account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
+
+        account_obj.transaction_count -= 1
+        account_obj.save()
+
+    transaction_obj.delete()
+
+
 class TransactionDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         user_name = self.request.user
-        transaction_obj = Transaction.objects.get(pk=self.kwargs['pk'])
-        out_flow = transaction_obj.out_flow
-        cleared_amount = transaction_obj.cleared
-        account = transaction_obj.account
-        try:
-            bill_name = transaction_obj.bill
-        except:
-            bill_name = False
-        try:
-            budget_name = transaction_obj.budgets
-        except:
-            budget_name = False
-
-        transaction_amount = float(transaction_obj.amount)
-
-        if cleared_amount:
-            account_obj = Account.objects.get(user=user_name, name=account.name)
-
-            if bill_name:
-                bill_name = bill_name.label
-                bill_obj = Bill.objects.filter(user=user_name, label=bill_name)[0]
-                if out_flow:
-                    bill_obj.amount = round(float(bill_obj.amount) + transaction_amount, 2)
-                else:
-                    bill_obj.amount = round(float(bill_obj.amount) - transaction_amount, 2)
-
-                bill_obj.amount = bill_obj.amount
-                bill_obj.save()
-
-            if budget_name:
-                budget_obj = update_budget_items(user_name, budget_name, transaction_amount, out_flow)
-                budget_obj.save()
-
-            if out_flow:
-                account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount, 2)
-            else:
-                account_obj.available_balance = round(float(account_obj.available_balance) - transaction_amount, 2)
-
-            account_obj.transaction_count -= 1
-            account_obj.save()
-
-        transaction_obj.delete()
+        pk = self.kwargs['pk']
+        delete_transaction_details(pk, user_name)
         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
@@ -2182,8 +2391,10 @@ def calculate_available_lock_amount(user_name, account_obj):
     total_allocate_amount = 0
     for data in goal_data:
         total_allocate_amount += float(data.allocate_amount)
-
-    available_lock_amount = float(lock_amount) - total_allocate_amount
+    if lock_amount:
+        available_lock_amount = float(lock_amount) - total_allocate_amount
+    else:
+        available_lock_amount = total_allocate_amount
     return available_lock_amount
 
 
@@ -2392,7 +2603,7 @@ class AccountAdd(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         total_balance = float(form.cleaned_data.get('balance'))
-        print("total Balance", total_balance)
+        print("total Balance============>", total_balance)
         lock_amount = form.cleaned_data.get('lock_amount')
         lock_check = form.cleaned_data.get('lock_check')
         if lock_amount != "None" and lock_amount and lock_check == "True":
@@ -2897,6 +3108,11 @@ def bill_update(request, pk):
 @login_required(login_url="/login")
 def bill_delete(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
+    user_name = request.user
+    transaction_details = Transaction.objects.filter(user=user_name, bill=bill_obj)
+    for data in transaction_details:
+        delete_transaction_details(data.pk, user_name)
+
     bill_obj.delete()
     return JsonResponse({"status": "Successfully", "path": "/bill_list/"})
 
@@ -4763,11 +4979,11 @@ def add_property(request):
             currency = request.GET['currency']
             value = request.GET['value']
             context = {
-                       'file_name': file_name,
-                       'name': name,
-                       'currency': currency,
-                       'value': value,
-                      }
+                'file_name': file_name,
+                'name': name,
+                'currency': currency,
+                'value': value,
+            }
 
         except:
             context = {'file_name': 'False', 'currency_symbol': '$'}
@@ -4779,10 +4995,10 @@ def add_property(request):
         one_year_date = today_date + datetime.timedelta(days=365)
 
     context.update({'today_date': today_date, 'one_year_date': one_year_date,
-               'today_date_str': str(today_date),
-               'one_year_date_str': str(one_year_date),
-               'month_date_dict': month_date_dict,
-               'currency_dict': currency_dict
+                    'today_date_str': str(today_date),
+                    'one_year_date_str': str(one_year_date),
+                    'month_date_dict': month_date_dict,
+                    'currency_dict': currency_dict
                     })
     return render(request, "property/property_add.html", context=context)
 
@@ -4792,7 +5008,7 @@ def update_property(request, pk, method_name):
     context = {'method_type': method_name,
                'currency_dict': currency_dict, 'property_type_list': property_type_list,
                'month_date_dict': month_date_dict, 'url_type': "Update"
-              }
+               }
     if method_name == "property":
         result_obj = Property.objects.get(user=user_name, pk=pk)
         if request.method == 'POST':
@@ -4898,7 +5114,7 @@ def property_details(request, pk):
                'unit_list': unit_list,
                'remaining_unit_list': remaining_unit_list,
                'maintenance_dict': maintenance_dict
-              }
+               }
     return render(request, "property/property_detail.html", context=context)
 
 
@@ -5220,7 +5436,7 @@ def property_invoice_add(request):
         property_list = Property.objects.filter(user=user_name)
         context = {'property_list': property_list}
 
-    return render(request, "property_invoice/property_invoice_add.html",  context=context)
+    return render(request, "property_invoice/property_invoice_add.html", context=context)
 
 
 def property_invoice_list(request, property_name, unit_name):
@@ -5350,4 +5566,3 @@ def property_info(request):
         user_name = request.user
         unit_list, tenant_dict, currency_symbol = get_units(user_name, property_name)
         return JsonResponse({'unit_list': unit_list, 'tenant_dict': tenant_dict, 'currency_symbol': currency_symbol})
-

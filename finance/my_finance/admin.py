@@ -27,3 +27,5 @@ admin.site.register(PropertyRentalInfo)
 admin.site.register(PropertyInvoice)
 admin.site.register(PropertyMaintenance)
 admin.site.register(PropertyExpense)
+admin.site.register(PlaidItem)
+
