@@ -11,3 +11,4 @@ six==1.15.0
 sqlparse==0.2.4
 reportlab==3.5.67
 requests==2.24.0
+plaid-python==9.9.0
