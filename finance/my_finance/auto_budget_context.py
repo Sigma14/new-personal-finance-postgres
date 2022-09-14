@@ -11,13 +11,11 @@ import time
 def all_time_login(request):
     url = f"http://vuexy.myds.me:8000/api/portfolio/list/"
     print("url===========>", url)
-    try:
-        portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
-        portfolio_list = portfolio_response.json()
-        print(portfolio_list)
-    except:
-        pass
-    time.sleep(10)
+    portfolio_response = requests.get(url, data={'user_name': 'admin'}, timeout=500)
+    print(portfolio_response)
+    portfolio_list = portfolio_response.json()
+    print(portfolio_list)
+    time.sleep(20 * 60)
     all_time_login(request)
 
 
