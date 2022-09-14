@@ -1,2 +1,5 @@
 # Pycharm Cache Files
 *.pyc
+.env
+venv
+env
