@@ -67,7 +67,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'my_finance.auto_budget_context.check_auto_budget',
-                'my_finance.auto_budget_context.all_time_login_context',
             ],
         },
     },

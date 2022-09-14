@@ -3,36 +3,6 @@ from .models import Budget, Bill, Revenues
 from datetime import datetime, timedelta
 import calendar
 from collections import OrderedDict
-import threading
-import requests
-import time
-
-
-def all_time_login(request):
-    url = f"http://vuexy.myds.me:8000/api/portfolio/list/"
-    print("url===========>", url)
-    portfolio_response = requests.get(url, data={'user_name': 'admin'}, timeout=500)
-    print(portfolio_response)
-    portfolio_list = portfolio_response.json()
-    print(portfolio_list)
-    time.sleep(20 * 60)
-    all_time_login(request)
-
-
-def all_time_login_context(request):
-    for thread in threading.enumerate():
-        print(thread.name)
-    context = {}
-    for thread in threading.enumerate():
-        if thread.name == "all_time_login_thread":
-            return context
-        else:
-            pass
-
-    t1 = threading.Thread(target=all_time_login, args=(request, ))
-    t1.start()
-    t1.name = 'all_time_login_thread'
-    return context
 
 
 def budgets_save(user_name, start_date, end_date, budget_name, budget_period, budget_currency, budget_amount,
