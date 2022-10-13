@@ -1468,6 +1468,25 @@ $("body").delegate(".get_transaction_btn", "click", function(event)
 
 });
 
+//  HIDE AND SHOW MORE APP DETAILS
+
+
+    $('.more_button').on('click', function(event)
+    {
+
+        if($(this).html() == 'More...')
+        {
+            $(this).html("Hide");
+            $(".see_more_summary").show();
+        }
+        else
+        {
+            $(this).html("More...");
+            $(".see_more_summary").hide();
+        }
+
+    });
+
 
 function getCookie(name) {
     let cookieValue = null;

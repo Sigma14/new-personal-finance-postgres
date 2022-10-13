@@ -5,6 +5,7 @@ urlpatterns = [
 
     # Home url:-
     path('', home, name='home'),
+    path('dashboard', dash_board, name='dashboard'),
     path('create_link_token', create_link_token, name='create-link-token'),
     path('get_access_token', get_access_token, name='get-access-token'),
     path('transactions/get', get_transactions, name='get-transactions'),

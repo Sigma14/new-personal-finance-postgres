@@ -1031,8 +1031,13 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
             balance_graph_data.append(round(current_balance, 2))
 
 
-@login_required(login_url="/login")
 def home(request):
+    print("home")
+    return render(request, "home.html")
+
+
+@login_required(login_url="/login")
+def dash_board(request):
     user_name = request.user
     if not request.user.is_anonymous:
         categories = Category.objects.filter(user=user_name)
