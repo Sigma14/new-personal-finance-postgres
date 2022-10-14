@@ -165,6 +165,7 @@
                 </li>
                 <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="home"></i><span class="menu-title text-truncate" data-i18n="Calculators">Real Estate</span></a>
                     <ul class="menu-content">
+                        <li class=" nav-item"><a class="d-flex align-items-center" href="{% url 'real_estate_home' %}"><i data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Home Page">Home page</span></a></li>
                         <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Property Manage">Property Manage</span></a>
                             <ul class="menu-content">
                                 <li class=" nav-item {% if request.resolver_match.view_name == 'property_list' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a

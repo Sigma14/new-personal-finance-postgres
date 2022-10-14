@@ -6,6 +6,7 @@ urlpatterns = [
     # Home url:-
     path('', home, name='home'),
     path('dashboard', dash_board, name='dashboard'),
+    path('real-estate-home', real_estate_home, name='real_estate_home'),
     path('create_link_token', create_link_token, name='create-link-token'),
     path('get_access_token', get_access_token, name='get-access-token'),
     path('transactions/get', get_transactions, name='get-transactions'),
@@ -74,6 +75,28 @@ urlpatterns = [
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),
     path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
 
+
+    # Revenue Urls :-
+    path('revenue_add/', revenue_add, name='revenue_add'),
+    path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
+    path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
+
+    # Revenue Urls :-
+    path('expenses_add/', expenses_add, name='expenses_add'),
+    path('expenses_update/<int:pk>', expenses_update, name='expenses_update'),
+    path('expenses_delete/<int:pk>', expenses_delete, name='expenses_delete'),
+
+    # Available Funds urls :-
+
+    path('funds_list/', FundList.as_view(), name='fund_list'),
+    path('fund_update/<int:pk>', fund_update, name='fund_update'),
+    path('fund_overtime', fund_overtime, name='fund_overtime'),
+
+    # Calculators
+
+    path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
+    path('future-net-worth-calculator/', future_net_worth_calculator, name='future_net_worth_calculator'),
+
     # Rental Property Models Urls:-
     path('rental_property_list/', RentalPropertyList.as_view(), name='rental_property_list'),
     path('rental_property_detail/<int:pk>', rental_property_details, name='rental_property_detail'),
@@ -105,34 +128,15 @@ urlpatterns = [
 
     # Property Invoice
     path('property/income/list/', property_income_list, name='property_income_list'),
-    path('property/invoice/list/<str:property_name>/<str:unit_name>', property_invoice_list, name='property_invoice_list'),
+    path('property/invoice/list/<str:property_name>/<str:unit_name>', property_invoice_list,
+         name='property_invoice_list'),
     path('property/invoice/details/<int:pk>', property_invoice_detail, name='property_invoice_details'),
     path('property/invoice/update/<int:pk>', property_invoice_update, name='property_invoice_update'),
     path('property/invoice/add', property_invoice_add, name='property_invoice_add'),
     path('property/invoice/delete/<int:pk>', property_invoice_delete, name='property_invoice_delete'),
     path('property/invoice/payment/<int:pk>', property_invoice_payment, name='property_invoice_payment'),
-    path('property/invoice/payment_delete/<int:pk>/<int:payment_index>/<str:paid_amount>', delete_invoice_payment, name='delete_invoice_payment'),
-
-    # Revenue Urls :-
-    path('revenue_add/', revenue_add, name='revenue_add'),
-    path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
-    path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
-
-    # Revenue Urls :-
-    path('expenses_add/', expenses_add, name='expenses_add'),
-    path('expenses_update/<int:pk>', expenses_update, name='expenses_update'),
-    path('expenses_delete/<int:pk>', expenses_delete, name='expenses_delete'),
-
-    # Available Funds urls :-
-
-    path('funds_list/', FundList.as_view(), name='fund_list'),
-    path('fund_update/<int:pk>', fund_update, name='fund_update'),
-    path('fund_overtime', fund_overtime, name='fund_overtime'),
-
-    # Calculators
-
-    path('mortgagecalculator/', mortgagecalculator, name='mortgagecalculator_list'),
-    path('future-net-worth-calculator/', future_net_worth_calculator, name='future_net_worth_calculator'),
+    path('property/invoice/payment_delete/<int:pk>/<int:payment_index>/<str:paid_amount>', delete_invoice_payment,
+         name='delete_invoice_payment'),
 
     path('login', user_login, name='user_login'),
     path('logout', user_logout, name='user_logout'),

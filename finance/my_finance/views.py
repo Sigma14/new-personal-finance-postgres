@@ -1031,9 +1031,16 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
             balance_graph_data.append(round(current_balance, 2))
 
 
+# Personal Finance Home Page
 def home(request):
     print("home")
     return render(request, "home.html")
+
+
+# Real Estate Home Page
+def real_estate_home(request):
+    print("real_estate")
+    return render(request, "real_estate_home.html")
 
 
 @login_required(login_url="/login")
@@ -3825,7 +3832,7 @@ def rental_property_update(request, pk):
                    'action_url': f"/rental_property_update/{pk}",
                    'heading_name': "Update Rental Property",
                    'heading_url': "Update Property",
-                   'property_url': "/rental_property_detail/{pk}",
+                   'property_url': f"/rental_property_detail/{pk}",
                    }
 
         return render(request, "properties/add_property.html", context=context)
