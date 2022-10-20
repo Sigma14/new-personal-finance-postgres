@@ -208,11 +208,18 @@
                                                                                                     </div>
                                                                                                 </th>
                                                                                                 {% for data in value %}
-
-                                                                                                    {% if forloop.counter == 2 %}
-                                                                                                        <td>{{data}}</td>
+                                                                                                    {% if data %}
+                                                                                                        {% if forloop.counter == 2 %}
+                                                                                                            <td>{{data}}</td>
+                                                                                                        {% else %}
+                                                                                                            <td>{{property_obj.currency}}{{data}}</td>
+                                                                                                        {% endif %}
                                                                                                     {% else %}
-                                                                                                        <td>{{property_obj.currency}}{{data}}</td>
+                                                                                                        {% if forloop.counter == 2 %}
+                                                                                                            <td>0</td>
+                                                                                                        {% else %}
+                                                                                                            <td>{{property_obj.currency}}0</td>
+                                                                                                        {% endif %}
                                                                                                     {% endif %}
                                                                                                 {% endfor %}
                                                                                             </tr>

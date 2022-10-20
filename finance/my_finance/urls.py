@@ -138,6 +138,10 @@ urlpatterns = [
     path('property/invoice/payment_delete/<int:pk>/<int:payment_index>/<str:paid_amount>', delete_invoice_payment,
          name='delete_invoice_payment'),
 
+    # Sample Pages
+    path('property/sample-page', property_sample_page, name='property_sample_page'),
+    path('rental_property/sample-page', rental_property_sample_page, name='rental_property_sample_page'),
+
     path('login', user_login, name='user_login'),
     path('logout', user_logout, name='user_logout'),
     path('net_worth', net_worth, name='net_worth'),
@@ -160,3 +164,4 @@ urlpatterns = [
     path('process_image', process_image, name='property_checkout'),
 
 ]
+

@@ -3,15 +3,13 @@ import csv
 import json
 import calendar
 import pandas as pd
-import numpy as np
 import datetime
+from dateutil import relativedelta
 from io import BytesIO
 import base64
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
-from django.contrib.auth.hashers import identify_hasher
-from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -247,6 +245,14 @@ def get_transactions(request):
         return HttpResponseRedirect('/', {'error': error, 'transactions': transactions})
     else:
         return redirect('/login')
+
+
+def check_zero_division(first_val, second_val):
+    try:
+        return first_val / second_val
+    except:
+        return 0
+
 
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
@@ -3322,402 +3328,413 @@ class RentalPropertyList(LoginRequiredMixin, ListView):
 
 @login_required(login_url="/login")
 def rental_property_details(request, pk):
-    user_name = request.user
-    property_obj = RentalPropertyModel.objects.get(user=user_name, pk=pk)
-    down_payment_value = (float(property_obj.purchase_price_detail.selected_price) * float(
-        property_obj.purchase_price_detail.down_payment)) / 100
-    selected_price = float(property_obj.purchase_price_detail.selected_price)
-    amount = float(property_obj.purchase_price_detail.selected_price) - down_payment_value
-    interest = float(property_obj.mortgage_detail.interest_rate)
-    currency_name = property_obj.currency
-    mortgage_year = float(property_obj.mortgage_detail.amortization_year)
-    other_cost_dict = ast.literal_eval(property_obj.closing_cost_detail.others_cost)[0]
-    total_investement = float(property_obj.closing_cost_detail.total_investment)
-    table = calculator(amount, interest, mortgage_year)
-    total_payment = abs(table['principle'].sum() + table['interest'].sum())
-    total_month = int(mortgage_year * 12)
-    json_records = table.reset_index().to_json(orient='records')
-    data = json.loads(json_records)
-    mortgage_date = property_obj.mortgage_detail.start_date
-    mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month,
-                                                                                           mortgage_date)
-    monthly_payment = data[0]['principle'] + data[0]['interest']
-    for key in other_cost_dict:
-        other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
-    other_cost_dict["Total Investment Required"] = f"{currency_name}{total_investement}"
-    other_cost_dict["Interest Rate Financed at"] = f"{interest}%"
-    other_cost_dict["Monthly Mortgage Payment (Principle & Interest)"] = f"{currency_name}{monthly_payment}"
+    try:
+        user_name = request.user
+        property_obj = RentalPropertyModel.objects.get(user=user_name, pk=pk)
+        down_payment_value = (float(property_obj.purchase_price_detail.selected_price) * float(
+            property_obj.purchase_price_detail.down_payment)) / 100
+        selected_price = float(property_obj.purchase_price_detail.selected_price)
+        amount = float(property_obj.purchase_price_detail.selected_price) - down_payment_value
+        interest = float(property_obj.mortgage_detail.interest_rate)
+        currency_name = property_obj.currency
+        mortgage_year = float(property_obj.mortgage_detail.amortization_year)
+        other_cost_dict = ast.literal_eval(property_obj.closing_cost_detail.others_cost)[0]
+        total_investement = float(property_obj.closing_cost_detail.total_investment)
+        table = calculator(amount, interest, mortgage_year)
+        total_payment = abs(table['principle'].sum() + table['interest'].sum())
+        total_month = int(mortgage_year * 12)
+        json_records = table.reset_index().to_json(orient='records')
+        data = json.loads(json_records)
+        mortgage_date = property_obj.mortgage_detail.start_date
+        mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month,
+                                                                                               mortgage_date)
+        monthly_payment = round(data[0]['principle'] + data[0]['interest'], 2)
+        for key in other_cost_dict:
+            other_cost_dict[key] = f"{currency_name}{other_cost_dict[key]}"
+        other_cost_dict["Total Investment Required"] = f"{currency_name}{total_investement}"
+        other_cost_dict["Interest Rate Financed at"] = f"{interest}%"
+        other_cost_dict["Monthly Mortgage Payment (Principle & Interest)"] = f"{currency_name}{monthly_payment}"
 
-    investment_data = {'Property Address': property_obj.name,
-                       'Property Purchase Price': f"{currency_name}{selected_price}",
-                       'Down Payment': f"{currency_name}{down_payment_value}",
-                       'Land Transfer Tax': f"{currency_name}{property_obj.closing_cost_detail.transfer_tax}",
-                       'Legal Fees': f"{currency_name}{property_obj.closing_cost_detail.legal_fee}",
-                       'Title Insurance': f"{currency_name}{property_obj.closing_cost_detail.title_insurance}",
-                       'Home Inspection ': f"{currency_name}{property_obj.closing_cost_detail.inspection}",
-                       'Appraisal Fee': f"{currency_name}{property_obj.closing_cost_detail.appraisal_fee}",
-                       'Purchase of Appliances': f"{currency_name}{property_obj.closing_cost_detail.appliances}",
-                       'Renovation Cost': f"{currency_name}{property_obj.closing_cost_detail.renovation_cost}",
-                       }
+        investment_data = {'Property Address': property_obj.name,
+                           'Property Purchase Price': f"{currency_name}{selected_price}",
+                           'Down Payment': f"{currency_name}{down_payment_value}",
+                           'Land Transfer Tax': f"{currency_name}{property_obj.closing_cost_detail.transfer_tax}",
+                           'Legal Fees': f"{currency_name}{property_obj.closing_cost_detail.legal_fee}",
+                           'Title Insurance': f"{currency_name}{property_obj.closing_cost_detail.title_insurance}",
+                           'Home Inspection ': f"{currency_name}{property_obj.closing_cost_detail.inspection}",
+                           'Appraisal Fee': f"{currency_name}{property_obj.closing_cost_detail.appraisal_fee}",
+                           'Purchase of Appliances': f"{currency_name}{property_obj.closing_cost_detail.appliances}",
+                           'Renovation Cost': f"{currency_name}{property_obj.closing_cost_detail.renovation_cost}",
+                           }
 
-    investment_data.update(other_cost_dict)
+        investment_data.update(other_cost_dict)
 
-    projection_key = []
-    total_revenue_list = []
-    annual_cash_flow_list = []
-    operating_expenses_list = []
-    cash_return_list = []
-    operating_expenses_ratio_list = []
-    net_operating_income_list = []
-    debt_cov_ratio_list = []
-    net_income_list = []
-    appreciation_assumption_list = []
-    roi_list = []
-    roi_p_list = []
-    roi_with_appreciation_list = []
-    roi_p_with_appreciation_list = []
-    cap_rate_list = []
-    cap_rate_include_closing_cost_list = []
-    revenue_unit_1_list = []
-    mortgage_principle_list = []
-    mortgage_interest_list = []
-    property_tax_list = []
-    insurance_list = []
-    maintenance_list = []
-    water_list = []
-    gas_list = []
-    electricity_list = []
-    water_heater_rental_list = []
-    management_fee_list = []
-    vacancy_list = []
-    capital_expenditure_list = []
-    annual_cash_flow_dict_investors = {}
-    net_operating_income_dict_investors = {}
-    roi_dict_investors = {}
-    roi_with_appreciation_dict_investors = {}
-    total_year_return_dict_investors = {}
+        projection_key = []
+        total_revenue_list = []
+        annual_cash_flow_list = []
+        operating_expenses_list = []
+        cash_return_list = []
+        operating_expenses_ratio_list = []
+        net_operating_income_list = []
+        debt_cov_ratio_list = []
+        net_income_list = []
+        appreciation_assumption_list = []
+        roi_list = []
+        roi_p_list = []
+        roi_with_appreciation_list = []
+        roi_p_with_appreciation_list = []
+        cap_rate_list = []
+        cap_rate_include_closing_cost_list = []
+        revenue_unit_1_list = []
+        mortgage_principle_list = []
+        mortgage_interest_list = []
+        property_tax_list = []
+        insurance_list = []
+        maintenance_list = []
+        water_list = []
+        gas_list = []
+        electricity_list = []
+        water_heater_rental_list = []
+        management_fee_list = []
+        vacancy_list = []
+        capital_expenditure_list = []
+        annual_cash_flow_dict_investors = {}
+        net_operating_income_dict_investors = {}
+        roi_dict_investors = {}
+        roi_with_appreciation_dict_investors = {}
+        total_year_return_dict_investors = {}
 
-    total_revenue = float(property_obj.monthly_revenue.total_revenue) * 12
-    rent_increase_assumption = float(property_obj.monthly_revenue.rent_increase_assumption)
-    interest_appreciation_assumption = float(property_obj.monthly_expenses.appreciation_assumption)
-    appreciation_assumption_value = (selected_price * interest_appreciation_assumption) / 100
-    all_investment = total_investement + (selected_price - down_payment_value)
-    unit_1_value = float(property_obj.monthly_revenue.unit_1) * 12
-    property_tax = float(property_obj.monthly_expenses.property_tax) * 12
-    insurance = float(property_obj.monthly_expenses.insurance) * 12
-    maintenance = float(property_obj.monthly_expenses.maintenance) * 12
-    water = float(property_obj.monthly_expenses.water) * 12
-    gas = float(property_obj.monthly_expenses.gas) * 12
-    electricity = float(property_obj.monthly_expenses.electricity) * 12
-    water_heater_rental = float(property_obj.monthly_expenses.water_heater_rental) * 12
-    management_fee = float(property_obj.monthly_expenses.management_fee) * 12
-    vacancy = float(property_obj.monthly_expenses.vacancy) * 12
-    capital_expenditure = float(property_obj.monthly_expenses.capital_expenditure) * 12
-    total_expense = float(property_obj.monthly_expenses.total_expenses) * 12
-    inflation_assumption = float(property_obj.monthly_expenses.inflation_assumption)
+        total_revenue = float(property_obj.monthly_revenue.total_revenue) * 12
+        rent_increase_assumption = float(property_obj.monthly_revenue.rent_increase_assumption)
+        interest_appreciation_assumption = float(property_obj.monthly_expenses.appreciation_assumption)
+        appreciation_assumption_value = (selected_price * interest_appreciation_assumption) / 100
+        all_investment = total_investement + (selected_price - down_payment_value)
+        unit_1_value = float(property_obj.monthly_revenue.unit_1) * 12
+        property_tax = float(property_obj.monthly_expenses.property_tax) * 12
+        insurance = float(property_obj.monthly_expenses.insurance) * 12
+        maintenance = float(property_obj.monthly_expenses.maintenance) * 12
+        water = float(property_obj.monthly_expenses.water) * 12
+        gas = float(property_obj.monthly_expenses.gas) * 12
+        electricity = float(property_obj.monthly_expenses.electricity) * 12
+        water_heater_rental = float(property_obj.monthly_expenses.water_heater_rental) * 12
+        management_fee = float(property_obj.monthly_expenses.management_fee) * 12
+        vacancy = float(property_obj.monthly_expenses.vacancy) * 12
+        capital_expenditure = float(property_obj.monthly_expenses.capital_expenditure) * 12
+        total_expense = float(property_obj.monthly_expenses.total_expenses) * 12
+        inflation_assumption = float(property_obj.monthly_expenses.inflation_assumption)
 
-    other_unit_dict = make_others_dict(ast.literal_eval(property_obj.monthly_revenue.others_revenue_cost)[0])
-    other_utility_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_utilities)[0])
-    other_expense_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_expenses)[0])
-    investors_dict = ast.literal_eval(property_obj.investor_details)[0]
-    total_investor_contributions = sum(investors_dict.values())
-    excess_short_fall = total_investor_contributions - total_investement
-    debt_financing = amount
-    total_financing = total_investor_contributions + amount
+        other_unit_dict = make_others_dict(ast.literal_eval(property_obj.monthly_revenue.others_revenue_cost)[0])
+        other_utility_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_utilities)[0])
+        other_expense_dict = make_others_dict(ast.literal_eval(property_obj.monthly_expenses.other_expenses)[0])
+        investors_dict = ast.literal_eval(property_obj.investor_details)[0]
+        total_investor_contributions = sum(investors_dict.values())
+        excess_short_fall = total_investor_contributions - total_investement
+        debt_financing = amount
+        total_financing = total_investor_contributions + amount
 
-    for key, units in investors_dict.items():
-        investor_contribution = round(float(units) / total_investor_contributions * 100, 2)
-        annual_cash_flow_dict_investors[key] = [investor_contribution]
-        net_operating_income_dict_investors[key] = [investor_contribution]
-        roi_dict_investors[key] = [investor_contribution]
-        roi_with_appreciation_dict_investors[key] = [investor_contribution]
-        investors_dict[key] = [f"{currency_name}{units}", f"{investor_contribution}%"]
+        for key, units in investors_dict.items():
+            investor_contribution = check_zero_division(float(units), total_investor_contributions)
+            investor_contribution = round(investor_contribution * 100, 2)
+            annual_cash_flow_dict_investors[key] = [investor_contribution]
+            net_operating_income_dict_investors[key] = [investor_contribution]
+            roi_dict_investors[key] = [investor_contribution]
+            roi_with_appreciation_dict_investors[key] = [investor_contribution]
+            investors_dict[key] = [f"{currency_name}{units}", f"{investor_contribution}%"]
 
-    start_index = 0
-    end_index = 12
+        start_index = 0
+        end_index = 12
 
-    for year in range(1, int(mortgage_year) + 1):
-        projection_key.append(f"Year {year}")
-        revenue_increase_assumption = total_revenue * rent_increase_assumption / 100
-        expense_increase_assumption = total_expense * inflation_assumption / 100
-        property_tax_increase = property_tax * inflation_assumption / 100
-        insurance_increase = insurance * inflation_assumption / 100
-        maintenance_increase = maintenance * inflation_assumption / 100
-        water_increase = water * inflation_assumption / 100
-        gas_increase = gas * inflation_assumption / 100
-        electricity_increase = electricity * inflation_assumption / 100
-        water_heater_rental_increase = water_heater_rental * inflation_assumption / 100
-        management_fee_increase = management_fee * inflation_assumption / 100
-        vacancy_increase = vacancy * inflation_assumption / 100
-        capital_expenditure_increase = capital_expenditure * inflation_assumption / 100
+        for year in range(1, int(mortgage_year) + 1):
+            projection_key.append(f"Year {year}")
+            revenue_increase_assumption = total_revenue * rent_increase_assumption / 100
+            expense_increase_assumption = total_expense * inflation_assumption / 100
+            property_tax_increase = property_tax * inflation_assumption / 100
+            insurance_increase = insurance * inflation_assumption / 100
+            maintenance_increase = maintenance * inflation_assumption / 100
+            water_increase = water * inflation_assumption / 100
+            gas_increase = gas * inflation_assumption / 100
+            electricity_increase = electricity * inflation_assumption / 100
+            water_heater_rental_increase = water_heater_rental * inflation_assumption / 100
+            management_fee_increase = management_fee * inflation_assumption / 100
+            vacancy_increase = vacancy * inflation_assumption / 100
+            capital_expenditure_increase = capital_expenditure * inflation_assumption / 100
 
-        appreciation_assumption_increase = (appreciation_assumption_value * interest_appreciation_assumption) / 100
-        unit_1_value_increase = unit_1_value * rent_increase_assumption / 100
-        mortgage_principle = 0
-        mortgage_interest = 0
-        for payment in data[start_index:end_index]:
-            mortgage_principle += abs(payment['principle'])
-            mortgage_interest += abs(payment['interest'])
+            appreciation_assumption_increase = (appreciation_assumption_value * interest_appreciation_assumption) / 100
+            unit_1_value_increase = unit_1_value * rent_increase_assumption / 100
+            mortgage_principle = 0
+            mortgage_interest = 0
+            for payment in data[start_index:end_index]:
+                mortgage_principle += abs(payment['principle'])
+                mortgage_interest += abs(payment['interest'])
 
-        other_units_dict = make_other_data(other_unit_dict, year, mortgage_year, rent_increase_assumption)
-        other_utilities_dict = make_other_data(other_utility_dict, year, mortgage_year, rent_increase_assumption)
-        other_expenses_dict = make_other_data(other_expense_dict, year, mortgage_year, rent_increase_assumption)
+            other_units_dict = make_other_data(other_unit_dict, year, mortgage_year, rent_increase_assumption)
+            other_utilities_dict = make_other_data(other_utility_dict, year, mortgage_year, rent_increase_assumption)
+            other_expenses_dict = make_other_data(other_expense_dict, year, mortgage_year, rent_increase_assumption)
 
-        expenses_ratio = round(total_expense / total_revenue * 100, 2)
-        cash_flow_value = total_revenue - total_expense - (monthly_payment * 12)
-        cash_return_value = cash_flow_value / total_investement * 100
-        income_value = round(total_revenue - total_expense, 2)
-        debt_value = round(income_value / (monthly_payment * 12), 2)
-        net_income_value = round(income_value - mortgage_interest, 2)
-        roi_value = round(cash_flow_value + mortgage_principle, 2)
-        roi_p_value = round(roi_value / total_investement * 100, 2)
-        roi_with_appreciation_value = round(roi_value + appreciation_assumption_value, 2)
-        roi_p_with_appreciation_value = round(roi_with_appreciation_value / total_investement * 100, 2)
-        cap_rate_value = round(income_value / selected_price * 100, 2)
-        cap_rate_include_closing_cost_value = round(income_value / all_investment * 100, 2)
+            expenses_ratio = check_zero_division(total_expense, total_revenue)
+            expenses_ratio = round(expenses_ratio * 100, 2)
+            cash_flow_value = total_revenue - total_expense - (monthly_payment * 12)
+            cash_return_value = check_zero_division(cash_flow_value, total_investement)
+            cash_return_value = cash_return_value * 100
+            income_value = round(total_revenue - total_expense, 2)
+            debt_value = check_zero_division(income_value, monthly_payment)
+            debt_value = round((debt_value * 12), 2)
+            net_income_value = round(income_value - mortgage_interest, 2)
+            roi_value = round(cash_flow_value + mortgage_principle, 2)
+            roi_p_value = check_zero_division(roi_value, total_investement)
+            roi_p_value = round(roi_p_value * 100, 2)
+            roi_with_appreciation_value = round(roi_value + appreciation_assumption_value, 2)
+            roi_p_with_appreciation_value = check_zero_division(roi_with_appreciation_value, total_investement)
+            roi_p_with_appreciation_value = round(roi_p_with_appreciation_value * 100, 2)
+            cap_rate_value = check_zero_division(income_value, selected_price)
+            cap_rate_value = round(cap_rate_value * 100, 2)
+            cap_rate_include_closing_cost_value = check_zero_division(income_value, all_investment)
+            cap_rate_include_closing_cost_value = round(cap_rate_include_closing_cost_value * 100, 2)
 
-        for key, value in annual_cash_flow_dict_investors.items():
-            investor_value = round(cash_flow_value * value[0] / 100, 2)
-            value.append(f"{currency_name}{investor_value}")
+            for key, value in annual_cash_flow_dict_investors.items():
+                investor_value = round(cash_flow_value * value[0] / 100, 2)
+                value.append(f"{currency_name}{investor_value}")
 
-        for key, value in net_operating_income_dict_investors.items():
-            investor_value = round(income_value * value[0] / 100, 2)
-            value.append(f"{currency_name}{investor_value}")
+            for key, value in net_operating_income_dict_investors.items():
+                investor_value = round(income_value * value[0] / 100, 2)
+                value.append(f"{currency_name}{investor_value}")
 
-        for key, value in roi_dict_investors.items():
-            investor_value = round(roi_value * value[0] / 100, 2)
-            value.append(f"{currency_name}{investor_value}")
+            for key, value in roi_dict_investors.items():
+                investor_value = round(roi_value * value[0] / 100, 2)
+                value.append(f"{currency_name}{investor_value}")
 
-        for key, value in roi_with_appreciation_dict_investors.items():
-            investor_value = round(roi_with_appreciation_value * value[0] / 100, 2)
-            value.append(f"{currency_name}{investor_value}")
+            for key, value in roi_with_appreciation_dict_investors.items():
+                investor_value = round(roi_with_appreciation_value * value[0] / 100, 2)
+                value.append(f"{currency_name}{investor_value}")
 
-        total_revenue_list.append(f"{currency_name}{round(total_revenue, 2)}")
-        operating_expenses_list.append(f"{currency_name}{round(total_expense, 2)}")
-        cash_return_list.append(f"{round(cash_return_value, 2)}%")
-        operating_expenses_ratio_list.append(f"{expenses_ratio}%")
-        annual_cash_flow_list.append(f"{currency_name}{round(cash_flow_value, 2)}")
-        net_operating_income_list.append(f"{currency_name}{income_value}")
-        debt_cov_ratio_list.append(debt_value)
-        appreciation_assumption_list.append(f"{currency_name}{round(appreciation_assumption_value, 2)}")
-        net_income_list.append(f"{currency_name}{net_income_value}")
-        roi_list.append(f"{currency_name}{roi_value}")
-        roi_p_list.append(f"{roi_p_value}%")
-        roi_with_appreciation_list.append(f"{currency_name}{roi_with_appreciation_value}")
-        roi_p_with_appreciation_list.append(f"{roi_p_with_appreciation_value}%")
-        cap_rate_list.append(f"{cap_rate_value}%")
-        cap_rate_include_closing_cost_list.append(f"{cap_rate_include_closing_cost_value}%")
-        revenue_unit_1_list.append(f"{round(unit_1_value, 2)}")
-        mortgage_principle_list.append(f"{round(mortgage_principle, 2)}")
-        mortgage_interest_list.append(f"{round(mortgage_interest, 2)}")
-        property_tax_list.append(f"{round(property_tax, 2)}")
-        insurance_list.append(f"{round(insurance, 2)}")
-        maintenance_list.append(f"{round(maintenance, 2)}")
-        water_list.append(f"{round(water, 2)}")
-        gas_list.append(f"{round(gas, 2)}")
-        electricity_list.append(f"{round(electricity, 2)}")
-        water_heater_rental_list.append(f"{round(water_heater_rental, 2)}")
-        management_fee_list.append(f"{round(management_fee, 2)}")
-        vacancy_list.append(f"{round(vacancy, 2)}")
-        capital_expenditure_list.append(f"{round(capital_expenditure, 2)}")
+            total_revenue_list.append(f"{currency_name}{round(total_revenue, 2)}")
+            operating_expenses_list.append(f"{currency_name}{round(total_expense, 2)}")
+            cash_return_list.append(f"{round(cash_return_value, 2)}%")
+            operating_expenses_ratio_list.append(f"{expenses_ratio}%")
+            annual_cash_flow_list.append(f"{currency_name}{round(cash_flow_value, 2)}")
+            net_operating_income_list.append(f"{currency_name}{income_value}")
+            debt_cov_ratio_list.append(debt_value)
+            appreciation_assumption_list.append(f"{currency_name}{round(appreciation_assumption_value, 2)}")
+            net_income_list.append(f"{currency_name}{net_income_value}")
+            roi_list.append(f"{currency_name}{roi_value}")
+            roi_p_list.append(f"{roi_p_value}%")
+            roi_with_appreciation_list.append(f"{currency_name}{roi_with_appreciation_value}")
+            roi_p_with_appreciation_list.append(f"{roi_p_with_appreciation_value}%")
+            cap_rate_list.append(f"{cap_rate_value}%")
+            cap_rate_include_closing_cost_list.append(f"{cap_rate_include_closing_cost_value}%")
+            revenue_unit_1_list.append(f"{round(unit_1_value, 2)}")
+            mortgage_principle_list.append(f"{round(mortgage_principle, 2)}")
+            mortgage_interest_list.append(f"{round(mortgage_interest, 2)}")
+            property_tax_list.append(f"{round(property_tax, 2)}")
+            insurance_list.append(f"{round(insurance, 2)}")
+            maintenance_list.append(f"{round(maintenance, 2)}")
+            water_list.append(f"{round(water, 2)}")
+            gas_list.append(f"{round(gas, 2)}")
+            electricity_list.append(f"{round(electricity, 2)}")
+            water_heater_rental_list.append(f"{round(water_heater_rental, 2)}")
+            management_fee_list.append(f"{round(management_fee, 2)}")
+            vacancy_list.append(f"{round(vacancy, 2)}")
+            capital_expenditure_list.append(f"{round(capital_expenditure, 2)}")
 
-        total_revenue += revenue_increase_assumption
-        total_expense += expense_increase_assumption
-        unit_1_value += unit_1_value_increase
-        appreciation_assumption_value += appreciation_assumption_increase
-        property_tax += property_tax_increase
-        insurance += insurance_increase
-        maintenance += maintenance_increase
-        water += water_increase
-        gas += gas_increase
-        electricity += electricity_increase
-        water_heater_rental += water_heater_rental_increase
-        management_fee += management_fee_increase
-        vacancy += vacancy_increase
-        capital_expenditure += capital_expenditure_increase
-        start_index = end_index
-        end_index += 12
+            total_revenue += revenue_increase_assumption
+            total_expense += expense_increase_assumption
+            unit_1_value += unit_1_value_increase
+            appreciation_assumption_value += appreciation_assumption_increase
+            property_tax += property_tax_increase
+            insurance += insurance_increase
+            maintenance += maintenance_increase
+            water += water_increase
+            gas += gas_increase
+            electricity += electricity_increase
+            water_heater_rental += water_heater_rental_increase
+            management_fee += management_fee_increase
+            vacancy += vacancy_increase
+            capital_expenditure += capital_expenditure_increase
+            start_index = end_index
+            end_index += 12
 
-    # Capex Budget data
+        # Capex Budget data
 
-    capex_budget_obj = property_obj.capex_budget_details
-    roof_list = make_capex_budget(ast.literal_eval(capex_budget_obj.roof))
-    water_heater_list = make_capex_budget(ast.literal_eval(capex_budget_obj.water_heater))
-    all_appliances_list = make_capex_budget(ast.literal_eval(capex_budget_obj.all_appliances))
-    bathroom_fixtures_list = make_capex_budget(ast.literal_eval(capex_budget_obj.bathroom_fixtures))
-    drive_way_list = make_capex_budget(ast.literal_eval(capex_budget_obj.drive_way))
-    furnance_list = make_capex_budget(ast.literal_eval(capex_budget_obj.furnance))
-    air_conditioner_list = make_capex_budget(ast.literal_eval(capex_budget_obj.air_conditioner))
-    flooring_list = make_capex_budget(ast.literal_eval(capex_budget_obj.flooring))
-    plumbing_list = make_capex_budget(ast.literal_eval(capex_budget_obj.plumbing))
-    electrical_list = make_capex_budget(ast.literal_eval(capex_budget_obj.electrical))
-    windows_list = make_capex_budget(ast.literal_eval(capex_budget_obj.windows))
-    paint_list = make_capex_budget(ast.literal_eval(capex_budget_obj.paint))
-    kitchen_list = make_capex_budget(ast.literal_eval(capex_budget_obj.kitchen))
-    structure_list = make_capex_budget(ast.literal_eval(capex_budget_obj.structure))
-    components_list = make_capex_budget(ast.literal_eval(capex_budget_obj.components))
-    landscaping_list = make_capex_budget(ast.literal_eval(capex_budget_obj.landscaping))
-    others_budgets_dict = ast.literal_eval(capex_budget_obj.other_budgets)[0]
-    total_replacement_costs = capex_budget_obj.total_budget_cost
-    for key, value in others_budgets_dict.items():
-        make_capex_budget(value)
+        capex_budget_obj = property_obj.capex_budget_details
+        roof_list = make_capex_budget(ast.literal_eval(capex_budget_obj.roof))
+        water_heater_list = make_capex_budget(ast.literal_eval(capex_budget_obj.water_heater))
+        all_appliances_list = make_capex_budget(ast.literal_eval(capex_budget_obj.all_appliances))
+        bathroom_fixtures_list = make_capex_budget(ast.literal_eval(capex_budget_obj.bathroom_fixtures))
+        drive_way_list = make_capex_budget(ast.literal_eval(capex_budget_obj.drive_way))
+        furnance_list = make_capex_budget(ast.literal_eval(capex_budget_obj.furnance))
+        air_conditioner_list = make_capex_budget(ast.literal_eval(capex_budget_obj.air_conditioner))
+        flooring_list = make_capex_budget(ast.literal_eval(capex_budget_obj.flooring))
+        plumbing_list = make_capex_budget(ast.literal_eval(capex_budget_obj.plumbing))
+        electrical_list = make_capex_budget(ast.literal_eval(capex_budget_obj.electrical))
+        windows_list = make_capex_budget(ast.literal_eval(capex_budget_obj.windows))
+        paint_list = make_capex_budget(ast.literal_eval(capex_budget_obj.paint))
+        kitchen_list = make_capex_budget(ast.literal_eval(capex_budget_obj.kitchen))
+        structure_list = make_capex_budget(ast.literal_eval(capex_budget_obj.structure))
+        components_list = make_capex_budget(ast.literal_eval(capex_budget_obj.components))
+        landscaping_list = make_capex_budget(ast.literal_eval(capex_budget_obj.landscaping))
+        others_budgets_dict = ast.literal_eval(capex_budget_obj.other_budgets)[0]
+        total_replacement_costs = capex_budget_obj.total_budget_cost
+        for key, value in others_budgets_dict.items():
+            make_capex_budget(value)
 
-    capex_budget_value = {
-        'Roof': roof_list,
-        'Water Heater': water_heater_list,
-        'All Appliances': all_appliances_list,
-        'Bathroom Fixtures (Showers, Vanities, Toilets etc.)': bathroom_fixtures_list,
-        'Driveway/Parking Lot': drive_way_list,
-        'Furnace': furnance_list,
-        'Air Conditioner ': air_conditioner_list,
-        'Flooring': flooring_list,
-        'Plumbing': plumbing_list,
-        'Electrical': electrical_list,
-        'Windows': windows_list,
-        'Paint': paint_list,
-        'Kitchen Cabinets/Counters': kitchen_list,
-        'Structure (foundation, framing)': structure_list,
-        'Components (garage door, etc.)': components_list,
-        'Landscaping': landscaping_list,
-    }
-    if others_budgets_dict:
-        capex_budget_value.update(others_budgets_dict)
-    # Yearly projection
-    projection_value = {'Total Revenue': total_revenue_list,
-                        'Annual Cashflow': annual_cash_flow_list,
-                        'Cash on Cash Return (%)': cash_return_list,
-                        'Operating Expenses': operating_expenses_list,
-                        'Operating Expenses Ratio': operating_expenses_ratio_list,
-                        'Net Operating Income (NOI)': net_operating_income_list,
-                        'Debt Service Coverage Ratio': debt_cov_ratio_list,
-                        'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list,
-                        'Property Appreciation Assumption': appreciation_assumption_list,
-                        'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
-                        'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
-                        'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
-                        'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
-                        'Capitalization Rate (Cap Rate)': cap_rate_list,
-                        'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
-                        }
+        capex_budget_value = {
+            'Roof': roof_list,
+            'Water Heater': water_heater_list,
+            'All Appliances': all_appliances_list,
+            'Bathroom Fixtures (Showers, Vanities, Toilets etc.)': bathroom_fixtures_list,
+            'Driveway/Parking Lot': drive_way_list,
+            'Furnace': furnance_list,
+            'Air Conditioner ': air_conditioner_list,
+            'Flooring': flooring_list,
+            'Plumbing': plumbing_list,
+            'Electrical': electrical_list,
+            'Windows': windows_list,
+            'Paint': paint_list,
+            'Kitchen Cabinets/Counters': kitchen_list,
+            'Structure (foundation, framing)': structure_list,
+            'Components (garage door, etc.)': components_list,
+            'Landscaping': landscaping_list,
+        }
+        if others_budgets_dict:
+            capex_budget_value.update(others_budgets_dict)
+        # Yearly projection
+        projection_value = {'Total Revenue': total_revenue_list,
+                            'Annual Cashflow': annual_cash_flow_list,
+                            'Cash on Cash Return (%)': cash_return_list,
+                            'Operating Expenses': operating_expenses_list,
+                            'Operating Expenses Ratio': operating_expenses_ratio_list,
+                            'Net Operating Income (NOI)': net_operating_income_list,
+                            'Debt Service Coverage Ratio': debt_cov_ratio_list,
+                            'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list,
+                            'Property Appreciation Assumption': appreciation_assumption_list,
+                            'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
+                            'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
+                            'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
+                            'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
+                            'Capitalization Rate (Cap Rate)': cap_rate_list,
+                            'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
+                            }
 
-    # yearly Revenues
+        # yearly Revenues
 
-    revenue_yearly_data = {'Unit 1': revenue_unit_1_list}
-    other_unit_dict['Total Revenue'] = total_revenue_list
-    revenue_yearly_data.update(other_units_dict)
+        revenue_yearly_data = {'Unit 1': revenue_unit_1_list}
+        other_unit_dict['Total Revenue'] = total_revenue_list
+        revenue_yearly_data.update(other_units_dict)
 
-    # Yearly Expenses
-    expenses_yearly_data1 = {'Mortgage Principle': mortgage_principle_list,
-                             'Mortgage Interest': mortgage_interest_list,
-                             'Property Taxes': property_tax_list,
-                             'Insurance': insurance_list,
-                             'Regular Maintenance': maintenance_list,
-                             'Water': water_list,
-                             'Gas': gas_list,
-                             'Electricity': electricity_list,
-                             'Water Heater Rental': water_heater_rental_list,
-                             }
-    expenses_yearly_data2 = {'Annual Cashflow': annual_cash_flow_list,
-                             'Cash on Cash Return (%)': cash_return_list,
-                             'Operating Expenses': operating_expenses_list,
-                             'Operating Expenses Ratio': operating_expenses_ratio_list,
-                             'Net Operating Income (NOI)': net_operating_income_list,
-                             'Debt Service Coverage Ratio': debt_cov_ratio_list,
-                             'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list
-                             }
-    expenses_yearly_data1.update(other_utilities_dict)
-    expenses_yearly_data1.update({"Capital Expenditure": capital_expenditure_list,
-                                  "Property Management Fees": management_fee_list, "Vacancy": vacancy_list})
-    expenses_yearly_data1.update(other_expenses_dict)
+        # Yearly Expenses
+        expenses_yearly_data1 = {'Mortgage Principle': mortgage_principle_list,
+                                 'Mortgage Interest': mortgage_interest_list,
+                                 'Property Taxes': property_tax_list,
+                                 'Insurance': insurance_list,
+                                 'Regular Maintenance': maintenance_list,
+                                 'Water': water_list,
+                                 'Gas': gas_list,
+                                 'Electricity': electricity_list,
+                                 'Water Heater Rental': water_heater_rental_list,
+                                 }
+        expenses_yearly_data2 = {'Annual Cashflow': annual_cash_flow_list,
+                                 'Cash on Cash Return (%)': cash_return_list,
+                                 'Operating Expenses': operating_expenses_list,
+                                 'Operating Expenses Ratio': operating_expenses_ratio_list,
+                                 'Net Operating Income (NOI)': net_operating_income_list,
+                                 'Debt Service Coverage Ratio': debt_cov_ratio_list,
+                                 'Net Income (Rental Revenue Less Operating Expenses and Interest Expenses)': net_income_list
+                                 }
+        expenses_yearly_data1.update(other_utilities_dict)
+        expenses_yearly_data1.update({"Capital Expenditure": capital_expenditure_list,
+                                      "Property Management Fees": management_fee_list, "Vacancy": vacancy_list})
+        expenses_yearly_data1.update(other_expenses_dict)
 
-    # Yearly Return On Investment
-    yearly_return_data = {
-        'Property Appreciation Assumption': appreciation_assumption_list,
-        'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
-        'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
-        'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
-        'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
-        'Capitalization Rate (Cap Rate)': cap_rate_list,
-        'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
-    }
+        # Yearly Return On Investment
+        yearly_return_data = {
+            'Property Appreciation Assumption': appreciation_assumption_list,
+            'Return On Investment % (ROI) (Assuming No Appreciation)': roi_p_list,
+            'Return On Investment (ROI) (Assuming No Appreciation)': roi_list,
+            'Return On Investment % (ROI) (With Appreciation Assumption)': roi_p_with_appreciation_list,
+            'Return On Investment (ROI) (With Appreciation Assumption)': roi_with_appreciation_list,
+            'Capitalization Rate (Cap Rate)': cap_rate_list,
+            'Capitalization Rate (Including all closing costs)': cap_rate_include_closing_cost_list,
+        }
 
-    # Stats and Graphs Data :-
+        # Stats and Graphs Data :-
 
-    cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)', 'data': cash_return_list}]
-    return_on_investment_data = [
-        {'name': 'Return On Investment % (ROI) (Assuming No Appreciation)', 'data': roi_p_list},
-        {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
-         'data': roi_p_with_appreciation_list}]
+        cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)', 'data': cash_return_list}]
+        return_on_investment_data = [
+            {'name': 'Return On Investment % (ROI) (Assuming No Appreciation)', 'data': roi_p_list},
+            {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
+             'data': roi_p_with_appreciation_list}]
 
-    change_annual_cash_flow_list = [float(x[1:]) for x in annual_cash_flow_list]
-    change_appreciation_assumption_list = [float(x[1:]) for x in appreciation_assumption_list]
-    change_mortgage_principle_list = [float(x) for x in mortgage_principle_list]
+        change_annual_cash_flow_list = [float(x[1:]) for x in annual_cash_flow_list]
+        change_appreciation_assumption_list = [float(x[1:]) for x in appreciation_assumption_list]
+        change_mortgage_principle_list = [float(x) for x in mortgage_principle_list]
 
-    debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': debt_cov_ratio_list}]
-    return_investment_data = [{'name': 'Annual Cashflow', 'data': change_annual_cash_flow_list},
-                              {'name': 'Net Operating Income(NOI)', 'data': [x[1:] for x in net_operating_income_list]},
-                              {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
-                               'data': [x[1:] for x in roi_list]},
-                              {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
-                               'data': [x[1:] for x in roi_with_appreciation_list]
-                               }]
-    property_expense_data = [{'name': 'Operating Expenses', 'data': [x[1:] for x in operating_expenses_list]}]
+        debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': debt_cov_ratio_list}]
+        return_investment_data = [{'name': 'Annual Cashflow', 'data': change_annual_cash_flow_list},
+                                  {'name': 'Net Operating Income(NOI)', 'data': [x[1:] for x in net_operating_income_list]},
+                                  {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
+                                   'data': [x[1:] for x in roi_list]},
+                                  {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
+                                   'data': [x[1:] for x in roi_with_appreciation_list]
+                                   }]
+        property_expense_data = [{'name': 'Operating Expenses', 'data': [x[1:] for x in operating_expenses_list]}]
 
-    stats_graph_dict = {'cash_on_cash_return_data': cash_on_cash_return_data,
-                        'return_on_investment_data': return_on_investment_data,
-                        'debt_cov_ratio_data': debt_cov_ratio_data,
-                        'return_investment_data': return_investment_data,
-                        'property_expense_data': property_expense_data}
+        stats_graph_dict = {'cash_on_cash_return_data': cash_on_cash_return_data,
+                            'return_on_investment_data': return_on_investment_data,
+                            'debt_cov_ratio_data': debt_cov_ratio_data,
+                            'return_investment_data': return_investment_data,
+                            'property_expense_data': property_expense_data}
 
-    total_year_return = sum(change_annual_cash_flow_list) + sum(change_appreciation_assumption_list) + \
-                        sum(change_mortgage_principle_list)
+        total_year_return = sum(change_annual_cash_flow_list) + sum(change_appreciation_assumption_list) + \
+                            sum(change_mortgage_principle_list)
 
-    for key, value in investors_dict.items():
-        update_value = float(value[1].replace("%", ""))
-        total_year_return_dict_investors[key] = [value[1],
-                                                 f"{currency_name}{round(update_value * total_year_return, 2)}"]
+        for key, value in investors_dict.items():
+            update_value = float(value[1].replace("%", ""))
+            total_year_return_dict_investors[key] = [value[1],
+                                                     f"{currency_name}{round(update_value * total_year_return, 2)}"]
 
-    expenses_yearly_data_dumbs = {}
-    expenses_yearly_data_dumbs.update(expenses_yearly_data1)
-    expenses_yearly_data_dumbs.update(expenses_yearly_data2)
+        expenses_yearly_data_dumbs = {}
+        expenses_yearly_data_dumbs.update(expenses_yearly_data1)
+        expenses_yearly_data_dumbs.update(expenses_yearly_data2)
 
-    context = {
-        'primary_key': pk,
-        'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
-        'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
-        "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
-        "yearly_return_data": yearly_return_data, 'data': data, 'monthly_payment': monthly_payment,
-        'last_month': last_month, 'days': total_month, 'total_payment': total_payment, 'mortgage_key': mortgage_key,
-        'mortgage_key_dumbs': json.dumps(mortgage_key), 'mortgage_graph_data': mortgage_graph_data,
-        'mortgage_date_data': mortgage_date_data, "total_year_return": round(total_year_return, 2),
-        "annual_cash_flow_dict_investors": annual_cash_flow_dict_investors,
-        "net_operating_income_dict_investors": net_operating_income_dict_investors,
-        "roi_dict_investors": roi_dict_investors,
-        "roi_with_appreciation_dict_investors": roi_with_appreciation_dict_investors,
-        "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
-        "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
-        "total_financing": total_financing, "capex_budget_value": capex_budget_value,
-        "total_replacement_costs": total_replacement_costs,
-        "total_return_investor_dict": total_year_return_dict_investors,
-        'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
-        "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
-        "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
-        "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
-        "roi_dict_investors_dumbs": json.dumps(roi_dict_investors),
-        "roi_with_appreciation_dict_investors_dumbs": json.dumps(roi_with_appreciation_dict_investors),
-        "cash_on_cash_return_data_dumbs": json.dumps(stats_graph_dict['cash_on_cash_return_data'][0]['data']),
-        "return_on_investment_data_dumbs": json.dumps(return_on_investment_data),
-        "debt_cov_ratio_data_dumbs": json.dumps(stats_graph_dict['debt_cov_ratio_data'][0]['data']),
-        "return_investment_data_dumbs": json.dumps(stats_graph_dict['return_investment_data']),
-        "property_expense_data_dumbs": json.dumps(stats_graph_dict['property_expense_data'][0]['data']),
-        "revenue_yearly_data_dumbs": json.dumps(revenue_yearly_data),
-        "expenses_yearly_data_dumbs": json.dumps(expenses_yearly_data_dumbs),
-        "yearly_return_data_dumbs": json.dumps(yearly_return_data)
+        context = {
+            'primary_key': pk,
+            'investment_data': investment_data, 'property_obj': property_obj, 'projection_key': projection_key,
+            'projection_value': projection_value, "revenue_yearly_data": revenue_yearly_data,
+            "expenses_yearly_data1": expenses_yearly_data1, "expenses_yearly_data2": expenses_yearly_data2,
+            "yearly_return_data": yearly_return_data, 'data': data, 'monthly_payment': monthly_payment,
+            'last_month': last_month, 'days': total_month, 'total_payment': total_payment, 'mortgage_key': mortgage_key,
+            'mortgage_key_dumbs': json.dumps(mortgage_key), 'mortgage_graph_data': mortgage_graph_data,
+            'mortgage_date_data': mortgage_date_data, "total_year_return": round(total_year_return, 2),
+            "annual_cash_flow_dict_investors": annual_cash_flow_dict_investors,
+            "net_operating_income_dict_investors": net_operating_income_dict_investors,
+            "roi_dict_investors": roi_dict_investors,
+            "roi_with_appreciation_dict_investors": roi_with_appreciation_dict_investors,
+            "investors_dict": investors_dict, "total_investor_contributions": total_investor_contributions,
+            "excess_short_fall": excess_short_fall, "debt_financing": debt_financing,
+            "total_financing": total_financing, "capex_budget_value": capex_budget_value,
+            "total_replacement_costs": total_replacement_costs,
+            "total_return_investor_dict": total_year_return_dict_investors,
+            'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
+            "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
+            "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
+            "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
+            "roi_dict_investors_dumbs": json.dumps(roi_dict_investors),
+            "roi_with_appreciation_dict_investors_dumbs": json.dumps(roi_with_appreciation_dict_investors),
+            "cash_on_cash_return_data_dumbs": json.dumps(stats_graph_dict['cash_on_cash_return_data'][0]['data']),
+            "return_on_investment_data_dumbs": json.dumps(return_on_investment_data),
+            "debt_cov_ratio_data_dumbs": json.dumps(stats_graph_dict['debt_cov_ratio_data'][0]['data']),
+            "return_investment_data_dumbs": json.dumps(stats_graph_dict['return_investment_data']),
+            "property_expense_data_dumbs": json.dumps(stats_graph_dict['property_expense_data'][0]['data']),
+            "revenue_yearly_data_dumbs": json.dumps(revenue_yearly_data),
+            "expenses_yearly_data_dumbs": json.dumps(expenses_yearly_data_dumbs),
+            "yearly_return_data_dumbs": json.dumps(yearly_return_data)
 
-    }
-    context.update(stats_graph_dict)
+        }
+        context.update(stats_graph_dict)
 
-    return render(request, "properties/property_detail.html", context=context)
+        return render(request, "properties/property_detail.html", context=context)
+    except Exception as err:
+        return render(request, "error.html", context={'error': 'Something Went Wrong'})
 
 
 def others_costs_data(other_closing_cost):
@@ -3737,6 +3754,7 @@ def rental_property_add(request):
             property_image = request.FILES['file']
         except:
             property_image = ""
+        print(request.POST)
         property_name = request.POST['name_address'].title()
         currency_name = request.POST['currency_name']
         user_name = request.user
@@ -3757,6 +3775,8 @@ def rental_property_add(request):
         return redirect("/rental_property_list/")
 
     else:
+        upcoming_date = today_date + relativedelta(months=1, day=1)
+        property_obj = {'mortgage_detail': {'start_date': str(upcoming_date), 'amortization_year': 25}}
         context = {
             'currency_dict': currency_dict,
             'scenario_dict': scenario_dict,
@@ -3764,6 +3784,7 @@ def rental_property_add(request):
             'heading_name': "Add Rental Property",
             'heading_url': "Add Property",
             'property_url': "/rental_property_list/",
+            'property_obj': property_obj
 
         }
         return render(request, "properties/add_property.html", context=context)
@@ -5057,7 +5078,7 @@ def update_property(request, pk, method_name):
     context['result_obj'] = result_obj
     return render(request, "property/property_update.html", context=context)
 
-
+@login_required(login_url="/login")
 def list_property(request):
     property_obj = Property.objects.filter(user=request.user)
     maintenance_dict = {}
@@ -5073,7 +5094,7 @@ def list_property(request):
                'property_key': property_key, 'property_key_dumps': json.dumps(property_key)}
     return render(request, "property/property_list.html", context=context)
 
-
+@login_required(login_url="/login")
 def property_details(request, pk):
     property_obj = Property.objects.get(user=request.user, pk=pk)
     unit_list = ast.literal_eval(property_obj.unit_details)
@@ -5129,7 +5150,7 @@ def property_details(request, pk):
                }
     return render(request, "property/property_detail.html", context=context)
 
-
+@login_required(login_url="/login")
 def add_lease(request, pk, unit_name):
     username = request.user
     result_obj = Property.objects.get(user=username, pk=pk)
@@ -5171,7 +5192,7 @@ def add_lease(request, pk, unit_name):
 
         return render(request, "property/property_update.html", context=context)
 
-
+@login_required(login_url="/login")
 def delete_property(request, pk):
     property_obj = Property.objects.get(pk=pk)
     property_obj.delete()
@@ -5318,6 +5339,7 @@ class ExpenseUpdate(LoginRequiredMixin, UpdateView):
         return data
 
 
+@login_required(login_url="/login")
 def delete_expense(request, pk):
     expense_obj = PropertyExpense.objects.get(pk=pk)
     expense_obj.delete()
@@ -5326,7 +5348,7 @@ def delete_expense(request, pk):
 
 # Income & Invoices
 
-
+@login_required(login_url="/login")
 def property_income_list(request):
     user_name = request.user
     unit_obj = PropertyRentalInfo.objects.filter(user=user_name)
@@ -5383,6 +5405,7 @@ def property_income_list(request):
     return render(request, "property_invoice/property_income_list.html", context=context)
 
 
+@login_required(login_url="/login")
 def property_invoice_add(request):
     user_name = request.user
     if request.method == 'POST':
@@ -5451,6 +5474,7 @@ def property_invoice_add(request):
     return render(request, "property_invoice/property_invoice_add.html", context=context)
 
 
+@login_required(login_url="/login")
 def property_invoice_list(request, property_name, unit_name):
     user_name = request.user
     invoice_details = PropertyInvoice.objects.filter(user=user_name, property_details__property_name=property_name,
@@ -5463,6 +5487,7 @@ def property_invoice_list(request, property_name, unit_name):
     return render(request, "property_invoice/property_invoice_list.html", context=context)
 
 
+@login_required(login_url="/login")
 def property_invoice_detail(request, pk):
     user_name = request.user
     invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
@@ -5491,6 +5516,7 @@ def property_invoice_detail(request, pk):
     return render(request, "property_invoice/property_invoice_detail.html", context=context)
 
 
+@login_required(login_url="/login")
 def property_invoice_update(request, pk):
     user_name = request.user
     invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
@@ -5498,6 +5524,7 @@ def property_invoice_update(request, pk):
     return render(request, "property_invoice/property_invoice_update.html", context=context)
 
 
+@login_required(login_url="/login")
 def record_payment_save(request, pk, method_type, paid_amount, payment_index=None):
     user_name = request.user
     invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
@@ -5541,18 +5568,21 @@ def record_payment_save(request, pk, method_type, paid_amount, payment_index=Non
     return redirect_url
 
 
+@login_required(login_url="/login")
 def delete_invoice_payment(request, pk, payment_index, paid_amount):
     paid_amount = float(paid_amount)
     redirect_url = record_payment_save(request, pk, 'delete_payment', paid_amount, payment_index)
     return redirect(redirect_url)
 
 
+@login_required(login_url="/login")
 def property_invoice_payment(request, pk):
     paid_amount = float(request.POST['paid_amount'])
     redirect_url = record_payment_save(request, pk, 'record_payment', paid_amount)
     return redirect(redirect_url)
 
 
+@login_required(login_url="/login")
 def property_invoice_delete(request, pk):
     user_name = request.user
     invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=pk)
@@ -5572,9 +5602,238 @@ def get_units(user_name, property_name):
     return unit_list, tenant_dict, property_info.currency
 
 
+@login_required(login_url="/login")
 def property_info(request):
     if request.method == 'POST' and request.is_ajax():
         property_name = request.POST['property_name']
         user_name = request.user
         unit_list, tenant_dict, currency_symbol = get_units(user_name, property_name)
         return JsonResponse({'unit_list': unit_list, 'tenant_dict': tenant_dict, 'currency_symbol': currency_symbol})
+
+
+# Sample Pages
+
+def property_sample_page(request):
+    graph_label = ['Total Open Invoices', 'Overdue', 'Partially Paid', 'Fully Paid']
+    graph_value = [11500.0, 0, 0, 600.0]
+    graph_currency = "$"
+    context = {'graph_label': json.dumps(graph_label),
+               'graph_value': graph_value,
+               'graph_currency': graph_currency,
+               'graph_id': "#income_pie_chart"
+               }
+    return render(request, 'property_sample_page.html', context=context)
+
+
+def rental_property_sample_page(request):
+    projection_key = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9',
+                      'Year 10', 'Year 11', 'Year 12', 'Year 13', 'Year 14', 'Year 15', 'Year 16', 'Year 17', 'Year 18',
+                      'Year 19', 'Year 20', 'Year 21', 'Year 22', 'Year 23', 'Year 24', 'Year 25', 'Year 26', 'Year 27',
+                      'Year 28', 'Year 29', 'Year 30']
+
+    cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)',
+                                 'data': ['9.21%', '9.76%', '10.33%', '10.91%', '11.5%', '12.11%', '12.72%', '13.35%',
+                                          '13.99%', '14.65%', '15.31%', '15.99%', '16.69%', '17.39%', '18.12%',
+                                          '18.85%', '19.6%', '20.37%', '21.15%', '21.95%', '22.76%', '23.59%', '24.43%',
+                                          '25.3%', '26.18%', '27.07%', '27.99%', '28.92%', '29.87%', '30.85%']}]
+
+    return_on_investment_data = [{'name': 'Return On Investment % (ROI) (Assuming No Appreciation)',
+                                  'data': ['16.92%', '17.71%', '18.52%', '19.35%', '20.2%', '21.07%', '21.95%',
+                                           '22.86%', '23.79%', '24.74%', '25.72%', '26.72%', '27.73%', '28.78%',
+                                           '29.85%', '30.94%', '32.06%', '33.2%', '34.37%', '35.57%', '36.8%',
+                                           '38.06%', '39.34%', '40.66%', '42.0%', '43.38%', '44.79%', '46.24%',
+                                           '47.72%', '49.23%']},
+                                 {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
+                                  'data': ['30.77%', '31.98%', '33.21%', '34.48%', '35.79%', '37.12%', '38.49%',
+                                           '39.9%', '41.34%', '42.82%', '44.33%', '45.89%', '47.48%', '49.12%',
+                                           '50.8%', '52.52%', '54.28%', '56.09%', '57.95%', '59.86%', '61.81%',
+                                           '63.82%', '65.88%', '67.99%', '70.16%', '72.38%', '74.66%', '77.0%', '79.41%', '81.87%']}]
+    debt_cov_ratio_data =[{'name': 'Debt Service Coverage Ratio (%)', 'data': [1.49, 1.52, 1.55, 1.58, 1.62, 1.65,
+                                                                               1.68, 1.71, 1.75, 1.78, 1.82, 1.86,
+                                                                               1.89, 1.93, 1.97, 2.01, 2.05, 2.09,
+                                                                               2.13, 2.17, 2.22, 2.26, 2.31, 2.35, 2.4,
+                                                                               2.45, 2.5, 2.55, 2.6, 2.65]}]
+    return_investment_data = [{'name': 'Annual Cashflow', 'data': [9969.6, 10573.73, 11189.95, 11818.49, 12459.6,
+                                                                   13113.53, 13780.54, 14460.89, 15154.85, 15862.69,
+                                                                   16584.69, 17321.12, 18072.28, 18838.47, 19619.98,
+                                                                   20417.12, 21230.2, 22059.55, 22905.48, 23768.33,
+                                                                   24648.44, 25546.15, 26461.81, 27395.79, 28348.44,
+                                                                   29320.15, 30311.3, 31322.27, 32353.45, 33405.26]},
+                              {'name': 'Net Operating Income(NOI)', 'data': ['30206.64', '30810.77', '31426.99',
+                                                                             '32055.53', '32696.64', '33350.57',
+                                                                             '34017.58', '34697.93', '35391.89',
+                                                                             '36099.73', '36821.73', '37558.16',
+                                                                             '38309.32', '39075.51', '39857.02',
+                                                                             '40654.16', '41467.24', '42296.59',
+                                                                             '43142.52', '44005.37', '44885.48',
+                                                                             '45783.19', '46698.85', '47632.83',
+                                                                             '48585.48', '49557.19', '50548.34',
+                                                                             '51559.31', '52590.49', '53642.3']},
+                              {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
+                               'data': ['18320.82', '19178.94', '20056.9', '20955.13', '21874.14', '22814.43',
+                                        '23776.5', '24760.87', '25768.12', '26798.8', '27853.42', '28932.62',
+                                        '30036.92', '31167.03', '32323.52', '33507.06', '34718.29', '35957.89',
+                                        '37226.54', '38524.99', '39853.93', '41214.15', '42606.36', '44031.4',
+                                        '45490.01', '46983.1', '48511.49', '50076.03', '51677.63', '53317.21']},
+                              {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
+                               'data': ['33320.82', '34628.94', '35970.4', '37346.04', '38756.77', '40203.54',
+                                        '41687.28', '43208.98', '44769.67', '46370.4', '48012.17', '49696.13',
+                                        '51423.33', '53195.04', '55012.37', '56876.57', '58788.89', '60750.6',
+                                        '62763.04', '64827.58', '66945.6', '69118.57', '71347.91', '73635.2',
+                                        '75981.92', '78389.77', '80860.36', '83395.37', '85996.55', '88665.69']}]
+
+    property_expense_data = [{'name': 'Operating Expenses', 'data': ['11793.36', '12029.23', '12269.81', '12515.21',
+                                                                     '12765.51', '13020.82', '13281.24', '13546.86',
+                                                                     '13817.8', '14094.16', '14376.04', '14663.56',
+                                                                     '14956.83', '15255.97', '15561.09', '15872.31',
+                                                                     '16189.76', '16513.55', '16843.82', '17180.7',
+                                                                     '17524.31', '17874.8', '18232.29', '18596.94',
+                                                                     '18968.88', '19348.26', '19735.22', '20129.93',
+                                                                     '20532.53', '20943.18']}]
+    mortgage_graph_data = [{'name': 'Balance',
+                           'data': [400000.0, 399313.58, 398625.45, 397935.6, 397244.02, 396550.72, 395855.68, 395158.9, 394460.38,
+                                   393760.12, 393058.1, 392354.33, 391648.8, 390941.5, 390232.44, 389521.61, 388808.99, 388094.6, 387378.42,
+                                   386660.45, 385940.69, 385219.12, 384495.75, 383770.58, 383043.59, 382314.78, 381584.15, 380851.7,
+                                   380117.41, 379381.29, 378643.32, 377903.51, 377161.86, 376418.35, 375672.98, 374925.74, 374176.64,
+                                   373425.67, 372672.81, 371918.08, 371161.46, 370402.95, 369642.54, 368880.23, 368116.01, 367349.89,
+                                   366581.84, 365811.88, 365040.0, 364266.18, 363490.43, 362712.74, 361933.11, 361151.52, 360367.98,
+                                   359582.49, 358795.03, 358005.6, 357214.2, 356420.82, 355625.45, 354828.1, 354028.76, 353227.41,
+                                   352424.06, 351618.71, 350811.34, 350001.95, 349190.54, 348377.1, 347561.63, 346744.11, 345924.56,
+                                   345102.95, 344279.29, 343453.58, 342625.79, 341795.94, 340964.02, 340130.01, 339293.92, 338455.74,
+                                   337615.46, 336773.08, 335928.6, 335082.01, 334233.29, 333382.46, 332529.5, 331674.41, 330817.18,
+                                   329957.81, 329096.28, 328232.61, 327366.77, 326498.77, 325628.61, 324756.26, 323881.74, 323005.02,
+                                   322126.12, 321245.02, 320361.72, 319476.2, 318588.48, 317698.53, 316806.36, 315911.96, 315015.33,
+                                   314116.45, 313215.32, 312311.95, 311406.31, 310498.41, 309588.24, 308675.79, 307761.07, 306844.05,
+                                   305924.75, 305003.14, 304079.24, 303153.02, 302224.48, 301293.63, 300360.45, 299424.93, 298487.08,
+                                   297546.88, 296604.33, 295659.43, 294712.16, 293762.52, 292810.51, 291856.12, 290899.35, 289940.18,
+                                   288978.61, 288014.64, 287048.26, 286079.47, 285108.25, 284134.61, 283158.53, 282180.01, 281199.04,
+                                   280215.62, 279229.74, 278241.4, 277250.59, 276257.3, 275261.53, 274263.26, 273262.51, 272259.25,
+                                   271253.48, 270245.2, 269234.39, 268221.06, 267205.2, 266186.8, 265165.85, 264142.35, 263116.29,
+                                   262087.66, 261056.46, 260022.69, 258986.33, 257947.38, 256905.83, 255861.68, 254814.92, 253765.54,
+                                   252713.54, 251658.9, 250601.64, 249541.72, 248479.16, 247413.94, 246346.06, 245275.51, 244202.28,
+                                   243126.37, 242047.77, 240966.48, 239882.48, 238795.77, 237706.34, 236614.19, 235519.31, 234421.69,
+                                   233321.33, 232218.22, 231112.35, 230003.71, 228892.3, 227778.12, 226661.15, 225541.38, 224418.82,
+                                   223293.45, 222165.27, 221034.27, 219900.44, 218763.77, 217624.26, 216481.91, 215336.7, 214188.62,
+                                   213037.68, 211883.86, 210727.15, 209567.55, 208405.05, 207239.65, 206071.33, 204900.1, 203725.93,
+                                   202548.83, 201368.79, 200185.79, 198999.84, 197810.92, 196619.03, 195424.17, 194226.31, 193025.46,
+                                   191821.61, 190614.74, 189404.87, 188191.96, 186976.03, 185757.05, 184535.03, 183309.95, 182081.81,
+                                   180850.59, 179616.3, 178378.93, 177138.46, 175894.89, 174648.21, 173398.42, 172145.5, 170889.44,
+                                   169630.25, 168367.91, 167102.41, 165833.75, 164561.92, 163286.91, 162008.71, 160727.32, 159442.72,
+                                   158154.91, 156863.88, 155569.63, 154272.13, 152971.4, 151667.41, 150360.16, 149049.65, 147735.85,
+                                   146418.78, 145098.41, 143774.74, 142447.76, 141117.46, 139783.84, 138446.88, 137106.58, 135762.93,
+                                   134415.93, 133065.55, 131711.8, 130354.66, 128994.13, 127630.2, 126262.86, 124892.1, 123517.91,
+                                   122140.29, 120759.23, 119374.71, 117986.73, 116595.28, 115200.35, 113801.94, 112400.03, 110994.61,
+                                   109585.68, 108173.23, 106757.25, 105337.72, 103914.65, 102488.02, 101057.83, 99624.05, 98186.7, 96745.75,
+                                   95301.2, 93853.03, 92401.25, 90945.84, 89486.79, 88024.09, 86557.73, 85087.71, 83614.01, 82136.63,
+                                   80655.56, 79170.78, 77682.29, 76190.08, 74694.14, 73194.46, 71691.03, 70183.84, 68672.88, 67158.15,
+                                   65639.63, 64117.31, 62591.19, 61061.25, 59527.49, 57989.89, 56448.45, 54903.15, 53353.99, 51800.96,
+                                   50244.05, 48683.24, 47118.54, 45549.92, 43977.37, 42400.9, 40820.49, 39236.12, 37647.8, 36055.5,
+                                   34459.22, 32858.96, 31254.69, 29646.41, 28034.11, 26417.78, 24797.4, 23172.98, 21544.5, 19911.94,
+                                   18275.31, 16634.58, 14989.75, 13340.81, 11687.74, 10030.55, 8369.21, 6703.71, 5034.06, 3360.23,
+                                   1682.21]}, {'name': 'Principle',
+                                               'data': [686.42, 688.13, 689.85, 691.58, 693.31, 695.04, 696.78, 698.52, 700.27, 702.02,
+                                                        703.77, 705.53, 707.29, 709.06, 710.84, 712.61, 714.39, 716.18, 717.97, 719.77,
+                                                        721.56, 723.37, 725.18, 726.99, 728.81, 730.63, 732.46, 734.29, 736.12, 737.96,
+                                                        739.81, 741.66, 743.51, 745.37, 747.23, 749.1, 750.97, 752.85, 754.73, 756.62,
+                                                        758.51, 760.41, 762.31, 764.22, 766.13, 768.04, 769.96, 771.89, 773.82, 775.75,
+                                                        777.69, 779.63, 781.58, 783.54, 785.5, 787.46, 789.43, 791.4, 793.38, 795.36,
+                                                        797.35, 799.35, 801.34, 803.35, 805.36, 807.37, 809.39, 811.41, 813.44, 815.47,
+                                                        817.51, 819.56, 821.6, 823.66, 825.72, 827.78, 829.85, 831.93, 834.01, 836.09,
+                                                        838.18, 840.28, 842.38, 844.48, 846.59, 848.71, 850.83, 852.96, 855.09, 857.23,
+                                                        859.37, 861.52, 863.68, 865.83, 868.0, 870.17, 872.34, 874.53, 876.71, 878.9, 881.1,
+                                                        883.3, 885.51, 887.73, 889.94, 892.17, 894.4, 896.64, 898.88, 901.13, 903.38,
+                                                        905.64, 907.9, 910.17, 912.45, 914.73, 917.01, 919.31, 921.6, 923.91, 926.22,
+                                                        928.53, 930.85, 933.18, 935.52, 937.85, 940.2, 942.55, 944.91, 947.27, 949.64,
+                                                        952.01, 954.39, 956.78, 959.17, 961.57, 963.97, 966.38, 968.8, 971.22, 973.65,
+                                                        976.08, 978.52, 980.97, 983.42, 985.88, 988.34, 990.81, 993.29, 995.77, 998.26,
+                                                        1000.76, 1003.26, 1005.77, 1008.28, 1010.8, 1013.33, 1015.86, 1018.4, 1020.95,
+                                                        1023.5, 1026.06, 1028.63, 1031.2, 1033.77, 1036.36, 1038.95, 1041.55, 1044.15,
+                                                        1046.76, 1049.38, 1052.0, 1054.63, 1057.27, 1059.91, 1062.56, 1065.22, 1067.88,
+                                                        1070.55, 1073.23, 1075.91, 1078.6, 1081.3, 1084.0, 1086.71, 1089.43, 1092.15,
+                                                        1094.88, 1097.62, 1100.36, 1103.11, 1105.87, 1108.64, 1111.41, 1114.19, 1116.97,
+                                                        1119.76, 1122.56, 1125.37, 1128.18, 1131.0, 1133.83, 1136.67, 1139.51, 1142.36,
+                                                        1145.21, 1148.07, 1150.94, 1153.82, 1156.71, 1159.6, 1162.5, 1165.4, 1168.32,
+                                                        1171.24, 1174.17, 1177.1, 1180.04, 1182.99, 1185.95, 1188.92, 1191.89, 1194.87,
+                                                        1197.86, 1200.85, 1203.85, 1206.86, 1209.88, 1212.9, 1215.94, 1218.98, 1222.02,
+                                                        1225.08, 1228.14, 1231.21, 1234.29, 1237.38, 1240.47, 1243.57, 1246.68, 1249.8,
+                                                        1252.92, 1256.05, 1259.19, 1262.34, 1265.5, 1268.66, 1271.83, 1275.01, 1278.2,
+                                                        1281.39, 1284.6, 1287.81, 1291.03, 1294.26, 1297.49, 1300.74, 1303.99, 1307.25,
+                                                        1310.52, 1313.79, 1317.08, 1320.37, 1323.67, 1326.98, 1330.3, 1333.62, 1336.96,
+                                                        1340.3, 1343.65, 1347.01, 1350.38, 1353.75, 1357.14, 1360.53, 1363.93, 1367.34,
+                                                        1370.76, 1374.19, 1377.62, 1381.07, 1384.52, 1387.98, 1391.45, 1394.93, 1398.42,
+                                                        1401.91, 1405.42, 1408.93, 1412.45, 1415.98, 1419.52, 1423.07, 1426.63, 1430.2,
+                                                        1433.77, 1437.36, 1440.95, 1444.55, 1448.16, 1451.78, 1455.41, 1459.05, 1462.7,
+                                                        1466.36, 1470.02, 1473.7, 1477.38, 1481.07, 1484.78, 1488.49, 1492.21, 1495.94,
+                                                        1499.68, 1503.43, 1507.19, 1510.96, 1514.73, 1518.52, 1522.32, 1526.12, 1529.94,
+                                                        1533.76, 1537.6, 1541.44, 1545.3, 1549.16, 1553.03, 1556.91, 1560.81, 1564.71,
+                                                        1568.62, 1572.54, 1576.47, 1580.41, 1584.36, 1588.33, 1592.3, 1596.28, 1600.27,
+                                                        1604.27, 1608.28, 1612.3, 1616.33, 1620.37, 1624.42, 1628.48, 1632.55, 1636.64,
+                                                        1640.73, 1644.83, 1648.94, 1653.06, 1657.2, 1661.34, 1665.49, 1669.66, 1673.83,
+                                                        1678.02, 1682.21]}, {'name': 'Interest',
+                                                                             'data': [1000.0, 998.28, 996.56, 994.84, 993.11, 991.38,
+                                                                                      989.64, 987.9, 986.15, 984.4, 982.65, 980.89, 979.12,
+                                                                                      977.35, 975.58, 973.8, 972.02, 970.24, 968.45, 966.65,
+                                                                                      964.85, 963.05, 961.24, 959.43, 957.61, 955.79,
+                                                                                      953.96, 952.13, 950.29, 948.45, 946.61, 944.76, 942.9,
+                                                                                      941.05, 939.18, 937.31, 935.44, 933.56, 931.68, 929.8,
+                                                                                      927.9, 926.01, 924.11, 922.2, 920.29, 918.37, 916.45,
+                                                                                      914.53, 912.6, 910.67, 908.73, 906.78, 904.83, 902.88,
+                                                                                      900.92, 898.96, 896.99, 895.01, 893.04, 891.05,
+                                                                                      889.06, 887.07, 885.07, 883.07, 881.06, 879.05,
+                                                                                      877.03, 875.0, 872.98, 870.94, 868.9, 866.86, 864.81,
+                                                                                      862.76, 860.7, 858.63, 856.56, 854.49, 852.41, 850.33,
+                                                                                      848.23, 846.14, 844.04, 841.93, 839.82, 837.71,
+                                                                                      835.58, 833.46, 831.32, 829.19, 827.04, 824.89,
+                                                                                      822.74, 820.58, 818.42, 816.25, 814.07, 811.89, 809.7,
+                                                                                      807.51, 805.32, 803.11, 800.9, 798.69, 796.47, 794.25,
+                                                                                      792.02, 789.78, 787.54, 785.29, 783.04, 780.78,
+                                                                                      778.52, 776.25, 773.97, 771.69, 769.4, 767.11, 764.81,
+                                                                                      762.51, 760.2, 757.88, 755.56, 753.23, 750.9, 748.56,
+                                                                                      746.22, 743.87, 741.51, 739.15, 736.78, 734.41,
+                                                                                      732.03, 729.64, 727.25, 724.85, 722.45, 720.04,
+                                                                                      717.62, 715.2, 712.77, 710.34, 707.9, 705.45, 703.0,
+                                                                                      700.54, 698.07, 695.6, 693.13, 690.64, 688.15, 685.66,
+                                                                                      683.16, 680.65, 678.13, 675.61, 673.09, 670.55,
+                                                                                      668.01, 665.47, 662.91, 660.36, 657.79, 655.22,
+                                                                                      652.64, 650.06, 647.47, 644.87, 642.26, 639.65,
+                                                                                      637.04, 634.41, 631.78, 629.15, 626.5, 623.85, 621.2,
+                                                                                      618.53, 615.87, 613.19, 610.51, 607.82, 605.12,
+                                                                                      602.42, 599.71, 596.99, 594.27, 591.54, 588.8, 586.05,
+                                                                                      583.3, 580.55, 577.78, 575.01, 572.23, 569.45, 566.65,
+                                                                                      563.85, 561.05, 558.23, 555.41, 552.59, 549.75,
+                                                                                      546.91, 544.06, 541.2, 538.34, 535.47, 532.59, 529.71,
+                                                                                      526.82, 523.92, 521.01, 518.1, 515.18, 512.25, 509.31,
+                                                                                      506.37, 503.42, 500.46, 497.5, 494.53, 491.55, 488.56,
+                                                                                      485.57, 482.56, 479.55, 476.54, 473.51, 470.48,
+                                                                                      467.44, 464.39, 461.34, 458.27, 455.2, 452.13, 449.04,
+                                                                                      445.95, 442.85, 439.74, 436.62, 433.5, 430.36, 427.22,
+                                                                                      424.08, 420.92, 417.76, 414.58, 411.4, 408.22, 405.02,
+                                                                                      401.82, 398.61, 395.39, 392.16, 388.92, 385.68,
+                                                                                      382.43, 379.17, 375.9, 372.62, 369.34, 366.05, 362.75,
+                                                                                      359.44, 356.12, 352.79, 349.46, 346.12, 342.77,
+                                                                                      339.41, 336.04, 332.66, 329.28, 325.89, 322.49,
+                                                                                      319.08, 315.66, 312.23, 308.79, 305.35, 301.9, 298.44,
+                                                                                      294.97, 291.49, 288.0, 284.5, 281.0, 277.49, 273.96,
+                                                                                      270.43, 266.89, 263.34, 259.79, 256.22, 252.64,
+                                                                                      249.06, 245.47, 241.86, 238.25, 234.63, 231.0, 227.36,
+                                                                                      223.72, 220.06, 216.39, 212.72, 209.04, 205.34,
+                                                                                      201.64, 197.93, 194.21, 190.48, 186.74, 182.99,
+                                                                                      179.23, 175.46, 171.68, 167.9, 164.1, 160.29, 156.48,
+                                                                                      152.65, 148.82, 144.97, 141.12, 137.26, 133.38, 129.5,
+                                                                                      125.61, 121.71, 117.8, 113.87, 109.94, 106.0, 102.05,
+                                                                                      98.09, 94.12, 90.14, 86.15, 82.15, 78.14, 74.12,
+                                                                                      70.09, 66.04, 61.99, 57.93, 53.86, 49.78, 45.69,
+                                                                                      41.59, 37.47, 33.35, 29.22, 25.08, 20.92, 16.76,
+                                                                                      12.59, 8.4, 4.21]}]
+    mortgage_date_data = ['2022-10-01', '2022-11-01', '2022-12-01', '2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01', '2023-10-01', '2023-11-01', '2023-12-01', '2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01', '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01', '2024-09-01', '2024-10-01', '2024-11-01', '2024-12-01', '2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01', '2025-05-01', '2025-06-01', '2025-07-01', '2025-08-01', '2025-09-01', '2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01', '2026-10-01', '2026-11-01', '2026-12-01', '2027-01-01', '2027-02-01', '2027-03-01', '2027-04-01', '2027-05-01', '2027-06-01', '2027-07-01', '2027-08-01', '2027-09-01', '2027-10-01', '2027-11-01', '2027-12-01', '2028-01-01', '2028-02-01', '2028-03-01', '2028-04-01', '2028-05-01', '2028-06-01', '2028-07-01', '2028-08-01', '2028-09-01', '2028-10-01', '2028-11-01', '2028-12-01', '2029-01-01', '2029-02-01', '2029-03-01', '2029-04-01', '2029-05-01', '2029-06-01', '2029-07-01', '2029-08-01', '2029-09-01', '2029-10-01', '2029-11-01', '2029-12-01', '2030-01-01', '2030-02-01', '2030-03-01', '2030-04-01', '2030-05-01', '2030-06-01', '2030-07-01', '2030-08-01', '2030-09-01', '2030-10-01', '2030-11-01', '2030-12-01', '2031-01-01', '2031-02-01', '2031-03-01', '2031-04-01', '2031-05-01', '2031-06-01', '2031-07-01', '2031-08-01', '2031-09-01', '2031-10-01', '2031-11-01', '2031-12-01', '2032-01-01', '2032-02-01', '2032-03-01', '2032-04-01', '2032-05-01', '2032-06-01', '2032-07-01', '2032-08-01', '2032-09-01', '2032-10-01', '2032-11-01', '2032-12-01', '2033-01-01', '2033-02-01', '2033-03-01', '2033-04-01', '2033-05-01', '2033-06-01', '2033-07-01', '2033-08-01', '2033-09-01', '2033-10-01', '2033-11-01', '2033-12-01', '2034-01-01', '2034-02-01', '2034-03-01', '2034-04-01', '2034-05-01', '2034-06-01', '2034-07-01', '2034-08-01', '2034-09-01', '2034-10-01', '2034-11-01', '2034-12-01', '2035-01-01', '2035-02-01', '2035-03-01', '2035-04-01', '2035-05-01', '2035-06-01', '2035-07-01', '2035-08-01', '2035-09-01', '2035-10-01', '2035-11-01', '2035-12-01', '2036-01-01', '2036-02-01', '2036-03-01', '2036-04-01', '2036-05-01', '2036-06-01', '2036-07-01', '2036-08-01', '2036-09-01', '2036-10-01', '2036-11-01', '2036-12-01', '2037-01-01', '2037-02-01', '2037-03-01', '2037-04-01', '2037-05-01', '2037-06-01', '2037-07-01', '2037-08-01', '2037-09-01', '2037-10-01', '2037-11-01', '2037-12-01', '2038-01-01', '2038-02-01', '2038-03-01', '2038-04-01', '2038-05-01', '2038-06-01', '2038-07-01', '2038-08-01', '2038-09-01', '2038-10-01', '2038-11-01', '2038-12-01', '2039-01-01', '2039-02-01', '2039-03-01', '2039-04-01', '2039-05-01', '2039-06-01', '2039-07-01', '2039-08-01', '2039-09-01', '2039-10-01', '2039-11-01', '2039-12-01', '2040-01-01', '2040-02-01', '2040-03-01', '2040-04-01', '2040-05-01', '2040-06-01', '2040-07-01', '2040-08-01', '2040-09-01', '2040-10-01', '2040-11-01', '2040-12-01', '2041-01-01', '2041-02-01', '2041-03-01', '2041-04-01', '2041-05-01', '2041-06-01', '2041-07-01', '2041-08-01', '2041-09-01', '2041-10-01', '2041-11-01', '2041-12-01', '2042-01-01', '2042-02-01', '2042-03-01', '2042-04-01', '2042-05-01', '2042-06-01', '2042-07-01', '2042-08-01', '2042-09-01', '2042-10-01', '2042-11-01', '2042-12-01', '2043-01-01', '2043-02-01', '2043-03-01', '2043-04-01', '2043-05-01', '2043-06-01', '2043-07-01', '2043-08-01', '2043-09-01', '2043-10-01', '2043-11-01', '2043-12-01', '2044-01-01', '2044-02-01', '2044-03-01', '2044-04-01', '2044-05-01', '2044-06-01', '2044-07-01', '2044-08-01', '2044-09-01', '2044-10-01', '2044-11-01', '2044-12-01', '2045-01-01', '2045-02-01', '2045-03-01', '2045-04-01', '2045-05-01', '2045-06-01', '2045-07-01', '2045-08-01', '2045-09-01', '2045-10-01', '2045-11-01', '2045-12-01', '2046-01-01', '2046-02-01', '2046-03-01', '2046-04-01', '2046-05-01', '2046-06-01', '2046-07-01', '2046-08-01', '2046-09-01', '2046-10-01', '2046-11-01', '2046-12-01', '2047-01-01', '2047-02-01', '2047-03-01', '2047-04-01', '2047-05-01', '2047-06-01', '2047-07-01', '2047-08-01', '2047-09-01', '2047-10-01', '2047-11-01', '2047-12-01', '2048-01-01', '2048-02-01', '2048-03-01', '2048-04-01', '2048-05-01', '2048-06-01', '2048-07-01', '2048-08-01', '2048-09-01', '2048-10-01', '2048-11-01', '2048-12-01', '2049-01-01', '2049-02-01', '2049-03-01', '2049-04-01', '2049-05-01', '2049-06-01', '2049-07-01', '2049-08-01', '2049-09-01', '2049-10-01', '2049-11-01', '2049-12-01', '2050-01-01', '2050-02-01', '2050-03-01', '2050-04-01', '2050-05-01', '2050-06-01', '2050-07-01', '2050-08-01', '2050-09-01', '2050-10-01', '2050-11-01', '2050-12-01', '2051-01-01', '2051-02-01', '2051-03-01', '2051-04-01', '2051-05-01', '2051-06-01', '2051-07-01', '2051-08-01', '2051-09-01', '2051-10-01', '2051-11-01', '2051-12-01', '2052-01-01', '2052-02-01', '2052-03-01', '2052-04-01', '2052-05-01', '2052-06-01', '2052-07-01', '2052-08-01', '2052-09-01']
+    context = {
+                'cash_on_cash_return_data': cash_on_cash_return_data,
+                'projection_key': projection_key,
+                'return_on_investment_data': return_on_investment_data,
+                'debt_cov_ratio_data': debt_cov_ratio_data,
+                'return_investment_data': return_investment_data,
+                'property_expense_data': property_expense_data,
+                'mortgage_date_data': mortgage_date_data,
+                'mortgage_graph_data': mortgage_graph_data}
+
+    return render(request, 'rental_prop_sample_page.html', context=context)

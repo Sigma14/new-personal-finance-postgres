@@ -1487,7 +1487,106 @@ $("body").delegate(".get_transaction_btn", "click", function(event)
 
     });
 
+//  Percentage Increase / Decrease
+$("body").delegate(".price_percentage", "change", function(event)
+{
+    price_p_val = parseFloat($(this).val())
+    likely_case_price = parseFloat($("#likely_case").val())
+    method_name = $(this).attr('method_name')
+    percentage_val = likely_case_price * price_p_val / 100
 
+    if(method_name == "best_case")
+    {
+        $("#best_case").val(likely_case_price - percentage_val)
+    }
+    if(method_name == "worst_case")
+    {
+        $("#worst_case").val(likely_case_price + percentage_val)
+    }
+    if(method_name == "likely_case")
+    {
+        best_price_p_val = $("#best_p_val").val()
+        worst_p_val = $("#worst_p_val").val()
+        best_case_p = likely_case_price * best_price_p_val / 100
+        worst_case_p = likely_case_price * worst_p_val / 100
+        $("#best_case").val(likely_case_price - best_case_p)
+        $("#worst_case").val(likely_case_price + worst_case_p)
+    }
+
+});
+
+//  Get Mortgage Year
+$("body").delegate("#mortgage_year", "change", function(event)
+{
+    year = $(this).val()
+    if(year != 30 && year != 25)
+    {
+        $(".get_mortgage_year").removeClass('badge-success')
+        $(".get_mortgage_year").removeClass('badge-primary')
+        $(".get_mortgage_year").addClass('badge-primary')
+
+    }
+    else
+    {
+        if(year == 25)
+        {
+            $("#min_year").removeClass('badge-primary')
+            $("#min_year").addClass('badge-success')
+            if( $("#max_year").hasClass('badge-success'))
+            {
+                $("#max_year").removeClass('badge-success')
+                $("#max_year").addClass('badge-primary')
+            }
+
+        }
+        else
+        {
+            $("#max_year").removeClass('badge-primary')
+            $("#max_year").addClass('badge-success')
+            if( $("#min_year").hasClass('badge-success'))
+            {
+                $("#min_year").removeClass('badge-success')
+                $("#min_year").addClass('badge-primary')
+            }
+
+        }
+    }
+
+});
+
+//  Get Mortgage Year
+$("body").delegate(".get_mortgage_year", "click", function(event)
+{
+    year = $(this).text().trim();
+    year_id = $(this).attr('id')
+    if(year_id == 'min_year')
+    {
+        if($("#max_year").hasClass('badge-success'))
+        {
+            $("#max_year").removeClass('badge-success')
+            $("#max_year").addClass('badge-primary')
+        }
+    }
+    else
+    {
+        if($("#min_year").hasClass('badge-success'))
+        {
+            $("#min_year").removeClass('badge-success')
+            $("#min_year").addClass('badge-primary')
+        }
+
+    }
+    $(this).removeClass('badge-primary')
+    $(this).addClass('badge-success')
+    $("#mortgage_year").val(year);
+
+});
+
+//  Show Interest Rate
+$("body").delegate(".show_interest_rate", "click", function(event)
+{
+    $(".interest_rate_info").toggle();
+});
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

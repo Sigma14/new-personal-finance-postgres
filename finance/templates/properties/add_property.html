@@ -116,7 +116,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Name / Address</label>
+                                                    <label for="fname-icon">Name / Address  <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -168,24 +168,11 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Best Case Scenario Purchase Price</label>
+                                                    <label for="fname-icon">Likely Case Scenario Purchase Price <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
-                                                        <input type="text" id="best_case" value="{{property_obj.purchase_price_detail.best_case_price}}" class="form-control" name="best_case" required
-                                                               placeholder="Best Case Purchase Price"/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Likely Case Scenario Purchase Price</label>
-                                                </div>
-                                                <div class="col-sm-9">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="text" id="likely_case" class="form-control" value="{{property_obj.purchase_price_detail.likely_case_price}}" name="likely_case" required
+                                                        <input type="text" id="likely_case" class="form-control price_percentage" method_name="likely_case" value="{% if property_obj.purchase_price_detail.likely_case_price %}{{property_obj.purchase_price_detail.likely_case_price}}{% else%}50000{% endif %}" name="likely_case" required
                                                                placeholder="Likely Case Purchase Price"/>
                                                     </div>
                                                 </div>
@@ -194,12 +181,18 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Worst Case Scenario Purchase Price</label>
+                                                    <label for="fname-icon">Best Case Scenario Purchase Price <strong class="text-danger">*</strong></label>
                                                 </div>
-                                                <div class="col-sm-9">
+                                                <div class="col-sm-8" style="padding-right: 0px;">
                                                     <div class="input-group input-group-merge">
-                                                        <input type="text" id="worst_case" class="form-control" value="{{property_obj.purchase_price_detail.worst_case_price}}" name="worst_case" required
-                                                               placeholder="Worst Case Purchase Price"/>
+                                                        <input type="text" readonly="readonly" id="best_case" value="{% if property_obj.purchase_price_detail.best_case_price %}{{property_obj.purchase_price_detail.best_case_price}}{% else%}49000{% endif %}" class="form-control" name="best_case" required
+                                                               placeholder="Best Case Purchase Price"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-1" style="padding: 0px;">
+                                                    <div class="input-group">
+                                                        <input type="number" id="best_p_val" class="touchspin-icon price_percentage" method_name="best_case" value="2" data-bts-button-down-class="btn btn-danger" data-bts-button-up-class="btn btn-danger"/>
+                                                         <strong class="">%</strong>
                                                     </div>
                                                 </div>
                                             </div>
@@ -207,7 +200,26 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Select a Scenario Purchase Price</label>
+                                                    <label for="fname-icon">Worst Case Scenario Purchase Price <strong class="text-danger">*</strong></label>
+                                                </div>
+                                                <div class="col-sm-8" style="padding-right: 0px;">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" id="worst_case" readonly="readonly"  class="form-control" value="{% if property_obj.purchase_price_detail.worst_case_price %}{{property_obj.purchase_price_detail.worst_case_price}}{% else%}51000{% endif %}" name="worst_case" required
+                                                               placeholder="Worst Case Purchase Price"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-1" style="padding: 0px;">
+                                                    <div class="input-group">
+                                                        <input type="number" id="worst_p_val" class="touchspin-icon price_percentage" method_name="worst_case" value="2" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success"/>
+                                                         <strong class="">%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label for="fname-icon">Select a Scenario Purchase Price <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -231,7 +243,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Purchase Price Selected</label>
+                                                    <label for="fname-icon">Purchase Price Selected <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -244,7 +256,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Down Payment(%)</label>
+                                                    <label for="fname-icon">Down Payment(%) <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -264,7 +276,8 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Interest Rate on Mortgage(%)</label>
+                                                    <a class="bg-light-info show_interest_rate" data-feather="info"></a>
+                                                    <a href="https://www.theglobaleconomy.com/rankings/mortgage_interest_rate/" target="_blank" title="see interest rates for different countries">&nbsp;Interest Rate on Mortgage(%) <strong class="text-danger">*</strong></a>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -274,22 +287,36 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12">
+                                        <div class="col-12 interest_rate_info" style="display:none;">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Mortgage Amortization (Year)</label>
+                                                    &nbsp;
                                                 </div>
-                                                <div class="col-sm-9">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="text" class="form-control" value="{{property_obj.mortgage_detail.amortization_year}}" name="amortization_year" required placeholder="Mortgage Amortization (Year)"/>
-                                                    </div>
+                                                <div class="col-sm-9 col-form-label">
+                                                    <label for="fname-icon" class="text-danger">you can look at mortgage rates for different countries. Keep in mind, rates will differ depending on many factors. Please note, it says the date the data was last update. Please refer to local market and bank websites for most updated information.</label>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Mortgage Start Date</label>
+                                                    <label for="fname-icon">Mortgage Amortization (Year) <strong class="text-danger">*</strong></label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" id="mortgage_year" class="form-control" value="{{property_obj.mortgage_detail.amortization_year}}" name="amortization_year" required placeholder="Mortgage Amortization (Year)"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-1">
+                                                    <a class="badge badge-pill badge-success get_mortgage_year" id="min_year" style="padding:12px; color:white;">25</a>
+                                                    <a class="badge badge-pill badge-primary get_mortgage_year" id="max_year" style="padding:12px; color:white;">30</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label for="fname-icon">Mortgage Start Date <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-9">
                                                     <div class="input-group input-group-merge">
@@ -329,7 +356,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Land Transfer Taxes</label>
+                                                    <label for="fname-icon">Land Transfer Taxes <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -347,7 +374,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Legal Fees and Professional Fees</label>
+                                                    <label for="fname-icon">Legal Fees and Professional Fees <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -365,7 +392,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Title Insurance/Search</label>
+                                                    <label for="fname-icon">Title Insurance/Search <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -378,7 +405,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Home Inspection</label>
+                                                    <label for="fname-icon">Home Inspection <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -396,7 +423,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Appraisal Fee</label>
+                                                    <label for="fname-icon">Appraisal Fee <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -414,7 +441,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Appliances</label>
+                                                    <label for="fname-icon">Appliances <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -432,7 +459,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Renovation Cost/Referbishment Cost</label>
+                                                    <label for="fname-icon">Renovation Cost/Referbishment Cost <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -451,7 +478,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Land Transfer Taxes</label>
+                                                    <label for="fname-icon">Land Transfer Taxes <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -469,7 +496,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Legal Fees and Professional Fees</label>
+                                                    <label for="fname-icon">Legal Fees and Professional Fees <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -487,7 +514,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Title Insurance/Search</label>
+                                                    <label for="fname-icon">Title Insurance/Search <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -500,7 +527,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Home Inspection</label>
+                                                    <label for="fname-icon">Home Inspection <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -518,7 +545,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Appraisal Fee</label>
+                                                    <label for="fname-icon">Appraisal Fee <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -536,7 +563,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Appliances</label>
+                                                    <label for="fname-icon">Appliances <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -554,7 +581,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Renovation Cost/Referbishment Cost</label>
+                                                    <label for="fname-icon">Renovation Cost/Referbishment Cost <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -656,7 +683,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Unit 1</label>
+                                                    <label for="fname-icon">Unit 1 <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -694,7 +721,7 @@
                                                     <div class="col-12 unit_div_{{forloop.counter|add:1}}">
                                                         <div class="form-group row">
                                                             <div class="col-sm-3 col-form-label">
-                                                                <label for="fname-icon">{{key}}</label>
+                                                                <label for="fname-icon">{{key}} <strong class="text-danger">*</strong></label>
                                                             </div>
                                                             <div class="col-sm-6">
                                                                 <div class="input-group input-group-merge">
@@ -710,7 +737,7 @@
                                         <div class="col-12 unit_div_2">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label class="last_unit" unit_number="2">Unit 2</label>
+                                                    <label class="last_unit" unit_number="2">Unit 2 <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-5">
                                                     <div class="input-group input-group-merge">
@@ -732,7 +759,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Annual % Rent Increase Assumption</label>
+                                                    <label for="fname-icon">Annual % Rent Increase Assumption <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -777,7 +804,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Property Taxes</label>
+                                                    <label for="fname-icon">Property Taxes <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -795,7 +822,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Insurance</label>
+                                                    <label for="fname-icon">Insurance <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -813,7 +840,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Regular Maintenance</label>
+                                                    <label for="fname-icon">Regular Maintenance <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -838,7 +865,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Water</label>
+                                                    <label for="fname-icon">Water <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -856,7 +883,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Gas</label>
+                                                    <label for="fname-icon">Gas <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -874,7 +901,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Electricity</label>
+                                                    <label for="fname-icon">Electricity <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -892,7 +919,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Water Heater Rental</label>
+                                                    <label for="fname-icon">Water Heater Rental <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -976,7 +1003,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Property Management Fees</label>
+                                                    <label for="fname-icon">Property Management Fees <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -994,7 +1021,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Vacancy</label>
+                                                    <label for="fname-icon">Vacancy <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -1012,7 +1039,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Capital Expenditure Budget</label>
+                                                    <label for="fname-icon">Capital Expenditure Budget <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -1108,7 +1135,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Annual Expense % Inflation Assumption</label>
+                                                    <label for="fname-icon">Annual Expense % Inflation Assumption <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">
@@ -1121,7 +1148,7 @@
                                         <div class="col-12">
                                             <div class="form-group row">
                                                 <div class="col-sm-3 col-form-label">
-                                                    <label for="fname-icon">Annual Property Appreciation Assumption</label>
+                                                    <label for="fname-icon">Annual Property Appreciation Assumption <strong class="text-danger">*</strong></label>
                                                 </div>
                                                 <div class="col-sm-6">
                                                     <div class="input-group input-group-merge">

@@ -208,6 +208,8 @@ $(function () {
                 else
                 {
                     form_list[0] = 'false'
+                    console.log("d.value", d.value)
+                    console.log("false")
 
                 }
             }

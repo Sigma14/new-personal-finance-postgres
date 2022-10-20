@@ -102,7 +102,7 @@
     <div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
         <div class="navbar-header">
             <ul class="nav navbar-nav flex-row">
-                <li class="nav-item mr-auto"><a class="navbar-brand" href="{% static 'html/ltr/vertical-menu-template-dark/index.html' %}"><span class="brand-logo">
+                <li class="nav-item mr-auto"><a class="navbar-brand" href="{% static 'home' %}"><span class="brand-logo">
                             <svg viewbox="0 0 139 95" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="24">
                                 <defs>
                                     <lineargradient id="linearGradient-1" x1="100%" y1="10.5120544%" x2="50%" y2="89.4879456%">
@@ -184,13 +184,21 @@
                                         class="d-flex align-items-center" href="{% url 'property_maintenance_list' %}"><i
                                         data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Maintenace</span></a>
                                 </li>
+                                <li class=" nav-item {% if request.resolver_match.view_name == 'property_sample_page'%}active{% endif %}"><a
+                                        class="d-flex align-items-center" href="{% url 'property_sample_page' %}"><i
+                                        data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Sample Page">Sample Page</span></a>
+                                </li>
                             </ul>
                         </li>
                         <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Properties Model</span></a>
                             <ul class="menu-content">
-                                <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list'  or request.resolver_match.view_name == 'rental_property_add' or request.resolver_match.view_name == 'rental_property_detail' or request.resolver_match.view_name == 'rental_property_update' %}active{% endif %}"><a
+                                <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_list' %}active{% endif %}"><a
                                         class="d-flex align-items-center" href="{% url 'rental_property_list' %}"><i
                                         data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Properties">Rental Property</span></a>
+                                </li>
+                                <li class=" nav-item {% if request.resolver_match.view_name == 'rental_property_sample_page' or request.resolver_match.view_name == 'property_add'  %}active{% endif %}"><a
+                                        class="d-flex align-items-center" href="{% url 'rental_property_sample_page' %}"><i
+                                        data-feather="circle"></i><span class="menu-title text-truncate" data-i18n="Sample Page">Sample Page</span></a>
                                 </li>
                             </ul>
                         </li>
@@ -241,7 +249,7 @@
 <!-- BEGIN: Footer-->
 <footer class="footer footer-static footer-light">
     <p class="clearfix mb-0"><span class="float-md-left d-block d-md-inline-block mt-25">COPYRIGHT &copy; 2022<a
-            class="ml-25" href="{% url 'home' %}" target="_blank">PersonalFinance</a><span
+            class="ml-25" href="{% url 'home' %}">PersonalFinance</a><span
             class="d-none d-sm-inline-block">, All rights Reserved</span></span><span
             class="float-md-right d-none d-md-block">Hand-crafted & Made with<i data-feather="heart"></i></span></p>
 </footer>
@@ -269,7 +277,7 @@
 <script src="{% static 'app-assets/vendors/js/forms/wizard/bs-stepper.min.js' %}"></script>
 <script src="{% static 'app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js' %}"></script>
 <script src="{% static 'app-assets/vendors/js/extensions/toastr.min.js' %}"></script>
-
+<script src="{% static 'app-assets/js/scripts/forms/form-number-input.js' %}"></script>
 
 
 <!-- END: Page Vendor JS-->
