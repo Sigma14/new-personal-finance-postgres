@@ -22,4 +22,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('my_finance.urls')),
 ]
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler404 = 'my_finance.views.error_404'
+handler500 = 'my_finance.views.error_500'
+handler403 = 'my_finance.views.error_403'
+handler400 = 'my_finance.views.error_400'

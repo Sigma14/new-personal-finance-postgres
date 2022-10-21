@@ -5837,3 +5837,26 @@ def rental_property_sample_page(request):
                 'mortgage_graph_data': mortgage_graph_data}
 
     return render(request, 'rental_prop_sample_page.html', context=context)
+
+
+# Page Errors
+
+def error_404(request, exception):
+    data = {'error': 'Page Not Found!'}
+    return render(request, 'error.html', data)
+
+
+def error_500(request):
+    data = {'error': 'Internal Server Error!'}
+    return render(request, 'error.html', data)
+
+
+def error_403(request, exception):
+    data = {'error': 'Access Denied.!'}
+    return render(request, 'error.html', data)
+
+
+def error_400(request, exception):
+    data = {'error': 'Bad Request!'}
+    return render(request, 'error.html', data)
+
