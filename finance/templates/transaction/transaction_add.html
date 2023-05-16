@@ -80,19 +80,33 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Categories</label>
+                                        <label for="fname-icon">Category Groups</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.categories }}
+                                            {{ form.category }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 transaction_cat_list" style="display:None;">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Categories</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge" id="trans_sub_cat">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" style="display:None;">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Bill</label>
@@ -107,7 +121,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 budget_div" style="display:None;">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Budget</label>
@@ -117,12 +131,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <select class="form-control" name="budget_name">
-                                                <option value="" selected>Select Budgets</option>
-                                                {% for name in budgets_name %}
-                                                <option>{{name}}</option>
-                                                {% endfor %}
-                                            </select>
+                                            <input type="text" class="form-control" id="budget_name" name="budget_name" readonly>
                                         </div>
                                     </div>
                                 </div>

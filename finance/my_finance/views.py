@@ -10,6 +10,7 @@ import base64
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
+from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -39,11 +40,12 @@ from reportlab.lib.enums import TA_CENTER
 
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
+from .helper import create_categories, check_subcategory_exists, save_fund_obj, create_category_group, sub_category_suggested_list
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense, PlaidItem
-from .mortgage import calculator
+    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory
+from .mortgage import calculator, calculate_tenure
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 
@@ -252,7 +254,6 @@ def check_zero_division(first_val, second_val):
         return first_val / second_val
     except:
         return 0
-
 
 
 def save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
@@ -523,7 +524,6 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
 
 
 def add_new_budget_items(user_name, budget_obj, transaction_amount, out_flow):
-    print("add_new_budget_items")
     amount_budget = float(budget_obj.amount)
     spent_budget = round(float(budget_obj.budget_spent) + transaction_amount, 2)
     period_budget = budget_obj.budget_period
@@ -834,12 +834,17 @@ def transaction_checks(username, transaction_amount, account, bill_name, budget_
         return account_obj, budget_obj
 
 
-def category_spent_amount(category_data, user_name, categories_name, categories_value):
+def category_spent_amount(category_data, user_name, categories_name, categories_value, total_spent_amount):
     for category_name in category_data:
         spent_value = 0
-        category_transaction_data = Transaction.objects.filter(user=user_name, categories=category_name)
+        category_transaction_data = Transaction.objects.filter(user=user_name, categories__category=category_name,
+                                                               out_flow=True)
         for transaction_data in category_transaction_data:
             spent_value += float(transaction_data.amount)
+            if transaction_data.account.currency in total_spent_amount:
+                total_spent_amount[transaction_data.account.currency] += float(transaction_data.amount)
+            else:
+                total_spent_amount[transaction_data.account.currency] = float(transaction_data.amount)
         if spent_value != 0:
             categories_name.append(category_name.name)
             categories_value.append(spent_value)
@@ -903,7 +908,7 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
             balance_graph_dict = {}
             balance_graph_data = []
             date_list = []
-            if data.liability_type != "Debt" and data.liability_type != "Loan" and data.liability_type != "Mortgage":
+            if data.account_type != "Mortgage" and data.account_type != "Loan" and data.account_type != "Student Loan" and data.account_type != "Personal Loan" and data.account_type != "Medical Debt" and data.account_type != "Other Loan" and data.account_type != "Other Debt":
                 if fun_name != "dash_board":
                     overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,
                                           balance_graph_data,
@@ -917,7 +922,7 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
                     currency_count_list.append(data.currency)
                     total_asset_amount_dict[data.currency] = round(float(data.available_balance), 2)
             else:
-                liability_data.append([data.name, data.currency + data.available_balance, data.liability_type,
+                liability_data.append([data.name, data.currency + data.available_balance, data.account_type,
                                        data.created_at])
                 if data.currency in total_liability_dict:
                     total_liability_dict[data.currency] = round(total_liability_dict[data.currency] +
@@ -964,8 +969,8 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
         return net_worth_dict
     else:
         return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
-               total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
-               total_currency_list, date_range_list
+            total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
+            total_currency_list, date_range_list
 
 
 def overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
@@ -1057,13 +1062,16 @@ def dash_board(request):
         all_transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
         current_date = datetime.datetime.today().date()
         month_start, month_end = start_end_date(current_date, "Monthly")
-        accounts_data = Account.objects.filter(user=user_name)
+        accounts_data = Account.objects.filter(user=user_name, account_type__in=['Checking', 'Savings', 'Cash',
+                                                                                 'Credit Card', 'Line of Credit'])
         property_data = Property.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name, start_date=month_start, end_date=month_end)
         budget_label = []
         budget_values = []
         budget_percentage = []
         total_budget = 0
+        total_account_balance = {}
+        total_spent_amount = {}
         categories_name = []
         categories_value = []
         acc_graph_data = []
@@ -1085,6 +1093,11 @@ def dash_board(request):
             account_date_list.append(str(min_date))
             account_date_list = account_date_list[::-1]
             for acc_obj in accounts_data:
+                if acc_obj.currency in total_account_balance:
+                    total_account_balance[acc_obj.currency] = total_account_balance[acc_obj.currency] + float(
+                        acc_obj.available_balance)
+                else:
+                    total_account_balance[acc_obj.currency] = float(acc_obj.available_balance)
                 account_transaction_value = []
                 acc_create_date = acc_obj.created_at.date()
                 amount_date_dict = {}
@@ -1109,7 +1122,7 @@ def dash_board(request):
         for data in property_data:
             property_currency_balance.append({data.currency: data.value})
 
-        category_spent_amount(categories, user_name, categories_name, categories_value)
+        category_spent_amount(categories, user_name, categories_name, categories_value, total_spent_amount)
         budget_currency = '$'
         for data in budget_data:
             budget_currency = data.currency
@@ -1143,7 +1156,9 @@ def dash_board(request):
             "graph_id": "#budget-chart",
             "net_worth_dict": net_worth_dict,
             "max_value": acc_max_value,
-            "min_value": acc_min_value
+            "min_value": acc_min_value,
+            "total_account_balance": total_account_balance,
+            "total_spent_amount": total_spent_amount
         }
         return render(request, "dashboard.html", context=context)
     else:
@@ -1166,8 +1181,8 @@ def net_worth(request):
         account_date_list = account_date_list
 
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
-    total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
-    total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
+        total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
+        total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
 
     print("Assets_currency_data", asset_currency_balance)
     print("Liabiliy_currency_data", liability_currency_balance)
@@ -1303,35 +1318,51 @@ def net_worth(request):
 
 
 class CategoryList(LoginRequiredMixin, ListView):
-    model = Category
+    model = SubCategory
     template_name = 'category/category_list.html'
 
     def get_context_data(self, **kwargs):
         # self.request = kwargs.pop('request')
         data = super(CategoryList, self).get_context_data(**kwargs)
         user_name = self.request.user
-        category_data = Category.objects.filter(user=self.request.user)
+        category_list = Category.objects.filter(user=user_name)
+        sub_category_data = SubCategory.objects.filter(category__user=user_name)
+        sub_category_dict = {}
         categories_name = []
         categories_value = []
 
-        for category_name in category_data:
+        for val in sub_category_data:
             spent_value = 0
-            category_transaction_data = Transaction.objects.filter(user=user_name, categories=category_name)
+            category_transaction_data = Transaction.objects.filter(user=user_name, categories__id=val.id)
             for transaction_data in category_transaction_data:
                 spent_value += float(transaction_data.amount)
-            if spent_value != 0:
-                categories_name.append(category_name.name)
-                categories_value.append(spent_value)
+            if val.category.name == "Goals":
+                goal_obj = Goal.objects.filter(label=val)
+                if goal_obj:
+                    spent_value = goal_obj[0].allocate_amount
+            if val.category.name in sub_category_dict:
+                sub_category_dict[val.category.name][2].append([val.name, spent_value, val.id])
+            else:
+                sub_category_dict[val.category.name] = [0, val.category.id, [[val.name, spent_value, val.id]]]
 
-        category_key = ['S.No.', 'Name', 'Last Activity']
-        data['category_data'] = category_data
+        for cat_data in category_list:
+            if cat_data.name not in sub_category_dict:
+                sub_category_dict[cat_data.name] = [0, cat_data.id, []]
+            else:
+                total_cat_spend = 0
+                for sub_cat in sub_category_dict[cat_data.name][2]:
+                    total_cat_spend += sub_cat[1]
+                sub_category_dict[cat_data.name][0] = total_cat_spend
+                if total_cat_spend != 0:
+                    categories_name.append(cat_data.name)
+                    categories_value.append(total_cat_spend)
+
+        sub_category_key = ['Category', 'Total Spent', 'Actions']
+        print(sub_category_dict)
+        data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
-        data['categories_name_dumbs'] = json.dumps(categories_name)
-        data['category_key'] = category_key
-        data['category_key_dumbs'] = json.dumps(category_key)
-        data['categories_value'] = categories_value
         data['categories_series'] = [{'name': 'Spend', 'data': categories_value}]
-
+        data['category_key'] = sub_category_key
         return data
 
 
@@ -1361,6 +1392,7 @@ class CategoryAdd(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
+        obj.name = self.request.POST.get('name').title().strip()
         obj.save()
         return super().form_valid(form)
 
@@ -1383,11 +1415,89 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         category_obj = Category.objects.get(pk=self.kwargs['pk'])
         user_name = self.request.user
-        transaction_details = Transaction.objects.filter(user=user_name, categories=category_obj)
+        transaction_details = Transaction.objects.filter(user=user_name, categories__category=category_obj)
         for data in transaction_details:
             delete_transaction_details(data.pk, user_name)
         category_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
+
+
+# Subcategory views
+
+def subcategory_add(request, category_pk):
+    category_obj = Category.objects.get(pk=category_pk)
+    suggestion_list = sub_category_suggested_list[category_obj.name]
+    for name in suggestion_list:
+        sub_obj = SubCategory.objects.filter(name=name, category=category_obj)
+        if sub_obj:
+            suggestion_list.remove(name)
+    context = {'subcategory_suggestions': suggestion_list, 'category_pk': category_pk}
+    if request.method == 'POST':
+        name = request.POST.get('name').title()
+        try:
+            SubCategory.objects.get(name=name, category=category_obj)
+            context['error'] = 'Subcategory already exists'
+            return render(request, "subcategory/add.html", context=context)
+        except:
+            SubCategory.objects.create(name=name, category=category_obj)
+            return redirect("/category_list")
+    return render(request, "subcategory/add.html", context=context)
+
+
+def subcategory_update(request, pk):
+    user = request.user
+    category_list = Category.objects.filter(user=user)
+    subcategory_obj = SubCategory.objects.get(pk=pk)
+    context = {'category_list': category_list,
+               'subcategory_obj': subcategory_obj}
+
+    if request.method == 'POST':
+        category_obj = Category.objects.get(user=user, name=request.POST.get('category'))
+        name = request.POST.get('name').title()
+        sub_category_exist = check_subcategory_exists(subcategory_obj, name, category_obj)
+        if sub_category_exist:
+            context['error'] = 'Subcategory already exists'
+            return render(request, "subcategory/update.html", context=context)
+        subcategory_obj.name = name
+        subcategory_obj.category = category_obj
+        subcategory_obj.save()
+        return redirect("/category_list")
+
+    return render(request, "subcategory/update.html", context=context)
+
+
+def subcategory_delete(request, pk):
+    subcategory_obj = SubCategory.objects.get(pk=pk)
+    user = request.user
+    transaction_details = Transaction.objects.filter(user=user, categories=subcategory_obj)
+    for data in transaction_details:
+        delete_transaction_details(data.pk, user)
+    subcategory_obj.delete()
+    return JsonResponse({"status": "Successfully", "path": "None"})
+
+
+def subcategory_list(request):
+    if request.method == "POST" and request.is_ajax():
+        user = request.user
+        category_group = request.POST.get('category_group')
+        category = Category.objects.get(user=user, pk=category_group)
+        subcategories = SubCategory.objects.filter(category=category)
+        subcategories = list(subcategories.values_list('name', flat=True))
+        return JsonResponse({"subcategories": subcategories})
+    return redirect("/category_list")
+
+
+def subcategory_budget(request):
+    user_name = request.user
+    category = request.POST.get('category')
+    sub_category_name = request.POST.get('name')
+    subcategory_obj = SubCategory.objects.get(category__pk=category, name=sub_category_name)
+    try:
+        budget = Budget.objects.get(user=user_name, category=subcategory_obj)
+        budget_name = budget.name
+    except:
+        budget_name = False
+    return JsonResponse({"budget_name": budget_name})
 
 
 # def user_login(request):
@@ -1532,6 +1642,7 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
 #
 #         return render(request, "login_page.html", context=context)
 
+
 def user_login(request):
     context = {'page': 'login_page'}
     if request.method == "POST":
@@ -1540,6 +1651,12 @@ def user_login(request):
         user = authenticate(username=username, password=user_password)
         if user:
             login(request, user)
+            category = Category.objects.filter(user=request.user)
+            suggest_category = SuggestiveCategory.objects.filter()
+            if not category:
+                create_categories(request.user)
+            if not suggest_category:
+                create_category_group()
             try:
                 redirect_url = request.POST['redirect_url']
                 return redirect(redirect_url)
@@ -1648,8 +1765,8 @@ def budgets_page_data(request, budget_page, template_page):
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, budget_names_list = make_budgets_values(
         user_name, budget_data, "budget_page")
     template_all_budgets, template_budget_graph_data, template_budget_values, template_budget_currency, \
-    template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data,
-                                                                              "template_page")
+        template_list_of_months, template_budget_names_list = make_budgets_values(user_name, template_budget_data,
+                                                                                  "template_page")
 
     # COMPARE BUDGETS :-
 
@@ -1804,13 +1921,27 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
     form_class = BudgetForm
     template_name = 'budget/budget_add.html'
 
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+
+        kwargs = super(BudgetAdd, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         user_name = self.request.user
         obj.user = user_name
+        category_name = form.cleaned_data.get('categories')
+        name = self.request.POST['subcategory'].title()
+        category_obj = Category.objects.get(name=category_name)
+        subcategory_obj = SubCategory.objects.get(name=name, category=category_obj)
+        obj.category = subcategory_obj
         budget_period = form.cleaned_data['budget_period']
         date_value = datetime.datetime.today().date()
-        budget_name = form.cleaned_data['name']
+        budget_name = name
+        obj.name = budget_name
         budget_amount = form.cleaned_data['amount']
         budget_currency = form.cleaned_data['currency']
         budget_auto = form.cleaned_data['auto_budget']
@@ -1869,6 +2000,28 @@ class BudgetUpdate(LoginRequiredMixin, UpdateView):
     form_class = BudgetForm
     template_name = 'budget/budget_update.html'
 
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class.
+         This is necessary to only display members that belong to a given user"""
+
+        kwargs = super(BudgetUpdate, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        user_name = self.request.user
+        budget_obj = Budget.objects.get(pk=self.kwargs['pk'])
+        data = super(BudgetUpdate, self).get_context_data(**kwargs)
+        category_id = budget_obj.category.category.id
+        categories = Category.objects.filter(user=user_name)
+        sub_categories = SubCategory.objects.filter(category__pk=category_id)
+        data['budgets_category_id'] = category_id
+        data['budgets_subcategory'] = budget_obj.category.name
+        data['categories'] = categories
+        data['sub_categories'] = sub_categories
+
+        return data
+
     def form_valid(self, form):
         user_name = self.request.user
         budget_obj = Budget.objects.get(user=user_name, pk=self.kwargs['pk'])
@@ -1882,6 +2035,12 @@ class BudgetUpdate(LoginRequiredMixin, UpdateView):
             is_auto = False
         extra_amount = update_amount - old_amount
         obj = form.save(commit=False)
+        category_name = form.cleaned_data.get('categories')
+        name = self.request.POST['subcategory'].title()
+        category_obj = Category.objects.get(name=category_name)
+        subcategory_obj = SubCategory.objects.get(name=name, category=category_obj)
+        budget_name = name
+        obj.category = subcategory_obj
         obj.start_date = budget_obj.start_date
         obj.end_date = budget_obj.end_date
         obj.amount = update_amount
@@ -1890,8 +2049,9 @@ class BudgetUpdate(LoginRequiredMixin, UpdateView):
         obj.auto_budget = is_auto
         obj.created_at = budget_obj.created_at
         obj.ended_at = budget_obj.ended_at
+        obj.name = budget_name
         obj.save()
-        budgets_data = Budget.objects.filter(user=user_name, name=budget_obj.name, created_at=budget_obj.created_at,
+        budgets_data = Budget.objects.filter(user=user_name, name=budget_name, created_at=budget_obj.created_at,
                                              ended_at=budget_obj.ended_at)
         for data in budgets_data:
             if data != budget_obj:
@@ -2134,14 +2294,6 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         kwargs['request'] = self.request
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        # self.request = kwargs.pop('request')
-        user_name = self.request.user
-        data = super(TransactionAdd, self).get_context_data(**kwargs)
-        data['budgets_name'] = get_budgets(user_name)
-
-        return data
-
     def get_success_url(self):
         """Detect the submit button used and act accordingly"""
         if 'add_other' in self.request.POST:
@@ -2152,8 +2304,13 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
+        category_name = form.cleaned_data.get('category')
+        name = self.request.POST['subcategory'].title()
+        category_obj = Category.objects.get(name=category_name)
+        subcategory_obj = SubCategory.objects.get(name=name, category=category_obj)
         user_name = self.request.user
         obj.user = user_name
+        obj.categories = subcategory_obj
         account = form.cleaned_data.get('account')
         transaction_amount = round(float(form.cleaned_data.get('amount')), 2)
         tags = form.cleaned_data.get('tags')
@@ -2162,7 +2319,9 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         out_flow = form.cleaned_data.get('out_flow')
         cleared_amount = form.cleaned_data.get('cleared')
         bill_name = form.cleaned_data.get('bill')
-        print("bill_name=======>", bill_name)
+        if category_name.name == 'Bills' or category_name.name == 'Bill':
+            bill_name = Bill.objects.get(label=name, user=user_name)
+            obj.bill = bill_name
         budget_name = self.request.POST['budget_name']
         transaction_date = form.cleaned_data.get('transaction_date')
         account = account.name
@@ -2207,6 +2366,12 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         obj = form.save(commit=False)
         account = transaction_obj.account.name.title()
         user_name = self.request.user
+        category_name = form.cleaned_data.get('category')
+        name = self.request.POST['subcategory'].title()
+        category_obj = Category.objects.get(name=category_name)
+        subcategory_obj = SubCategory.objects.get(name=name, category=category_obj)
+        obj.user = user_name
+        obj.categories = subcategory_obj
         transaction_amount = round(float(transaction_obj.amount), 2)
         transaction_out_flow = transaction_obj.out_flow
         print("transaction_out_flow======>", transaction_out_flow)
@@ -2216,16 +2381,60 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         out_flow = form.cleaned_data.get('out_flow')
         cleared_amount = form.cleaned_data.get('cleared')
         bill_name = form.cleaned_data.get('bill')
+        if category_name.name == 'Bills' or category_name.name == 'Bill':
+            bill_name = Bill.objects.get(label=name, user=user_name)
+            obj.bill = bill_name
         budget_name = self.request.POST['budget_name']
         transaction_date = form.cleaned_data.get('transaction_date')
 
-        print(out_flow)
-        print("out_flow======>", type(out_flow))
-
         if cleared_amount == "True":
+            old_account_obj = Account.objects.get(user=user_name, name=account)
             if account == update_account:
                 account_obj = Account.objects.get(user=user_name, name=account)
                 if transaction_amount != update_transaction_amount:
+                    if category_name.name == "Funds":
+                        new_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+                        if transaction_out_flow:
+                            fund_total = round(float(new_fund_obj.total_fund) - transaction_amount, 2)
+                            fund_total = fund_total + update_transaction_amount
+                            new_fund_obj.total_fund = fund_total
+                            new_fund_obj.save()
+                        else:
+                            fund_total = round(float(new_fund_obj.total_fund) + transaction_amount, 2)
+                            fund_total = fund_total - update_transaction_amount
+
+                        new_fund_obj.total_fund = fund_total
+                        new_fund_obj.save()
+                    else:
+                        if transaction_obj.categories.category.name == "Funds":
+                            old_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+                            if transaction_out_flow:
+                                fund_total = round(float(old_fund_obj.total_fund) - transaction_amount, 2)
+                                old_fund_obj.total_fund = fund_total
+                                total_fund = old_fund_obj.total_fund
+                                total_lock_fund = 0.0
+                                goal_qs = Goal.objects.filter(user=user_name, account=old_account_obj)
+                                for goal_data in goal_qs:
+                                    if total_fund == 0.0:
+                                        goal_data.allocate_amount = 0.0
+                                        goal_data.save()
+                                    else:
+                                        if goal_data.allocate_amount > total_fund:
+                                            goal_data.allocate_amount = total_fund
+                                            total_lock_fund += total_fund
+                                            goal_data.save()
+                                            total_fund == 0.0
+                                        else:
+                                            total_fund -= goal_data.allocate_amount
+                                            total_lock_fund += goal_data.allocate_amount
+
+                                old_fund_obj.lock_fund = total_lock_fund
+                                old_fund_obj.save()
+                            else:
+                                fund_total = round(float(old_fund_obj.total_fund) + transaction_amount, 2)
+                                old_fund_obj.total_fund = fund_total
+                                old_fund_obj.save()
+
                     if transaction_out_flow:
                         account_obj.available_balance = round(float(account_obj.available_balance) + transaction_amount,
                                                               2)
@@ -2240,10 +2449,44 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                         account_obj.available_balance = round(
                             float(account_obj.available_balance) + update_transaction_amount, 2)
 
-
             else:
-                old_account_obj = Account.objects.get(user=user_name, name=account)
                 account_obj = Account.objects.get(user=user_name, name=update_account)
+                if category_name.name == "Funds" or transaction_obj.categories.category.name == "Funds":
+                    old_fund_obj = AvailableFunds.objects.get(user=user_name, account=old_account_obj)
+                    new_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+                    if transaction_obj.categories.category.name == "Funds":
+                        if transaction_out_flow:
+                            old_fund_obj.total_fund = float(old_fund_obj.total_fund) - transaction_amount
+                            total_fund = old_fund_obj.total_fund
+                            total_lock_fund = 0.0
+                            goal_qs = Goal.objects.filter(user=user_name, account=old_account_obj)
+                            for goal_data in goal_qs:
+                                if total_fund == 0.0:
+                                    goal_data.allocate_amount = 0.0
+                                    goal_data.save()
+                                else:
+                                    if goal_data.allocate_amount > total_fund:
+                                        goal_data.allocate_amount = total_fund
+                                        total_lock_fund += total_fund
+                                        goal_data.save()
+                                        total_fund == 0.0
+                                    else:
+                                        total_fund -= goal_data.allocate_amount
+                                        total_lock_fund += goal_data.allocate_amount
+
+                            old_fund_obj.lock_fund = total_lock_fund
+                            old_fund_obj.save()
+                        else:
+                            old_fund_obj.total_fund = float(old_fund_obj.total_fund) + transaction_amount
+                            old_fund_obj.save()
+
+                    if category_name.name == "Funds":
+                        if transaction_out_flow:
+                            new_fund_obj.total_fund = float(new_fund_obj.total_fund) + transaction_amount
+                            new_fund_obj.save()
+                        else:
+                            new_fund_obj.total_fund = float(new_fund_obj.total_fund) - transaction_amount
+                            new_fund_obj.save()
 
                 if transaction_out_flow:
                     old_account_obj.available_balance = round(
@@ -2274,29 +2517,24 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 bill_obj = False
 
             if bill_obj:
-                transaction_bill_name = transaction_obj.bill
                 bill_obj_amount = round(float(bill_obj.amount), 2)
-                if transaction_bill_name == bill_name:
-                    if transaction_amount != update_transaction_amount:
-                        bill_obj_amount = bill_obj_amount + transaction_amount
-                else:
-                    old_bill_obj = Bill.objects.filter(user=user_name, label=transaction_bill_name)
-                    if old_bill_obj:
-                        old_bill_obj_amount = round(float(old_bill_obj.amount), 2)
-                        old_bill_obj.amount = old_bill_obj_amount + transaction_amount
-                        if old_bill_obj.amount > 0.0:
-                            old_bill_obj.status = "unpaid"
-                        else:
-                            old_bill_obj.status = "paid"
-
-                        old_bill_obj.save()
+                try:
+                    transaction_bill_name = transaction_obj.bill.label
+                except:
+                    transaction_bill_name = None
+                if transaction_bill_name:
+                    if transaction_bill_name == bill_name:
+                        if transaction_amount != update_transaction_amount:
+                            bill_obj_amount = bill_obj_amount + transaction_amount
 
                 if update_transaction_amount >= bill_obj_amount:
                     bill_obj.status = "paid"
                     bill_obj.amount = bill_obj_amount - update_transaction_amount
+                    bill_obj.remaining_amount = 0.0
                 else:
                     bill_obj.status = "unpaid"
                     bill_obj.amount = bill_obj_amount - update_transaction_amount
+                    bill_obj.remaining_amount = bill_obj.amount
                 bill_obj.save()
 
             if budget_name:
@@ -2353,6 +2591,7 @@ def delete_transaction_details(pk, user_name):
     out_flow = transaction_obj.out_flow
     cleared_amount = transaction_obj.cleared
     account = transaction_obj.account
+    sub_category = transaction_obj.categories
     try:
         bill_name = transaction_obj.bill
     except:
@@ -2363,9 +2602,40 @@ def delete_transaction_details(pk, user_name):
         budget_name = False
 
     transaction_amount = float(transaction_obj.amount)
-
     if cleared_amount:
         account_obj = Account.objects.get(user=user_name, name=account.name)
+
+        # check category name is funds
+        if sub_category.category.name == "Funds":
+            fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+            if out_flow:
+                fund_obj.total_fund = float(fund_obj.total_fund) - transaction_amount
+                total_fund = fund_obj.total_fund
+                total_lock_fund = 0.0
+                goal_qs = Goal.objects.filter(user=user_name, account=account_obj)
+                for goal_data in goal_qs:
+                    if total_fund == 0.0:
+                        goal_data.allocate_amount = 0.0
+                        goal_data.save()
+                    else:
+                        if goal_data.allocate_amount > total_fund:
+                            goal_data.allocate_amount = total_fund
+                            total_lock_fund += total_fund
+                            goal_data.save()
+                            total_fund == 0.0
+                        else:
+                            total_fund -= goal_data.allocate_amount
+                            total_lock_fund += goal_data.allocate_amount
+
+                fund_obj.lock_fund = total_lock_fund
+                fund_obj.save()
+            else:
+                fund_obj.total_fund = float(fund_obj.total_fund) + transaction_amount
+                fund_obj.save()
+
+
+
+
 
         if bill_name:
             bill_name = bill_name.label
@@ -2418,32 +2688,95 @@ def calculate_available_lock_amount(user_name, account_obj):
 
 @login_required(login_url="/login")
 def goal_obj_save(request, goal_obj, user_name, fun_name=None):
-    label = request.POST['label']
+    return_data = {}
+    user = request.user
+    category_name = request.POST['category']
+    sub_category_name = request.POST['sub_category_name']
     goal_amount = request.POST['goal_amount']
-    currency = request.POST['currency']
     goal_date = request.POST['goal_date']
     account_name = request.POST['account_name']
     allocate_amount = request.POST['allocate_amount']
     account_obj = Account.objects.get(name=account_name)
-    available_lock_amount = calculate_available_lock_amount(user_name, account_obj)
-    if float(allocate_amount) > available_lock_amount:
-        context = {'currency_dict': currency_dict, 'error': 'Lock Amount Insufficient Please Add More..'}
-        if fun_name:
-            print("fun_name")
-            return render(request, 'goal/goal_update.html', context=context)
+    if fun_name:
+        try:
+            fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+            if float(fund_obj.total_fund) < float(allocate_amount):
+                return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account total fund." \
+                                       f" please add more fund."
+                return return_data
+        except:
+            return_data['error'] = f"Please add lock fund to {account_obj.name} account first then allocate amount to goal"
+            return return_data
+
+        if account_obj != goal_obj.account:
+            old_fund_obj = AvailableFunds.objects.get(user=user_name, account=goal_obj.account)
+            old_fund_obj.lock_fund = round(float(old_fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
+            old_fund_obj.save()
+
+            if float(allocate_amount) > float(fund_obj.total_fund):
+                return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account lock fund." \
+                                       f" please add more lock fund."
+                return return_data
+            lock_funds = round(float(fund_obj.lock_fund) + float(allocate_amount), 2)
+            fund_obj.lock_fund = lock_funds
         else:
-            print("fun_name====>", context)
-            return render(request, 'goal/goal_add.html', context=context)
+            if goal_obj.allocate_amount != float(allocate_amount):
+                lock_funds = round(float(fund_obj.lock_fund) + float(allocate_amount), 2)
+                fund_obj.lock_fund = lock_funds
+                fund_obj.lock_fund = round(float(fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
+
+        category_obj = Category.objects.get(user=user, name=category_name)
+        if sub_category_name != goal_obj.label.name:
+            sub_category = SubCategory.objects.filter(category__user=user, name=sub_category_name)
+            if not sub_category:
+                sub_category = SubCategory.objects.create(category=category_obj, name=sub_category_name)
+            else:
+                goal = Goal.objects.filter(user=user, label=sub_category[0])
+                if goal:
+                    return_data['error'] = "Name is already exist"
+                    return return_data
+                sub_category = sub_category[0]
+        else:
+            sub_category = goal_obj.label
     else:
-        goal_obj.user = user_name
-        goal_obj.account = account_obj
-        goal_obj.goal_amount = goal_amount
-        goal_obj.currency = currency
-        goal_obj.goal_date = goal_date
-        goal_obj.label = label
-        goal_obj.allocate_amount = allocate_amount
-        goal_obj.save()
-        return redirect("/goal_list")
+        try:
+            fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+        except:
+            return_data['error'] = f"Please add lock fund to {account_obj.name} account first then allocate amount to goal"
+            return return_data
+        lock_funds = round(float(fund_obj.lock_fund) + float(allocate_amount), 2)
+        fund_obj.lock_fund = lock_funds
+        if float(allocate_amount) > float(fund_obj.total_fund):
+            return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account lock fund." \
+                                   f" please add more lock fund."
+            return return_data
+
+        category = Category.objects.filter(user=user, name=category_name)
+        if not category:
+            category_obj = Category.objects.create(name=category_name, user=user)
+        else:
+            category_obj = category[0]
+
+        sub_category = SubCategory.objects.filter(category__user=user, name=sub_category_name)
+        if not sub_category:
+            sub_category = SubCategory.objects.create(category=category_obj, name=sub_category_name)
+        else:
+            goal = Goal.objects.filter(user=user, label=sub_category[0])
+            if goal:
+                return_data['error'] = "Name is already exist"
+                return return_data
+            sub_category = sub_category[0]
+
+    goal_obj.user = user_name
+    goal_obj.account = account_obj
+    goal_obj.goal_amount = goal_amount
+    goal_obj.currency = account_obj.currency
+    goal_obj.goal_date = goal_date
+    goal_obj.label = sub_category
+    goal_obj.allocate_amount = allocate_amount
+    goal_obj.save()
+    fund_obj.save()
+    return return_data
 
 
 class GoalList(LoginRequiredMixin, ListView):
@@ -2456,7 +2789,7 @@ class GoalList(LoginRequiredMixin, ListView):
         user_name = self.request.user
         goal_data = Goal.objects.filter(user=user_name)
         fund_value = show_current_funds(user_name, fun_name='goal_funds')
-        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Lock fund',
+        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Current Balance', 'Freeze Amount', 'Used Lock Fund',
                     'Available Fund', 'Action']
         data['fund_key'] = fund_key
         data['fund_value'] = fund_value
@@ -2490,33 +2823,54 @@ class GoalDetail(LoginRequiredMixin, DetailView):
 @login_required(login_url="/login")
 def goal_add(request):
     user_name = request.user
+    error = False
     if request.method == 'POST':
         goal_obj = Goal()
-        return goal_obj_save(request, goal_obj, user_name)
+        goal_data = goal_obj_save(request, goal_obj, user_name)
+        if 'error' in goal_data:
+            error = goal_data['error']
+        else:
+            return redirect('/goal_list')
 
-    else:
-        account_data = Account.objects.filter(user=user_name)
-        context = {'currency_dict': currency_dict, 'account_data': account_data}
-        return render(request, 'goal/goal_add.html', context=context)
+    account_data = Account.objects.filter(user=user_name, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card', 'Line of Credit'])
+    category_obj = Category.objects.get(name="Goals", user=user_name)
+    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj)}
+
+    if error:
+        context['error'] = error
+    return render(request, 'goal/goal_add.html', context=context)
 
 
 @login_required(login_url="/login")
 def goal_update(request, pk):
     user_name = request.user
+    error = False
     goal_data = Goal.objects.get(pk=pk)
     if request.method == 'POST':
-        return goal_obj_save(request, goal_data, user_name, fun_name='goal_update')
-    else:
-        goal_date = datetime.datetime.strftime(goal_data.goal_date, '%Y-%m-%d')
-        account_data = Account.objects.filter(user=user_name)
-        context = {'goal_data': goal_data, 'currency_dict': currency_dict, 'goal_date': goal_date,
-                   'account_data': account_data}
-        return render(request, 'goal/goal_update.html', context=context)
+        goal_result = goal_obj_save(request, goal_data, user_name, fun_name='goal_update')
+        if 'error' in goal_result:
+            error = goal_result['error']
+        else:
+            return redirect('/goal_list')
+
+    account_data = Account.objects.filter(user=user_name,
+                                          account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
+                                                            'Line of Credit'])
+
+    category_obj = Category.objects.get(name="Goals", user=user_name)
+    context = {'account_data': account_data, 'goal_data': goal_data, 'goal_category': SubCategory.objects.filter(category=category_obj)}
+    if error:
+        context['error'] = error
+    return render(request, 'goal/goal_update.html', context=context)
 
 
 class GoalDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
+        user = request.user
         goal_obj = Goal.objects.get(pk=self.kwargs['pk'])
+        fund_obj = AvailableFunds.objects.get(user=user, account=goal_obj.account)
+        fund_obj.lock_fund = round(float(fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
+        fund_obj.save()
         goal_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})
 
@@ -2526,7 +2880,7 @@ class AccountList(LoginRequiredMixin, ListView):
     template_name = 'account/account_list.html'
 
     def get_queryset(self):
-        return Account.objects.filter(user=self.request.user)
+        return Account.objects.filter(user=self.request.user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card', 'Line of Credit'])
 
 
 class AccountDetail(LoginRequiredMixin, DetailView):
@@ -2620,27 +2974,15 @@ class AccountAdd(LoginRequiredMixin, CreateView):
     template_name = 'account/account_add.html'
 
     def form_valid(self, form):
-        total_balance = float(form.cleaned_data.get('balance'))
-        print("total Balance============>", total_balance)
-        lock_amount = form.cleaned_data.get('lock_amount')
-        lock_check = form.cleaned_data.get('lock_check')
-        if lock_amount != "None" and lock_amount and lock_check == "True":
-            available_balance = total_balance - float(lock_amount)
-        else:
-            available_balance = total_balance
-            lock_amount = ""
+        account_name = form.cleaned_data.get('name').title()
+        account_type = form.cleaned_data.get('account_type')
+        balance = float(form.cleaned_data.get('balance'))
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.lock_amount = lock_amount
-        obj.available_balance = round(available_balance, 2)
+        obj.name = account_name
+        obj.available_balance = balance
+        obj.account_type = account_type
         obj.save()
-
-        fund_obj = AvailableFunds()
-        fund_obj.user = self.request.user
-        fund_obj.account = obj
-        fund_obj.lock_fund = lock_amount
-        fund_obj.total_fund = total_balance
-        fund_obj.save()
 
         return super().form_valid(form)
 
@@ -2650,20 +2992,24 @@ class AccountUpdate(LoginRequiredMixin, UpdateView):
     form_class = AccountForm
     template_name = 'account/account_update.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account_pk = self.kwargs['pk']
+        account_obj = Account.objects.get(pk=account_pk)
+        context['account_type'] = account_obj.account_type
+        context['balance'] = account_obj.available_balance
+        return context
+
     def form_valid(self, form):
-        total_balance = float(form.cleaned_data.get('balance'))
-        lock_amount = form.cleaned_data.get('lock_amount')
-        lock_check = form.cleaned_data.get('lock_check')
-        print("lock_check=====>", lock_check)
-        if lock_amount != "None" and lock_amount and lock_check == "True":
-            available_balance = total_balance - float(lock_amount)
-        else:
-            available_balance = total_balance
-            lock_amount = ""
         obj = form.save(commit=False)
+        account_type = form.cleaned_data.get('account_type')
+        account_name = form.cleaned_data.get('name').title()
+        balance = float(form.cleaned_data.get('balance'))
         obj.user = self.request.user
-        obj.lock_amount = lock_amount
-        obj.available_balance = round(available_balance, 2)
+        obj.name = account_name
+        obj.account_type = account_type
+        obj.balance = balance
+        obj.available_balance = balance
         obj.save()
         return super().form_valid(form)
 
@@ -2673,6 +3019,190 @@ class AccountDelete(LoginRequiredMixin, DeleteView):
         account_obj = Account.objects.get(pk=self.kwargs['pk'])
         account_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "/account_list/"})
+
+
+# LOAN VIEW
+def loan_add(request):
+    loan_error = False
+    user = request.user
+    if request.method == "POST":
+        category_name = request.POST['category'].title()
+        loan_type = request.POST['loan_type']
+        sub_category_name = request.POST['sub_category_name'].title()
+        currency = request.POST['currency']
+        amount = request.POST['amount']
+        interest_rate = request.POST['interest_rate']
+        monthly_payment = request.POST['monthly_payment']
+        include_net_worth = request.POST['include_net_worth']
+        mortgage_date = request.POST['mortgage_date']
+        if include_net_worth == "on":
+            include_net_worth = True
+        else:
+            include_net_worth = False
+
+        category = Category.objects.filter(name=category_name)
+        if not category:
+            category_obj = Category.objects.create(name=category_name, user=user)
+        else:
+            category_obj = category[0]
+
+        sub_category = SubCategory.objects.filter(category__user=user, name=sub_category_name)
+        if not sub_category:
+            SubCategory.objects.create(category=category_obj, name=sub_category_name)
+            mortgage_year = calculate_tenure(float(amount), float(monthly_payment), float(interest_rate))
+            if mortgage_year:
+                print(mortgage_year)
+                Account.objects.create(name=sub_category_name, user=user, account_type=loan_type, currency=currency,
+                                       balance=amount, available_balance=amount, interest_rate=interest_rate,
+                                       mortgage_monthly_payment=monthly_payment, mortgage_date=mortgage_date,
+                                       mortgage_year=mortgage_year,
+                                       include_net_worth=include_net_worth)
+                return redirect("/loan_list/")
+            loan_error = "The monthly payment is not sufficient to cover the interest and principal."
+        else:
+            loan_error = "Name is already exist"
+
+    category = Category.objects.filter(user=user)
+    category_list = []
+    for data in category:
+        if "Mortgage" in data.name or "Loan" in data.name or "Mortgages" in data.name or "Loans" in data.name or "Mortgages and Loans" in data.name or "Mortgages & Loans" in data.name:
+            category_list.append(data.name)
+
+    loan_type = ['Mortgage', 'Loan', 'Student Loan', 'Personal Loan', 'Medical Debt', 'Other Debt']
+    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': currency_dict,
+               'loan_type': loan_type}
+    if loan_error:
+        context['loan_error'] = loan_error
+    return render(request, 'loan/loan_add.html', context=context)
+
+
+def loan_list(request):
+    account = Account.objects.filter(user=request.user, account_type__in=["Mortgage", "Loan", "Student Loan", "Personal Loan", "Medical Debt", "Other Debt"])
+    loan_accounts = []
+    for data in account:
+        transaction_data = Transaction.objects.filter(user=request.user, categories__name=data.name)
+        loan_accounts.append({'id': data.id, 'name': data.name, 'account_type': data.account_type,
+                              'available_balance': data.available_balance, 'currency': data.currency,
+                              'interest_rate': data.interest_rate, 'updated_at': data.updated_at, 'transaction_count': len(transaction_data)})
+
+    return render(request, 'loan/loan_list.html', context={'account': loan_accounts})
+
+
+def loan_update(request, pk):
+    user = request.user
+    account = Account.objects.get(pk=pk)
+    loan_error = False
+    if request.method == "POST":
+        category_name = request.POST['category'].title()
+        loan_type = request.POST['loan_type']
+        sub_category_name = request.POST['sub_category_name'].title()
+        currency = request.POST['currency']
+        amount = request.POST['amount']
+        interest_rate = request.POST['interest_rate']
+        monthly_payment = request.POST['monthly_payment']
+        include_net_worth = request.POST['include_net_worth']
+        mortgage_date = request.POST['mortgage_date']
+        if include_net_worth == "on":
+            include_net_worth = True
+        else:
+            include_net_worth = False
+        account.name = sub_category_name
+        account.account_type = loan_type
+        account.currency = currency
+        account.balance = amount
+        account.available_balance = amount
+        account.interest_rate = interest_rate
+        account.mortgage_monthly_payment = monthly_payment
+        account.mortgage_date = mortgage_date
+        account.include_net_worth = include_net_worth
+
+        if account.name != sub_category_name:
+            category_obj = Category.objects.get(name=category_name)
+            sub_category = SubCategory.objects.filter(category__user=user, name=sub_category_name)
+            if not sub_category:
+                SubCategory.objects.create(category=category_obj, name=sub_category_name)
+                mortgage_year = calculate_tenure(float(amount), float(monthly_payment), float(interest_rate))
+                if mortgage_year:
+                    account.mortgage_year = mortgage_year
+                    account.save()
+                    return redirect("/loan_list/")
+                loan_error = "The monthly payment is not sufficient to cover the interest and principal."
+            else:
+                loan_error = "Name is already exist"
+        else:
+            mortgage_year = calculate_tenure(float(amount), float(monthly_payment), float(interest_rate))
+            if mortgage_year:
+                account.mortgage_year = mortgage_year
+                account.save()
+                return redirect("/loan_list/")
+            loan_error = "The monthly payment is not sufficient to cover the interest and principal."
+
+    category = Category.objects.filter(user=user)
+    category_list = []
+    for data in category:
+        if "Mortgage" in data.name or "Loan" in data.name or "Mortgages" in data.name or "Loans" in data.name or "Mortgages and Loans" in data.name or "Mortgages & Loans" in data.name:
+            category_list.append(data.name)
+
+    loan_type = ['Mortgage', 'Loan', 'Student Loan', 'Personal Loan', 'Medical Debt', 'Other Debt']
+    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': currency_dict,
+               'loan_type': loan_type, 'account': account}
+    if loan_error:
+        context['loan_error'] = loan_error
+    return render(request, 'loan/loan_update.html', context=context)
+
+
+def loan_delete(request, pk):
+    user = request.user
+    account = Account.objects.get(pk=pk)
+    sub_category = SubCategory.objects.get(category__user=user, name=account.name)
+    user = request.user
+    transaction_details = Transaction.objects.filter(user=user, categories=sub_category)
+    for data in transaction_details:
+        delete_transaction_details(data.pk, user)
+    sub_category.delete()
+    account.delete()
+    return JsonResponse({"status": "Successfully", "path": "/loan_list/"})
+
+
+def loan_details(request, pk):
+    account = Account.objects.get(pk=pk)
+    amount = float(account.balance)
+    interest = float(account.interest_rate)
+    tenure_months = int(account.mortgage_year)
+    mortgage_date = account.mortgage_date
+    monthly_payment = account.mortgage_monthly_payment
+    table = calculator(amount, interest, tenure_months, tenure_months)
+    total_payment = abs(table['principle'].sum() + table['interest'].sum())
+    json_records = table.reset_index().to_json(orient='records')
+    data = json.loads(json_records)
+    mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, tenure_months,
+                                                                                           mortgage_date)
+    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
+    categories = SubCategory.objects.get(name=account.name)
+    transaction_data = Transaction.objects.filter(user=request.user, categories=categories, out_flow=True)
+    total_pay_amount = list(transaction_data.values_list('amount', flat=True))
+    total_pay_amount = [float(x) for x in total_pay_amount]
+    print(sum(total_pay_amount))
+    remaining_amount = float(total_payment) - float(sum(total_pay_amount))
+
+    context = {
+        'data': data,
+        'monthly_payment': monthly_payment,
+        'remaining_amount': remaining_amount,
+        'last_month': last_month,
+        'days': tenure_months,
+        'total_payment': total_payment,
+        'mortgage_key': mortgage_key,
+        'mortgage_key_dumbs': json.dumps(mortgage_key),
+        'mortgage_graph_data': mortgage_graph_data,
+        'mortgage_date_data': mortgage_date_data,
+        'account': account,
+        'transaction_key': transaction_key,
+        'transaction_data': transaction_data,
+
+    }
+
+    return render(request, 'loan/loan_detail.html', context=context)
 
 
 class LiabilityAdd(LoginRequiredMixin, CreateView):
@@ -2863,12 +3393,13 @@ def show_current_funds(user_name, fun_name=None):
 
             if fun_name:
                 available_lock_amount = calculate_available_lock_amount(user_name, obj)
+                available_lock_amount = round(float(fund_obj.total_fund) - float(fund_obj.lock_fund), 2)
                 fund_value.append(
-                    [fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund, available_lock_amount,
-                     obj.available_balance, fund_obj.id])
+                    [fund_obj.account.name, fund_obj.account.available_balance, fund_obj.total_fund,
+                     fund_obj.lock_fund, available_lock_amount, fund_obj.id])
             else:
-                fund_value.append([fund_obj.account.name, fund_obj.total_fund, fund_obj.lock_fund,
-                                   obj.available_balance, fund_obj.id])
+                fund_value.append([fund_obj.account.name, fund_obj.account.available_balance, fund_obj.total_fund,
+                                    fund_obj.lock_fund, available_lock_amount, fund_obj.id])
 
     return fund_value
 
@@ -2880,9 +3411,9 @@ class FundList(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         data = super(FundList, self).get_context_data(**kwargs)
         user_name = self.request.user
-        fund_value = show_current_funds(user_name)
-        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Total Fund', 'Lock Fund', 'Available Fund',
-                    'Action']
+        fund_value = show_current_funds(user_name, fun_name='goal_funds')
+        fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Current Balance', 'Freeze Amount', 'Used Lock Fund',
+                    'Available Fund', 'Action']
         data['fund_key'] = fund_key
         data['fund_value'] = fund_value
         return data
@@ -2893,135 +3424,178 @@ def fund_overtime(request):
     if request.method == 'POST' and request.is_ajax():
         user_name = request.user
         account_name = request.POST['account_name']
-        account_data = Account.objects.get(user=user_name, name=account_name)
-        transaction_data = Transaction.objects.filter(user=user_name, account=account_data)
-        account_min_date = account_data.created_at.date()
-        print(transaction_data)
-        if transaction_data:
-            transaction_min_date = transaction_data[0].transaction_date
-            if transaction_min_date <= account_min_date:
-                min_date = transaction_min_date
-            else:
-                min_date = account_min_date
-        else:
-            min_date = account_min_date
-        max_date = datetime.datetime.today().date()
-        day_diff = (max_date - min_date).days
-        account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
-        account_date_list.append(str(min_date))
-        account_date_list = account_date_list[::-1]
-        print("account_date_list=======>", account_date_list)
-        total_fund_data = []
-        lock_fund_data = []
-        fund_graph_data = []
-        initial_fund = AvailableFunds.objects.filter(user=user_name, account=account_data)[0]
-        total_fund = float(initial_fund.total_fund)
-        lock_fund = float(initial_fund.lock_fund)
-        account_transaction_value = []
-        acc_create_date = account_data.created_at.date()
-        amount_date_dict = {}
-        if account_data.lock_amount:
-            acc_current_balance = float(account_data.balance) - float(account_data.lock_amount)
-        else:
-            acc_current_balance = float(account_data.balance)
+        transaction_qs = Transaction.objects.filter(user=user_name, account__name=account_name,
+                                                     categories__category__name='Funds').order_by('transaction_date')
+        if transaction_qs:
+            min_date = transaction_qs[0].transaction_date
+            max_date = datetime.datetime.today().date()
+            day_diff = (max_date - min_date).days
+            freeze_funds = []
+            account_date_list = []
+            fund_graph_data = []
+            outflow_count = 0
+            for transaction_data in transaction_qs:
+                account_date_list.append(str(transaction_data.transaction_date))
+                if transaction_data.out_flow:
+                    outflow_count += 1
+                    freeze_funds.append(float(transaction_data.amount))
 
-        acc_available_balance = float(acc_current_balance)
-        acc_transaction_data = Transaction.objects.filter(user=user_name, account=account_data).order_by(
-            'transaction_date')
-        multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
-                        acc_create_date, account_transaction_value, acc_available_balance)
-        print("account_transaction_value", account_transaction_value)
-        for name in account_date_list:
-            check_date = datetime.datetime.strptime(name, '%Y-%m-%d').date()
-            fund_data = AvailableFunds.objects.filter(user=user_name, account=account_data, created_at=check_date)
-            print(fund_data)
-            if fund_data:
-                for fund_value in fund_data:
-                    total_fund = float(fund_value.total_fund)
-                    lock_fund = float(fund_value.lock_fund)
-                total_fund_data.append(round(total_fund, 2))
-                lock_fund_data.append(round(lock_fund, 2))
+                else:
+                    if outflow_count >= 1:
+                        freeze_total = sum(freeze_funds)
+                        freeze_funds.append(freeze_total - float(transaction_data.amount))
 
-            else:
-                total_fund_data.append(total_fund)
-                lock_fund_data.append(lock_fund)
+            fund_graph_data.append({'label_name': 'Freeze Amount', 'data_value': freeze_funds})
+            max_value = max(freeze_funds)
+            min_value = min(freeze_funds)
+            if min_value == max_value:
+                min_value = 0
 
-        result_list = total_fund_data + lock_fund_data + account_transaction_value
-        max_value = max(result_list)
-        min_value = min(result_list)
-        fund_graph_data.append({'label_name': 'Total Fund', 'data_value': total_fund_data})
-        fund_graph_data.append({'label_name': 'Lock Fund', 'data_value': lock_fund_data})
-        fund_graph_data.append({'label_name': 'Available Fund', 'data_value': account_transaction_value})
-
+        # account_data = Account.objects.get(user=user_name, name=account_name)
+        # transaction_data = Transaction.objects.filter(user=user_name, account=account_data)
+        # account_min_date = account_data.created_at.date()
+        # print(transaction_data)
+        # if transaction_data:
+        #     transaction_min_date = transaction_data[0].transaction_date
+        #     if transaction_min_date <= account_min_date:
+        #         min_date = transaction_min_date
+        #     else:
+        #         min_date = account_min_date
+        # else:
+        #     min_date = account_min_date
+        # max_date = datetime.datetime.today().date()
+        # day_diff = (max_date - min_date).days
+        # account_date_list = [str(max_date - datetime.timedelta(days=x)) for x in range(day_diff)]
+        # account_date_list.append(str(min_date))
+        # account_date_list = account_date_list[::-1]
+        # print("account_date_list=======>", account_date_list)
+        # total_fund_data = []
+        # lock_fund_data = []
+        # fund_graph_data = []
+        # initial_fund = AvailableFunds.objects.filter(user=user_name, account=account_data)[0]
+        # total_fund = float(initial_fund.total_fund)
+        # lock_fund = float(initial_fund.lock_fund)
+        # account_transaction_value = []
+        # acc_create_date = account_data.created_at.date()
+        # amount_date_dict = {}
+        # if account_data.lock_amount:
+        #     acc_current_balance = float(account_data.balance) - float(account_data.lock_amount)
+        # else:
+        #     acc_current_balance = float(account_data.balance)
+        #
+        # acc_available_balance = float(acc_current_balance)
+        # acc_transaction_data = Transaction.objects.filter(user=user_name, account=account_data).order_by(
+        #     'transaction_date')
+        # multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance, account_date_list,
+        #                 acc_create_date, account_transaction_value, acc_available_balance)
+        # print("account_transaction_value", account_transaction_value)
+        # for name in account_date_list:
+        #     check_date = datetime.datetime.strptime(name, '%Y-%m-%d').date()
+        #     fund_data = AvailableFunds.objects.filter(user=user_name, account=account_data, created_at=check_date)
+        #     print(fund_data)
+        #     if fund_data:
+        #         for fund_value in fund_data:
+        #             total_fund = float(fund_value.total_fund)
+        #             lock_fund = float(fund_value.lock_fund)
+        #         total_fund_data.append(round(total_fund, 2))
+        #         lock_fund_data.append(round(lock_fund, 2))
+        #
+        #     else:
+        #         total_fund_data.append(total_fund)
+        #         lock_fund_data.append(lock_fund)
+        #
+        # result_list = total_fund_data + lock_fund_data + account_transaction_value
+        # max_value = max(result_list)
+        # min_value = min(result_list)
+        # fund_graph_data.append({'label_name': 'Total Fund', 'data_value': total_fund_data})
+        # fund_graph_data.append({'label_name': 'Lock Fund', 'data_value': lock_fund_data})
+        # fund_graph_data.append({'label_name': 'Available Fund', 'data_value': account_transaction_value})
+        print("fund_graph_data", fund_graph_data)
     return JsonResponse({'fund_data': fund_graph_data, 'date_range_list': account_date_list,
                          'max_value': max_value, 'min_value': min_value})
 
 
 @login_required(login_url="/login")
-def fund_update(request, pk):
-    fund_obj = AvailableFunds.objects.get(pk=pk)
-    total_fund = float(fund_obj.total_fund)
-    lock_fund = float(fund_obj.lock_fund)
+def fund_add(request):
+    user_name = request.user
+    error = False
     if request.method == 'POST':
-        user_name = request.user
-        update_total_fund = float(request.POST['total_fund'])
-        update_lock_fund = float(request.POST['lock_fund'])
-        if update_total_fund < total_fund:
-            context = {'fund_obj': fund_obj, 'error': 'Please Enter Total Fund Greater Than Current Total Fund'}
+        fund_data = save_fund_obj(request, user_name)
+
+        if 'error' in fund_data:
+            error = fund_data['error']
         else:
-            if update_total_fund == total_fund and update_lock_fund == lock_fund:
-                context = {'fund_obj': fund_obj}
+            return redirect('/goal_list')
+
+    account_data = Account.objects.filter(user=user_name,
+                                          account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
+                                                            'Line of Credit'])
+    context = {'account_data': account_data}
+    if error:
+        context['error'] = error
+    return render(request, 'funds/funds_add.html', context=context)
+
+
+@login_required(login_url="/login")
+def fund_update(request, pk):
+    fund_data = AvailableFunds.objects.get(pk=pk)
+    if request.method == 'POST':
+        freeze_amount = round(float(request.POST['freeze_amount']), 2)
+        old_total_fund = float(fund_data.total_fund)
+        if old_total_fund != freeze_amount:
+            account_obj = fund_data.account
+            account_balance = float(account_obj.available_balance)
+            sub_category = SubCategory.objects.get(category__user=fund_data.user, name=account_obj.name)
+            transaction_obj = Transaction()
+            if freeze_amount > old_total_fund:
+                add_amount = freeze_amount - old_total_fund
+                remaining_amount = account_balance - add_amount
+                transaction_obj.out_flow = True
             else:
-                current_balance = float(fund_obj.account.available_balance)
-                account_obj = Account.objects.get(name=fund_obj.account.name)
-                new_fund_obj = AvailableFunds()
-                new_fund_obj.user = fund_obj.user
-                new_fund_obj.account = account_obj
-                new_fund_obj.lock_fund = update_lock_fund
-                new_fund_obj.total_fund = update_total_fund
-                new_fund_obj.save()
-                transaction_obj = Transaction()
-                try:
-                    category_obj = Category.objects.get(user=user_name, name='Funds')
-                except:
-                    category_obj = Category()
-                    category_obj.user = user_name
-                    category_obj.name = 'Funds'
-                    category_obj.save()
+                add_amount = old_total_fund - freeze_amount
+                if freeze_amount < float(fund_data.lock_fund):
+                    context = {'fund_data': fund_data, 'error': 'This freeze amount already locked for goals. please add more amount to freeze.'}
+                    return render(request, 'funds/funds_update.html', context=context)
+                remaining_amount = account_balance + add_amount
+                transaction_obj.out_flow = False
+                transaction_obj.in_flow = True
 
-                transaction_obj.user = user_name
-                transaction_obj.remaining_amount = current_balance
-                transaction_obj.transaction_date = datetime.datetime.today().date()
-                transaction_obj.categories = category_obj
-                transaction_obj.account = account_obj
-                transaction_obj.payee = 'Self'
-                transaction_obj.tags = 'Funds'
-                transaction_obj.cleared = True
-
-                if update_total_fund != total_fund:
-                    new_fund_amount = update_total_fund - total_fund
-                    transaction_obj.amount = new_fund_amount
-                    transaction_obj.out_flow = False
-                    account_obj.available_balance = round(current_balance + new_fund_amount, 2)
-                    account_obj.save()
-                    transaction_obj.save()
-                    return redirect("/funds_list")
-                elif update_lock_fund > lock_fund:
-                    new_fund_amount = update_lock_fund - lock_fund
-                    account_obj.available_balance = round(current_balance - new_fund_amount, 2)
-                    transaction_obj.amount = new_fund_amount
-                    transaction_obj.out_flow = True
-                    account_obj.save()
-                    transaction_obj.save()
-                    return redirect("/funds_list")
-                else:
-                    context = {'fund_obj': fund_obj, 'error': 'Please Enter Lock Fund Greater Than Current Lock Fund'}
-    else:
-        context = {'fund_obj': fund_obj}
+            transaction_obj.user = fund_data.user
+            transaction_obj.payee = "Self"
+            transaction_obj.amount = add_amount
+            transaction_obj.remaining_amount = remaining_amount
+            transaction_obj.transaction_date = datetime.datetime.today().date()
+            transaction_obj.categories = sub_category
+            transaction_obj.account = account_obj
+            transaction_obj.tags = "Funds"
+            transaction_obj.cleared = True
+            account_obj.available_balance = remaining_amount
+            account_obj.transaction_count += 1
+            account_obj.save()
+            transaction_obj.save()
+        fund_data.total_fund = freeze_amount
+        fund_data.save()
+        return redirect('/goal_list')
+    context = {'fund_data': fund_data}
 
     return render(request, 'funds/funds_update.html', context=context)
 
 
+def fund_delete(request, pk):
+    fund_data = AvailableFunds.objects.get(pk=pk)
+    account_obj = fund_data.account
+    sub_category = SubCategory.objects.get(category__user=fund_data.user, name=account_obj.name)
+    goal_qs = Goal.objects.filter(user=fund_data.user, account=account_obj)
+    transaction_qs = Transaction.objects.filter(user=fund_data.user, categories=sub_category)
+    account_balance = float(account_obj.available_balance)
+    remaining_amount = account_balance + float(fund_data.total_fund)
+    account_obj.available_balance = remaining_amount
+    account_obj.transaction_count -= len(transaction_qs)
+    account_obj.save()
+    transaction_qs.delete()
+    fund_data.delete()
+    goal_qs.delete()
+    return JsonResponse({"status": "Successfully", "path": "None"})
 # class FundUpdate(UpdateView):
 #     model = AvailableFunds
 #     form_class = FundForm
@@ -3064,6 +3638,8 @@ def bill_detail(request, pk):
 def bill_add(request):
     form = BillForm(request.POST or None)
     error = ''
+    user = request.user
+    bill_category = SubCategory.objects.filter(category__name="Bills", category__user=user)
     if form.is_valid():
         label = form.cleaned_data.get('label').title()
         amount = form.cleaned_data.get('amount')
@@ -3088,7 +3664,8 @@ def bill_add(request):
 
     context = {
         'form': form,
-        'error': error
+        'error': error,
+        'bill_category': bill_category
     }
     return render(request, "bill/bill_add.html", context=context)
 
@@ -3097,6 +3674,8 @@ def bill_add(request):
 def bill_update(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
     form = BillForm(request.POST or None)
+    user = request.user
+    bill_category = SubCategory.objects.filter(category__name="Bills", category__user=user)
     if form.is_valid():
         label = form.cleaned_data.get('label')
         amount = form.cleaned_data.get('amount')
@@ -3118,7 +3697,8 @@ def bill_update(request, pk):
     context = {
         'form': form,
         'bill_data': bill_obj,
-        'currency_dict': currency_dict
+        'currency_dict': currency_dict,
+        'bill_category': bill_category
     }
     return render(request, "bill/bill_update.html", context=context)
 
@@ -3670,7 +4250,8 @@ def rental_property_details(request, pk):
 
         debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': debt_cov_ratio_list}]
         return_investment_data = [{'name': 'Annual Cashflow', 'data': change_annual_cash_flow_list},
-                                  {'name': 'Net Operating Income(NOI)', 'data': [x[1:] for x in net_operating_income_list]},
+                                  {'name': 'Net Operating Income(NOI)',
+                                   'data': [x[1:] for x in net_operating_income_list]},
                                   {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
                                    'data': [x[1:] for x in roi_list]},
                                   {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
@@ -3714,7 +4295,8 @@ def rental_property_details(request, pk):
             "total_financing": total_financing, "capex_budget_value": capex_budget_value,
             "total_replacement_costs": total_replacement_costs,
             "total_return_investor_dict": total_year_return_dict_investors,
-            'investment_data_dumbs': json.dumps(investment_data), "projection_value_dumbs": json.dumps(projection_value),
+            'investment_data_dumbs': json.dumps(investment_data),
+            "projection_value_dumbs": json.dumps(projection_value),
             "annual_cash_flow_dict_investors_dumbs": json.dumps(annual_cash_flow_dict_investors),
             "net_operating_income_dict_investors_dumbs": json.dumps(net_operating_income_dict_investors),
             "total_return_investor_dict_dumbs": json.dumps(total_year_return_dict_investors),
@@ -5078,6 +5660,7 @@ def update_property(request, pk, method_name):
     context['result_obj'] = result_obj
     return render(request, "property/property_update.html", context=context)
 
+
 @login_required(login_url="/login")
 def list_property(request):
     property_obj = Property.objects.filter(user=request.user)
@@ -5093,6 +5676,7 @@ def list_property(request):
     context = {'property_obj': property_obj, 'maintenance_dict': maintenance_dict,
                'property_key': property_key, 'property_key_dumps': json.dumps(property_key)}
     return render(request, "property/property_list.html", context=context)
+
 
 @login_required(login_url="/login")
 def property_details(request, pk):
@@ -5150,6 +5734,7 @@ def property_details(request, pk):
                }
     return render(request, "property/property_detail.html", context=context)
 
+
 @login_required(login_url="/login")
 def add_lease(request, pk, unit_name):
     username = request.user
@@ -5191,6 +5776,7 @@ def add_lease(request, pk, unit_name):
         context['unit_details'] = unit_details
 
         return render(request, "property/property_update.html", context=context)
+
 
 @login_required(login_url="/login")
 def delete_property(request, pk):
@@ -5647,12 +6233,13 @@ def rental_property_sample_page(request):
                                   'data': ['30.77%', '31.98%', '33.21%', '34.48%', '35.79%', '37.12%', '38.49%',
                                            '39.9%', '41.34%', '42.82%', '44.33%', '45.89%', '47.48%', '49.12%',
                                            '50.8%', '52.52%', '54.28%', '56.09%', '57.95%', '59.86%', '61.81%',
-                                           '63.82%', '65.88%', '67.99%', '70.16%', '72.38%', '74.66%', '77.0%', '79.41%', '81.87%']}]
-    debt_cov_ratio_data =[{'name': 'Debt Service Coverage Ratio (%)', 'data': [1.49, 1.52, 1.55, 1.58, 1.62, 1.65,
-                                                                               1.68, 1.71, 1.75, 1.78, 1.82, 1.86,
-                                                                               1.89, 1.93, 1.97, 2.01, 2.05, 2.09,
-                                                                               2.13, 2.17, 2.22, 2.26, 2.31, 2.35, 2.4,
-                                                                               2.45, 2.5, 2.55, 2.6, 2.65]}]
+                                           '63.82%', '65.88%', '67.99%', '70.16%', '72.38%', '74.66%', '77.0%',
+                                           '79.41%', '81.87%']}]
+    debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': [1.49, 1.52, 1.55, 1.58, 1.62, 1.65,
+                                                                                1.68, 1.71, 1.75, 1.78, 1.82, 1.86,
+                                                                                1.89, 1.93, 1.97, 2.01, 2.05, 2.09,
+                                                                                2.13, 2.17, 2.22, 2.26, 2.31, 2.35, 2.4,
+                                                                                2.45, 2.5, 2.55, 2.6, 2.65]}]
     return_investment_data = [{'name': 'Annual Cashflow', 'data': [9969.6, 10573.73, 11189.95, 11818.49, 12459.6,
                                                                    13113.53, 13780.54, 14460.89, 15154.85, 15862.69,
                                                                    16584.69, 17321.12, 18072.28, 18838.47, 19619.98,
@@ -5691,150 +6278,340 @@ def rental_property_sample_page(request):
                                                                      '18968.88', '19348.26', '19735.22', '20129.93',
                                                                      '20532.53', '20943.18']}]
     mortgage_graph_data = [{'name': 'Balance',
-                           'data': [400000.0, 399313.58, 398625.45, 397935.6, 397244.02, 396550.72, 395855.68, 395158.9, 394460.38,
-                                   393760.12, 393058.1, 392354.33, 391648.8, 390941.5, 390232.44, 389521.61, 388808.99, 388094.6, 387378.42,
-                                   386660.45, 385940.69, 385219.12, 384495.75, 383770.58, 383043.59, 382314.78, 381584.15, 380851.7,
-                                   380117.41, 379381.29, 378643.32, 377903.51, 377161.86, 376418.35, 375672.98, 374925.74, 374176.64,
-                                   373425.67, 372672.81, 371918.08, 371161.46, 370402.95, 369642.54, 368880.23, 368116.01, 367349.89,
-                                   366581.84, 365811.88, 365040.0, 364266.18, 363490.43, 362712.74, 361933.11, 361151.52, 360367.98,
-                                   359582.49, 358795.03, 358005.6, 357214.2, 356420.82, 355625.45, 354828.1, 354028.76, 353227.41,
-                                   352424.06, 351618.71, 350811.34, 350001.95, 349190.54, 348377.1, 347561.63, 346744.11, 345924.56,
-                                   345102.95, 344279.29, 343453.58, 342625.79, 341795.94, 340964.02, 340130.01, 339293.92, 338455.74,
-                                   337615.46, 336773.08, 335928.6, 335082.01, 334233.29, 333382.46, 332529.5, 331674.41, 330817.18,
-                                   329957.81, 329096.28, 328232.61, 327366.77, 326498.77, 325628.61, 324756.26, 323881.74, 323005.02,
-                                   322126.12, 321245.02, 320361.72, 319476.2, 318588.48, 317698.53, 316806.36, 315911.96, 315015.33,
-                                   314116.45, 313215.32, 312311.95, 311406.31, 310498.41, 309588.24, 308675.79, 307761.07, 306844.05,
-                                   305924.75, 305003.14, 304079.24, 303153.02, 302224.48, 301293.63, 300360.45, 299424.93, 298487.08,
-                                   297546.88, 296604.33, 295659.43, 294712.16, 293762.52, 292810.51, 291856.12, 290899.35, 289940.18,
-                                   288978.61, 288014.64, 287048.26, 286079.47, 285108.25, 284134.61, 283158.53, 282180.01, 281199.04,
-                                   280215.62, 279229.74, 278241.4, 277250.59, 276257.3, 275261.53, 274263.26, 273262.51, 272259.25,
-                                   271253.48, 270245.2, 269234.39, 268221.06, 267205.2, 266186.8, 265165.85, 264142.35, 263116.29,
-                                   262087.66, 261056.46, 260022.69, 258986.33, 257947.38, 256905.83, 255861.68, 254814.92, 253765.54,
-                                   252713.54, 251658.9, 250601.64, 249541.72, 248479.16, 247413.94, 246346.06, 245275.51, 244202.28,
-                                   243126.37, 242047.77, 240966.48, 239882.48, 238795.77, 237706.34, 236614.19, 235519.31, 234421.69,
-                                   233321.33, 232218.22, 231112.35, 230003.71, 228892.3, 227778.12, 226661.15, 225541.38, 224418.82,
-                                   223293.45, 222165.27, 221034.27, 219900.44, 218763.77, 217624.26, 216481.91, 215336.7, 214188.62,
-                                   213037.68, 211883.86, 210727.15, 209567.55, 208405.05, 207239.65, 206071.33, 204900.1, 203725.93,
-                                   202548.83, 201368.79, 200185.79, 198999.84, 197810.92, 196619.03, 195424.17, 194226.31, 193025.46,
-                                   191821.61, 190614.74, 189404.87, 188191.96, 186976.03, 185757.05, 184535.03, 183309.95, 182081.81,
-                                   180850.59, 179616.3, 178378.93, 177138.46, 175894.89, 174648.21, 173398.42, 172145.5, 170889.44,
-                                   169630.25, 168367.91, 167102.41, 165833.75, 164561.92, 163286.91, 162008.71, 160727.32, 159442.72,
-                                   158154.91, 156863.88, 155569.63, 154272.13, 152971.4, 151667.41, 150360.16, 149049.65, 147735.85,
-                                   146418.78, 145098.41, 143774.74, 142447.76, 141117.46, 139783.84, 138446.88, 137106.58, 135762.93,
-                                   134415.93, 133065.55, 131711.8, 130354.66, 128994.13, 127630.2, 126262.86, 124892.1, 123517.91,
-                                   122140.29, 120759.23, 119374.71, 117986.73, 116595.28, 115200.35, 113801.94, 112400.03, 110994.61,
-                                   109585.68, 108173.23, 106757.25, 105337.72, 103914.65, 102488.02, 101057.83, 99624.05, 98186.7, 96745.75,
-                                   95301.2, 93853.03, 92401.25, 90945.84, 89486.79, 88024.09, 86557.73, 85087.71, 83614.01, 82136.63,
-                                   80655.56, 79170.78, 77682.29, 76190.08, 74694.14, 73194.46, 71691.03, 70183.84, 68672.88, 67158.15,
-                                   65639.63, 64117.31, 62591.19, 61061.25, 59527.49, 57989.89, 56448.45, 54903.15, 53353.99, 51800.96,
-                                   50244.05, 48683.24, 47118.54, 45549.92, 43977.37, 42400.9, 40820.49, 39236.12, 37647.8, 36055.5,
-                                   34459.22, 32858.96, 31254.69, 29646.41, 28034.11, 26417.78, 24797.4, 23172.98, 21544.5, 19911.94,
-                                   18275.31, 16634.58, 14989.75, 13340.81, 11687.74, 10030.55, 8369.21, 6703.71, 5034.06, 3360.23,
-                                   1682.21]}, {'name': 'Principle',
-                                               'data': [686.42, 688.13, 689.85, 691.58, 693.31, 695.04, 696.78, 698.52, 700.27, 702.02,
-                                                        703.77, 705.53, 707.29, 709.06, 710.84, 712.61, 714.39, 716.18, 717.97, 719.77,
-                                                        721.56, 723.37, 725.18, 726.99, 728.81, 730.63, 732.46, 734.29, 736.12, 737.96,
-                                                        739.81, 741.66, 743.51, 745.37, 747.23, 749.1, 750.97, 752.85, 754.73, 756.62,
-                                                        758.51, 760.41, 762.31, 764.22, 766.13, 768.04, 769.96, 771.89, 773.82, 775.75,
-                                                        777.69, 779.63, 781.58, 783.54, 785.5, 787.46, 789.43, 791.4, 793.38, 795.36,
-                                                        797.35, 799.35, 801.34, 803.35, 805.36, 807.37, 809.39, 811.41, 813.44, 815.47,
-                                                        817.51, 819.56, 821.6, 823.66, 825.72, 827.78, 829.85, 831.93, 834.01, 836.09,
-                                                        838.18, 840.28, 842.38, 844.48, 846.59, 848.71, 850.83, 852.96, 855.09, 857.23,
-                                                        859.37, 861.52, 863.68, 865.83, 868.0, 870.17, 872.34, 874.53, 876.71, 878.9, 881.1,
-                                                        883.3, 885.51, 887.73, 889.94, 892.17, 894.4, 896.64, 898.88, 901.13, 903.38,
-                                                        905.64, 907.9, 910.17, 912.45, 914.73, 917.01, 919.31, 921.6, 923.91, 926.22,
-                                                        928.53, 930.85, 933.18, 935.52, 937.85, 940.2, 942.55, 944.91, 947.27, 949.64,
-                                                        952.01, 954.39, 956.78, 959.17, 961.57, 963.97, 966.38, 968.8, 971.22, 973.65,
-                                                        976.08, 978.52, 980.97, 983.42, 985.88, 988.34, 990.81, 993.29, 995.77, 998.26,
-                                                        1000.76, 1003.26, 1005.77, 1008.28, 1010.8, 1013.33, 1015.86, 1018.4, 1020.95,
-                                                        1023.5, 1026.06, 1028.63, 1031.2, 1033.77, 1036.36, 1038.95, 1041.55, 1044.15,
-                                                        1046.76, 1049.38, 1052.0, 1054.63, 1057.27, 1059.91, 1062.56, 1065.22, 1067.88,
-                                                        1070.55, 1073.23, 1075.91, 1078.6, 1081.3, 1084.0, 1086.71, 1089.43, 1092.15,
-                                                        1094.88, 1097.62, 1100.36, 1103.11, 1105.87, 1108.64, 1111.41, 1114.19, 1116.97,
-                                                        1119.76, 1122.56, 1125.37, 1128.18, 1131.0, 1133.83, 1136.67, 1139.51, 1142.36,
-                                                        1145.21, 1148.07, 1150.94, 1153.82, 1156.71, 1159.6, 1162.5, 1165.4, 1168.32,
-                                                        1171.24, 1174.17, 1177.1, 1180.04, 1182.99, 1185.95, 1188.92, 1191.89, 1194.87,
-                                                        1197.86, 1200.85, 1203.85, 1206.86, 1209.88, 1212.9, 1215.94, 1218.98, 1222.02,
-                                                        1225.08, 1228.14, 1231.21, 1234.29, 1237.38, 1240.47, 1243.57, 1246.68, 1249.8,
-                                                        1252.92, 1256.05, 1259.19, 1262.34, 1265.5, 1268.66, 1271.83, 1275.01, 1278.2,
-                                                        1281.39, 1284.6, 1287.81, 1291.03, 1294.26, 1297.49, 1300.74, 1303.99, 1307.25,
-                                                        1310.52, 1313.79, 1317.08, 1320.37, 1323.67, 1326.98, 1330.3, 1333.62, 1336.96,
-                                                        1340.3, 1343.65, 1347.01, 1350.38, 1353.75, 1357.14, 1360.53, 1363.93, 1367.34,
-                                                        1370.76, 1374.19, 1377.62, 1381.07, 1384.52, 1387.98, 1391.45, 1394.93, 1398.42,
-                                                        1401.91, 1405.42, 1408.93, 1412.45, 1415.98, 1419.52, 1423.07, 1426.63, 1430.2,
-                                                        1433.77, 1437.36, 1440.95, 1444.55, 1448.16, 1451.78, 1455.41, 1459.05, 1462.7,
-                                                        1466.36, 1470.02, 1473.7, 1477.38, 1481.07, 1484.78, 1488.49, 1492.21, 1495.94,
-                                                        1499.68, 1503.43, 1507.19, 1510.96, 1514.73, 1518.52, 1522.32, 1526.12, 1529.94,
-                                                        1533.76, 1537.6, 1541.44, 1545.3, 1549.16, 1553.03, 1556.91, 1560.81, 1564.71,
-                                                        1568.62, 1572.54, 1576.47, 1580.41, 1584.36, 1588.33, 1592.3, 1596.28, 1600.27,
-                                                        1604.27, 1608.28, 1612.3, 1616.33, 1620.37, 1624.42, 1628.48, 1632.55, 1636.64,
-                                                        1640.73, 1644.83, 1648.94, 1653.06, 1657.2, 1661.34, 1665.49, 1669.66, 1673.83,
-                                                        1678.02, 1682.21]}, {'name': 'Interest',
-                                                                             'data': [1000.0, 998.28, 996.56, 994.84, 993.11, 991.38,
-                                                                                      989.64, 987.9, 986.15, 984.4, 982.65, 980.89, 979.12,
-                                                                                      977.35, 975.58, 973.8, 972.02, 970.24, 968.45, 966.65,
-                                                                                      964.85, 963.05, 961.24, 959.43, 957.61, 955.79,
-                                                                                      953.96, 952.13, 950.29, 948.45, 946.61, 944.76, 942.9,
-                                                                                      941.05, 939.18, 937.31, 935.44, 933.56, 931.68, 929.8,
-                                                                                      927.9, 926.01, 924.11, 922.2, 920.29, 918.37, 916.45,
-                                                                                      914.53, 912.6, 910.67, 908.73, 906.78, 904.83, 902.88,
-                                                                                      900.92, 898.96, 896.99, 895.01, 893.04, 891.05,
-                                                                                      889.06, 887.07, 885.07, 883.07, 881.06, 879.05,
-                                                                                      877.03, 875.0, 872.98, 870.94, 868.9, 866.86, 864.81,
-                                                                                      862.76, 860.7, 858.63, 856.56, 854.49, 852.41, 850.33,
-                                                                                      848.23, 846.14, 844.04, 841.93, 839.82, 837.71,
-                                                                                      835.58, 833.46, 831.32, 829.19, 827.04, 824.89,
-                                                                                      822.74, 820.58, 818.42, 816.25, 814.07, 811.89, 809.7,
-                                                                                      807.51, 805.32, 803.11, 800.9, 798.69, 796.47, 794.25,
-                                                                                      792.02, 789.78, 787.54, 785.29, 783.04, 780.78,
-                                                                                      778.52, 776.25, 773.97, 771.69, 769.4, 767.11, 764.81,
-                                                                                      762.51, 760.2, 757.88, 755.56, 753.23, 750.9, 748.56,
-                                                                                      746.22, 743.87, 741.51, 739.15, 736.78, 734.41,
-                                                                                      732.03, 729.64, 727.25, 724.85, 722.45, 720.04,
-                                                                                      717.62, 715.2, 712.77, 710.34, 707.9, 705.45, 703.0,
-                                                                                      700.54, 698.07, 695.6, 693.13, 690.64, 688.15, 685.66,
-                                                                                      683.16, 680.65, 678.13, 675.61, 673.09, 670.55,
-                                                                                      668.01, 665.47, 662.91, 660.36, 657.79, 655.22,
-                                                                                      652.64, 650.06, 647.47, 644.87, 642.26, 639.65,
-                                                                                      637.04, 634.41, 631.78, 629.15, 626.5, 623.85, 621.2,
-                                                                                      618.53, 615.87, 613.19, 610.51, 607.82, 605.12,
-                                                                                      602.42, 599.71, 596.99, 594.27, 591.54, 588.8, 586.05,
-                                                                                      583.3, 580.55, 577.78, 575.01, 572.23, 569.45, 566.65,
-                                                                                      563.85, 561.05, 558.23, 555.41, 552.59, 549.75,
-                                                                                      546.91, 544.06, 541.2, 538.34, 535.47, 532.59, 529.71,
-                                                                                      526.82, 523.92, 521.01, 518.1, 515.18, 512.25, 509.31,
-                                                                                      506.37, 503.42, 500.46, 497.5, 494.53, 491.55, 488.56,
-                                                                                      485.57, 482.56, 479.55, 476.54, 473.51, 470.48,
-                                                                                      467.44, 464.39, 461.34, 458.27, 455.2, 452.13, 449.04,
-                                                                                      445.95, 442.85, 439.74, 436.62, 433.5, 430.36, 427.22,
-                                                                                      424.08, 420.92, 417.76, 414.58, 411.4, 408.22, 405.02,
-                                                                                      401.82, 398.61, 395.39, 392.16, 388.92, 385.68,
-                                                                                      382.43, 379.17, 375.9, 372.62, 369.34, 366.05, 362.75,
-                                                                                      359.44, 356.12, 352.79, 349.46, 346.12, 342.77,
-                                                                                      339.41, 336.04, 332.66, 329.28, 325.89, 322.49,
-                                                                                      319.08, 315.66, 312.23, 308.79, 305.35, 301.9, 298.44,
-                                                                                      294.97, 291.49, 288.0, 284.5, 281.0, 277.49, 273.96,
-                                                                                      270.43, 266.89, 263.34, 259.79, 256.22, 252.64,
-                                                                                      249.06, 245.47, 241.86, 238.25, 234.63, 231.0, 227.36,
-                                                                                      223.72, 220.06, 216.39, 212.72, 209.04, 205.34,
-                                                                                      201.64, 197.93, 194.21, 190.48, 186.74, 182.99,
-                                                                                      179.23, 175.46, 171.68, 167.9, 164.1, 160.29, 156.48,
-                                                                                      152.65, 148.82, 144.97, 141.12, 137.26, 133.38, 129.5,
-                                                                                      125.61, 121.71, 117.8, 113.87, 109.94, 106.0, 102.05,
-                                                                                      98.09, 94.12, 90.14, 86.15, 82.15, 78.14, 74.12,
-                                                                                      70.09, 66.04, 61.99, 57.93, 53.86, 49.78, 45.69,
-                                                                                      41.59, 37.47, 33.35, 29.22, 25.08, 20.92, 16.76,
-                                                                                      12.59, 8.4, 4.21]}]
-    mortgage_date_data = ['2022-10-01', '2022-11-01', '2022-12-01', '2023-01-01', '2023-02-01', '2023-03-01', '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01', '2023-10-01', '2023-11-01', '2023-12-01', '2024-01-01', '2024-02-01', '2024-03-01', '2024-04-01', '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01', '2024-09-01', '2024-10-01', '2024-11-01', '2024-12-01', '2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01', '2025-05-01', '2025-06-01', '2025-07-01', '2025-08-01', '2025-09-01', '2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01', '2026-10-01', '2026-11-01', '2026-12-01', '2027-01-01', '2027-02-01', '2027-03-01', '2027-04-01', '2027-05-01', '2027-06-01', '2027-07-01', '2027-08-01', '2027-09-01', '2027-10-01', '2027-11-01', '2027-12-01', '2028-01-01', '2028-02-01', '2028-03-01', '2028-04-01', '2028-05-01', '2028-06-01', '2028-07-01', '2028-08-01', '2028-09-01', '2028-10-01', '2028-11-01', '2028-12-01', '2029-01-01', '2029-02-01', '2029-03-01', '2029-04-01', '2029-05-01', '2029-06-01', '2029-07-01', '2029-08-01', '2029-09-01', '2029-10-01', '2029-11-01', '2029-12-01', '2030-01-01', '2030-02-01', '2030-03-01', '2030-04-01', '2030-05-01', '2030-06-01', '2030-07-01', '2030-08-01', '2030-09-01', '2030-10-01', '2030-11-01', '2030-12-01', '2031-01-01', '2031-02-01', '2031-03-01', '2031-04-01', '2031-05-01', '2031-06-01', '2031-07-01', '2031-08-01', '2031-09-01', '2031-10-01', '2031-11-01', '2031-12-01', '2032-01-01', '2032-02-01', '2032-03-01', '2032-04-01', '2032-05-01', '2032-06-01', '2032-07-01', '2032-08-01', '2032-09-01', '2032-10-01', '2032-11-01', '2032-12-01', '2033-01-01', '2033-02-01', '2033-03-01', '2033-04-01', '2033-05-01', '2033-06-01', '2033-07-01', '2033-08-01', '2033-09-01', '2033-10-01', '2033-11-01', '2033-12-01', '2034-01-01', '2034-02-01', '2034-03-01', '2034-04-01', '2034-05-01', '2034-06-01', '2034-07-01', '2034-08-01', '2034-09-01', '2034-10-01', '2034-11-01', '2034-12-01', '2035-01-01', '2035-02-01', '2035-03-01', '2035-04-01', '2035-05-01', '2035-06-01', '2035-07-01', '2035-08-01', '2035-09-01', '2035-10-01', '2035-11-01', '2035-12-01', '2036-01-01', '2036-02-01', '2036-03-01', '2036-04-01', '2036-05-01', '2036-06-01', '2036-07-01', '2036-08-01', '2036-09-01', '2036-10-01', '2036-11-01', '2036-12-01', '2037-01-01', '2037-02-01', '2037-03-01', '2037-04-01', '2037-05-01', '2037-06-01', '2037-07-01', '2037-08-01', '2037-09-01', '2037-10-01', '2037-11-01', '2037-12-01', '2038-01-01', '2038-02-01', '2038-03-01', '2038-04-01', '2038-05-01', '2038-06-01', '2038-07-01', '2038-08-01', '2038-09-01', '2038-10-01', '2038-11-01', '2038-12-01', '2039-01-01', '2039-02-01', '2039-03-01', '2039-04-01', '2039-05-01', '2039-06-01', '2039-07-01', '2039-08-01', '2039-09-01', '2039-10-01', '2039-11-01', '2039-12-01', '2040-01-01', '2040-02-01', '2040-03-01', '2040-04-01', '2040-05-01', '2040-06-01', '2040-07-01', '2040-08-01', '2040-09-01', '2040-10-01', '2040-11-01', '2040-12-01', '2041-01-01', '2041-02-01', '2041-03-01', '2041-04-01', '2041-05-01', '2041-06-01', '2041-07-01', '2041-08-01', '2041-09-01', '2041-10-01', '2041-11-01', '2041-12-01', '2042-01-01', '2042-02-01', '2042-03-01', '2042-04-01', '2042-05-01', '2042-06-01', '2042-07-01', '2042-08-01', '2042-09-01', '2042-10-01', '2042-11-01', '2042-12-01', '2043-01-01', '2043-02-01', '2043-03-01', '2043-04-01', '2043-05-01', '2043-06-01', '2043-07-01', '2043-08-01', '2043-09-01', '2043-10-01', '2043-11-01', '2043-12-01', '2044-01-01', '2044-02-01', '2044-03-01', '2044-04-01', '2044-05-01', '2044-06-01', '2044-07-01', '2044-08-01', '2044-09-01', '2044-10-01', '2044-11-01', '2044-12-01', '2045-01-01', '2045-02-01', '2045-03-01', '2045-04-01', '2045-05-01', '2045-06-01', '2045-07-01', '2045-08-01', '2045-09-01', '2045-10-01', '2045-11-01', '2045-12-01', '2046-01-01', '2046-02-01', '2046-03-01', '2046-04-01', '2046-05-01', '2046-06-01', '2046-07-01', '2046-08-01', '2046-09-01', '2046-10-01', '2046-11-01', '2046-12-01', '2047-01-01', '2047-02-01', '2047-03-01', '2047-04-01', '2047-05-01', '2047-06-01', '2047-07-01', '2047-08-01', '2047-09-01', '2047-10-01', '2047-11-01', '2047-12-01', '2048-01-01', '2048-02-01', '2048-03-01', '2048-04-01', '2048-05-01', '2048-06-01', '2048-07-01', '2048-08-01', '2048-09-01', '2048-10-01', '2048-11-01', '2048-12-01', '2049-01-01', '2049-02-01', '2049-03-01', '2049-04-01', '2049-05-01', '2049-06-01', '2049-07-01', '2049-08-01', '2049-09-01', '2049-10-01', '2049-11-01', '2049-12-01', '2050-01-01', '2050-02-01', '2050-03-01', '2050-04-01', '2050-05-01', '2050-06-01', '2050-07-01', '2050-08-01', '2050-09-01', '2050-10-01', '2050-11-01', '2050-12-01', '2051-01-01', '2051-02-01', '2051-03-01', '2051-04-01', '2051-05-01', '2051-06-01', '2051-07-01', '2051-08-01', '2051-09-01', '2051-10-01', '2051-11-01', '2051-12-01', '2052-01-01', '2052-02-01', '2052-03-01', '2052-04-01', '2052-05-01', '2052-06-01', '2052-07-01', '2052-08-01', '2052-09-01']
+                            'data': [400000.0, 399313.58, 398625.45, 397935.6, 397244.02, 396550.72, 395855.68,
+                                     395158.9, 394460.38,
+                                     393760.12, 393058.1, 392354.33, 391648.8, 390941.5, 390232.44, 389521.61,
+                                     388808.99, 388094.6, 387378.42,
+                                     386660.45, 385940.69, 385219.12, 384495.75, 383770.58, 383043.59, 382314.78,
+                                     381584.15, 380851.7,
+                                     380117.41, 379381.29, 378643.32, 377903.51, 377161.86, 376418.35, 375672.98,
+                                     374925.74, 374176.64,
+                                     373425.67, 372672.81, 371918.08, 371161.46, 370402.95, 369642.54, 368880.23,
+                                     368116.01, 367349.89,
+                                     366581.84, 365811.88, 365040.0, 364266.18, 363490.43, 362712.74, 361933.11,
+                                     361151.52, 360367.98,
+                                     359582.49, 358795.03, 358005.6, 357214.2, 356420.82, 355625.45, 354828.1,
+                                     354028.76, 353227.41,
+                                     352424.06, 351618.71, 350811.34, 350001.95, 349190.54, 348377.1, 347561.63,
+                                     346744.11, 345924.56,
+                                     345102.95, 344279.29, 343453.58, 342625.79, 341795.94, 340964.02, 340130.01,
+                                     339293.92, 338455.74,
+                                     337615.46, 336773.08, 335928.6, 335082.01, 334233.29, 333382.46, 332529.5,
+                                     331674.41, 330817.18,
+                                     329957.81, 329096.28, 328232.61, 327366.77, 326498.77, 325628.61, 324756.26,
+                                     323881.74, 323005.02,
+                                     322126.12, 321245.02, 320361.72, 319476.2, 318588.48, 317698.53, 316806.36,
+                                     315911.96, 315015.33,
+                                     314116.45, 313215.32, 312311.95, 311406.31, 310498.41, 309588.24, 308675.79,
+                                     307761.07, 306844.05,
+                                     305924.75, 305003.14, 304079.24, 303153.02, 302224.48, 301293.63, 300360.45,
+                                     299424.93, 298487.08,
+                                     297546.88, 296604.33, 295659.43, 294712.16, 293762.52, 292810.51, 291856.12,
+                                     290899.35, 289940.18,
+                                     288978.61, 288014.64, 287048.26, 286079.47, 285108.25, 284134.61, 283158.53,
+                                     282180.01, 281199.04,
+                                     280215.62, 279229.74, 278241.4, 277250.59, 276257.3, 275261.53, 274263.26,
+                                     273262.51, 272259.25,
+                                     271253.48, 270245.2, 269234.39, 268221.06, 267205.2, 266186.8, 265165.85,
+                                     264142.35, 263116.29,
+                                     262087.66, 261056.46, 260022.69, 258986.33, 257947.38, 256905.83, 255861.68,
+                                     254814.92, 253765.54,
+                                     252713.54, 251658.9, 250601.64, 249541.72, 248479.16, 247413.94, 246346.06,
+                                     245275.51, 244202.28,
+                                     243126.37, 242047.77, 240966.48, 239882.48, 238795.77, 237706.34, 236614.19,
+                                     235519.31, 234421.69,
+                                     233321.33, 232218.22, 231112.35, 230003.71, 228892.3, 227778.12, 226661.15,
+                                     225541.38, 224418.82,
+                                     223293.45, 222165.27, 221034.27, 219900.44, 218763.77, 217624.26, 216481.91,
+                                     215336.7, 214188.62,
+                                     213037.68, 211883.86, 210727.15, 209567.55, 208405.05, 207239.65, 206071.33,
+                                     204900.1, 203725.93,
+                                     202548.83, 201368.79, 200185.79, 198999.84, 197810.92, 196619.03, 195424.17,
+                                     194226.31, 193025.46,
+                                     191821.61, 190614.74, 189404.87, 188191.96, 186976.03, 185757.05, 184535.03,
+                                     183309.95, 182081.81,
+                                     180850.59, 179616.3, 178378.93, 177138.46, 175894.89, 174648.21, 173398.42,
+                                     172145.5, 170889.44,
+                                     169630.25, 168367.91, 167102.41, 165833.75, 164561.92, 163286.91, 162008.71,
+                                     160727.32, 159442.72,
+                                     158154.91, 156863.88, 155569.63, 154272.13, 152971.4, 151667.41, 150360.16,
+                                     149049.65, 147735.85,
+                                     146418.78, 145098.41, 143774.74, 142447.76, 141117.46, 139783.84, 138446.88,
+                                     137106.58, 135762.93,
+                                     134415.93, 133065.55, 131711.8, 130354.66, 128994.13, 127630.2, 126262.86,
+                                     124892.1, 123517.91,
+                                     122140.29, 120759.23, 119374.71, 117986.73, 116595.28, 115200.35, 113801.94,
+                                     112400.03, 110994.61,
+                                     109585.68, 108173.23, 106757.25, 105337.72, 103914.65, 102488.02, 101057.83,
+                                     99624.05, 98186.7, 96745.75,
+                                     95301.2, 93853.03, 92401.25, 90945.84, 89486.79, 88024.09, 86557.73, 85087.71,
+                                     83614.01, 82136.63,
+                                     80655.56, 79170.78, 77682.29, 76190.08, 74694.14, 73194.46, 71691.03, 70183.84,
+                                     68672.88, 67158.15,
+                                     65639.63, 64117.31, 62591.19, 61061.25, 59527.49, 57989.89, 56448.45, 54903.15,
+                                     53353.99, 51800.96,
+                                     50244.05, 48683.24, 47118.54, 45549.92, 43977.37, 42400.9, 40820.49, 39236.12,
+                                     37647.8, 36055.5,
+                                     34459.22, 32858.96, 31254.69, 29646.41, 28034.11, 26417.78, 24797.4, 23172.98,
+                                     21544.5, 19911.94,
+                                     18275.31, 16634.58, 14989.75, 13340.81, 11687.74, 10030.55, 8369.21, 6703.71,
+                                     5034.06, 3360.23,
+                                     1682.21]}, {'name': 'Principle',
+                                                 'data': [686.42, 688.13, 689.85, 691.58, 693.31, 695.04, 696.78,
+                                                          698.52, 700.27, 702.02,
+                                                          703.77, 705.53, 707.29, 709.06, 710.84, 712.61, 714.39,
+                                                          716.18, 717.97, 719.77,
+                                                          721.56, 723.37, 725.18, 726.99, 728.81, 730.63, 732.46,
+                                                          734.29, 736.12, 737.96,
+                                                          739.81, 741.66, 743.51, 745.37, 747.23, 749.1, 750.97, 752.85,
+                                                          754.73, 756.62,
+                                                          758.51, 760.41, 762.31, 764.22, 766.13, 768.04, 769.96,
+                                                          771.89, 773.82, 775.75,
+                                                          777.69, 779.63, 781.58, 783.54, 785.5, 787.46, 789.43, 791.4,
+                                                          793.38, 795.36,
+                                                          797.35, 799.35, 801.34, 803.35, 805.36, 807.37, 809.39,
+                                                          811.41, 813.44, 815.47,
+                                                          817.51, 819.56, 821.6, 823.66, 825.72, 827.78, 829.85, 831.93,
+                                                          834.01, 836.09,
+                                                          838.18, 840.28, 842.38, 844.48, 846.59, 848.71, 850.83,
+                                                          852.96, 855.09, 857.23,
+                                                          859.37, 861.52, 863.68, 865.83, 868.0, 870.17, 872.34, 874.53,
+                                                          876.71, 878.9, 881.1,
+                                                          883.3, 885.51, 887.73, 889.94, 892.17, 894.4, 896.64, 898.88,
+                                                          901.13, 903.38,
+                                                          905.64, 907.9, 910.17, 912.45, 914.73, 917.01, 919.31, 921.6,
+                                                          923.91, 926.22,
+                                                          928.53, 930.85, 933.18, 935.52, 937.85, 940.2, 942.55, 944.91,
+                                                          947.27, 949.64,
+                                                          952.01, 954.39, 956.78, 959.17, 961.57, 963.97, 966.38, 968.8,
+                                                          971.22, 973.65,
+                                                          976.08, 978.52, 980.97, 983.42, 985.88, 988.34, 990.81,
+                                                          993.29, 995.77, 998.26,
+                                                          1000.76, 1003.26, 1005.77, 1008.28, 1010.8, 1013.33, 1015.86,
+                                                          1018.4, 1020.95,
+                                                          1023.5, 1026.06, 1028.63, 1031.2, 1033.77, 1036.36, 1038.95,
+                                                          1041.55, 1044.15,
+                                                          1046.76, 1049.38, 1052.0, 1054.63, 1057.27, 1059.91, 1062.56,
+                                                          1065.22, 1067.88,
+                                                          1070.55, 1073.23, 1075.91, 1078.6, 1081.3, 1084.0, 1086.71,
+                                                          1089.43, 1092.15,
+                                                          1094.88, 1097.62, 1100.36, 1103.11, 1105.87, 1108.64, 1111.41,
+                                                          1114.19, 1116.97,
+                                                          1119.76, 1122.56, 1125.37, 1128.18, 1131.0, 1133.83, 1136.67,
+                                                          1139.51, 1142.36,
+                                                          1145.21, 1148.07, 1150.94, 1153.82, 1156.71, 1159.6, 1162.5,
+                                                          1165.4, 1168.32,
+                                                          1171.24, 1174.17, 1177.1, 1180.04, 1182.99, 1185.95, 1188.92,
+                                                          1191.89, 1194.87,
+                                                          1197.86, 1200.85, 1203.85, 1206.86, 1209.88, 1212.9, 1215.94,
+                                                          1218.98, 1222.02,
+                                                          1225.08, 1228.14, 1231.21, 1234.29, 1237.38, 1240.47, 1243.57,
+                                                          1246.68, 1249.8,
+                                                          1252.92, 1256.05, 1259.19, 1262.34, 1265.5, 1268.66, 1271.83,
+                                                          1275.01, 1278.2,
+                                                          1281.39, 1284.6, 1287.81, 1291.03, 1294.26, 1297.49, 1300.74,
+                                                          1303.99, 1307.25,
+                                                          1310.52, 1313.79, 1317.08, 1320.37, 1323.67, 1326.98, 1330.3,
+                                                          1333.62, 1336.96,
+                                                          1340.3, 1343.65, 1347.01, 1350.38, 1353.75, 1357.14, 1360.53,
+                                                          1363.93, 1367.34,
+                                                          1370.76, 1374.19, 1377.62, 1381.07, 1384.52, 1387.98, 1391.45,
+                                                          1394.93, 1398.42,
+                                                          1401.91, 1405.42, 1408.93, 1412.45, 1415.98, 1419.52, 1423.07,
+                                                          1426.63, 1430.2,
+                                                          1433.77, 1437.36, 1440.95, 1444.55, 1448.16, 1451.78, 1455.41,
+                                                          1459.05, 1462.7,
+                                                          1466.36, 1470.02, 1473.7, 1477.38, 1481.07, 1484.78, 1488.49,
+                                                          1492.21, 1495.94,
+                                                          1499.68, 1503.43, 1507.19, 1510.96, 1514.73, 1518.52, 1522.32,
+                                                          1526.12, 1529.94,
+                                                          1533.76, 1537.6, 1541.44, 1545.3, 1549.16, 1553.03, 1556.91,
+                                                          1560.81, 1564.71,
+                                                          1568.62, 1572.54, 1576.47, 1580.41, 1584.36, 1588.33, 1592.3,
+                                                          1596.28, 1600.27,
+                                                          1604.27, 1608.28, 1612.3, 1616.33, 1620.37, 1624.42, 1628.48,
+                                                          1632.55, 1636.64,
+                                                          1640.73, 1644.83, 1648.94, 1653.06, 1657.2, 1661.34, 1665.49,
+                                                          1669.66, 1673.83,
+                                                          1678.02, 1682.21]}, {'name': 'Interest',
+                                                                               'data': [1000.0, 998.28, 996.56, 994.84,
+                                                                                        993.11, 991.38,
+                                                                                        989.64, 987.9, 986.15, 984.4,
+                                                                                        982.65, 980.89, 979.12,
+                                                                                        977.35, 975.58, 973.8, 972.02,
+                                                                                        970.24, 968.45, 966.65,
+                                                                                        964.85, 963.05, 961.24, 959.43,
+                                                                                        957.61, 955.79,
+                                                                                        953.96, 952.13, 950.29, 948.45,
+                                                                                        946.61, 944.76, 942.9,
+                                                                                        941.05, 939.18, 937.31, 935.44,
+                                                                                        933.56, 931.68, 929.8,
+                                                                                        927.9, 926.01, 924.11, 922.2,
+                                                                                        920.29, 918.37, 916.45,
+                                                                                        914.53, 912.6, 910.67, 908.73,
+                                                                                        906.78, 904.83, 902.88,
+                                                                                        900.92, 898.96, 896.99, 895.01,
+                                                                                        893.04, 891.05,
+                                                                                        889.06, 887.07, 885.07, 883.07,
+                                                                                        881.06, 879.05,
+                                                                                        877.03, 875.0, 872.98, 870.94,
+                                                                                        868.9, 866.86, 864.81,
+                                                                                        862.76, 860.7, 858.63, 856.56,
+                                                                                        854.49, 852.41, 850.33,
+                                                                                        848.23, 846.14, 844.04, 841.93,
+                                                                                        839.82, 837.71,
+                                                                                        835.58, 833.46, 831.32, 829.19,
+                                                                                        827.04, 824.89,
+                                                                                        822.74, 820.58, 818.42, 816.25,
+                                                                                        814.07, 811.89, 809.7,
+                                                                                        807.51, 805.32, 803.11, 800.9,
+                                                                                        798.69, 796.47, 794.25,
+                                                                                        792.02, 789.78, 787.54, 785.29,
+                                                                                        783.04, 780.78,
+                                                                                        778.52, 776.25, 773.97, 771.69,
+                                                                                        769.4, 767.11, 764.81,
+                                                                                        762.51, 760.2, 757.88, 755.56,
+                                                                                        753.23, 750.9, 748.56,
+                                                                                        746.22, 743.87, 741.51, 739.15,
+                                                                                        736.78, 734.41,
+                                                                                        732.03, 729.64, 727.25, 724.85,
+                                                                                        722.45, 720.04,
+                                                                                        717.62, 715.2, 712.77, 710.34,
+                                                                                        707.9, 705.45, 703.0,
+                                                                                        700.54, 698.07, 695.6, 693.13,
+                                                                                        690.64, 688.15, 685.66,
+                                                                                        683.16, 680.65, 678.13, 675.61,
+                                                                                        673.09, 670.55,
+                                                                                        668.01, 665.47, 662.91, 660.36,
+                                                                                        657.79, 655.22,
+                                                                                        652.64, 650.06, 647.47, 644.87,
+                                                                                        642.26, 639.65,
+                                                                                        637.04, 634.41, 631.78, 629.15,
+                                                                                        626.5, 623.85, 621.2,
+                                                                                        618.53, 615.87, 613.19, 610.51,
+                                                                                        607.82, 605.12,
+                                                                                        602.42, 599.71, 596.99, 594.27,
+                                                                                        591.54, 588.8, 586.05,
+                                                                                        583.3, 580.55, 577.78, 575.01,
+                                                                                        572.23, 569.45, 566.65,
+                                                                                        563.85, 561.05, 558.23, 555.41,
+                                                                                        552.59, 549.75,
+                                                                                        546.91, 544.06, 541.2, 538.34,
+                                                                                        535.47, 532.59, 529.71,
+                                                                                        526.82, 523.92, 521.01, 518.1,
+                                                                                        515.18, 512.25, 509.31,
+                                                                                        506.37, 503.42, 500.46, 497.5,
+                                                                                        494.53, 491.55, 488.56,
+                                                                                        485.57, 482.56, 479.55, 476.54,
+                                                                                        473.51, 470.48,
+                                                                                        467.44, 464.39, 461.34, 458.27,
+                                                                                        455.2, 452.13, 449.04,
+                                                                                        445.95, 442.85, 439.74, 436.62,
+                                                                                        433.5, 430.36, 427.22,
+                                                                                        424.08, 420.92, 417.76, 414.58,
+                                                                                        411.4, 408.22, 405.02,
+                                                                                        401.82, 398.61, 395.39, 392.16,
+                                                                                        388.92, 385.68,
+                                                                                        382.43, 379.17, 375.9, 372.62,
+                                                                                        369.34, 366.05, 362.75,
+                                                                                        359.44, 356.12, 352.79, 349.46,
+                                                                                        346.12, 342.77,
+                                                                                        339.41, 336.04, 332.66, 329.28,
+                                                                                        325.89, 322.49,
+                                                                                        319.08, 315.66, 312.23, 308.79,
+                                                                                        305.35, 301.9, 298.44,
+                                                                                        294.97, 291.49, 288.0, 284.5,
+                                                                                        281.0, 277.49, 273.96,
+                                                                                        270.43, 266.89, 263.34, 259.79,
+                                                                                        256.22, 252.64,
+                                                                                        249.06, 245.47, 241.86, 238.25,
+                                                                                        234.63, 231.0, 227.36,
+                                                                                        223.72, 220.06, 216.39, 212.72,
+                                                                                        209.04, 205.34,
+                                                                                        201.64, 197.93, 194.21, 190.48,
+                                                                                        186.74, 182.99,
+                                                                                        179.23, 175.46, 171.68, 167.9,
+                                                                                        164.1, 160.29, 156.48,
+                                                                                        152.65, 148.82, 144.97, 141.12,
+                                                                                        137.26, 133.38, 129.5,
+                                                                                        125.61, 121.71, 117.8, 113.87,
+                                                                                        109.94, 106.0, 102.05,
+                                                                                        98.09, 94.12, 90.14, 86.15,
+                                                                                        82.15, 78.14, 74.12,
+                                                                                        70.09, 66.04, 61.99, 57.93,
+                                                                                        53.86, 49.78, 45.69,
+                                                                                        41.59, 37.47, 33.35, 29.22,
+                                                                                        25.08, 20.92, 16.76,
+                                                                                        12.59, 8.4, 4.21]}]
+    mortgage_date_data = ['2022-10-01', '2022-11-01', '2022-12-01', '2023-01-01', '2023-02-01', '2023-03-01',
+                          '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01',
+                          '2023-10-01', '2023-11-01', '2023-12-01', '2024-01-01', '2024-02-01', '2024-03-01',
+                          '2024-04-01', '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01', '2024-09-01',
+                          '2024-10-01', '2024-11-01', '2024-12-01', '2025-01-01', '2025-02-01', '2025-03-01',
+                          '2025-04-01', '2025-05-01', '2025-06-01', '2025-07-01', '2025-08-01', '2025-09-01',
+                          '2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01', '2026-03-01',
+                          '2026-04-01', '2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01',
+                          '2026-10-01', '2026-11-01', '2026-12-01', '2027-01-01', '2027-02-01', '2027-03-01',
+                          '2027-04-01', '2027-05-01', '2027-06-01', '2027-07-01', '2027-08-01', '2027-09-01',
+                          '2027-10-01', '2027-11-01', '2027-12-01', '2028-01-01', '2028-02-01', '2028-03-01',
+                          '2028-04-01', '2028-05-01', '2028-06-01', '2028-07-01', '2028-08-01', '2028-09-01',
+                          '2028-10-01', '2028-11-01', '2028-12-01', '2029-01-01', '2029-02-01', '2029-03-01',
+                          '2029-04-01', '2029-05-01', '2029-06-01', '2029-07-01', '2029-08-01', '2029-09-01',
+                          '2029-10-01', '2029-11-01', '2029-12-01', '2030-01-01', '2030-02-01', '2030-03-01',
+                          '2030-04-01', '2030-05-01', '2030-06-01', '2030-07-01', '2030-08-01', '2030-09-01',
+                          '2030-10-01', '2030-11-01', '2030-12-01', '2031-01-01', '2031-02-01', '2031-03-01',
+                          '2031-04-01', '2031-05-01', '2031-06-01', '2031-07-01', '2031-08-01', '2031-09-01',
+                          '2031-10-01', '2031-11-01', '2031-12-01', '2032-01-01', '2032-02-01', '2032-03-01',
+                          '2032-04-01', '2032-05-01', '2032-06-01', '2032-07-01', '2032-08-01', '2032-09-01',
+                          '2032-10-01', '2032-11-01', '2032-12-01', '2033-01-01', '2033-02-01', '2033-03-01',
+                          '2033-04-01', '2033-05-01', '2033-06-01', '2033-07-01', '2033-08-01', '2033-09-01',
+                          '2033-10-01', '2033-11-01', '2033-12-01', '2034-01-01', '2034-02-01', '2034-03-01',
+                          '2034-04-01', '2034-05-01', '2034-06-01', '2034-07-01', '2034-08-01', '2034-09-01',
+                          '2034-10-01', '2034-11-01', '2034-12-01', '2035-01-01', '2035-02-01', '2035-03-01',
+                          '2035-04-01', '2035-05-01', '2035-06-01', '2035-07-01', '2035-08-01', '2035-09-01',
+                          '2035-10-01', '2035-11-01', '2035-12-01', '2036-01-01', '2036-02-01', '2036-03-01',
+                          '2036-04-01', '2036-05-01', '2036-06-01', '2036-07-01', '2036-08-01', '2036-09-01',
+                          '2036-10-01', '2036-11-01', '2036-12-01', '2037-01-01', '2037-02-01', '2037-03-01',
+                          '2037-04-01', '2037-05-01', '2037-06-01', '2037-07-01', '2037-08-01', '2037-09-01',
+                          '2037-10-01', '2037-11-01', '2037-12-01', '2038-01-01', '2038-02-01', '2038-03-01',
+                          '2038-04-01', '2038-05-01', '2038-06-01', '2038-07-01', '2038-08-01', '2038-09-01',
+                          '2038-10-01', '2038-11-01', '2038-12-01', '2039-01-01', '2039-02-01', '2039-03-01',
+                          '2039-04-01', '2039-05-01', '2039-06-01', '2039-07-01', '2039-08-01', '2039-09-01',
+                          '2039-10-01', '2039-11-01', '2039-12-01', '2040-01-01', '2040-02-01', '2040-03-01',
+                          '2040-04-01', '2040-05-01', '2040-06-01', '2040-07-01', '2040-08-01', '2040-09-01',
+                          '2040-10-01', '2040-11-01', '2040-12-01', '2041-01-01', '2041-02-01', '2041-03-01',
+                          '2041-04-01', '2041-05-01', '2041-06-01', '2041-07-01', '2041-08-01', '2041-09-01',
+                          '2041-10-01', '2041-11-01', '2041-12-01', '2042-01-01', '2042-02-01', '2042-03-01',
+                          '2042-04-01', '2042-05-01', '2042-06-01', '2042-07-01', '2042-08-01', '2042-09-01',
+                          '2042-10-01', '2042-11-01', '2042-12-01', '2043-01-01', '2043-02-01', '2043-03-01',
+                          '2043-04-01', '2043-05-01', '2043-06-01', '2043-07-01', '2043-08-01', '2043-09-01',
+                          '2043-10-01', '2043-11-01', '2043-12-01', '2044-01-01', '2044-02-01', '2044-03-01',
+                          '2044-04-01', '2044-05-01', '2044-06-01', '2044-07-01', '2044-08-01', '2044-09-01',
+                          '2044-10-01', '2044-11-01', '2044-12-01', '2045-01-01', '2045-02-01', '2045-03-01',
+                          '2045-04-01', '2045-05-01', '2045-06-01', '2045-07-01', '2045-08-01', '2045-09-01',
+                          '2045-10-01', '2045-11-01', '2045-12-01', '2046-01-01', '2046-02-01', '2046-03-01',
+                          '2046-04-01', '2046-05-01', '2046-06-01', '2046-07-01', '2046-08-01', '2046-09-01',
+                          '2046-10-01', '2046-11-01', '2046-12-01', '2047-01-01', '2047-02-01', '2047-03-01',
+                          '2047-04-01', '2047-05-01', '2047-06-01', '2047-07-01', '2047-08-01', '2047-09-01',
+                          '2047-10-01', '2047-11-01', '2047-12-01', '2048-01-01', '2048-02-01', '2048-03-01',
+                          '2048-04-01', '2048-05-01', '2048-06-01', '2048-07-01', '2048-08-01', '2048-09-01',
+                          '2048-10-01', '2048-11-01', '2048-12-01', '2049-01-01', '2049-02-01', '2049-03-01',
+                          '2049-04-01', '2049-05-01', '2049-06-01', '2049-07-01', '2049-08-01', '2049-09-01',
+                          '2049-10-01', '2049-11-01', '2049-12-01', '2050-01-01', '2050-02-01', '2050-03-01',
+                          '2050-04-01', '2050-05-01', '2050-06-01', '2050-07-01', '2050-08-01', '2050-09-01',
+                          '2050-10-01', '2050-11-01', '2050-12-01', '2051-01-01', '2051-02-01', '2051-03-01',
+                          '2051-04-01', '2051-05-01', '2051-06-01', '2051-07-01', '2051-08-01', '2051-09-01',
+                          '2051-10-01', '2051-11-01', '2051-12-01', '2052-01-01', '2052-02-01', '2052-03-01',
+                          '2052-04-01', '2052-05-01', '2052-06-01', '2052-07-01', '2052-08-01', '2052-09-01']
     context = {
-                'cash_on_cash_return_data': cash_on_cash_return_data,
-                'projection_key': projection_key,
-                'return_on_investment_data': return_on_investment_data,
-                'debt_cov_ratio_data': debt_cov_ratio_data,
-                'return_investment_data': return_investment_data,
-                'property_expense_data': property_expense_data,
-                'mortgage_date_data': mortgage_date_data,
-                'mortgage_graph_data': mortgage_graph_data}
+        'cash_on_cash_return_data': cash_on_cash_return_data,
+        'projection_key': projection_key,
+        'return_on_investment_data': return_on_investment_data,
+        'debt_cov_ratio_data': debt_cov_ratio_data,
+        'return_investment_data': return_investment_data,
+        'property_expense_data': property_expense_data,
+        'mortgage_date_data': mortgage_date_data,
+        'mortgage_graph_data': mortgage_graph_data}
 
     return render(request, 'rental_prop_sample_page.html', context=context)
 
@@ -5859,4 +6636,3 @@ def error_403(request, exception):
 def error_400(request, exception):
     data = {'error': 'Bad Request!'}
     return render(request, 'error.html', data)
-

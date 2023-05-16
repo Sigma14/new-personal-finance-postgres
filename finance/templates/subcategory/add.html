@@ -9,7 +9,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Update Category Group</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Category</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -17,7 +17,7 @@
                                     <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categories</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Update Category Group
+                                        Add Category
                                     </li>
                                 </ol>
                             </div>
@@ -33,6 +33,9 @@
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <form class="form form-horizontal" method="post">
+                                        {% if error %}
+                                            <p class="text-danger">{{error}}</p>
+                                        {% endif %}
                                         {% csrf_token %}
                                         <div class="row">
                                             <div class="col-12">
@@ -46,17 +49,38 @@
                                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                                             </div>
                                                             <input type="text" id="fname-icon" class="form-control" name="name"
-                                                                   placeholder="Name" value="{{ form.name.value }}">
+                                                                   placeholder="Name">
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-sm-9 offset-sm-3">
-                                                <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                                <button type="submit" class="btn btn-primary mr-1">Add</button>
                                                 <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
                                             </div>
                                         </div>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">SUGGESTED CATEGORIES</h4>
+                                </div>
+                                <br/>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% for category in subcategory_suggestions %}
+                                        <a style="margin:5px; font-size: 12px;" url="{% url 'subcategory_add' category_pk=category_pk %}" class="btn btn-outline-secondary new_subcategory">
+                                            {{category}}&nbsp;<i class="fa fa-plus"></i>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         </div>

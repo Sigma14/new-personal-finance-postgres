@@ -36,15 +36,18 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Label</label>
+                                        <label for="fname-icon">Category</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="label" required
-                                                   placeholder="Name"/>
+                                            <select type="text" id="fname-icon" class="form-control" name="label" required>
+                                                {% for label in bill_category %}
+                                                    <option value="{{label.name}}">{{label.name}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

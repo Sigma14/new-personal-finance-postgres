@@ -27,21 +27,20 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="POST">
+                    <form class="form form-horizontal" method="post">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Name</label>
+                                        <label>Name</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="name"
-                                                   placeholder="Name" value="{{ form.name.value }}">
+                                            {{form.name}}
                                         </div>
                                     </div>
                                 </div>
@@ -49,14 +48,40 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Currency</label>
+                                        <label>Bank Account Type</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{form.currency}}
+                                            <select class="form-control" name="account_type">
+                                                {% if account_type == 'Checking' %}
+                                                    <option selected>Checking</option>
+                                                {% else %}
+                                                    <option>Checking</option>
+                                                {% endif %}
+                                                {% if account_type == 'Savings' %}
+                                                    <option selected>Savings</option>
+                                                {% else %}
+                                                    <option>Savings</option>
+                                                {% endif %}
+                                                {% if account_type == 'Cash' %}
+                                                    <option selected>Cash</option>
+                                                {% else %}
+                                                    <option>Cash</option>
+                                                {% endif %}
+                                                {% if account_type == 'Credit Card' %}
+                                                    <option selected>Credit Card</option>
+                                                {% else %}
+                                                    <option>Credit Card</option>
+                                                {% endif %}
+                                                {% if account_type == 'Line of Credit' %}
+                                                    <option selected>Line of Credit</option>
+                                                {% else %}
+                                                    <option>Line of Credit</option>
+                                                {% endif %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -64,15 +89,14 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Total Balance</label>
+                                        <label>Balance</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                           <input type="text" id="fname-icon" class="form-control" name="balance"
-                                                   placeholder="Balance" value="{{ form.balance.value }}">
+                                            <input type="text" class="form-control" name="balance" value="{{balance}}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -80,15 +104,14 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Interest Rate</label>
+                                        <label>Currency</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="interest_rate"
-                                                   placeholder="Interest Rate" value="{{form.interest_rate.value}}">
+                                            {{ form.currency }}
                                         </div>
                                     </div>
                                 </div>
@@ -96,46 +119,11 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
+                                        <label>&nbsp;</label>
                                     </div>
                                     <div class="custom-control custom-checkbox">
-                                        {% if form.include_net_worth.value %}
-                                        <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" />
-                                        {% else %}
-                                        <input type="checkbox" name="include_net_worth" class="custom-control-input new_tab_check" id="customCheck1" />
-                                        {% endif %}
+                                        <input type="checkbox" name="include_net_worth" class="custom-control-input new_tab_check" id="customCheck1" checked/>
                                         <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox">
-                                        {% if form.lock_amount.value %}
-                                        <input type="checkbox" name="lock_check" checked class="custom-control-input " id="lock_amount_check" />
-                                        {% else %}
-                                        <input type="checkbox" name="lock_check" class="custom-control-input " id="lock_amount_check" />
-                                        {% endif %}
-                                        <label class="custom-control-label" for="lock_amount_check">&nbsp;&nbsp;Lock Amount</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12" id="lock_amount_div">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Lock Amount</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
-                                            <input type="text" id="email-icon" class="form-control" value="{{form.lock_amount.value}}" name="lock_amount" required
-                                                   placeholder="Lock Amount"/>
-                                        </div>
                                     </div>
                                 </div>
                             </div>

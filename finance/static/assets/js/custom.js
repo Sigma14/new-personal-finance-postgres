@@ -210,7 +210,7 @@ $('#expense_table').DataTable( {
     $('.new_category').on('click', function(e)
     {
         e.preventDefault();
-        var category_name = $(this).text()
+        var category_name = $(this).text().trim()
         var csrftoken = getCookie('csrftoken');
         $(this).remove();
         Swal.fire({
@@ -224,6 +224,36 @@ $('#expense_table').DataTable( {
         $.ajax({
             type: 'POST',
             url:'/category_add/',
+            data: {
+            'name': category_name,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            dataType: 'json',
+            success: function()
+            {
+
+            }
+        })
+    });
+
+    $('.new_subcategory').on('click', function(e)
+    {
+        e.preventDefault();
+        var category_name = $(this).text().trim()
+        var sub_url = $(this).attr('url')
+        var csrftoken = getCookie('csrftoken');
+        $(this).remove();
+        Swal.fire({
+                    title: 'Added',
+                    icon: 'success',
+                    customClass: {
+                      confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                  });
+        $.ajax({
+            type: 'POST',
+            url: sub_url,
             data: {
             'name': category_name,
             'csrfmiddlewaretoken': csrftoken
@@ -377,6 +407,19 @@ function inputHTML(formHtml, name, value)
         name = $(this).attr('delete_name');
         del_method = $(this).attr('del_method')
         text_msg = "Once deleted the " + name + ", cannot be recovered."
+        if(del_method == 'account_delete')
+        {
+            text_msg += 'All transactions related to this account also deleted.'
+        }
+        if(del_method == 'Goals')
+        {
+            text_msg += 'All allocated or lock amount of this goal will be added into their fund account'
+        }
+        if(del_method == 'Funds')
+        {
+            text_msg += 'All the goals related to this fund also delete and freeze amount of this fund will be added into their bank account'
+        }
+
         if(del_method == 'category_delete')
         {
             text_msg += 'All transactions, bills and budgets related to this category also deleted.'
@@ -1587,6 +1630,75 @@ $("body").delegate(".show_interest_rate", "click", function(event)
 {
     $(".interest_rate_info").toggle();
 });
+
+//  Show and hide subcategory
+$("body").delegate(".category", "click", function(event)
+{
+    class_name = $(this).attr('class_name')
+    $("." + class_name).toggle();
+    $("." + class_name + "_dropdown").toggle();
+});
+
+//  Show and hide subcategory
+$("body").delegate(".pick_category", "change", function(event)
+{
+    category_group = $(this).val()
+    var csrftoken = getCookie('csrftoken');
+    $.ajax({
+        type: 'POST',
+        url:'/subcategory_list',
+        data: {
+        'category_group': category_group,
+        'csrfmiddlewaretoken': csrftoken
+        },
+        success: function(response)
+        {
+            var cat_list = response.subcategories
+            var optionHtml = "<select class='form-control check_budget_category' id='subcategory' name='subcategory'><option value='' selected=''>Select Category</option>"
+            $("#trans_sub_cat").empty();
+            for(let i=0; i < cat_list.length; i++)
+            {
+                optionHtml += "<option>" + cat_list[i] + "</option>"
+            }
+            optionHtml += "</select>"
+            console.log(optionHtml)
+            $("#trans_sub_cat").append(optionHtml);
+            $(".transaction_cat_list").show();
+        }
+    });
+});
+
+//  check Budget Category
+$("body").delegate(".check_budget_category", "change", function(event)
+{
+    category_name = $("#id_category").val()
+    sub_category_name = $("#subcategory").val()
+    var csrftoken = getCookie('csrftoken');
+    $.ajax({
+        type: 'POST',
+        url:'/subcategory_budget',
+        data: {
+        'category': category_name,
+        'name': sub_category_name,
+        'csrfmiddlewaretoken': csrftoken
+        },
+        success: function(response)
+        {
+            console.log(response)
+            if(response.budget_name)
+            {
+                $("#budget_name").val(response.budget_name);
+                $(".budget_div").show();
+            }
+            else
+            {
+                $("#budget_name").val('');
+                $(".budget_div").hide();
+            }
+        }
+    });
+});
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

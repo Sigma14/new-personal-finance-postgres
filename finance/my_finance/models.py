@@ -11,6 +11,22 @@ TYPES = (
     ("Mortgage", 'Mortgage'),
 )
 
+BUDGET_ACCOUNT_TYPES = (
+    ("Checking", 'Checking'),
+    ("Savings", 'Savings'),
+    ("Cash", 'Cash'),
+    ("Credit Card", 'Credit Card'),
+    ("Line of Credit", 'Line of Credit'),
+    ("Mortgage", 'Mortgage'),
+    ("Loan", 'Loan'),
+    ("Student Loan", 'Student Loan'),
+    ("Personal Loan", 'Personal Loan'),
+    ("Medical Debt", 'Medical Debt'),
+    ("Other Debt", 'Other Debt'),
+    ("Asset", 'Asset'),
+    ("Liability", 'Liability'),
+)
+
 PERIODS = (
     ("Per day", 'Per day'),
     ("Per month", 'Per month'),
@@ -180,6 +196,19 @@ class Category(models.Model):
         return reverse('category_list')
 
 
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{str(self.category.name)}: {str(self.name)}"
+
+    def get_absolute_url(self):
+        return reverse('category_list')
+
+
 class SuggestiveCategory(models.Model):
     name = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -193,7 +222,8 @@ class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     initial_amount = models.CharField(max_length=15, blank=True, null=True)
     amount = models.CharField(max_length=15, default=0, blank=True, null=True)
@@ -263,6 +293,7 @@ class PlaidItem(models.Model):
 class Account(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='account_user')
     name = models.CharField(max_length=50, null=True)
+    account_type = models.CharField(max_length=50, choices=BUDGET_ACCOUNT_TYPES, blank=True, null=True)
     balance = models.CharField(max_length=10, blank=True, null=True)
     available_balance = models.CharField(max_length=10, blank=True, null=True)
     lock_amount = models.CharField(max_length=10, blank=True, null=True)
@@ -271,12 +302,13 @@ class Account(models.Model):
     include_net_worth = models.BooleanField(default=True, blank=True, null=True)
     liability_type = models.CharField(max_length=10, choices=TYPES, blank=True, null=True)
     interest_period = models.CharField(max_length=10, choices=PERIODS, blank=True, null=True)
+    mortgage_date = models.DateField(blank=True, null=True)
+    mortgage_monthly_payment = models.CharField(max_length=10, blank=True, null=True)
     mortgage_year = models.CharField(max_length=10, blank=True, null=True)
     transaction_count = models.IntegerField(default=0, blank=True, null=True)
     plaid_account_id = models.CharField(max_length=200, blank=True, null=True)
     mask = models.CharField(max_length=200, blank=True, null=True)
     subtype = models.CharField(max_length=200, blank=True, null=True)
-    account_type = models.CharField(max_length=200, blank=True, null=True)
     item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -305,7 +337,7 @@ class Goal(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     goal_date = models.DateField(blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    label = models.CharField(max_length=40)
+    label = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
     goal_amount = models.FloatField()
     allocate_amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -425,7 +457,7 @@ class Transaction(models.Model):
     amount = models.CharField(max_length=255)
     remaining_amount = models.CharField(max_length=10)
     transaction_date = models.DateField(blank=True, null=True)
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+    categories = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
     budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
     payee = models.CharField(max_length=25)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

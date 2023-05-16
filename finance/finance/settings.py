@@ -22,7 +22,7 @@ SECRET_KEY = 'rh$a_#87-yqqj%!oqn+)s(_hfet)*$)lgo=(bcve+e@om1dhf6'
 
 mongodb_host = os.environ.get("NOSQL_HOST") or "localhost"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -33,15 +33,44 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Name</label>
+                                        <label>Category Groups</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" value="{{form.name.value}}" id="fname-icon" class="form-control" name="name" required
-                                                   placeholder="Name"/>
+                                            <select name="categories" class="form-control pick_category" required="" id="id_categories">
+                                                  <option value="">Select Category Group</option>
+                                                  {% for category in categories %}
+                                                    {% if budgets_category_id == category.id %}
+                                                      <option value="{{category.id}}" selected>{{category.name}}</option>
+                                                    {% else %}
+                                                      <option value="{{category.id}}">{{category.name}}</option>
+                                                    {% endif %}
+                                                  {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="col-12 transaction_cat_list">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Categories</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge" id="trans_sub_cat">
+                                        <select class="form-control check_budget_category" id="subcategory" name="subcategory">
+                                            <option value="" >Select Category</option>
+                                            {% for sub_category in sub_categories %}
+                                                {% if budgets_subcategory == sub_category.name %}
+                                                  <option selected>{{sub_category.name}}</option>
+                                                {% else %}
+                                                  <option>{{sub_category.name}}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
                                         </div>
                                     </div>
                                 </div>
@@ -49,7 +78,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Currency</label>
+                                        <label>Currency</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -71,8 +100,8 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" value="{{form.amount.value}}" id="fname-icon" class="form-control" name="amount" required
-                                                   placeholder="Amount"/>
+                                            <input type="text" class="form-control" name="amount" required
+                                                   value="{{form.amount.value}}" placeholder="Amount"/>
                                         </div>
                                     </div>
                                 </div>

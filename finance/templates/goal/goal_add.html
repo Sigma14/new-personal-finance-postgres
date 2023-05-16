@@ -29,22 +29,27 @@
                 <div class="card-body">
                     <form class="form form-horizontal" action="{% url 'goal_add' %}" method="post">
                         {% if error %}
+                        <div class="col-sm-40 offset-sm-20">
                             <p class="text-danger">{{error}}</p>
+                            <a href="{% url 'fund_add' %}" class="btn btn-primary"><i
+                                class="fa fa-plus"></i> Add Fund</a>
+                        </div>
                         {% endif %}
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Label</label>
+                                        <label for="fname-icon">Category Group</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="fname-icon" class="form-control" name="label" required
-                                                   placeholder="Label"/>
+                                            <select class="form-control" name="category">
+                                                <option value="Goals">Goals</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -52,14 +57,34 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="email-icon">Goal Amount</label>
+                                        <label for="sub_category_name">Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input list="browsers" type="text" class="form-control data_list_drop_down" id="sub_category_name" name="sub_category_name" placeholder="Goal Name" required data-validation-required-message="This field is required"/>
+                                                <datalist id="browsers" name="">
+                                                    {% for data in goal_category %}
+                                                        <option value="{{data.name}}" data-id="{{forloop.counter}}">{{data.name}}</option>
+                                                    {% endfor %}
+                                                </datalist>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="goal_amount">Goal Amount</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="goal_amount" required
+                                            <input type="text" id="goal_amount" class="form-control" name="goal_amount" required
                                                    placeholder="Goal Amount"/>
                                         </div>
                                     </div>
@@ -87,25 +112,6 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Currency</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <select class="form-control" id="currency" name="currency" required>
-                                                {% for key, value in currency_dict.items %}
-                                                <option value="{{key}}">{{value}}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Goal Date</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -113,7 +119,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" name="goal_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="goal_date" name="goal_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>
@@ -128,7 +134,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" class="form-control" name="allocate_amount"
+                                            <input type="text" id="allocate_amount" value="0" class="form-control" name="allocate_amount"
                                                    required placeholder="Enter Lock Amount Allocate to Goal"/>
                                         </div>
                                     </div>

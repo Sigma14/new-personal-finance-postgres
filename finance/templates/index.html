@@ -66,7 +66,6 @@
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
     <!-- END: Custom CSS-->
-
 </head>
 <!-- END: Head-->
 
@@ -206,11 +205,11 @@
                 </li>
                 <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Accounts">Accounts</span></a>
                     <ul class="menu-content">
-                        <li class="{% if request.resolver_match.view_name == 'account_list' or request.resolver_match.view_name == 'account_add' or request.resolver_match.view_name == 'account_detail' or request.resolver_match.view_name == 'account_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Asset Accounts</span></a>
+                        <li class="{% if request.resolver_match.view_name == 'account_list' or request.resolver_match.view_name == 'account_add' or request.resolver_match.view_name == 'account_detail' or request.resolver_match.view_name == 'account_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Bank Accounts</span></a>
+                        </li>
+                        <li class=""><a class="d-flex align-items-center" href="{% url 'loan_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Mortgages and Loans Accounts</span></a>
                         </li>
                         <li class="{% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_add' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'fund_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Available Funds</span></a>
-                        </li>
-                        <li class="{% if request.resolver_match.view_name == 'liability_list' or request.resolver_match.view_name == 'liability_add' or request.resolver_match.view_name == 'liability_detail' or request.resolver_match.view_name == 'liability_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'liability_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Liabilities</span></a>
                         </li>
                     </ul>
                 </li>

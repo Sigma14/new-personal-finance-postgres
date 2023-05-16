@@ -40,12 +40,6 @@
                     </div>
                 </div>
                 <br/>
-
-                <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'account_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Funds</a>
-                </div>
-                <br/>
                 <section id="dashboard-ecommrc">
                     <div class="row match-height">
                         <div class="col-12">
@@ -53,6 +47,11 @@
                                 <div class="card-body">
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
+                                        <div class="col-sm-40 offset-sm-20">
+                                            <a href="{% url 'fund_add' %}" class="btn btn-primary"><i
+                                                    class="fa fa-plus"></i> Add Fund</a>
+                                        </div>
+
                                         <h4 class="card-title mb-25">Fund List</h4>
                                         <button class="btn btn-primary download_csv" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
@@ -82,7 +81,7 @@
                                                     </div>
                                                 </td>
                                                 {% for data in object %}
-                                                {% if forloop.counter != 5 %}
+                                                {% if forloop.counter != 6 %}
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1" id="acc_name" account_name="{{data}}">{{ data }}</span>
@@ -100,7 +99,7 @@
 
                                                                 </li>
                                                                 <li class="list-inline-item">
-                                                                    <button type="button" delete_name="{{ object.name }} Account" url=""
+                                                                    <button type="button" del_method="Funds" delete_name="{{ object.name }} Funds" url="{% url 'fund_delete' pk=data %}"
                                                                        class="btn btn-danger btn-sm rounded-0 delete_button"
                                                                        data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                                             class="fa fa-trash"></i></button>

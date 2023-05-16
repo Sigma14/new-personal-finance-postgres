@@ -59,50 +59,59 @@
 <!--                                </div>-->
                                 <div class="card-body statistics-body">
                                     <div class="row">
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
-                                            <div class="media">
-                                                <div class="avatar bg-light-primary mr-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="trending-up" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="media-body my-auto">
-                                                    <h4 class="font-weight-bolder mb-0">230k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Sales</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
-                                            <div class="media">
-                                                <div class="avatar bg-light-info mr-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="user" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="media-body my-auto">
-                                                    <h4 class="font-weight-bolder mb-0">8.549k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Customers</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-sm-0">
-                                            <div class="media">
-                                                <div class="avatar bg-light-danger mr-2">
-                                                    <div class="avatar-content">
-                                                        <i data-feather="box" class="avatar-icon"></i>
-                                                    </div>
-                                                </div>
-                                                <div class="media-body my-auto">
-                                                    <h4 class="font-weight-bolder mb-0">1.423k</h4>
-                                                    <p class="card-text font-small-3 mb-0">Products</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-xl-3 col-sm-6 col-12">
+                                        <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
                                             <div class="media">
                                                 <div class="avatar bg-light-success mr-2">
                                                     <div class="avatar-content">
-                                                        <i data-feather="bar-chart" class="avatar-icon"></i>
+                                                        <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="media-body my-auto">
+                                                    <h4 class="font-weight-bolder mb-0">
+                                                        {% if total_account_balance %}
+                                                        {% for key, value in total_account_balance.items %}
+                                                            {{key}}{{value|floatformat:0}}
+                                                            {% if forloop.counter == 2 %}
+                                                                ,&nbsp;
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% else %}
+                                                            0
+                                                        {% endif %}
+                                                    </h4>
+                                                    <p class="card-text font-small-3 mb-0">Total Account Balance</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-4 col-sm-6 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="avatar bg-light-danger mr-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="credit-card" class="avatar-icon"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="media-body my-auto">
+                                                    <h4 class="font-weight-bolder mb-0">
+                                                        {% if total_spent_amount %}
+                                                        {% for key, value in total_spent_amount.items %}
+                                                            {{key}}{{value|floatformat:0}}
+                                                            {% if forloop.counter == 2 %}
+                                                                ,&nbsp;
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% else %}
+                                                            0
+                                                        {% endif %}
+                                                    </h4>
+                                                    <p class="card-text font-small-3 mb-0">Total Spent Amount</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-4 col-sm-6 col-12">
+                                            <div class="media">
+                                                <div class="avatar bg-light-info mr-2">
+                                                    <div class="avatar-content">
+                                                        <i data-feather="trending-up" class="avatar-icon"></i>
                                                     </div>
                                                 </div>
                                                 <div class="media-body my-auto">
@@ -127,7 +136,7 @@
                         <div class="col-xl-8 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <h5>Accounts</h5>
+                                    <h5>Bank Accounts</h5>
                                     <canvas class="macro-chart chartjs" data-height="450"></canvas>
                                 </div>
                             </div>
@@ -153,7 +162,7 @@
                         <div class="col-xl-12 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <h5>Categories</h5>
+                                    <h5>Category Groups</h5>
                                     <div id="column-chart"></div>
                                 </div>
                             </div>

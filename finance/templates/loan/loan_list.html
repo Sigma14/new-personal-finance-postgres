@@ -9,12 +9,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Accounts | Bank accounts</h2>
+                            <h2 class="content-header-title float-left mb-0">Accounts | Mortgages & Loans</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Accounts
+                                    <li class="breadcrumb-item">Mortgages & Loans Accounts
                                     </li>
                                 </ol>
                             </div>
@@ -24,27 +24,25 @@
             </div>
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'account_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Account</a>
-                    <button class="btn btn-success" id="link-button"><i
-                            class="fa fa-plus" title="linked our account"></i> Link Account</button>
+                    <a href="{% url 'loan_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Mortgages & Loans</a>
                 </div>
                 <br/>
                 <section id="ecommerce-products" class="list-view">
-                    {% for object in object_list %}
+                    {% for object in account %}
                     <div class="card ecommerce-card">
                         <div class="item-img text-center">
-                            <a href="{% url 'account_detail' pk=object.id %}">
+                            <a href="{% url 'loan_details' pk=object.id %}">
                                 <div class="card-body">
                                     <h2 style="float: left;">{{ object.name }} ({{object.account_type}})</h2>
                                     <h2 style="float: right;">
                                         <div class="avatar bg-light-info" float="right">
-                                            <div class="avatar-content">{{ object.transaction_count }}</div>
+                                            <div class="avatar-content" title="transaction count">{{ object.transaction_count }}</div>
                                         </div>
                                     </h2>
                                 </div>
                                 <div class="card-body" style="padding-bottom:40px;">
-                                    <h4 style="float: left;">{{ object.currency }}{{ object.available_balance}}</h4>
+                                    <h4 style="float: left;" title="Amount">{{ object.currency }}{{ object.available_balance}}&nbsp;&nbsp;</h4>
+                                    <h4 style="float: left;" title="Interest Rate">&nbsp;&nbsp;{{ object.interest_rate}}%</h4>
                                     <h4 style="float: right;">{{ object.updated_at }}</h4>
                                 </div>
                             </a>

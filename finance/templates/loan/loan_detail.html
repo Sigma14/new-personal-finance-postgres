@@ -9,15 +9,15 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Accounts | Bank accounts</h2>
+                            <h2 class="content-header-title float-left mb-0">Accounts | Mortgages and Loans</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'account_list' %}">Accounts</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'loan_list' %}">Mortgages and Loans</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        {{object.name}}
+                                        {{account.name}}
                                     </li>
                                 </ol>
                             </div>
@@ -31,11 +31,11 @@
                         <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
                             <div class="card">
                                 <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Account PageInfo</span>
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i>Mortgages and Loans PageInfo</span>
                                 </div>
                                 <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                     <div class="card-body">
-                                        Asset accounts are your personal bank accounts. This page shows your current balance and all transactions data of asset account.
+                                        Mortgages and Loans accounts that have an outstanding balance you're currently paying off, and aren't spending from.
                                     </div>
                                 </div>
                             </div>
@@ -44,95 +44,165 @@
                 </div>
                 <br/>
                 <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'account_update' pk=object.id %}" class="btn btn-primary"><i
-                    data-feather="edit-2"></i>&nbsp;Edit Account</a>
-                    <button type="button" del_method="account_delete" delete_name="{{ object.name }} Account" url="{% url 'account_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
+                    <a href="{% url 'loan_update' pk=account.id %}" class="btn btn-primary"><i
+                    data-feather="edit-2"></i>&nbsp;Edit</a>
+                    <button type="button" del_method="account_delete" delete_name="{{ object.name }} Account" url="{% url 'loan_delete' pk=account.id %}" class="btn btn-danger delete_button"><i
                                             data-feather="trash"></i>&nbsp;Delete</button>
 
                 </div>
                 <br/>
-                <section id="ecommerce-products" class="list-view">
-                    <div class="card ecommerce-card">
-                        <div class="item-img text-center" style="height:150px;">
-                            <a href="{% url 'account_detail' pk=object.id %}">
-                                <div class="card-body">
-                                    <h2 style="float: left;">{{ object.name }}</h2>
-                                    <h2 style="float: right;">{{ object.currency }}{{ object.available_balance}}</h2>
-                                </div>
-                                <br/>
-                                <div class="card-body" style="padding-bottom:30px;">
-                                    <h4 style="float: left;">Account Type :- {{ object.account_type }}</h4>
-                                    <h4 style="float: right;">{{ object.updated_at }}</h4>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </section>
-                <section id="dashboard-ecommrc">
-                    <div class="row match-height">
-                        <div class="col-12">
-                            <div class="card card-congratulation-medal">
-                                <div class="card-body">
-                                    <div class="card-header border-bottom">
-                                        <h4 class="card-title mb-25">Transactions</h4>
-                                    </div>
-                                    <br/>
-                                    <br/>
-                                    <!-- Line Chart Starts -->
-                                    <div class="col-12">
-                                        <div class="card">
-                                            <div class="card-header d-flex flex-sm-row flex-column justify-content-md-between align-items-start justify-content-start">
-                                                <div>
-                                                    <h4 class="card-title mb-25">{{object.name}}</h4>
-                                                    <span class="card-subtitle text-muted">Chart For all transactions</span>
-                                                </div>
-                                                <div class="d-flex align-items-center flex-wrap mt-sm-0 mt-1">
-                                                    {% if amount_diff > 0 %}
-                                                    <h5 class="font-weight-bolder text-success mb-0 mr-1">{{ object.currency }}{{ amount_diff|floatformat:2}}</h5>
-                                                    {% else %}
-                                                    <h5 class="font-weight-bolder text-danger mb-0 mr-1">{{ object.currency }}{{ amount_diff|floatformat:2}}</h5>
-                                                    {% endif %}
-                                                    {% if amount_inc_percentage > 0 %}
-                                                        <div class="badge badge-light-secondary">
-                                                            <i class="text-success font-small-3" data-feather="arrow-up"></i>
-                                                            <span class="align-middle">{{ amount_inc_percentage }}%</span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="badge badge-light-secondary">
-                                                            <i class="text-danger font-small-3" data-feather="arrow-down"></i>
-                                                            <span class="align-middle">{{ amount_inc_percentage }}%</span>
-                                                        </div>
-                                                    {% endif %}
+                 <section>
+                    <div class="row">
+                    <div class="col-12">
+                        <div class="card card-statistics">
+                            <div class="card-header">
+                                <h2>{{account.name}} ({{account.account_type}})</h2>
+                                <h4 class="font-weight-bolder mb-0" style="float:right;">Interest Rate :- {{account.interest_rate|floatformat:2}} %</h4>
+                            </div>
+                            <div class="card-body statistics-body">
+                                <div class="row">
+                                    <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-danger mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="dollar-sign" class="avatar-icon"></i>
                                                 </div>
                                             </div>
-                                            <div class="card-body">
-                                                <div id="Account-balance-line-chart"></div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{remaining_amount|floatformat:2}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Remaining Payment</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Line Chart Ends -->
+                                    <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-danger mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{monthly_payment|floatformat:2}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Monthly Payment</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-xl-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-success mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="dollar-sign" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{total_payment|floatformat:2}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Total of {{days}} payments</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-3 col-sm-6 col-12 mb-2 mb-sm-0">
+                                        <div class="media">
+                                            <div class="avatar bg-light-info mr-2">
+                                                <div class="avatar-content">
+                                                    <i data-feather="calendar" class="avatar-icon"></i>
+                                                </div>
+                                            </div>
+                                            <div class="media-body my-auto">
+                                                <h4 class="font-weight-bolder mb-0">{{last_month}}</h4>
+                                                <p class="card-text font-small-3 mb-0">Payoff date</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
                 </section>
                 <!-- Responsive Datatable -->
+                <section class="app-user-edit">
+					<div class="card">
+						<div class="card-body">
+							<ul class="nav nav-pills" role="tablist">
+                                <li class="nav-item">
+									<a class="nav-link d-flex align-items-center active" id="loan_graph_tab" data-toggle="tab" href="#loan_graph_data" aria-controls="loan_graph_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">{{account.account_type}} Calculation Graph</span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link d-flex align-items-center" id="loan_tab" data-toggle="tab" href="#loan_data" aria-controls="loan_data" role="tab" aria-selected="false">
+										<span class="d-none d-sm-block">{{account.account_type}} Calculation Data</span>
+									</a>
+								</li>
+                            </ul>
+                        </div>
+                        <div class="tab-content">
+                            <div class="tab-pane" id="loan_data" aria-labelledby="loan_tab" role="tabpanel">
+                                <section id="responsive-data">
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="download_csv_form"></div>
+                                                <div class="card-header border-bottom">
+                                                    <h4 class="card-title">{{account.account_type}} Calculation</h4>
+                                                    <button class="btn btn-primary download_csv" file_name="mortgage_calculation.csv" table_heading="{{mortgage_key_dumbs}}" table_length="{{mortgage_key | length}}" table_id="#mortgage" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                                </div>
+                                                <div class="card-datatable">
+                                                    <table class="table table-striped" id="mortgage">
+                                                        <thead>
+                                                        <tr>
+                                                            {% for name in mortgage_key %}
+                                                                <th>{{name}}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <!-- jinja2 Technique -->
+                                                        {% for i in data %}
+                                                        <tr>
+                                                            <td>{{i.month}}</td>
+                                                            <td>{{i.initial_balance}}</td>
+                                                            <td>{{i.payment}}</td>
+                                                            <td>{{i.interest}}</td>
+                                                            <td>{{i.principle}}</td>
+                                                            <td>{{i.ending_balance}}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="tab-pane active" id="loan_graph_data" aria-labelledby="loan_graph_tab" role="tabpanel">
+                                <section id="responsiv-data">
+                                    <div class="row match-height">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="line-area-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 <section id="responsive-datatable">
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
                                 <div class="download_csv_form"></div>
-                                <div class="download_pdf_form"></div>
                                 <div class="card-header border-bottom">
                                     <h4 class="card-title">Transactions</h4>
-                                    <div float="right">
-                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_account_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
-                                    <button class="btn btn-primary download_csv" pdf_title="{{object.name}} Transaction" file_name="{{object.name}}_account_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
-                                    <input type="hidden" id="download_graph_data" data_label="{{transaction_date_dumbs}}" graph_type="line" data_value="{{transaction_graph_value}}">
-                                    </div>
+                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_liability_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                 </div>
-                                <div class="card-datatable table-responsive">
-                                    <table class="dt-row-grouping table" id="transactions">
+                                <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="transactions">
                                         <thead>
                                         <tr>
                                             {% for name in transaction_key %}
@@ -252,6 +322,7 @@
                         </div>
                     </div>
                 </section>
+            </section>
             </div>
         </div>
     </div>

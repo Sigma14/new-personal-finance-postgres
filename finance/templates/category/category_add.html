@@ -7,7 +7,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Category</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Category Group</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -15,7 +15,7 @@
                                     <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Category</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Add Category
+                                        Add Category Group
                                     </li>
                                 </ol>
                             </div>
@@ -28,6 +28,11 @@
                     <div class="card" >
                         <div class="card-body">
                             <form class="form form-horizontal" method="post">
+                                {% if form.errors %}
+                                    {% for error in form.non_field_errors %}
+                                        <p class="text-danger">{{error}}</p>
+                                    {% endfor %}
+                                {% endif %}
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-12">
@@ -60,13 +65,13 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title">SUGGESTED CATEGORIES</h4>
+                                    <h4 class="card-title">SUGGESTED GROUPS</h4>
                                 </div>
                                 <br/>
                                 <div class="card-body">
                                     <div class="row">
-                                        {% for category in category_suggestions %}
-                                        <a style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary new_category">
+                                        {% for category in subcategory_suggestions %}
+                                        <a style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary new_sub_category">
                                             {{category}}&nbsp;<i class="fa fa-plus"></i>
                                         </a>
                                         {% endfor %}

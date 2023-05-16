@@ -19,6 +19,14 @@ urlpatterns = [
     path('category_update/<int:pk>', CategoryUpdate.as_view(), name='category_update'),
     path('category_delete/<int:pk>', CategoryDelete.as_view(), name='category_delete'),
 
+    # SubCategory urls :-
+
+    path('subcategory_update/<int:pk>', subcategory_update, name='subcategory_update'),
+    path('subcategory_add/<int:category_pk>', subcategory_add, name='subcategory_add'),
+    path('subcategory_delete/<int:pk>', subcategory_delete, name='subcategory_delete'),
+    path('subcategory_list', subcategory_list, name='subcategory_list'),
+    path('subcategory_budget', subcategory_budget, name='subcategory_budget'),
+
     # Budget urls :-
 
     path('budget_list/', budget_list, name='budget_list'),
@@ -60,12 +68,20 @@ urlpatterns = [
     path('account_update/<int:pk>', AccountUpdate.as_view(), name='account_update'),
     path('account_delete/<int:pk>', AccountDelete.as_view(), name='account_delete'),
 
+
     # Liability Urls:-
     path('liability_list/', LiabilityList.as_view(), name='liability_list'),
     path('liability_detail/<int:pk>', LiabilityDetail.as_view(), name='liability_detail'),
     path('liability_add/', LiabilityAdd.as_view(), name='liability_add'),
     path('liability_update/<int:pk>', LiabilityUpdate.as_view(), name='liability_update'),
     path('liability_delete/<int:pk>', LiabilityDelete.as_view(), name='liability_delete'),
+
+    # Mortgage & loan account urls:-
+    path('loan_add/', loan_add, name='loan_add'),
+    path('loan_list/', loan_list, name='loan_list'),
+    path('loan_detail/<int:pk>', loan_details, name='loan_details'),
+    path('loan_update/<int:pk>', loan_update, name='loan_update'),
+    path('loan_delete/<int:pk>', loan_delete, name='loan_delete'),
 
     # Bill Urls:-
     path('bill_list/', bill_list, name='bill_list'),
@@ -90,7 +106,9 @@ urlpatterns = [
 
     path('funds_list/', FundList.as_view(), name='fund_list'),
     path('fund_update/<int:pk>', fund_update, name='fund_update'),
+    path('fund_delete/<int:pk>', fund_delete, name='fund_delete'),
     path('fund_overtime', fund_overtime, name='fund_overtime'),
+    path('fund_add/', fund_add, name='fund_add'),
 
     # Calculators
 
