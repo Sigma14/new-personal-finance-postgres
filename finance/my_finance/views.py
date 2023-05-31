@@ -499,18 +499,22 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
                         update_transaction_amount=None):
     amount_budget = float(budget_obj.amount)
     spent_budget = round(float(budget_obj.budget_spent) - transaction_amount, 2)
-    left_budget = round(float(budget_obj.budget_left) + transaction_amount, 2)
+    if update_transaction_amount:
+        spent_budget += update_transaction_amount
     period_budget = budget_obj.budget_period
+
     if transaction_out_flow:
         budget_obj.budget_spent = spent_budget
-        budget_obj.budget_left = left_budget
         if period_budget == 'Yearly' or period_budget == 'Quarterly':
+            budget_left = float(budget_obj.budget_left) + transaction_amount
+            budget_obj.budget_left = budget_left - update_transaction_amount
+            print("budget_obj.budget_left", budget_obj.budget_left)
             data_budget = Budget.objects.filter(user=user_name, name=budget_obj.name,
                                                 created_at=budget_obj.created_at,
                                                 ended_at=budget_obj.ended_at)
             for budget_value in data_budget:
                 if budget_value.start_date != budget_obj.start_date:
-                    budget_value.budget_left = left_budget
+                    budget_value.budget_left = budget_obj.budget_left
                     budget_value.save()
         if period_budget == 'Daily' or period_budget == 'Weekly':
             try:
@@ -523,7 +527,8 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
                 budget_obj.budget_spent = spent_budget
             except Exception as e:
                 print("Exception=========>", e)
-        budget_obj.budget_left = round(amount_budget - spent_budget, 2)
+        if period_budget != 'Yearly' and period_budget != 'Quarterly':
+            budget_obj.budget_left = round(amount_budget - spent_budget, 2)
     else:
         budget_obj.amount = round(amount_budget - transaction_amount, 2)
         budget_obj.budget_left = round(budget_obj.budget_left - transaction_amount, 2)
@@ -2554,6 +2559,11 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         update_account = form.cleaned_data.get('account').name.title()
         update_transaction_amount = round(float(form.cleaned_data.get('amount')), 2)
         out_flow = form.cleaned_data.get('out_flow')
+        if out_flow == "True":
+            out_flow = True
+        else:
+            out_flow = False
+
         cleared_amount = "True"
         if category_name.name == 'Income':
             due_income_id = int(self.request.POST['due_income'])
@@ -2730,6 +2740,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             account_obj.save()
 
             if budget_name:
+                print("yes budget name")
                 date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
                 start_month_date, end_month_date = start_end_date(date_check, "Monthly")
                 budget_obj = Budget.objects.filter(user=user_name, name=budget_name, start_date=start_month_date,
@@ -2760,6 +2771,10 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                     transaction_start_date, transaction_end_date = start_end_date(transaction_obj.transaction_date,
                                                                                   "Monthly")
                     if transaction_budget_name == budget_name:
+                        print("transaction_out_flow", transaction_out_flow)
+                        print("out_flow", out_flow)
+                        print(type(transaction_out_flow))
+                        print(type(out_flow))
                         if out_flow != transaction_out_flow:
                             budget_obj = update_budget_items(user_name, budget_obj, transaction_amount,
                                                              transaction_out_flow, date_check)
@@ -2779,7 +2794,8 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                         old_budget_obj.save()
                         budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow,
                                                           date_check)
-                except:
+                except Exception as e:
+                    print("exception ========>", e)
                     budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow, date_check)
                 budget_obj.save()
 
