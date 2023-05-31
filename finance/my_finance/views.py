@@ -5511,6 +5511,21 @@ def income_add(request):
             created_date = datetime.datetime.strptime(income_date, '%Y-%m-%d')
             save_income(user, sub_category, account, income_amount, income_date, auto_income, frequency, auto_credit,
                         created_date, "True")
+            if not auto_income:
+                income = Income.objects.get(user=user, sub_category=sub_category)
+                income_detail_obj = save_income_details(account, income_amount, income, False, income_date)
+                if auto_credit:
+                    account_balance = float(account.available_balance)
+                    remaining_amount = round(account_balance + income_amount, 2)
+                    save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date,
+                                     sub_category,
+                                     account,
+                                     "income", False, True)
+                    account.available_balance = remaining_amount
+                    account.transaction_count += 1
+                    account.save()
+                    income_detail_obj.credited = True
+                    income_detail_obj.save()
             create_income_request()
             return redirect('/income_list/')
     income_category = SubCategory.objects.filter(category__name="Income", category__user=user)
