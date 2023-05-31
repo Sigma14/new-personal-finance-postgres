@@ -218,7 +218,7 @@ class SuggestiveCategory(models.Model):
         return str(self.name)
 
 
-class Budget(models.Model):
+class TemplateBudget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
@@ -230,31 +230,10 @@ class Budget(models.Model):
     budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
     budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
     auto_budget = models.BooleanField(default=True, blank=True, null=True)
+    auto_pay = models.BooleanField(default=True, blank=True, null=True)
     budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
     budget_status = models.BooleanField(default=False, blank=True, null=True)
-    created_at = models.DateField(blank=True, null=True)
-    ended_at = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.name}{self.id}{self.currency}"
-
-    def get_absolute_url(self):
-        return reverse('budget_list')
-
-
-class TemplateBudget(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_date = models.DateField(blank=True, null=True)
-    end_date = models.DateField(blank=True, null=True)
-    name = models.CharField(max_length=50)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    initial_amount = models.CharField(max_length=15, blank=True, null=True)
-    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
-    budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
-    budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
-    auto_budget = models.BooleanField(default=True, blank=True, null=True)
-    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
-    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    budget_start_date = models.DateField(blank=True, null=True)
     created_at = models.DateField(blank=True, null=True)
     ended_at = models.DateField(blank=True, null=True)
 
@@ -263,25 +242,6 @@ class TemplateBudget(models.Model):
 
     def get_absolute_url(self):
         return reverse('template_budget_list')
-
-
-class Bill(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    label = models.CharField(max_length=50)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    amount = models.CharField(max_length=50)
-    remaining_amount = models.CharField(max_length=50)
-    date = models.DateField()
-    status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
-    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.label + "(" + self.currency + ")")
-
-    def get_absolute_url(self):
-        return reverse('bill_list')
 
 
 class PlaidItem(models.Model):
@@ -318,6 +278,71 @@ class Account(models.Model):
 
     def get_absolute_url(self):
         return reverse('account_list')
+
+
+class BillDetail(models.Model):
+    label = models.CharField(max_length=50)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True, null=True)
+    amount = models.CharField(max_length=50)
+    date = models.DateField()
+    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    auto_bill = models.BooleanField(default=False, blank=True, null=True)
+    auto_pay = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.label)
+
+
+class Bill(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    label = models.CharField(max_length=50)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_account', blank=True, null=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    amount = models.CharField(max_length=50)
+    remaining_amount = models.CharField(max_length=50)
+    date = models.DateField()
+    bill_details = models.ForeignKey(BillDetail, on_delete=models.CASCADE, related_name='bill_details', blank=True, null=True)
+    status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
+    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    auto_bill = models.BooleanField(default=False, blank=True, null=True)
+    auto_pay = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.label + "(" + self.currency + ")")
+
+    def get_absolute_url(self):
+        return reverse('bill_list')
+
+
+class Budget(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='budget_account', blank=True, null=True)
+    initial_amount = models.CharField(max_length=15, blank=True, null=True)
+    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
+    budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
+    auto_budget = models.BooleanField(default=True, blank=True, null=True)
+    auto_pay = models.BooleanField(default=True, blank=True, null=True)
+    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    budget_start_date = models.DateField(blank=True, null=True)
+    created_at = models.DateField(blank=True, null=True)
+    ended_at = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}{self.id}{self.currency}"
+
+    def get_absolute_url(self):
+        return reverse('budget_list')
 
 
 class AvailableFunds(models.Model):
@@ -492,6 +517,36 @@ class MortgageCalculator(models.Model):
 
     def get_absolute_url(self):
         return reverse('mortgagecalculator_list')
+
+
+class Income(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='income_account', blank=True, null=True)
+    income_amount = models.CharField(max_length=50)
+    income_date = models.DateField()
+    auto_income = models.BooleanField(default=False, blank=True, null=True)
+    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    auto_credit = models.BooleanField(default=False, blank=True, null=True)
+    primary = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{str(self.sub_category.name)}"
+
+
+class IncomeDetail(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='income_detail_account', blank=True, null=True)
+    income_amount = models.CharField(max_length=50)
+    income_date = models.DateField(blank=True, null=True)
+    income = models.ForeignKey(Income, on_delete=models.CASCADE)
+    credited = models.BooleanField(default=False, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{str(self.income.sub_category.name)}"
 
 
 class Revenues(models.Model):

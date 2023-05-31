@@ -55,21 +55,21 @@
 										<span class="d-none d-sm-block">Current Budget</span>
 									</a>
 								</li>
-								<li class="nav-item">
-									<a class="nav-link d-flex align-items-center" id="target_budget_tab" data-toggle="tab" href="#target_budget_data" aria-controls="target_budget_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Target Budget</span>
-									</a>
-								</li>
+<!--								<li class="nav-item">-->
+<!--									<a class="nav-link d-flex align-items-center" id="target_budget_tab" data-toggle="tab" href="#target_budget_data" aria-controls="target_budget_data" role="tab" aria-selected="false">-->
+<!--										<span class="d-none d-sm-block">Target Budget</span>-->
+<!--									</a>-->
+<!--								</li>-->
 								<li class="nav-item">
 									<a class="nav-link d-flex align-items-center" id="compare_budget_tab" data-toggle="tab" href="#compare_budget_data" aria-controls="compare_budget_data" role="tab" aria-selected="false">
 										<span class="d-none d-sm-block">Compare Budget</span>
 									</a>
 								</li>
-								<li class="nav-item">
-									<a class="nav-link d-flex align-items-center" id="income_expenses_tab" data-toggle="tab" href="#income_expenses_data" aria-controls="income_expenses_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Income & Expenses</span>
-									</a>
-								</li>
+<!--								<li class="nav-item">-->
+<!--									<a class="nav-link d-flex align-items-center" id="income_expenses_tab" data-toggle="tab" href="#income_expenses_data" aria-controls="income_expenses_data" role="tab" aria-selected="false">-->
+<!--										<span class="d-none d-sm-block">Income & Expenses</span>-->
+<!--									</a>-->
+<!--								</li>-->
                             </ul>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Chart for all transactions for budgets between {{week_start}} and {{week_end}}</h4>
+                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{week_start}} and {{week_end}}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -284,7 +284,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{week_start}} and {{week_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{week_start}} and {{week_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -429,7 +429,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{week_start}} and {{week_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{week_start}} and {{week_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -586,7 +586,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Chart for all transactions for budgets between {{monht_start}} and {{month_end}}</h4>
+                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{monht_start}} and {{month_end}}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -750,7 +750,7 @@
                                                                                     <div class="card-body">
                                                                                         <div class="download_csv_form"></div>
                                                                                         <div class="card-header border-bottom">
-                                                                                            <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{month_start}} and {{month_end}}</h4>
+                                                                                            <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{month_start}} and {{month_end}}</h4>
                                                                                             <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                         </div>
                                                                                         <div class="card-datatable table-responsive">
@@ -894,7 +894,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{month_start}} and {{month_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{month_start}} and {{month_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1051,7 +1051,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Chart for all transactions for budgets between {{quart_start}} and {{quart_end}}</h4>
+                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{quart_start}} and {{quart_end}}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1215,7 +1215,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{quart_start}} and {{quart_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{quart_start}} and {{quart_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1358,7 +1358,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{quart_start}} and {{quart_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{quart_start}} and {{quart_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1514,7 +1514,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Chart for all transactions for budgets between {{yearly_start}} and {{yearly_end}}</h4>
+                                                        <h4 class="card-title mb-25">All transactions for budgets between {{yearly_start}} and {{yearly_end}}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1678,7 +1678,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{yearly_start}} and {{yearly_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All transactions for "{{name}}" budgets between {{yearly_start}} and {{yearly_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1821,7 +1821,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">Chart for all transactions for "{{name}}" budgets between {{yearly_start}} and {{yearly_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{yearly_start}} and {{yearly_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -2015,7 +2015,8 @@
                                                     </thead>
                                                     <tbody>
                                                     {% for object in all_budgets %}
-                                                    <tr>
+                                                    {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
+                                                        <tr>
                                                         {% for value in object %}
                                                         {% if forloop.counter != 5 %}
                                                             {% if forloop.counter == 2 %}
@@ -2023,7 +2024,11 @@
                                                                     <div class="d-flex flex-column">
                                                                         <span class="font-weight-bolder mb-25">{{ value }}</span>
                                                                         {% if object.6 %}
-                                                                        <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>
+                                                                            {% if object.5 == 'Daily' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
+                                                                            {% else %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>
+                                                                            {% endif %}
                                                                         {% endif %}
                                                                     </div>
                                                                 </td>
@@ -2055,7 +2060,7 @@
 
                                                                         </li>
                                                                         <li class="list-inline-item">
-                                                                            <button type="button" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=value %}"
+                                                                            <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=value %}"
                                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
                                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
                                                                                     class="fa fa-trash"></i></button>
@@ -2067,6 +2072,95 @@
                                                         {% endif %}
                                                         {% endfor %}
                                                     </tr>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    {% for key, value in weekly_daily_budget.items %}
+                                                        {% for k, v in value.items %}
+                                                        {% for object in v %}
+                                                            {% if forloop.counter == 1 %}
+                                                                <tr class="show_daily_budget" id_name="{{object.4}}">
+                                                                    <td title="details">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1"><a href="{% url 'budget_detail' pk=object.4 %}">{{ object.0 }}</a></span>
+                                                                        </div>
+                                                                    </td>
+                                                                     <td class="text-nowrap">
+                                                                        <div class="d-flex flex-column">
+                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
+                                                                            {% if key == 'daily' %}
+                                                                                <span class="font-small-2 text-muted">Daily Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                            {% else %}
+                                                                                <span class="font-small-2 text-muted">Weekly Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">
+                                                                                <ul class="list-inline m-0">
+                                                                                    <li class="list-inline-item">
+                                                                                        <a href="{% url 'budget_update' pk=object.4 %}"
+                                                                                           class="btn btn-success btn-sm rounded-0"><i
+                                                                                                class="fa fa-edit"></i></a>
+
+                                                                                    </li>
+                                                                                    <li class="list-inline-item">
+                                                                                        <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
+                                                                                           class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                                class="fa fa-trash"></i></button>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            {% else %}
+                                                                <tr class="show_daily_rows{{v.0.4}}">
+                                                                     <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
+                                                                        </div>
+                                                                     </td>
+                                                                     <td class="text-nowrap">
+                                                                        <div class="d-flex flex-column">
+                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
+                                                                            {% if key == 'daily' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
+                                                                            {% else %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endfor %}
                                                     {% endfor %}
                                                     </tbody>
                                                 </table>
@@ -2101,42 +2195,22 @@
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
                                             <div class="download_csv_form"></div>
-                                            <div class="col-sm-40 offset-sm-20">
-                                                <a href="{% url 'template_budget_add' %}" class="btn btn-primary"><i
-                                                        class="fa fa-plus"></i> Add Budget</a>
-                                            </div>
+                                            <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                                                    <div class="card">
+                                                        <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                                            <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Template Budget</span>
+                                                        </div>
+                                                        <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                                            <div class="card-body">
+                                                                A template budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see all the budgets and their total spending and left budgets.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             <div class="card-header border-bottom">
                                                 <h4 class="card-title mb-25">Template Budgets</h4>
-                                                <div float="right">
-                                                <button class="btn btn-primary download_csv" file_name="my_template_budget.csv" table_heading="{{budget_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#template_budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
-                                                </div>
                                             </div>
                                             <div class="card-datatable table-responsive">
-                                                <!--                                        <table class="dt-row-grouping table category_table">-->
-<!--                                            <thead>-->
-<!--                                                <tr>-->
-<!--                                                    <th>Category</th>-->
-<!--                                                    <th>Budget Amount</th>-->
-<!--                                                    <th>Spent</th>-->
-<!--                                                    <th>Left</th>-->
-<!--                                                    <th>Action</th>-->
-<!--                                                </tr>-->
-<!--                                            </thead>-->
-<!--                                            <tbody>-->
-<!--                                                <tr class="category">-->
-<!--                                                    <td><strong>Bills&nbsp;</strong><i class="fa fa-chevron-down"></i><i class="fa fa-chevron-right" style="display:None;"></i></td>-->
-<!--                                                    <td><strong>0.00</strong></td>-->
-<!--                                                    <td><strong>0.00</strong></td>-->
-<!--                                                    <td><strong>0.00</strong></td>-->
-<!--                                                </tr>-->
-<!--                                                <tr class="subcategory">-->
-<!--                                                    <td>Water</td>-->
-<!--                                                    <td>0.00</td>-->
-<!--                                                    <td>0.00</td>-->
-<!--                                                    <td>0.00</td>-->
-<!--                                                </tr>-->
-<!--                                            </tbody>-->
-<!--                                        </table>-->
                                                 <table class="table" id="template_budgets">
                                                     <thead>
                                                     <tr>
@@ -2147,61 +2221,94 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    {% for object in template_all_budgets %}
-                                                    <tr>
-                                                        {% for value in object %}
-                                                        {% if forloop.counter != 5 %}
-                                                            {% if forloop.counter == 2 %}
-                                                                <td class="text-nowrap">
-                                                                    <div class="d-flex flex-column">
-                                                                        <span class="font-weight-bolder mb-25">{{ value }}</span>
-                                                                        {% if object.6 %}
-                                                                        <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </td>
-                                                            {% endif %}
-                                                            {% if forloop.counter == 1 or forloop.counter == 3 or forloop.counter == 4 %}
-                                                                {% if forloop.counter == 1 %}
+                                                    {% for key, value in template_budget_data.items %}
+                                                        {% for object in value %}
+                                                            {% if forloop.counter == 1 %}
+                                                                <tr class="show_daily_budget" id_name="{{object.4}}">
                                                                     <td title="details">
                                                                         <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ value }}</span>
+                                                                            <span class="font-weight-bolder mr-1"><a href="#" title="you can't see details. it is template budget overview.">{{ object.0 }}</a></span>
                                                                         </div>
                                                                     </td>
-                                                                {% else %}
+                                                                     <td class="text-nowrap">
+                                                                        <div class="d-flex flex-column">
+                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
+                                                                            {% if key == 'Daily' %}
+                                                                                <span class="font-small-2 text-muted">Daily Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                            {% endif %}
+                                                                            {% if key == 'Weekly' %}
+                                                                                <span class="font-small-2 text-muted">Weekly Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                            {% endif %}
+                                                                            {% if key == 'Monthly' or key == 'Quarterly' or key == 'Yearly' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </td>
                                                                     <td>
                                                                         <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ value }}</span>
+                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
                                                                         </div>
                                                                     </td>
-                                                                {% endif %}
-                                                            {% endif %}
-                                                        {% else %}
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">
-                                                                    <ul class="list-inline m-0">
-                                                                        <li class="list-inline-item">
-                                                                            <a href="{% url 'template_budget_update' pk=value %}"
-                                                                               class="btn btn-success btn-sm rounded-0"><i
-                                                                                    class="fa fa-edit"></i></a>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">
+                                                                                <ul class="list-inline m-0">
+                                                                                    <li class="list-inline-item">
+                                                                                        <a href="#" title="you can't edit it is template budget overview"
+                                                                                           class="btn btn-success btn-sm rounded-0"><i
+                                                                                                class="fa fa-edit"></i></a>
 
-                                                                        </li>
-                                                                        <li class="list-inline-item">
-                                                                            <button type="button" delete_name="{{ object.0 }} Budget" url="{% url 'template_budget_delete' pk=value %}"
-                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                    class="fa fa-trash"></i></button>
-                                                                        </li>
-                                                                    </ul>
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        {% endif %}
+                                                                                    </li>
+                                                                                    <li class="list-inline-item">
+                                                                                        <button type="button" class="btn btn-danger btn-sm rounded-0" title="you can't delete it is template budget overview"><i
+                                                                                                class="fa fa-trash"></i></button>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            {% else %}
+                                                                <tr class="show_daily_rows{{value.0.4}}">
+                                                                     <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
+                                                                        </div>
+                                                                     </td>
+                                                                     <td class="text-nowrap">
+                                                                        <div class="d-flex flex-column">
+                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
+                                                                            {% if key == 'Daily' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
+                                                                            {% else %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endif %}
                                                         {% endfor %}
-                                                    </tr>
                                                     {% endfor %}
-                                                    </tbody>
                                                 </table>
                                             </div>
                                         </div>
@@ -2227,164 +2334,164 @@
                         </section>
                     </div>
                     <!-- Income & Expenses DATA -->
-                    <div class="tab-pane" id="income_expenses_data" aria-labelledby="income_expenses_tab" role="tabpanel">
-                        <section>
-                            <div class="row match-height">
-                                <div class="col-xl-8 col-md-12 col-12">
-                                    <div class="card card-congratulation-medal">
-                                        <div class="card-body">
-                                            <div class="card-header border-bottom">
-                                                <h4 class="card-title mb-25">Income</h4>
-                                                <div class="col-sm-40 offset-sm-20">
-                                                    <a href="{% url 'revenue_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Income</a>
-                                                </div>
-                                            </div>
-                                            <div class="card-datatable table-responsive">
-                                                <table class="dt-row-grouping table" id="revenue_table" graph_label='{{graph_label}}' column_length="{{revenue_keys | length}}">
-                                                    <thead>
-                                                    <tr>
-                                                    {% for data in revenue_keys %}
-                                                        {% if forloop.counter == 1 or forloop.counter == 2 %}
-                                                        <th>{{data}}</th>
-                                                        {% else %}
-                                                        <th><a href="{% url 'revenue_update_name' pk=data %}" title="Edit">{{data}}</a></th>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {% for value in revenue_values %}
-                                                    <tr>
-                                                        {% for key, object in value.items %}
-                                                        {% if forloop.counter == 1 or forloop.counter == 2 %}
-                                                        <td>{{object}}</td>
-                                                        {% else %}
-                                                        <td class="text-primary edit_income" href="{% url 'revenue_update' pk=key %}" title="Edit">{{object}}</td>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </tr>
-                                                    {% endfor %}
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr>
-                                                        {% for data in revenue_keys %}
-                                                            {% if forloop.counter == 1 %}
-                                                                <th>Total</th>
-                                                            {% else %}
-                                                            <th></th>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-4 col-md-12 col-12">
-                                    <div class="card card-congratulation-medal">
-                                        <div class="card-body">
-                                            <h5>Non Primary Income</h5>
-                                            <div id="budget-chart"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        <section>
-                            <div class="row match-height">
-                                <div class="col-xl-8 col-md-12 col-12">
-                                    <div class="card card-congratulation-medal">
-                                        <div class="card-body">
-                                            <div class="card-header border-bottom">
-                                                <h4 class="card-title mb-25">Expenses</h4>
-                                                <div class="col-sm-40 offset-sm-20">
-                                                    <a href="{% url 'expenses_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Expense</a>
-                                                </div>
-                                            </div>
-                                            <div class="card-datatable table-responsive">
-                                                <table class="dt-row-grouping table" id="expense_table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>S.No.</th>
-                                                        <th>Name</th>
-                                                        <th>Category</th>
-                                                        <th>Month</th>
-                                                        <th>Amount</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {% for data in expenses_data %}
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td class="font-weight-bolder mr-1">
-                                                            {{ data.name }}
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">{{ data.categories }}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">{{ data.month }}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td class="font-weight-bolder mr-1">{{ data.currency }}{{ data.amount }}
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">
-                                                                    <ul class="list-inline m-0">
-                                                                        <li class="list-inline-item">
-                                                                            <a href="{% url 'expenses_update' pk=data.id %}"
-                                                                               class="btn btn-success btn-sm rounded-0"><i
-                                                                                    class="fa fa-edit"></i></a>
+<!--                    <div class="tab-pane" id="income_expenses_data" aria-labelledby="income_expenses_tab" role="tabpanel">-->
+<!--                        <section>-->
+<!--                            <div class="row match-height">-->
+<!--                                <div class="col-xl-8 col-md-12 col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <div class="card-header border-bottom">-->
+<!--                                                <h4 class="card-title mb-25">Income</h4>-->
+<!--                                                <div class="col-sm-40 offset-sm-20">-->
+<!--                                                    <a href="" class="btn btn-primary"><i class="fa fa-plus"></i> Add Income</a>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="card-datatable table-responsive">-->
+<!--                                                <table class="dt-row-grouping table" id="revenue_table" graph_label='{{graph_label}}' column_length="{{revenue_keys | length}}">-->
+<!--                                                    <thead>-->
+<!--                                                    <tr>-->
+<!--                                                    {% for data in revenue_keys %}-->
+<!--                                                        {% if forloop.counter == 1 or forloop.counter == 2 %}-->
+<!--                                                        <th>{{data}}</th>-->
+<!--                                                        {% else %}-->
+<!--                                                        <th><a href="{% url 'revenue_update_name' pk=data %}" title="Edit">{{data}}</a></th>-->
+<!--                                                        {% endif %}-->
+<!--                                                    {% endfor %}-->
+<!--                                                    </tr>-->
+<!--                                                    </thead>-->
+<!--                                                    <tbody>-->
+<!--                                                    {% for value in revenue_values %}-->
+<!--                                                    <tr>-->
+<!--                                                        {% for key, object in value.items %}-->
+<!--                                                        {% if forloop.counter == 1 or forloop.counter == 2 %}-->
+<!--                                                        <td>{{object}}</td>-->
+<!--                                                        {% else %}-->
+<!--                                                        <td class="text-primary edit_income" href="{% url 'revenue_update' pk=key %}" title="Edit">{{object}}</td>-->
+<!--                                                        {% endif %}-->
+<!--                                                        {% endfor %}-->
+<!--                                                    </tr>-->
+<!--                                                    {% endfor %}-->
+<!--                                                    </tbody>-->
+<!--                                                    <tfoot>-->
+<!--                                                        <tr>-->
+<!--                                                        {% for data in revenue_keys %}-->
+<!--                                                            {% if forloop.counter == 1 %}-->
+<!--                                                                <th>Total</th>-->
+<!--                                                            {% else %}-->
+<!--                                                            <th></th>-->
+<!--                                                            {% endif %}-->
+<!--                                                        {% endfor %}-->
+<!--                                                        </tr>-->
+<!--                                                    </tfoot>-->
+<!--                                                </table>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="col-xl-4 col-md-12 col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <h5>Non Primary Income</h5>-->
+<!--                                            <div id="budget-chart"></div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </section>-->
+<!--                        <section>-->
+<!--                            <div class="row match-height">-->
+<!--                                <div class="col-xl-8 col-md-12 col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <div class="card-header border-bottom">-->
+<!--                                                <h4 class="card-title mb-25">Expenses</h4>-->
+<!--                                                <div class="col-sm-40 offset-sm-20">-->
+<!--                                                    <a href="{% url 'expenses_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Expense</a>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="card-datatable table-responsive">-->
+<!--                                                <table class="dt-row-grouping table" id="expense_table">-->
+<!--                                                    <thead>-->
+<!--                                                    <tr>-->
+<!--                                                        <th>S.No.</th>-->
+<!--                                                        <th>Name</th>-->
+<!--                                                        <th>Category</th>-->
+<!--                                                        <th>Month</th>-->
+<!--                                                        <th>Amount</th>-->
+<!--                                                        <th>Actions</th>-->
+<!--                                                    </tr>-->
+<!--                                                    </thead>-->
+<!--                                                    <tbody>-->
+<!--                                                    {% for data in expenses_data %}-->
+<!--                                                    <tr>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td class="font-weight-bolder mr-1">-->
+<!--                                                            {{ data.name }}-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{ data.categories }}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">{{ data.month }}</span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        <td class="font-weight-bolder mr-1">{{ data.currency }}{{ data.amount }}-->
+<!--                                                        </td>-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">-->
+<!--                                                                    <ul class="list-inline m-0">-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <a href="{% url 'expenses_update' pk=data.id %}"-->
+<!--                                                                               class="btn btn-success btn-sm rounded-0"><i-->
+<!--                                                                                    class="fa fa-edit"></i></a>-->
 
-                                                                        </li>
-                                                                        <li class="list-inline-item">
-                                                                            <button type="button" url="{% url 'expenses_delete' pk=data.id %}"
-                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                    class="fa fa-trash"></i></button>
-                                                                        </li>
-                                                                    </ul>
-                                                                </span>
-                                                            </div>
-                                                        </td>
+<!--                                                                        </li>-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <button type="button" url="{% url 'expenses_delete' pk=data.id %}"-->
+<!--                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"-->
+<!--                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i-->
+<!--                                                                                    class="fa fa-trash"></i></button>-->
+<!--                                                                        </li>-->
+<!--                                                                    </ul>-->
+<!--                                                                </span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
 
-                                                    </tr>
-                                                    {% endfor %}
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr>
-                                                            <th colspan="3">Total</th>
-                                                            <th></th>
-                                                            <th></th>
-                                                            <th></th>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-4 col-md-12 col-12">
-                                    <div class="card card-congratulation-medal">
-                                        <div class="card-body">
-                                            <h5>Expenses</h5>
-                                            <div id="column-chart"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+<!--                                                    </tr>-->
+<!--                                                    {% endfor %}-->
+<!--                                                    </tbody>-->
+<!--                                                    <tfoot>-->
+<!--                                                        <tr>-->
+<!--                                                            <th colspan="3">Total</th>-->
+<!--                                                            <th></th>-->
+<!--                                                            <th></th>-->
+<!--                                                            <th></th>-->
+<!--                                                        </tr>-->
+<!--                                                    </tfoot>-->
+<!--                                                </table>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="col-xl-4 col-md-12 col-12">-->
+<!--                                    <div class="card card-congratulation-medal">-->
+<!--                                        <div class="card-body">-->
+<!--                                            <h5>Expenses</h5>-->
+<!--                                            <div id="column-chart"></div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </section>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>

@@ -55,14 +55,18 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Currency</label>
+                                        <label for="fname-icon">Account</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            {{ form.currency }}
+                                            <select name="account_name" class="form-control" id="account_name" required>
+                                                {% for account in account_qs %}
+                                                    <option>{{account.name}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -86,19 +90,30 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Bill Date</label>
+                                        <label for="fname-icon">Bill Due Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="email-icon" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="due_date" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1" checked/>
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-bill</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 show_bill_budget_periods">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Frequency</label>
@@ -110,6 +125,17 @@
                                             </div>
                                             {{ form.frequency }}
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2"/>
+                                        <label class="custom-control-label" for="customCheck2">&nbsp;&nbsp;Auto-pay</label>
                                     </div>
                                 </div>
                             </div>

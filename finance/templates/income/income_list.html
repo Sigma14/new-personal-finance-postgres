@@ -1,0 +1,89 @@
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Incomes</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Incomes
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                            <div class="card">
+                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Income PageInfo</span>
+                                </div>
+                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                    <div class="card-body">
+                                        This page have all the incomes list.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'income_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Income</a>
+                </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    {% for income in income_data %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center" style="height:150px;">
+                            <a href="{% url 'income_details' pk=income.id %}">
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ income.sub_category.name }}&nbsp;&nbsp;
+                                        {% if income.auto_income %}
+                                        <div class="badge badge-glow badge-info" title="Generate income automatically according to date.">Auto Income({{ income.frequency }})</div>
+                                        {% else %}
+                                        <div class="badge badge-glow badge-info" title="Generate income manually.">Manual Income</div>
+                                        {% endif %}
+                                    </h2>
+
+                                    <h2 style="float: right;">
+                                        {{ income.account.currency }}{{ income.income_amount }}
+                                        {% if income.auto_credit %}
+                                        <div class="badge badge-glow badge-info" title="Credit income automatically according to due date.">Auto Credit</div>
+                                        {% else %}
+                                            <div class="badge badge-glow badge-info" title="Credit income manually.">Manual Credit</div>
+                                        {% endif %}
+                                    </h2>
+                                </div>
+                                <br/>
+                                <div class="card-body" style="padding-bottom:30px;">
+                                    <h4 style="float: left;">Income Date :- {{ income.income_date }}</h4>
+<!--                                    <h4 style="float: right;">{{ object.updated_at }}</h4>-->
+                                    <div style="float: right;" class="col-sm-40 offset-sm-20">
+                                        <h4 style="float: left;">Account :- {{ income.account.name }}</h4>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </section>
+
+            </div>
+        </div>
+    </div>
+{% endblock content%}

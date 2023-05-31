@@ -106,6 +106,35 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 transaction_due_bill_list" style="display:None;">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Unpaid Bills</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge" id="trans_bills">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 transaction_income_list" style="display:None;">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Uncredited Income</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge" id="trans_income">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-12" style="display:None;">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
@@ -165,6 +194,7 @@
                                             <input type="text" id="email-icon" value="{{form.amount.value}}" class="form-control" name="amount" required
                                                    placeholder="Amount"/>
                                         </div>
+                                        <p id="amount_error" class="text-danger" style="display:None"></p>
                                     </div>
                                 </div>
                             </div>
@@ -176,41 +206,25 @@
                                     &nbsp;
                                     {% if form.out_flow.value %}
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" id="customRadio1" value="False" name="out_flow" class="custom-control-input"  />
-                                        <label class="custom-control-label" for="customRadio1">&nbsp;Inflow&nbsp;</label>
+                                        <input type="radio" id="customRadio1" value="True" name="out_flow" class="custom-control-input" checked/>
+                                        <label class="custom-control-label" for="customRadio1">&nbsp;Expenses</label>
                                     </div>
                                     &nbsp;
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" id="customRadio2" value="True" name="out_flow" class="custom-control-input" checked/>
-                                        <label class="custom-control-label" for="customRadio2">&nbsp;Outflow</label>
+                                        <input type="radio" id="customRadio2" value="False" name="out_flow" class="custom-control-input"  />
+                                        <label class="custom-control-label" for="customRadio2">&nbsp;Income&nbsp;</label>
                                     </div>
                                     {% else %}
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" id="customRadio1" name="out_flow" class="custom-control-input"  checked/>
-                                        <label class="custom-control-label" for="customRadio1">&nbsp;Inflow&nbsp;</label>
+                                        <input type="radio" id="customRadio1" value="True" name="out_flow" class="custom-control-input"/>
+                                        <label class="custom-control-label" for="customRadio1">&nbsp;Expenses</label>
                                     </div>
                                     &nbsp;
                                     <div class="custom-control custom-radio">
-                                        <input type="radio" id="customRadio2" name="out_flow" class="custom-control-input"/>
-                                        <label class="custom-control-label" for="customRadio2">&nbsp;Outflow</label>
+                                        <input type="radio" id="customRadio2" value="False" name="out_flow" class="custom-control-input" checked/>
+                                        <label class="custom-control-label" for="customRadio2">&nbsp;Income&nbsp;</label>
                                     </div>
                                     {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
-                                    </div>
-                                    &nbsp;
-                                    <div class="custom-control custom-checkbox">
-                                        {% if form.cleared.value %}
-                                        <input type="checkbox" name="cleared" checked class="custom-control-input new_tab_check" id="customCheck1" />
-                                        {% else %}
-                                        <input type="checkbox" name="cleared" class="custom-control-input new_tab_check" id="customCheck1" />
-                                        {% endif %}
-                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Cleared</label>
-                                    </div>
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">

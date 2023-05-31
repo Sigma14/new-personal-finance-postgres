@@ -2,22 +2,20 @@
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
-        <div class="content-overlay"></div>
-        <div class="header-navbar-shadow"></div>
         <div class="content-wrapper">
             <div class="content-header row">
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Update Bill</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Income</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'income_list' %}">Incomes</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Update Bill
+                                        Add Income
                                     </li>
                                 </ol>
                             </div>
@@ -25,9 +23,11 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+            <div class="content-body">
+                <section class="app-user-edit">
+                    <div class="card" >
+                        <div class="card-body">
+                            <form class="form form-horizontal" action="{% url 'income_add' %}" method="post">
                         {% if error %}
                             <p class="text-danger">{{error}}</p>
                         {% endif %}
@@ -36,23 +36,19 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Category</label>
+                                        <label for="sub_category_name">Category</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <select type="text" id="fname-icon" class="form-control" name="label" required>
-                                                {% for label in bill_category %}
-                                                    {% if label.name == bill_data.label %}
-                                                        <option selected value="{{label.name}}">{{label.name}}</option>
-                                                    {% else %}
-                                                        <option value="{{label.name}}">{{label.name}}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-
+                                            <input list="browsers" type="text" class="form-control data_list_drop_down" id="sub_category_name" name="sub_category_name" placeholder="Name" required data-validation-required-message="This field is required"/>
+                                                <datalist id="browsers" name="">
+                                                    {% for data in income_category %}
+                                                        <option value="{{data.name}}" data-id="{{forloop.counter}}">{{data.name}}</option>
+                                                    {% endfor %}
+                                                </datalist>
                                         </div>
                                     </div>
                                 </div>
@@ -60,7 +56,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Account</label>
+                                        <label for="account_name">Account</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -69,11 +65,7 @@
                                             </div>
                                             <select name="account_name" class="form-control" id="account_name" required>
                                                 {% for account in account_qs %}
-                                                    {% if bill_data.account.name == account.name %}
-                                                        <option selected>{{account.name}}</option>
-                                                    {% else %}
-                                                        <option>{{account.name}}</option>
-                                                    {% endif %}
+                                                    <option>{{account.name}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -90,7 +82,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="mail"></i></span>
                                             </div>
-                                            <input value="{{bill_data.amount}}" type="text" id="email-icon" class="form-control" name="amount" required
+                                            <input type="text" id="email-icon" class="form-control" name="amount" required
                                                    placeholder="Amount"/>
                                         </div>
                                     </div>
@@ -99,14 +91,14 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Bill Due Date</label>
+                                        <label for="income_date">Income Date</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input value="{{bill_data.date|date:'c'}}" type="text" id="email-icon" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="income_date" name="income_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>
@@ -114,36 +106,28 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">&nbsp;</label>
+                                        <label for="income">&nbsp;</label>
                                     </div>
                                     <div class="custom-control custom-checkbox">
-                                        {% if bill_data.auto_bill %}
-                                            <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1" checked/>
-                                        {% else %}
-                                            <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1"/>
-                                        {% endif %}
-                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-bill</label>
+                                        <input type="checkbox" name="auto_income" class="custom-control-input check_auto_bill" id="customCheck1" checked/>
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-Income</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 show_bill_budget_periods">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Frequency</label>
+                                        <label for="frequency">Frequency</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <select name="frequency" class="form-control" id="id_frequency">
-                                              {% for name in bill_frequency %}
-                                                {%if name == bill_data.frequency %}
-                                                    <option selected>{{name}}</option>
-                                                {% else %}
+                                            <select name="frequency" class="form-control" id="frequency" required>
+                                                {% for name in frequency %}
                                                     <option>{{name}}</option>
-                                                {% endif %}
-                                              {% endfor %}
+                                                {% endfor %}
                                             </select>
                                         </div>
                                     </div>
@@ -155,23 +139,22 @@
                                         <label for="fname-icon">&nbsp;</label>
                                     </div>
                                     <div class="custom-control custom-checkbox">
-                                        {% if bill_data.auto_pay %}
-                                            <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2" checked/>
-                                        {% else %}
-                                            <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2"/>
-                                        {% endif %}
-                                        <label class="custom-control-label" for="customCheck2">&nbsp;&nbsp;Auto-pay</label>
+                                        <input type="checkbox" name="auto_credit" class="custom-control-input" id="customCheck2"/>
+                                        <label class="custom-control-label" for="customCheck2">&nbsp;&nbsp;Auto-credit</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Update</button>
-                                <a href="{% url 'bill_detail' pk=bill_data.id %}" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'income_list' %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
                         </div>
                     </form>
-                </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
+
 {% endblock content%}

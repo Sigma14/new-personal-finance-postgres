@@ -409,11 +409,15 @@ function inputHTML(formHtml, name, value)
         text_msg = "Once deleted the " + name + ", cannot be recovered."
         if(del_method == 'account_delete')
         {
-            text_msg += 'All transactions related to this account also deleted.'
+            text_msg += 'All the transactions related to this account also deleted.'
+        }
+        if(del_method == 'income_delete')
+        {
+            text_msg += 'All the transactions related to this income source also deleted and total transaction amount added to selected income account.'
         }
         if(del_method == 'Goals')
         {
-            text_msg += 'All allocated or lock amount of this goal will be added into their fund account'
+            text_msg += 'All the allocated or lock amount of this goal will be added into their fund account'
         }
         if(del_method == 'Funds')
         {
@@ -422,15 +426,19 @@ function inputHTML(formHtml, name, value)
 
         if(del_method == 'category_delete')
         {
-            text_msg += 'All transactions, bills and budgets related to this category also deleted.'
+            text_msg += 'All the transactions, bills and budgets related to this category also deleted.'
         }
         if(del_method == 'bill_delete')
         {
-            text_msg += 'All transactions and budgets related to this bill also deleted.'
+            text_msg += 'All the transactions, paid or unpaid bills also deleted.'
+        }
+        if(del_method == 'selected_bill_delete')
+        {
+            text_msg += 'All the transactions related to this bills also deleted.'
         }
         if(del_method == 'budget_delete')
         {
-            text_msg += 'All transactions and bill related to this budget also deleted.'
+            text_msg += 'All the past and current transactions related to this budget also deleted.'
         }
 
         delete_url = $(this).attr('url');
@@ -1642,6 +1650,12 @@ $("body").delegate(".category", "click", function(event)
 //  Show and hide subcategory
 $("body").delegate(".pick_category", "change", function(event)
 {
+    $(".transaction_due_bill_list").hide();
+    $(".transaction_income_list").hide();
+    $("#id_amount").val('');
+    $("#id_amount").attr('disabled', false);
+    $('#customRadio1').prop('checked', true);
+
     category_group = $(this).val()
     var csrftoken = getCookie('csrftoken');
     $.ajax({
@@ -1654,18 +1668,130 @@ $("body").delegate(".pick_category", "change", function(event)
         success: function(response)
         {
             var cat_list = response.subcategories
-            var optionHtml = "<select class='form-control check_budget_category' id='subcategory' name='subcategory'><option value='' selected=''>Select Category</option>"
+            var optionHtml = "<select class='form-control show_due_bills check_budget_category' id='subcategory' name='subcategory'><option value='' selected=''>Select Category</option>"
             $("#trans_sub_cat").empty();
             for(let i=0; i < cat_list.length; i++)
             {
                 optionHtml += "<option>" + cat_list[i] + "</option>"
             }
             optionHtml += "</select>"
-            console.log(optionHtml)
             $("#trans_sub_cat").append(optionHtml);
             $(".transaction_cat_list").show();
         }
     });
+});
+
+
+//  Show and hide due bills
+$("body").delegate(".show_due_bills", "change", function(event)
+{
+    category_id = $("#id_category").val()
+    var category_name = $('#id_category option:selected').text();
+    sub_category = $(this).val()
+    var csrftoken = getCookie('csrftoken');
+    if (category_name == "Income")
+    {
+
+        $.ajax({
+            type: 'POST',
+            url:'/income/uncredited_list',
+            data: {
+            'sub_category': sub_category,
+            'category_id': category_id,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            success: function(response)
+            {
+                if(response.status == 'error')
+                {
+                    $(".transaction_income_list").hide();
+                    $("#trans_income").empty();
+                }
+                else
+                {
+                    var income_dict = response.income_dict
+                    var optionHtml = "<select class='form-control' amount_dict='" + response.amount_dict + "' id='due_income' name='due_income' required><option value='' selected=''>Select uncredited income</option>"
+                    $("#trans_income").empty();
+                    $.each(income_dict, function(key, value) {
+                        optionHtml += "<option value='" + key + "'>" + value + "</option>"
+                    });
+                    optionHtml += "</select>"
+                    $("#trans_income").append(optionHtml);
+                    $(".transaction_income_list").show();
+                }
+            }
+        });
+    }
+    if (category_name == "Bills")
+    {
+        $.ajax({
+            type: 'POST',
+            url:'/bill/due_list',
+            data: {
+            'sub_category': sub_category,
+            'category_id': category_id,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            success: function(response)
+            {
+                if(response.status == 'error')
+                {
+                    $(".transaction_due_bill_list").hide();
+                    $("#trans_bills").empty();
+                }
+                else
+                {
+                    var unpaid_bill_dict = response.unpaid_bill_dict
+                    var optionHtml = "<select class='form-control' amount_dict='" + response.amount_dict + "' id='due_bill' name='due_bill' required><option value='' selected=''>Select due bills</option>"
+                    $("#trans_bills").empty();
+                    $.each(unpaid_bill_dict, function(key, value)
+                    {
+                        optionHtml += "<option value='" + key + "'>" + value  + "</option>"
+                    });
+                    optionHtml += "</select>"
+                    $("#trans_bills").append(optionHtml);
+                    $(".transaction_due_bill_list").show();
+                }
+            }
+        });
+    }
+});
+
+
+// add auto amount when select due bill
+$("body").delegate("#due_bill", "change", function(event)
+{
+    amount_dict = JSON.parse($(this).attr('amount_dict'))
+    bill_id = $(this).val()
+    $("#id_amount").val(amount_dict[bill_id])
+    $("#id_amount").attr('max_amount', amount_dict[bill_id])
+});
+
+// add uncredited amount when select uncredited income
+$("body").delegate("#due_income", "change", function(event)
+{
+    amount_dict = JSON.parse($(this).attr('amount_dict'))
+    income_id = $(this).val()
+    var income_date = $('#due_income option:selected').text();
+    $("#id_transaction_date").val(income_date)
+    $("#id_amount").val(amount_dict[income_id])
+    $('#customRadio2').prop('checked', true);
+//    $("#id_amount").attr('disabled', 'disabled')
+});
+
+
+// don't enter grater amount than due bill amount
+$("body").delegate("#id_amount", "change paste keypress", function(event)
+{
+    $("#amount_error").hide()
+    max_amount = parseFloat($(this).attr('max_amount'))
+    enter_amount = $(this).val()
+    if(enter_amount > max_amount)
+    {
+        $(this).val(max_amount)
+        $("#amount_error").text('Amount should not be greater than due bill amount')
+        $("#amount_error").show()
+    }
 });
 
 //  check Budget Category
@@ -1684,7 +1810,6 @@ $("body").delegate(".check_budget_category", "change", function(event)
         },
         success: function(response)
         {
-            console.log(response)
             if(response.budget_name)
             {
                 $("#budget_name").val(response.budget_name);
@@ -1698,6 +1823,78 @@ $("body").delegate(".check_budget_category", "change", function(event)
         }
     });
 });
+
+// check auto bill & budget
+$("body").delegate(".check_auto_bill", "change", function(event)
+{
+    var check = $(this).prop("checked")
+    if(check)
+    {
+        $('.show_bill_budget_periods').show();
+    }
+    else
+    {
+        $('.show_bill_budget_periods').hide();
+    }
+});
+
+// show daily budgets
+// check auto bill & budget
+$("body").delegate(".show_daily_budget", "click", function(event)
+{
+    id_name = $(this).attr('id_name')
+    class_name = ".show_daily_rows" + id_name
+    $(class_name).toggle();
+    $("." + "dropdown_" + id_name).toggle();
+});
+
+// Pay bill amount
+
+// Pay bill
+
+    $('.pay_bill_amount').on("click", function(e)
+    {
+        var pay_id = $(this).attr('pay_id')
+        var url = '/bill_pay/' + pay_id
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+        $.ajax(
+        {
+            type: 'POST',
+            url: url,
+            data: {
+                    'csrfmiddlewaretoken': csrfmiddlewaretoken
+                  },
+            success: function(response)
+            {
+                if(response.status == 'true')
+                {
+                    Swal.fire
+                             ({
+                                title: 'Paid Successfully',
+                                icon: 'success',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                    location.reload();
+                }
+                else
+                {
+                    Swal.fire
+                             ({
+                                title: 'Account Balance is low you can not pay bill',
+                                icon: 'error',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                }
+
+            }
+        });
+    });
 
 function getCookie(name) {
     let cookieValue = null;

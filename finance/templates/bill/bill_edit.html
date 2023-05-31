@@ -9,7 +9,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Update Bill</h2>
+                            <h2 class="content-header-title float-left mb-0">Edit Bill</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -17,7 +17,7 @@
                                     <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Update Bill
+                                        Edit Bill
                                     </li>
                                 </ol>
                             </div>
@@ -27,7 +27,28 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                                <div class="card">
+                                    <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                        <span class="lead collapse-title"><i class="bg-light-danger" data-feather="info"></i> Edit Note</span>
+                                    </div>
+                                    <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                        <div class="card-body">
+                                            Edit bills changes not apply on the paid bills. It will apply on next bill payment.
+                                            If you want to apply changes on unpaid bills please tick Apply-unpaid-bills.
+                                            If any unpaid bill have transaction then it will not apply changes on that bill.
+                                            please clear transaction first then apply changes on that bill.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+
+                    <form class="form form-horizontal" action="{% url 'bill_edits' pk=bill_data.id %}" method="post">
                         {% if error %}
                             <p class="text-danger">{{error}}</p>
                         {% endif %}
@@ -164,8 +185,19 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="unpaid_apply" class="custom-control-input" id="customCheck3"/>
+                                        <label class="custom-control-label" for="customCheck3">&nbsp;&nbsp;Apply-unpaid-bills</label>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                <button type="submit" class="btn btn-primary mr-1">Edit</button>
                                 <a href="{% url 'bill_detail' pk=bill_data.id %}" class="btn btn-outline-secondary">Cancel</a>
                             </div>
                         </div>

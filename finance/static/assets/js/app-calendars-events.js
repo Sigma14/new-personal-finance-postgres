@@ -21,7 +21,7 @@ function showCalenders(event_data)
         var nextDay = new Date(date_event.getTime() + 24 * 60 * 60 * 1000);
         calender_data.push({
                                 id: i + 1,
-                                url: '/bill_detail/' + event_data[i]['label_id'],
+                                url: '/bill_details/' + event_data[i]['label_id'],
                                 title: event_data[i]['label'],
                                 start: date_event,
                                 end: nextDay ,

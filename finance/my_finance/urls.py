@@ -32,7 +32,7 @@ urlpatterns = [
     path('budget_list/', budget_list, name='budget_list'),
     path('budget_detail/<int:pk>', budget_details, name='budget_detail'),
     path('budget_add/', BudgetAdd.as_view(), name='budget_add'),
-    path('budget_update/<int:pk>', BudgetUpdate.as_view(), name='budget_update'),
+    path('budget_update/<int:pk>', budget_update, name='budget_update'),
     path('budget_delete/<int:pk>', BudgetDelete.as_view(), name='budget_delete'),
 
     # Template Budget urls :-
@@ -85,17 +85,28 @@ urlpatterns = [
 
     # Bill Urls:-
     path('bill_list/', bill_list, name='bill_list'),
+    path('bill_details/<int:pk>/', bill_details, name='bill_details'),
+    path('bill_edit/<int:pk>/', bill_edit, name='bill_edits'),
     path('bill_detail/<int:pk>', bill_detail, name='bill_detail'),
     path('bill_add/', bill_add, name='bill_add'),
     path('bill_update/<int:pk>', bill_update, name='bill_update'),
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),
+    path('bill_pay/<int:pk>', bill_pay, name='bill_pay'),
     path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
+    path('bill/due_list', unpaid_bills, name='bill_due_list'),
 
 
     # Revenue Urls :-
-    path('revenue_add/', revenue_add, name='revenue_add'),
-    path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
-    path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
+    path('income_add/', income_add, name='income_add'),
+    path('income_list/', income_list, name='income_list'),
+    path('income_details/<int:pk>', income_details, name='income_details'),
+    path('income_update/<int:pk>', income_update, name='income_update'),
+    path('income_delete/<int:pk>', income_delete, name='income_delete'),
+    path('income_edit/<int:pk>', income_edit, name='income_edit'),
+    path('income_date_delete/<int:pk>', income_date_delete, name='income_date_delete'),
+    path('income/uncredited_list', income_uncredited_list, name='income_uncredited_list'),
+    # path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
+    # path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
 
     # Revenue Urls :-
     path('expenses_add/', expenses_add, name='expenses_add'),

@@ -148,7 +148,7 @@ class BudgetForm(forms.ModelForm):
             self.request = kwargs.pop('request')
             user_name = self.request.user
             super(BudgetForm, self).__init__(*args, **kwargs)
-            self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Bills", "Goals", "Funds"]),
+            self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Bills", "Goals", "Funds", "Income"]),
                                                              empty_label="Select Category Group",
                                                              widget=forms.Select(
                                                                  attrs={'class': 'form-control pick_category'}))
@@ -171,12 +171,11 @@ class TemplateBudgetForm(forms.ModelForm):
 
 
 class BillForm(forms.ModelForm):
-    currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     frequency = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
 
     class Meta:
         model = Bill
-        exclude = ('user', 'status', 'created_at', 'remaining_amount', 'updated_at')
+        exclude = ('user', 'currency', 'status', 'created_at', 'remaining_amount', 'updated_at')
 
 
 class TransactionForm(forms.ModelForm):
@@ -186,7 +185,7 @@ class TransactionForm(forms.ModelForm):
                                        required=True)
     in_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     out_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
-    cleared = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
+    cleared = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}), required=False)
     amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     category = forms.ModelChoiceField(queryset=None)
 
@@ -194,7 +193,7 @@ class TransactionForm(forms.ModelForm):
         self.request = kwargs.pop('request')
         user_name = self.request.user
         super(TransactionForm, self).__init__(*args, **kwargs)
-        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name),
+        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Goals"]),
                                                            empty_label="Select Category Group",
                                                            widget=forms.Select(
                                                                attrs={'class': 'form-control pick_category'}))

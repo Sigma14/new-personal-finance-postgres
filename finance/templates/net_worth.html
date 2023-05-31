@@ -133,20 +133,35 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        {% for key, value in total_asset_amount_dict.items %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
-                                                </div>
-                                            </td>
-                                            <td colspan="2">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
+                                        {% if total_asset_amount_dict %}
+                                            {% for key, value in total_asset_amount_dict.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum($)</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">0</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -194,20 +209,35 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        {% for key, value in total_liability_dict.items %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
-                                                </div>
-                                            </td>
-                                            <td colspan="2">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
+                                        {% if total_liability_dict %}
+                                            {% for key, value in total_liability_dict.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum($)</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">0</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -256,20 +286,36 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        {% for key, value in total_property_dict.items %}
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">Sum({{key}})</span>
-                                                </div>
-                                            </td>
-                                            <td colspan="2">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
+                                        {% if total_property_dict %}
+                                            {% for key, value in total_property_dict.items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum({{key}})</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{key}}{{value}}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">Sum($)</span>
+                                                    </div>
+                                                </td>
+                                                <td colspan="2">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">0</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+
                                         </tbody>
                                     </table>
                                 </div>
