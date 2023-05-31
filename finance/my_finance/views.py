@@ -1068,21 +1068,25 @@ def dash_board(request):
         asset_currency_balance = []
         liability_currency_balance = []
         property_currency_balance = []
-        bill_label = []
-        bill_values = []
         income_label = []
         income_values = []
-
+        bill_graph_dict = {}
+        bill_label = []
+        bill_values = []
         for bill in bills_data:
             bill_name = bill.bill_details.label
-            bill_transactions = all_transaction_data.filter(categories__category__name='Bills',
-                                                            categories__name=bill_name, out_flow=True)
-            if bill_transactions:
-                bills_amount = 0
-                for bill_t in bill_transactions:
-                    bills_amount += float(bill_t.amount)
-                bill_label.append(bill_name)
-                bill_values.append(bills_amount)
+            if bill_name not in bill_graph_dict:
+                bill_graph_dict[bill_name] = 0
+                bill_transactions = all_transaction_data.filter(categories__category__name='Bills',
+                                                                categories__name=bill_name, out_flow=True)
+                if bill_transactions:
+                    bills_amount = 0
+                    for bill_t in bill_transactions:
+                        bill_graph_dict[bill_name] += float(bill_t.amount)
+
+        for key, value in bill_graph_dict.items():
+            bill_label.append(key)
+            bill_values.append(value)
 
         for income in income_data:
             income_transactions = all_transaction_data.filter(categories__category__name='Income',

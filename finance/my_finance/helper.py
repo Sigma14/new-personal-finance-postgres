@@ -171,9 +171,7 @@ def check_bill_is_due():
         Check bill date is due or not
     """
     today_date = datetime.today().date()
-    print(today_date)
     bill_data = Bill.objects.filter(date__lte=today_date, status="unpaid")
-    print(bill_data)
     for bill in bill_data:
         bill_detail_obj = bill.bill_details
         account_obj = bill_detail_obj.account
@@ -210,6 +208,7 @@ def check_bill_is_due():
         else:
             bill.status = "unpaid"
             bill.save()
+
 
 def request_bill():
     """
@@ -274,7 +273,7 @@ def check_income_date():
         Check income date
     """
     today_date = datetime.today().date()
-    income_data = Income.objects.filter(income_date__lte=today_date)
+    income_data = Income.objects.filter(income_date__lte=today_date, auto_income=True)
     for income in income_data:
         account_obj = income.account
         account_balance = float(account_obj.available_balance)
@@ -306,9 +305,7 @@ def request_income():
     Request income
     """
     while True:
-        print("Income check start")
         check_income_date()
-        print("Income check end")
 
 
 def create_income_request():
