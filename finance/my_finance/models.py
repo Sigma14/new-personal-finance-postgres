@@ -281,6 +281,7 @@ class Account(models.Model):
 
 
 class BillDetail(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True, null=True)
     amount = models.CharField(max_length=50)
@@ -292,7 +293,7 @@ class BillDetail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.label)
+        return str(self.label + self.user.username)
 
 
 class Bill(models.Model):

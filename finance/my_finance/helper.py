@@ -171,54 +171,52 @@ def check_bill_is_due():
         Check bill date is due or not
     """
     today_date = datetime.today().date()
+    print(today_date)
     bill_data = Bill.objects.filter(date__lte=today_date, status="unpaid")
+    print(bill_data)
     for bill in bill_data:
-        account_obj = bill.bill_details.account
+        bill_detail_obj = bill.bill_details
+        account_obj = bill_detail_obj.account
         account_balance = float(account_obj.available_balance)
         currency = account_obj.currency
-        label = bill.bill_details.label
-        bill_amount = float(bill.bill_details.amount)
-        auto_bill = bill.bill_details.auto_bill
-        auto_pay = bill.bill_details.auto_pay
-        bill_date = bill.bill_details.date
-        frequency = bill.bill_details.frequency
+        label = bill_detail_obj.label
+        bill_amount = float(bill_detail_obj.amount)
+        auto_bill = bill_detail_obj.auto_bill
+        auto_pay = bill_detail_obj.auto_pay
+        bill_date = bill_detail_obj.date
+        frequency = bill_detail_obj.frequency
+        next_bill_date = get_period_date(bill_date, frequency)
+        bill_detail_obj.date = next_bill_date
+        bill_detail_obj.save()
 
         if auto_bill:
             next_bill_date = get_period_date(bill_date, frequency)
             Bill.objects.create(user=bill.user, account=account_obj, currency=currency, label=label,
                                 amount=bill_amount, remaining_amount=bill_amount, date=next_bill_date,
-                                frequency=frequency, bill_details=bill.bill_details, auto_bill=auto_bill,
+                                frequency=frequency, bill_details=bill_detail_obj, auto_bill=auto_bill,
                                 auto_pay=auto_pay)
 
         if auto_pay:
-            if account_balance < bill_amount:
-                bill.status = "unpaid"
-                bill.save()
-
-            else:
-                remaining_amount = round(account_balance - bill_amount, 2)
-                categories = SubCategory.objects.get(name=label, category__user=bill.user)
-                save_transaction(bill.user, label, bill_amount, remaining_amount, today_date, categories, account_obj,
-                                 "bills", True, True, bill)
-                account_obj.available_balance = remaining_amount
-                account_obj.transaction_count += 1
-                account_obj.save()
-                bill.remaining_amount = 0.0
-                bill.status = "paid"
-                bill.save()
+            remaining_amount = round(account_balance - bill_amount, 2)
+            categories = SubCategory.objects.get(name=label, category__user=bill.user)
+            save_transaction(bill.user, label, bill_amount, remaining_amount, bill.date, categories, account_obj,
+                             "bills", True, True, bill)
+            account_obj.available_balance = remaining_amount
+            account_obj.transaction_count += 1
+            account_obj.save()
+            bill.remaining_amount = 0.0
+            bill.status = "paid"
+            bill.save()
         else:
             bill.status = "unpaid"
             bill.save()
-
 
 def request_bill():
     """
     Request bill
     """
     while True:
-        print("Bills check start")
         check_bill_is_due()
-        print("Bills check end")
 
 
 def create_bill_request():

@@ -1920,7 +1920,7 @@ def budgets_page_data(request, budget_page, template_page):
                'template_all_budgets': template_all_budgets, 'template_budget_graph_data': template_graph_data,
                'template_budget_names': template_name_list, 'template_list_of_months': template_list_of_months,
                "template_budget_graph_value": template_values,
-               "template_budget_graph_currency": budget_currency, 'budget_key': budget_key,
+               "template_budget_graph_currency": '$', 'budget_key': budget_key,
                'budget_key_dumbs': json.dumps(budget_key),
                "current_month": current_month, "budget_graph_label": budget_label,
                "budget_graph_value": budget_values,
@@ -3967,6 +3967,7 @@ def bill_pay(request, pk):
 
 @login_required(login_url="/login")
 def bill_list(request):
+    bill_list_data = BillDetail.objects.filter(user=request.user).order_by('-date')
     bill_data = Bill.objects.filter(user=request.user)
 
     calendar_bill_data = []
@@ -3983,7 +3984,7 @@ def bill_list(request):
 
         calendar_bill_data.append(data_dict)
 
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_data}
+    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data}
     return render(request, "bill/bill_list.html", context=context)
 
 
@@ -4001,7 +4002,6 @@ def bill_add(request):
     error = ''
     user = request.user
     if form.is_valid():
-        print(request.POST)
         label = form.cleaned_data.get('label').title()
         amount = form.cleaned_data.get('amount')
         bill_date = form.cleaned_data.get('date')
@@ -4035,7 +4035,7 @@ def bill_add(request):
             except:
                 bill_obj.auto_pay = False
 
-            bill_details_obj = BillDetail.objects.create(label=label, account=account_obj, amount=amount,
+            bill_details_obj = BillDetail.objects.create(user=user, label=label, account=account_obj, amount=amount,
                                                          date=bill_date, frequency=bill_obj.frequency,
                                                          auto_bill=bill_obj.auto_bill, auto_pay=bill_obj.auto_pay)
             bill_obj.bill_details = bill_details_obj

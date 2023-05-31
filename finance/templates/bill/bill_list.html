@@ -113,22 +113,22 @@
                         </div>
                         <div class="tab-pane" id="bills_data" aria-labelledby="bills_tab" role="tabpanel">
                             <section id="ecommerce-products" class="list-view">
-                                {% for bill in bill_data %}
+                                {% for bill_details in bill_data %}
                                 <div class="card ecommerce-card">
                                     <div class="item-img text-center" style="height:150px;">
-                                        <a href="{% url 'bill_details' pk=bill.bill_details.id %}">
+                                        <a href="{% url 'bill_details' pk=bill_details.id %}">
                                             <div class="card-body">
-                                                <h2 style="float: left;">{{ bill.bill_details.label }}&nbsp;&nbsp;
-                                                    {% if bill.bill_details.auto_bill %}
-                                                    <div class="badge badge-glow badge-info" title="Generate bill automatically according to due date.">Auto Bill({{ bill.bill_details.frequency }})</div>
+                                                <h2 style="float: left;">{{ bill_details.label }}&nbsp;&nbsp;
+                                                    {% if bill_details.auto_bill %}
+                                                    <div class="badge badge-glow badge-info" title="Generate bill automatically according to due date.">Auto Bill({{ bill_details.frequency }})</div>
                                                     {% else %}
                                                     <div class="badge badge-glow badge-info" title="Generate bill manually.">Manual Bill</div>
                                                     {% endif %}
                                                 </h2>
 
                                                 <h2 style="float: right;">
-                                                    {{ bill.bill_details.account.currency }}{{ bill.bill_details.amount }}
-                                                    {% if bill_data.auto_pay %}
+                                                    {{ bill_details.account.currency }}{{ bill_details.amount }}
+                                                    {% if bill_details.auto_pay %}
                                                     <div class="badge badge-glow badge-info" title="Pay bill automatically according to due date.">Auto Pay</div>
                                                     {% else %}
                                                         <div class="badge badge-glow badge-info" title="Pay bill manually.">Manual Pay</div>
@@ -137,10 +137,10 @@
                                             </div>
                                             <br/>
                                             <div class="card-body" style="padding-bottom:30px;">
-                                                <h4 style="float: left;">Due Date :- {{ bill.bill_details.date }}</h4>
+                                                <h4 style="float: left;">Due Date :- {{ bill_details.date }}</h4>
             <!--                                    <h4 style="float: right;">{{ object.updated_at }}</h4>-->
                                                 <div style="float: right;" class="col-sm-40 offset-sm-20">
-                                                    <h4 style="float: left;">Account :- {{ bill.bill_details.account.name }}</h4>
+                                                    <h4 style="float: left;">Account :- {{ bill_details.account.name }}</h4>
                                                 </div>
                                             </div>
                                         </a>
