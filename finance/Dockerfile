@@ -8,6 +8,7 @@ WORKDIR /finance
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+EXPOSE 8072
 
 # install dependencies
 COPY ./requirements.txt /finance/requirements.txt
