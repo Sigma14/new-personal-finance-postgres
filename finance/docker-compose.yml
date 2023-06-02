@@ -3,9 +3,9 @@ version: '3.7'
 services:
   dashboard:
     build: .
-    command: python manage.py runserver 0.0.0.0:8002 --insecure
+    command: python manage.py runserver 0.0.0.0:8072 --insecure
     ports:
-      - "8002:8002"
+      - "8072:8072"
     environment:
       - DEBUG=1
       - NOSQL_ENGINE=djongo

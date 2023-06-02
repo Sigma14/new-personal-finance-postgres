@@ -96,7 +96,7 @@ urlpatterns = [
     path('bill/due_list', unpaid_bills, name='bill_due_list'),
 
 
-    # Revenue Urls :-
+    # Income Urls :-
     path('income_add/', income_add, name='income_add'),
     path('income_list/', income_list, name='income_list'),
     path('income_details/<int:pk>', income_details, name='income_details'),
