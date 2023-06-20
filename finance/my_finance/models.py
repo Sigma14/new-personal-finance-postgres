@@ -147,7 +147,8 @@ class PropertyInvoice(models.Model):
 
 class PropertyMaintenance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_maintenance_user')
-    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_maintenance_details')
+    property_details = models.ForeignKey(Property, on_delete=models.CASCADE,
+                                         related_name='property_maintenance_details')
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     tenant_name = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=10, choices=MAINTENANCE_CATEGORY, blank=True, null=True)
@@ -158,7 +159,7 @@ class PropertyMaintenance(models.Model):
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
-        return str(self.name + " " + self.property_details.property_name + " " + self.unit_name )
+        return str(self.name + " " + self.property_details.property_name + " " + self.unit_name)
 
     def get_absolute_url(self):
         return reverse('property_maintenance_list')
@@ -283,7 +284,8 @@ class Account(models.Model):
 class BillDetail(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     label = models.CharField(max_length=50)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True, null=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True,
+                                null=True)
     amount = models.CharField(max_length=50)
     date = models.DateField()
     frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
@@ -304,7 +306,8 @@ class Bill(models.Model):
     amount = models.CharField(max_length=50)
     remaining_amount = models.CharField(max_length=50)
     date = models.DateField()
-    bill_details = models.ForeignKey(BillDetail, on_delete=models.CASCADE, related_name='bill_details', blank=True, null=True)
+    bill_details = models.ForeignKey(BillDetail, on_delete=models.CASCADE, related_name='bill_details', blank=True,
+                                     null=True)
     status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
     frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
     auto_bill = models.BooleanField(default=False, blank=True, null=True)
@@ -538,7 +541,8 @@ class Income(models.Model):
 
 
 class IncomeDetail(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='income_detail_account', blank=True, null=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='income_detail_account', blank=True,
+                                null=True)
     income_amount = models.CharField(max_length=50)
     income_date = models.DateField(blank=True, null=True)
     income = models.ForeignKey(Income, on_delete=models.CASCADE)
@@ -578,3 +582,17 @@ class Expenses(models.Model):
 
     def __str__(self):
         return str(self.month)
+
+
+class StockHoldings(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stockholdings_user')
+    port_id = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
+    currency = models.CharField(max_length=10, blank=True, null=True)
+    value = models.CharField(max_length=255)
+    end_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.name)

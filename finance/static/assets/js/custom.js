@@ -1838,6 +1838,91 @@ $("body").delegate(".check_auto_bill", "change", function(event)
     }
 });
 
+// show portfolio holdings
+$("body").delegate(".portfolio_show_form", "click", function(event)
+{
+    form_id = $(this).attr('form_id')
+    $("#" + form_id).submit();
+});
+
+// add_portfolio_to_networth
+$("body").delegate(".add_portfolio_to_networth", "click", function(event)
+{
+    method_name = $(this).attr('method_name')
+    portfolio_value = $(this).attr('portfolio_value')
+    portfolio_name = $(this).attr('portfolio_name')
+    portfolio_id = $(this).attr('portfolio_id')
+    portfolio_currency = $(this).attr('portfolio_currency')
+    var url = '/add_port_in_networth'
+    var csrfmiddlewaretoken = getCookie('csrftoken');
+    $.ajax(
+        {
+            type: 'POST',
+            url: url,
+            data: {
+                    'portfolio_name': portfolio_name,
+                    'portfolio_id': portfolio_id,
+                    'portfolio_value': portfolio_value,
+                    'portfolio_currency': portfolio_currency,
+                    'method_name': method_name,
+                    'csrfmiddlewaretoken': csrfmiddlewaretoken
+                  },
+            success: function(response)
+            {
+                if(response.status == 'true')
+                {
+                    Swal.fire
+                             ({
+                                title: 'Added Successfully in your networth',
+                                icon: 'success',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                }
+                else
+                {
+                    if(response.status == 'delete')
+                    {
+                        Swal.fire
+                             ({
+                                title: 'Deleted Successfully from your networth',
+                                icon: 'success',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                    }
+                    else
+                    {
+                        Swal.fire
+                             ({
+                                title: 'Failed to add in networth',
+                                icon: 'error',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                    }
+                }
+            }
+        });
+    if(method_name == 'add_port')
+    {
+        $(this).hide();
+        $(".already_holds").show();
+    }
+    else
+    {
+        $(".add_portfolio_to_networth").show();
+        $(".already_holds").hide();
+    }
+    return false;
+});
+
 // show daily budgets
 // check auto bill & budget
 $("body").delegate(".show_daily_budget", "click", function(event)

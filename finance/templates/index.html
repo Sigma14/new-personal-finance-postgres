@@ -223,9 +223,9 @@
                         </li>
                     </ul>
                 </li>
-                <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_analysis' %}active{% endif %}">
-                    <a class="d-flex align-items-center" href="{% url 'stock_analysis' %}"><i
-                            data-feather="bar-chart"></i><span class="menu-title text-truncate" data-i18n="Stock Analysis">Stock Analysis</span></a>
+                <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_holdings' %}active{% endif %}">
+                    <a class="d-flex align-items-center" href="{% url 'stock_holdings' %}"><i
+                            data-feather="bar-chart"></i><span class="menu-title text-truncate" data-i18n="Stock Analysis">Stock Portfolios & Holdings</span></a>
                 </li>
             </ul>
         </div>

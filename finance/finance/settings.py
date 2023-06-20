@@ -71,7 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'finance.wsgi.application'
-
+stock_app_url = "http://localhost:8003"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

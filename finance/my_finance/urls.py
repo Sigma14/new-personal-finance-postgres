@@ -184,6 +184,8 @@ urlpatterns = [
     # STOCK ANALYSIS
 
     path('stock-analysis', stock_analysis, name='stock_analysis'),
+    path('stock-holdings', stock_holdings, name='stock_holdings'),
+    path('add_port_in_networth', add_port_in_networth, name='add_port_in_networth'),
 
     # DOWNLOADS FILE OPTIONS
 

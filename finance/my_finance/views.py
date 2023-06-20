@@ -3,9 +3,10 @@ import csv
 import json
 import calendar
 import time
-
 import pandas as pd
 import datetime
+
+import pytz
 from dateutil import relativedelta
 from io import BytesIO
 import base64
@@ -13,6 +14,7 @@ from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
 from django.db.models import Sum
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -39,7 +41,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus.flowables import Spacer
 from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
-
+from finance.settings import stock_app_url
 from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
 from .helper import create_categories, check_subcategory_exists, save_fund_obj, create_category_group, \
@@ -49,7 +51,7 @@ from .helper import create_categories, check_subcategory_exists, save_fund_obj, 
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail
+    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings
 from .mortgage import calculator, calculate_tenure
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
@@ -869,17 +871,19 @@ def multi_acc_chart(acc_transaction_data, amount_date_dict, acc_current_balance,
             account_transaction_value.append(amount_constant)
 
 
-def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
+def net_worth_cal(account_data, property_data, date_range_list, stock_portfolio_data, fun_name=None):
     liability_data = []
     assets_data = []
     total_asset_amount_dict = {}
     total_liability_dict = {}
     total_property_dict = {}
+    total_portfolio_dict = {}
     currency_count_list = []
     net_worth_dict = {}
     asset_currency_balance = []
     liability_currency_balance = []
     property_currency_balance = []
+    portfolio_currency_balance = []
     # base = max(date_compare)
     # min_date = min(date_compare)
     # num_days = base - min_date
@@ -934,6 +938,34 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
 
             property_currency_balance.append({data.currency: data.value})
 
+    start_date = datetime.datetime.today()
+    utc_tz = pytz.UTC
+    start_date = utc_tz.localize(start_date)
+    for data in stock_portfolio_data:
+        print("data.end_at=====>", data.end_at)
+        print("start_date=====>", start_date)
+        print(data.end_at < start_date)
+        if data.end_at < start_date:
+            print("Inn holdings==")
+            data.end_at = start_date + datetime.timedelta(hours=2)
+            my_portfolio_url = f"{stock_app_url}/api/portfolio_values/"
+            url_response = requests.post(my_portfolio_url,
+                                         data={'user_name': data.user.username, 'port_id': data.port_id},
+                                         timeout=500)
+            print("url_response=====>", url_response)
+            my_portfolio_context = url_response.json()
+            print("my_portfolio_context=====>", my_portfolio_context)
+            data.name = my_portfolio_context['name']
+            data.value = my_portfolio_context['value']
+            data.save()
+        if data.currency in total_portfolio_dict:
+            total_portfolio_dict[data.currency] = round(total_portfolio_dict[data.currency] +
+                                                        float(data.value), 2)
+        else:
+            currency_count_list.append(data.currency)
+            total_portfolio_dict[data.currency] = round(float(data.value), 2)
+        portfolio_currency_balance.append({data.currency: data.value})
+
     total_currency_list = list(dict.fromkeys(currency_count_list))
 
     for name in total_currency_list:
@@ -949,15 +981,22 @@ def net_worth_cal(account_data, property_data, date_range_list, fun_name=None):
             total_property = total_property_dict[name]
         else:
             total_property = 0
+        if name in total_portfolio_dict:
+            total_portfolio = total_portfolio_dict[name]
+        else:
+            total_portfolio = 0
+        net_worth_dict[name] = total_assets + total_property + total_portfolio - total_liability
 
-        net_worth_dict[name] = total_assets + total_property - total_liability
-
+    print("total_assets=============>", total_assets)
+    print("total_liability=============>", total_liability)
+    print("total_portfolio=============>", total_portfolio)
+    print("net_worth_dict=============>", net_worth_dict)
     if fun_name == "dash_board":
         return net_worth_dict
     else:
         return net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
             total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
-            total_currency_list, date_range_list
+            total_currency_list, date_range_list, portfolio_currency_balance, total_portfolio_dict
 
 
 def overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list, balance_graph_data,
@@ -1052,6 +1091,7 @@ def dash_board(request):
         accounts_data = Account.objects.filter(user=user_name, account_type__in=['Checking', 'Savings', 'Cash',
                                                                                  'Credit Card', 'Line of Credit'])
         property_data = Property.objects.filter(user=user_name)
+        stock_portfolio_data = StockHoldings.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name)
         bills_data = Bill.objects.filter(user=user_name)
         income_data = Income.objects.filter(user=user_name)
@@ -1161,8 +1201,8 @@ def dash_board(request):
             budget_label.append(key)
             budget_values.append(round(value, 2))
 
-        net_worth_dict = net_worth_cal(accounts_data, property_data, account_date_list, fun_name="dash_board")
-        print(net_worth_dict)
+        all_account_data = Account.objects.filter(user=user_name)
+        net_worth_dict = net_worth_cal(all_account_data, property_data, account_date_list, stock_portfolio_data, fun_name="dash_board")
         if acc_min_max_value_list:
             acc_max_value = max(acc_min_max_value_list)
             acc_min_value = min(acc_min_max_value_list)
@@ -1210,6 +1250,8 @@ def net_worth(request):
     account_data = Account.objects.filter(user=user_name)
     property_data = Property.objects.filter(user=user_name)
     all_transaction_data = Transaction.objects.filter(user=user_name)
+    stock_portfolio_data = StockHoldings.objects.filter(user=user_name)
+
     if account_data:
         min_date = account_data[0].created_at.date()
         max_date = datetime.datetime.today().date()
@@ -1222,12 +1264,8 @@ def net_worth(request):
 
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
         total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
-        total_currency_list, date_range_list = net_worth_cal(account_data, property_data, account_date_list)
+        total_currency_list, date_range_list, portfolio_currency_balance, total_portfolio_dict = net_worth_cal(account_data, property_data, account_date_list, stock_portfolio_data)
 
-    print("Assets_currency_data", asset_currency_balance)
-    print("Liabiliy_currency_data", liability_currency_balance)
-    print("Property_currency_data", property_currency_balance)
-    print("total_currency_list", total_currency_list)
     asset_total_dict = {}
     liability_total_dict = {}
     net_worth_graph_list = []
@@ -1257,10 +1295,6 @@ def net_worth(request):
                     liability_total_dict[liability_currency_name] = sum_liab_data
                 else:
                     liability_total_dict[liability_currency_name] = liability_balance_data
-
-    print(asset_total_dict)
-    print(liability_total_dict)
-    print(total_property_dict)
     for name in total_currency_list:
         net_worth_list = []
         for net_worth_index in range(len(date_range_list)):
@@ -1269,7 +1303,8 @@ def net_worth(request):
                 overtime_net_worth += asset_total_dict[name][net_worth_index]
             if name in total_property_dict:
                 overtime_net_worth += total_property_dict[name]
-                print("overtime_net_worth=====>", overtime_net_worth)
+            if name in total_portfolio_dict:
+                overtime_net_worth += total_portfolio_dict[name]
             if name in liability_total_dict:
                 overtime_net_worth -= liability_total_dict[name][net_worth_index]
             net_worth_list.append(overtime_net_worth)
@@ -1286,11 +1321,13 @@ def net_worth(request):
 
     context = {
         "property_data": property_data,
+        "portfolio_data": stock_portfolio_data,
         "assets_data": assets_data,
         "liability_data": liability_data,
         "total_asset_amount_dict": total_asset_amount_dict,
         "total_liability_dict": total_liability_dict,
         "total_property_dict": total_property_dict,
+        "total_portfolio_dict": total_portfolio_dict,
         "net_worth_dict": net_worth_dict,
         "currency_dict": currency_dict,
         "account_graph_data": net_worth_graph_list,
@@ -1833,8 +1870,10 @@ def budgets_page_data(request, budget_page, template_page):
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
         start_date, end_date = start_end_date(date_value, "Monthly")
 
-    budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by('-created_at')
-    template_budget_data = TemplateBudget.objects.filter(start_date=start_date, end_date=end_date).order_by('-created_at')
+    budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by(
+        '-created_at')
+    template_budget_data = TemplateBudget.objects.filter(start_date=start_date, end_date=end_date).order_by(
+        '-created_at')
     budget_key = ['Name', 'budgeted', 'Spent', 'Left']
     budget_label = ['Total Spent', 'Total Left']
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list = make_budgets_values(
@@ -1917,7 +1956,8 @@ def budgets_page_data(request, budget_page, template_page):
 
     template_budget_data, template_values, template_name_list, template_graph_data = get_template_budget()
 
-    context = {'all_budgets': all_budgets, 'budget_graph_data': budget_graph_data, 'budget_names': current_budget_names_list,
+    context = {'all_budgets': all_budgets, 'budget_graph_data': budget_graph_data,
+               'budget_names': current_budget_names_list,
                'list_of_months': list_of_months, "budget_graph_value": budget_values,
                "budget_graph_currency": budget_currency, "budget_bar_id": "#budgets-bar",
                "template_budget_bar_id": "#template-budgets-bar", "template_budget_graph_id": "#template_total_budget",
@@ -2238,7 +2278,8 @@ def budget_update(request, pk):
     context = {'budget_data': budget_obj, 'categories': categories, 'sub_categories': sub_categories,
                'currency_dict': currency_dict, 'budget_period': budget_periods,
                'current_budget_date': str(budget_obj.created_at),
-               'budget_date': str(budget_obj.budget_start_date), 'errors': error, 'budget_update_period': budget_update_period}
+               'budget_date': str(budget_obj.budget_start_date), 'errors': error,
+               'budget_update_period': budget_update_period}
     return render(request, 'budget/budget_update.html', context=context)
 
 
@@ -2800,7 +2841,8 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                                                           date_check)
                 except Exception as e:
                     print("exception ========>", e)
-                    budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow, date_check)
+                    budget_obj = add_new_budget_items(user_name, budget_obj, update_transaction_amount, out_flow,
+                                                      date_check)
                 budget_obj.save()
 
             obj.budgets = budget_obj
@@ -5457,7 +5499,7 @@ def transaction_upload(request):
 
 @login_required(login_url="/login")
 def stock_analysis(request):
-    url = "https://stock.tradingtech.org/api/portfolio/list/"
+    url = f"{stock_app_url}/api/portfolio/list/"
     portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
     portfolio_list = portfolio_response.json()
 
@@ -5466,12 +5508,56 @@ def stock_analysis(request):
     else:
         p_name = portfolio_list[0]
 
-    my_portfolio_url = "https://stock.tradingtech.org/api/my_portfolio/list/"
+    my_portfolio_url = f"{stock_app_url}/api/my_portfolio/list/"
     url_response = requests.post(my_portfolio_url, data={'user_name': request.user.username, 'p_name': p_name},
                                  timeout=500)
     my_portfolio_context = url_response.json()
     my_portfolio_context['portfolio_list'] = portfolio_list
     return render(request, 'stock_analysis.html', context=my_portfolio_context)
+
+
+@login_required(login_url="/login")
+def stock_holdings(request):
+    url = f"{stock_app_url}/api/portfolio/list/"
+    portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
+    portfolio_dict = portfolio_response.json()
+    if request.method == 'POST':
+        my_portfolio_name = request.POST['portfolio_name']
+    else:
+        my_portfolio_name = portfolio_dict['portfolio_list'][0]
+    my_portfolio_url = f"{stock_app_url}/api/my_portfolio/list/"
+    url_response = requests.post(my_portfolio_url,
+                                 data={'user_name': request.user.username, 'p_name': my_portfolio_name},
+                                 timeout=500)
+    my_portfolio_context = url_response.json()
+    portfolio_dict.update({"my_portfolio_name": my_portfolio_name})
+    portfolio_dict.update(my_portfolio_context)
+    check_networth = StockHoldings.objects.filter(user=request.user, port_id=portfolio_dict['portfolio_id'])
+    portfolio_dict.update({'check_networth': check_networth})
+    print(portfolio_dict)
+    return render(request, 'stock_analysis.html', context=portfolio_dict)
+
+
+@login_required(login_url="/login")
+def add_port_in_networth(request):
+    try:
+        if request.method == 'POST' and request.is_ajax():
+            portfolio_id = int(request.POST['portfolio_id'])
+            portfolio_name = request.POST['portfolio_name']
+            portfolio_value = request.POST['portfolio_value']
+            portfolio_currency = request.POST['portfolio_currency']
+            method_name = request.POST['method_name']
+            portfolio_curr = {'USD': "$", 'EUR': '€', 'INR': '₹', 'GBP': '£'}
+            if method_name == "delete_port":
+                StockHoldings.objects.get(user=request.user, port_id=portfolio_id).delete()
+                return JsonResponse({'status': 'delete'})
+            else:
+                end_date = today_date + datetime.timedelta(hours=2)
+                StockHoldings.objects.create(user=request.user, port_id=portfolio_id, name=portfolio_name,
+                                             value=portfolio_value, end_at=end_date, currency=portfolio_curr[portfolio_currency])
+                return JsonResponse({'status': 'true'})
+    except:
+        return JsonResponse({'status': 'false'})
 
 
 # Income views
