@@ -5519,6 +5519,7 @@ def stock_analysis(request):
 @login_required(login_url="/login")
 def stock_holdings(request):
     url = f"{stock_app_url}/api/portfolio/list/"
+    print("url========>", url)
     portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
     portfolio_dict = portfolio_response.json()
     if request.method == 'POST':
