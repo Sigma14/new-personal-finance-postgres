@@ -949,7 +949,8 @@ def net_worth_cal(account_data, property_data, date_range_list, stock_portfolio_
             print("Inn holdings==")
             data.end_at = start_date + datetime.timedelta(hours=2)
             my_portfolio_url = f"{stock_app_url}/api/portfolio_values/"
-            url_response = requests.post(my_portfolio_url,
+            headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0'}
+            url_response = requests.post(my_portfolio_url, headers=headers,
                                          data={'user_name': data.user.username, 'port_id': data.port_id},
                                          timeout=500)
             print("url_response=====>", url_response)
@@ -5520,14 +5521,15 @@ def stock_analysis(request):
 def stock_holdings(request):
     url = f"{stock_app_url}/api/portfolio/list/"
     print("url========>", url)
-    portfolio_response = requests.get(url, data={'user_name': request.user.username}, timeout=500)
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0'}
+    portfolio_response = requests.get(url, headers=headers, data={'user_name': request.user.username}, timeout=500)
     portfolio_dict = portfolio_response.json()
     if request.method == 'POST':
         my_portfolio_name = request.POST['portfolio_name']
     else:
         my_portfolio_name = portfolio_dict['portfolio_list'][0]
     my_portfolio_url = f"{stock_app_url}/api/my_portfolio/list/"
-    url_response = requests.post(my_portfolio_url,
+    url_response = requests.post(my_portfolio_url, headers=headers,
                                  data={'user_name': request.user.username, 'p_name': my_portfolio_name},
                                  timeout=500)
     my_portfolio_context = url_response.json()
