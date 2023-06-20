@@ -71,7 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'finance.wsgi.application'
-stock_app_url = "http://127.0.0.1:8071"
+stock_app_url = "http://vuexy.myds.me:8071"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
