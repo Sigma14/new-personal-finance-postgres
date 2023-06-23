@@ -950,6 +950,7 @@ def net_worth_cal(account_data, property_data, date_range_list, stock_portfolio_
             data.end_at = start_date + datetime.timedelta(hours=2)
             my_portfolio_url = f"{stock_app_url}/api/portfolio_values/"
             headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0'}
+            print("my_portfolio_url===>", my_portfolio_url)
             url_response = requests.post(my_portfolio_url, headers=headers,
                                          data={'user_name': data.user.username, 'port_id': data.port_id},
                                          timeout=500)
@@ -5529,6 +5530,7 @@ def stock_holdings(request):
     else:
         my_portfolio_name = portfolio_dict['portfolio_list'][0]
     my_portfolio_url = f"{stock_app_url}/api/my_portfolio/list/"
+    print("url========>", my_portfolio_url)
     url_response = requests.post(my_portfolio_url, headers=headers,
                                  data={'user_name': request.user.username, 'p_name': my_portfolio_name},
                                  timeout=500)
