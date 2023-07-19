@@ -13,7 +13,7 @@ sub_category_suggested_list = {
     "Housing": ["Mortgage", "Rent", "Hoa Fees", "Home Improvement"],
     "Personal Care": ["Hair", "Shopping", "Electronic Items", "Beauty", "Spa", "Clothes"],
     "Transportation": ["Ride Share", "Parking", "Public Transportation"],
-    "Bills": ["Electricity", "Water", "Cellphone", "Internet",
+    "Bills & Subscriptions": ["Electricity", "Water", "Cellphone", "Internet",
               "Spotify Subscription", "Netflix Spotify Subscription",
               "Amazon Prime Spotify Subscription"],
     "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
@@ -29,7 +29,7 @@ def create_category_group():
 
 
 def create_categories(user):
-    categories_dict = {"Bills": ['Electricity', 'Water', 'Cellphone'],
+    categories_dict = {"Bills & Subscriptions": ['Electricity', 'Water', 'Cellphone'],
                        "Goals": ["Phone", "Vacation", "Education"],
                        "Funds": [],
                        "Food": ["Groceries", "Eating Out"],
@@ -44,7 +44,7 @@ def create_categories(user):
 
 def check_subcategory_exists(subcategory_obj, name, category_obj):
     if subcategory_obj.name != name:
-        subcategory_qs = SubCategory.objects.filter(name=name, category=category_obj)
+        subcategory_qs = SubCategory.objects.filter(category__user=category_obj.user, name=name)
         if subcategory_qs.exists():
             return True
     return False
@@ -146,6 +146,7 @@ def start_end_date(date_value, period):
         week_end = week_start + timedelta(days=6)
         return week_start, week_end
 
+    return date_value, ""
 
 def get_period_date(start_date, period):
     if period == "Daily":
@@ -495,3 +496,22 @@ def get_template_budget():
                            {'name': 'Left', 'data': [1500.0, 150.0, 50.0, template_dict['Weekly'][0][3], template_dict['Daily'][0][3]]},
                            {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
     return template_dict, template_values, template_name_list, template_graph_data
+
+
+def get_cmp_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
+                 budget_transaction_data_dict):
+    for bgt_name in budget_names:
+        transaction_budget = Transaction.objects.filter(user=user_name, categories__name=bgt_name,
+                                                        transaction_date__range=(month_start, month_end)).order_by(
+            '-transaction_date')
+        total_spent_amount = 0
+        budget_transaction_data_dict[bgt_name] = []
+        for t in transaction_budget:
+            total_spent_amount += float(t.amount)
+            budget_transaction_data_dict[bgt_name].append([str(t.transaction_date), float(t.amount)])
+
+        budget_graph_value.append(total_spent_amount)
+        budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_spent_amount])
+        budget_bar_value[0]['data'].append(total_spent_amount)
+
+    return budget_bar_value, budget_graph_value, budget_transaction_data_dict

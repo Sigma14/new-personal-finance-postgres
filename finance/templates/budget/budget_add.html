@@ -14,7 +14,7 @@
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Budgets</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
                                     </li>
                                     <li class="breadcrumb-item">
                                         Add Budget
@@ -36,12 +36,12 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Category Groups</label>
+                                        <label for="fname-icon"><span class="lead add_categories" title="add category group" data-toggle="modal" data-target="#categories_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>Category Groups</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                             {{ form.categories }}
                                         </div>
@@ -51,12 +51,12 @@
                             <div class="col-12 transaction_cat_list" style="display:None;">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label>Categories</label>
+                                        <label><span class="lead sub_cat_popup" method_name="budget_pop" title="add category" data-toggle="modal" data-target="#sub_category_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>Categories</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_sub_cat">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -70,7 +70,7 @@
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                             {{ form.currency }}
                                         </div>
@@ -85,7 +85,7 @@
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                             <input type="text" class="form-control" name="amount" required
                                                    placeholder="Amount"/>
@@ -102,7 +102,7 @@
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                             {{ form.budget_period }}
                                         </div>
@@ -117,7 +117,7 @@
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                                <span class="input-group-text"></span>
                                             </div>
                                             <input type="text" id="budget_date" name="budget_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
                                         </div>
@@ -141,6 +141,125 @@
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="categories_toggle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel1">Add Category Group</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Basic Vertical form layout section start -->
+                    <section id="basic-vertical-layouts" >
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card" style="margin-bottom:0px;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <h5>Name</h5>
+                                                    <input type="text" id="category_group_name" name="category_group_name" class="form-control" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary new_category" method_name="group_add">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Basic Vertical form layout section end -->
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Suggestions</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% for category in category_suggestions %}
+                                        <a style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary new_category">
+                                            {{category}}&nbsp;<i class="fa fa-plus"></i>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="sub_category_toggle" tabindex="-1" role="dialog" aria-labelledby="sub_category1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="sub_category1">Add Category</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Basic Vertical form layout section start -->
+                    <section id="basic-vertical-layout" >
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card" style="margin-bottom:0px;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <h5>Group</h5>
+                                                    <select class="form-control sub_cat_select" id="category_group" name="category_group" required>
+                                                        <option value="">Select Group</option>
+                                                        {% for category in category_groups %}
+                                                        <option value="{{category.id}}">{{category.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div><div class="col-12">
+                                                <div class="form-group">
+                                                    <h5>Name</h5>
+                                                    <input type="text" id="sub_category_name" name="sub_category_name" class="form-control" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary new_subcategory" method_name='sub_cat_budget' id="sub_cat_add_btn">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Basic Vertical form layout section end -->
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Suggestions</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row sub_cat_sugg">
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

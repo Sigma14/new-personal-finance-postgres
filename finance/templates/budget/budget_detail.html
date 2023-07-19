@@ -15,7 +15,9 @@
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'budget_list' %}">Budgets</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">{{budget_obj.name}} Budget
                                     </li>
                                 </ol>
                                 </ol>
@@ -94,9 +96,9 @@
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         {% if start_date %}
-                                            <h4 class="card-title mb-25">Chart for all transactions for budget "{{budget_obj.name}}" between {{start_date}} and {{end_date}}</h4>
+                                            <h4 class="card-title mb-25">"{{budget_obj.name}}" Budget Transactions {{start_date}} to {{end_date}}</h4>
                                         {% else %}
-                                        <h4 class="card-title mb-25">Chart for all transactions for budget "{{budget_obj.name}}"</h4>
+                                        <h4 class="card-title mb-25">"{{budget_obj.name}}" Budget Transactions</h4>
                                         {% endif %}
                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>

@@ -9,12 +9,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Bills</h2>
+                            <h2 class="content-header-title float-left mb-0">Bills & Subscriptions</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills & Subscriptions</a>
                                     </li>
                                     <li class="breadcrumb-item">
                                         {{bill_data.label}}
@@ -28,7 +28,7 @@
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'bill_edits' pk=bill_data.id %}" class="btn btn-primary"><i
-                        data-feather="edit-2"></i>&nbsp;Edit Bill</a>
+                        data-feather="edit-2"></i>&nbsp;Edit Bills & Subscriptions</a>
                     <button type="button" del_method="bill_delete"  delete_name="{{ bill_data.label }} Bill" url="{% url 'bill_delete' pk=bill_data.id %}" class="btn btn-danger delete_button"><i
                                             data-feather="trash"></i>&nbsp;Delete</button>
 

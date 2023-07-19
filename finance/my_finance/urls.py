@@ -26,9 +26,14 @@ urlpatterns = [
     path('subcategory_delete/<int:pk>', subcategory_delete, name='subcategory_delete'),
     path('subcategory_list', subcategory_list, name='subcategory_list'),
     path('subcategory_budget', subcategory_budget, name='subcategory_budget'),
+    path('subcategory_suggestion', subcategory_suggestion, name='subcategory_suggestion'),
 
     # Budget urls :-
 
+    path('budgets/', budgets_box, name='budgets'),
+    path('budgets/sample', sample_budget_box, name='sample-budgets'),
+    path('budgets/current', current_budget_box, name='current-budgets'),
+    path('budgets/compare', compare_budget_box, name='compare-budgets'),
     path('budget_list/', budget_list, name='budget_list'),
     path('budget_detail/<int:pk>', budget_details, name='budget_detail'),
     path('budget_add/', BudgetAdd.as_view(), name='budget_add'),
@@ -61,8 +66,8 @@ urlpatterns = [
     path('goal_delete/<int:pk>', GoalDelete.as_view(), name='goal_delete'),
 
     # Account urls :-
-
-    path('account_list/', AccountList.as_view(), name='account_list'),
+    path('accounts/', account_box, name='account_box'),
+    path('accounts/<str:name>', account_list, name='account_list'),
     path('account_detail/<int:pk>', AccountDetail.as_view(), name='account_detail'),
     path('account_add/', AccountAdd.as_view(), name='account_add'),
     path('account_update/<int:pk>', AccountUpdate.as_view(), name='account_update'),
@@ -77,8 +82,9 @@ urlpatterns = [
     path('liability_delete/<int:pk>', LiabilityDelete.as_view(), name='liability_delete'),
 
     # Mortgage & loan account urls:-
+    path('mortgages-loans-accounts/', loan_accounts_box, name='loan_accounts_box'),
     path('loan_add/', loan_add, name='loan_add'),
-    path('loan_list/', loan_list, name='loan_list'),
+    path('mortgages-loans-accounts/<str:name>', loan_list, name='loan_list'),
     path('loan_detail/<int:pk>', loan_details, name='loan_details'),
     path('loan_update/<int:pk>', loan_update, name='loan_update'),
     path('loan_delete/<int:pk>', loan_delete, name='loan_delete'),

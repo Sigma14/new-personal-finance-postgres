@@ -9,12 +9,14 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Accounts | Mortgages & Loans</h2>
+                            <h2 class="content-header-title float-left mb-0">{{name}} | Mortgages & Loans</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Mortgages & Loans Accounts
+                                    <li class="breadcrumb-item"><a href="{% url 'loan_accounts_box' %}">Mortgages & Loans Accounts</a>
+                                    </li>
+                                    <li class="breadcrumb-item">{{name}}
                                     </li>
                                 </ol>
                             </div>

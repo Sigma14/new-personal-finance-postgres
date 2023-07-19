@@ -9,15 +9,15 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Bill</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Bills & Subscriptions</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills & Subscriptions</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Add Bill
+                                        Add Bills & Subscriptions
                                     </li>
                                 </ol>
                             </div>
@@ -36,7 +36,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Category</label>
+                                        <label for="fname-icon"><a class="lead add_category" href="{% url 'subcategory_add' category_pk=bill_id %}" title="add category"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</a>Category</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">

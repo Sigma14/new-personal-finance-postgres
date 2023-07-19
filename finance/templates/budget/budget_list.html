@@ -115,7 +115,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{month_start}} to {{month_end}}</h4>
+                                                        <h4 class="card-title mb-25">Current Week Transactions</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -586,7 +586,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{monht_start}} to {{month_end}}</h4>
+                                                        <h4 class="card-title mb-25">Current Month Transactions</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1051,7 +1051,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">All the transactions for budgets between {{quart_start}} to {{quart_end}}</h4>
+                                                        <h4 class="card-title mb-25">Current Quarter Transactions</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1514,7 +1514,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">All transactions for budgets between {{yearly_start}} to {{yearly_end}}</h4>
+                                                        <h4 class="card-title mb-25">Current Year Transactions</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1974,26 +1974,24 @@
                     <div class="tab-pane {{budget_page}}" id="current_budget_data" aria-labelledby="current_budget_tab" role="tabpanel">
                         <section id="current-bgt">
                             <div class="row match-height">
-                                <div class="col-xl-8 col-md-12 col-12">
+                                <div class="col-xl-12 col-md-12 col-12">
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
                                             <div class="download_csv_form"></div>
-                                            <div class="col-sm-40 offset-sm-20">
-                                                <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
-                                                        class="fa fa-plus"></i> Add Budget</a>
-                                            </div>
                                             <div class="card-header border-bottom">
-                                                <h4 class="card-title mb-25">Budgets List</h4>
+                                                 <div class="col-sm-40 offset-sm-20">
+                                                    <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
+                                                        class="fa fa-plus"></i> Add Budget</a>
+                                                 </div>
                                                 <div class="basic-modal">
                                                     <form method="post" action="{% url 'budget_list' %}" id="period_filter_form">
                                                         {% csrf_token %}
-                                                    <label>Month filter</label>
                                                     <select class="form-control budget_period_filter" name="select_period" style="width:200px">
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
-                                                                <option selected>{{month}}</option>
+                                                                <option selected value="{{month}}">{{month}} Budget</option>
                                                             {% else %}
-                                                                <option>{{month}}</option>
+                                                                <option value="{{month}}">{{month}} Budget</option>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </select>
@@ -2004,185 +2002,504 @@
                                                 </div>
                                             </div>
                                             <div class="card-datatable table-responsive">
-                                                <table class="table" id="budgets">
+                                                <table class="table">
                                                     <thead>
-                                                    <tr>
-                                                        {% for name in budget_key %}
-                                                            <th>{{name}}</th>
-                                                        {% endfor %}
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {% for object in all_budgets %}
-                                                    {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
-                                                        <tr>
-                                                        {% for value in object %}
-                                                        {% if forloop.counter != 5 %}
-                                                            {% if forloop.counter == 2 %}
-                                                                <td class="text-nowrap">
-                                                                    <div class="d-flex flex-column">
-                                                                        <span class="font-weight-bolder mb-25">{{ value }}</span>
-                                                                        {% if object.6 %}
-                                                                            {% if object.5 == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
-                                                                            {% else %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>
-                                                                            {% endif %}
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </td>
-                                                            {% endif %}
-                                                            {% if forloop.counter == 1 or forloop.counter == 3 or forloop.counter == 4 %}
-                                                                {% if forloop.counter == 1 %}
-                                                                    <td title="details">
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1"><a href="{% url 'budget_detail' pk=object.4 %}">{{ value }}</a></span>
-                                                                        </div>
-                                                                    </td>
-                                                                {% else %}
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ value }}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                {% endif %}
-                                                            {% endif %}
-                                                        {% else %}
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">
-                                                                    <ul class="list-inline m-0">
-                                                                        <li class="list-inline-item">
-                                                                            <a href="{% url 'budget_update' pk=value %}"
-                                                                               class="btn btn-success btn-sm rounded-0"><i
-                                                                                    class="fa fa-edit"></i></a>
-
-                                                                        </li>
-                                                                        <li class="list-inline-item">
-                                                                            <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=value %}"
-                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                    class="fa fa-trash"></i></button>
-                                                                        </li>
-                                                                    </ul>
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </tr>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                    {% for key, value in weekly_daily_budget.items %}
-                                                        {% for k, v in value.items %}
-                                                        {% for object in v %}
-                                                            {% if forloop.counter == 1 %}
-                                                                <tr class="show_daily_budget" id_name="{{object.4}}">
-                                                                    <td title="details">
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1"><a href="{% url 'budget_detail' pk=object.4 %}">{{ object.0 }}</a></span>
-                                                                        </div>
-                                                                    </td>
-                                                                     <td class="text-nowrap">
-                                                                        <div class="d-flex flex-column">
-                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
-                                                                            {% if key == 'daily' %}
-                                                                                <span class="font-small-2 text-muted">Daily Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
-                                                                            {% else %}
-                                                                                <span class="font-small-2 text-muted">Weekly Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
-                                                                            {% endif %}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">
-                                                                                <ul class="list-inline m-0">
-                                                                                    <li class="list-inline-item">
-                                                                                        <a href="{% url 'budget_update' pk=object.4 %}"
-                                                                                           class="btn btn-success btn-sm rounded-0"><i
-                                                                                                class="fa fa-edit"></i></a>
-
-                                                                                    </li>
-                                                                                    <li class="list-inline-item">
-                                                                                        <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
-                                                                                           class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                                           data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                                class="fa fa-trash"></i></button>
-                                                                                    </li>
-                                                                                </ul>
-                                                                            </span>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            {% else %}
-                                                                <tr class="show_daily_rows{{v.0.4}}">
-                                                                     <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
-                                                                        </div>
-                                                                     </td>
-                                                                     <td class="text-nowrap">
-                                                                        <div class="d-flex flex-column">
-                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
-                                                                            {% if key == 'daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
-                                                                            {% else %}
+                                                        <tr class="show_bdgt_exp" method_name="expenses_income_cls">
+                                                            <th><h5><b>Income</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th><h5><b class="text-success">{{budget_graph_currency}}{{total_income}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down income_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right income_drp_sign"></i></h5></td></th>
+                                                        </tr>
+                                                        {% for ex_key, ex_value in income_bdgt_dict.items %}
+                                                        <tr class="expenses_income_cls" style="display:None;">
+                                                            <th colspan="9">
+                                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{{ex_key}}</b></span></div>
+                                                            </th>
+                                                        </tr>
+                                                        {% for object in ex_value %}
+                                                            {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
+                                                            <tr class="expenses_income_cls" style="display:None;">
+                                                                <th colspan="9">
+                                                                    <div class="item-img text-center">
+                                                                        <a href="{% url 'budget_detail' pk=object.4 %}">
+                                                                            <div class="card-body">
+                                                                                <h6 style="float: left;"><a href="{% url 'budget_detail' pk=object.4 %}">{{object.0}}</a></h6>
+                                                                                <span class="text-danger">{{object.8}}{{object.3}} left</span>
+                                                                                <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
+                                                                            </div>
+                                                                            <br/>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
                                                                                 <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
-                                                                            {% endif %}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
+                                                                                <span style="float: right;" class="text-success">
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder mr-1">
+                                                                                        <ul class="list-inline m-0">
+                                                                                            <li class="list-inline-item">
+                                                                                                <a href="{% url 'budget_update' pk=object.4 %}"
+                                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                                        class="fa fa-edit"></i></a>
+
+                                                                                            </li>
+                                                                                            <li class="list-inline-item">
+                                                                                                <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
+                                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                                        class="fa fa-trash"></i></button>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </span>
+                                                                                </div>
+                                                                                </span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </div>
+                                                                </th>
+                                                            </tr>
+                                                            {% else %}
+                                                            {% for daily_data in object.6 %}
+                                                            <tr class="{% if forloop.counter != 1 %}daily_week_records daily{{object.6.0.4}}{% else %} expenses_income_cls{% endif %}" style="display:None;">
+                                                                <th colspan="9">
+                                                                    {% if forloop.counter == 1 %}
+                                                                    <div class="item-img text-center daily_bdgt_data" class_name=".daily{{daily_data.4}}">
+                                                                        <a>
+                                                                            <div class="card-body">
+                                                                                <h6 style="float: left;"><a href="{% url 'budget_detail' pk=daily_data.4 %}">{{daily_data.0}}</a></h6>
+                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
+                                                                                <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
+                                                                                <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
+
+                                                                            </div>
+                                                                            <br/>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.9}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                                                <span class="font-small-2 text-muted" style="text-">{{object.5}}</span>
+                                                                                <h6 style="float: right;">
+                                                                                    <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder mr-1">
+                                                                                        <ul class="list-inline m-0">
+                                                                                            <li class="list-inline-item">
+                                                                                                <a href="{% url 'budget_update' pk=daily_data.4 %}"
+                                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                                        class="fa fa-edit"></i></a>
+
+                                                                                            </li>
+                                                                                            <li class="list-inline-item">
+                                                                                                <button type="button" del_method="budget_delete" delete_name="{{ daily_data.0 }} Budget" url="{% url 'budget_delete' pk=daily_data.4 %}"
+                                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                                        class="fa fa-trash"></i></button>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </span>
+                                                                                </div>
+                                                                                </h6>
+                                                                            </div>
+
+                                                                        </a>
+                                                                    </div>
+                                                                    {% else %}
+                                                                    <div class="item-img text-center daily_week_records daily{{object.6.0.4}}" style="display:None;">
+                                                                        <a>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                                                {% if object.5 == 'Daily' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                {% else %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                {% endif %}
+                                                                                <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </th>
+                                                            </tr>
+                                                            {% endfor %}
                                                             {% endif %}
                                                         {% endfor %}
-                                                    {% endfor %}
-                                                    {% endfor %}
-                                                    </tbody>
+                                                        {% endfor %}
+                                                        <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
+                                                            <th><h5><b>Expenses</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th><h5><b>{{budget_graph_currency}}{{total_expense}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down expense_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right expense_drp_sign"></i></h5></td></th>
+                                                        </tr>
+                                                        {% for ex_key, ex_value in expenses_dict.items %}
+                                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                            <th colspan="9">
+                                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{{ex_key}}</b></span></div>
+                                                            </th>
+                                                        </tr>
+                                                        {% for object in ex_value %}
+                                                            {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
+                                                            <tr class="expenses_budgets_cls" style="display:None;">
+                                                                <th colspan="9">
+                                                                    <div class="item-img text-center">
+                                                                        <a href="{% url 'budget_detail' pk=object.4 %}">
+                                                                            <div class="card-body">
+                                                                                <h6 style="float: left;"><a href="{% url 'budget_detail' pk=object.4 %}">{{object.0}}</a></h6>
+                                                                                <span class="text-danger">{{object.8}}{{object.3}} left</span>
+                                                                                <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
+                                                                            </div>
+                                                                            <br/>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <span style="float: right;" class="text-success">
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder mr-1">
+                                                                                        <ul class="list-inline m-0">
+                                                                                            <li class="list-inline-item">
+                                                                                                <a href="{% url 'budget_update' pk=object.4 %}"
+                                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                                        class="fa fa-edit"></i></a>
+
+                                                                                            </li>
+                                                                                            <li class="list-inline-item">
+                                                                                                <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
+                                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                                        class="fa fa-trash"></i></button>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </span>
+                                                                                </div>
+                                                                                </span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </div>
+                                                                </th>
+                                                            </tr>
+                                                            {% else %}
+                                                            {% for daily_data in object.6 %}
+                                                            <tr class="{% if forloop.counter != 1 %}daily_week_records daily{{object.6.0.4}}{% else %} expenses_budgets_cls{% endif %}" style="display:None;">
+                                                                <th colspan="9">
+                                                                    {% if forloop.counter == 1 %}
+                                                                    <div class="item-img text-center daily_bdgt_data" class_name=".daily{{daily_data.4}}">
+                                                                        <a>
+                                                                            <div class="card-body">
+                                                                                <h6 style="float: left;"><a href="{% url 'budget_detail' pk=daily_data.4 %}">{{daily_data.0}}</a></h6>
+                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
+                                                                                <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
+                                                                                <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
+
+                                                                            </div>
+                                                                            <br/>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.9}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                                                <span class="font-small-2 text-muted" style="text-">{{object.5}}</span>
+                                                                                <h6 style="float: right;">
+                                                                                    <div class="d-flex align-items-center">
+                                                                                    <span class="font-weight-bolder mr-1">
+                                                                                        <ul class="list-inline m-0">
+                                                                                            <li class="list-inline-item">
+                                                                                                <a href="{% url 'budget_update' pk=daily_data.4 %}"
+                                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                                        class="fa fa-edit"></i></a>
+
+                                                                                            </li>
+                                                                                            <li class="list-inline-item">
+                                                                                                <button type="button" del_method="budget_delete" delete_name="{{ daily_data.0 }} Budget" url="{% url 'budget_delete' pk=daily_data.4 %}"
+                                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                                        class="fa fa-trash"></i></button>
+                                                                                            </li>
+                                                                                        </ul>
+                                                                                    </span>
+                                                                                </div>
+                                                                                </h6>
+                                                                            </div>
+
+                                                                        </a>
+                                                                    </div>
+                                                                    {% else %}
+                                                                    <div class="item-img text-center daily_week_records daily{{object.6.0.4}}" style="display:None;">
+                                                                        <a>
+                                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                                <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                                                {% if object.5 == 'Daily' %}
+                                                                                <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                {% else %}
+                                                                                <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                {% endif %}
+                                                                                <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
+                                                                            </div>
+                                                                        </a>
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </th>
+                                                            </tr>
+                                                            {% endfor %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                        <tr>
+                                                            <th><h5><b>Leftover cash</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th><h5>
+                                                                {% if left_over_cash < 0 %}
+                                                                    <b class="text-danger">{{budget_graph_currency}}{{left_over_cash}}</b>
+                                                                {% else %}
+                                                                    <b class="text-success">{{budget_graph_currency}}{{left_over_cash}}</b>
+                                                                {% endif %}
+                                                            </h5></td></th>
+                                                        </tr>
+                                                    </thead>
                                                 </table>
                                             </div>
+<!--                                            <div class="card-datatable table-responsive">-->
+<!--                                                <table class="table" id="budgets">-->
+<!--                                                    <thead>-->
+<!--                                                    <tr>-->
+<!--                                                        {% for name in budget_key %}-->
+<!--                                                            <th>{{name}}</th>-->
+<!--                                                        {% endfor %}-->
+<!--                                                        <th>Actions</th>-->
+<!--                                                    </tr>-->
+<!--                                                    </thead>-->
+<!--                                                    <tbody>-->
+<!--                                                    {% for object in all_budgets %}-->
+<!--                                                    {% if object.5 != 'Daily' and object.5 != 'Weekly' %}-->
+<!--                                                        <tr>-->
+<!--                                                        {% for value in object %}-->
+<!--                                                        {% if forloop.counter != 5 %}-->
+<!--                                                            {% if forloop.counter == 2 %}-->
+<!--                                                                <td class="text-nowrap">-->
+<!--                                                                    <div class="d-flex flex-column">-->
+<!--                                                                        <span class="font-weight-bolder mb-25">{{ value }}</span>-->
+<!--                                                                        {% if object.6 %}-->
+<!--                                                                            {% if object.5 == 'Daily' %}-->
+<!--                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>-->
+<!--                                                                            {% else %}-->
+<!--                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>-->
+<!--                                                                            {% endif %}-->
+<!--                                                                        {% endif %}-->
+<!--                                                                    </div>-->
+<!--                                                                </td>-->
+<!--                                                            {% endif %}-->
+<!--                                                            {% if forloop.counter == 1 or forloop.counter == 3 or forloop.counter == 4 %}-->
+<!--                                                                {% if forloop.counter == 1 %}-->
+<!--                                                                    <td title="details">-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1"><a href="{% url 'budget_detail' pk=object.4 %}">{{ value }}</a></span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                {% else %}-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">{{ value }}</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                {% endif %}-->
+<!--                                                            {% endif %}-->
+<!--                                                        {% else %}-->
+<!--                                                        <td>-->
+<!--                                                            <div class="d-flex align-items-center">-->
+<!--                                                                <span class="font-weight-bolder mr-1">-->
+<!--                                                                    <ul class="list-inline m-0">-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <a href="{% url 'budget_update' pk=value %}"-->
+<!--                                                                               class="btn btn-success btn-sm rounded-0"><i-->
+<!--                                                                                    class="fa fa-edit"></i></a>-->
+
+<!--                                                                        </li>-->
+<!--                                                                        <li class="list-inline-item">-->
+<!--                                                                            <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=value %}"-->
+<!--                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"-->
+<!--                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i-->
+<!--                                                                                    class="fa fa-trash"></i></button>-->
+<!--                                                                        </li>-->
+<!--                                                                    </ul>-->
+<!--                                                                </span>-->
+<!--                                                            </div>-->
+<!--                                                        </td>-->
+<!--                                                        {% endif %}-->
+<!--                                                        {% endfor %}-->
+<!--                                                    </tr>-->
+<!--                                                    {% endif %}-->
+<!--                                                    {% endfor %}-->
+<!--                                                    {% for key, value in weekly_daily_budget.items %}-->
+<!--                                                        {% for k, v in value.items %}-->
+<!--                                                        {% for object in v %}-->
+<!--                                                            {% if forloop.counter == 1 %}-->
+<!--                                                                <tr class="show_daily_budget" id_name="{{object.4}}">-->
+<!--                                                                    <td title="details">-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1"><a href="{% url 'budget_detail' pk=object.4 %}">{{ object.0 }}</a></span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                     <td class="text-nowrap">-->
+<!--                                                                        <div class="d-flex flex-column">-->
+<!--                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>-->
+<!--                                                                            {% if key == 'daily' %}-->
+<!--                                                                                <span class="font-small-2 text-muted">Daily Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>-->
+<!--                                                                            {% else %}-->
+<!--                                                                                <span class="font-small-2 text-muted">Weekly Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>-->
+<!--                                                                            {% endif %}-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">-->
+<!--                                                                                <ul class="list-inline m-0">-->
+<!--                                                                                    <li class="list-inline-item">-->
+<!--                                                                                        <a href="{% url 'budget_update' pk=object.4 %}"-->
+<!--                                                                                           class="btn btn-success btn-sm rounded-0"><i-->
+<!--                                                                                                class="fa fa-edit"></i></a>-->
+
+<!--                                                                                    </li>-->
+<!--                                                                                    <li class="list-inline-item">-->
+<!--                                                                                        <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"-->
+<!--                                                                                           class="btn btn-danger btn-sm rounded-0 delete_button"-->
+<!--                                                                                           data-toggle="tooltip" data-placement="top" title="Delete"><i-->
+<!--                                                                                                class="fa fa-trash"></i></button>-->
+<!--                                                                                    </li>-->
+<!--                                                                                </ul>-->
+<!--                                                                            </span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                </tr>-->
+<!--                                                            {% else %}-->
+<!--                                                                <tr class="show_daily_rows{{v.0.4}}">-->
+<!--                                                                     <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>-->
+<!--                                                                        </div>-->
+<!--                                                                     </td>-->
+<!--                                                                     <td class="text-nowrap">-->
+<!--                                                                        <div class="d-flex flex-column">-->
+<!--                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>-->
+<!--                                                                            {% if key == 'daily' %}-->
+<!--                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>-->
+<!--                                                                            {% else %}-->
+<!--                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>-->
+<!--                                                                            {% endif %}-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">{{ object.2 }}</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">{{ object.3 }}</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                    <td>-->
+<!--                                                                        <div class="d-flex align-items-center">-->
+<!--                                                                            <span class="font-weight-bolder mr-1">&nbsp;</span>-->
+<!--                                                                        </div>-->
+<!--                                                                    </td>-->
+<!--                                                                </tr>-->
+<!--                                                            {% endif %}-->
+<!--                                                        {% endfor %}-->
+<!--                                                    {% endfor %}-->
+<!--                                                    {% endfor %}-->
+<!--                                                    </tbody>-->
+<!--                                                </table>-->
+<!--                                            </div>-->
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xl-4 col-md-12 col-12">
+                                <div class="col-xl-6 col-md-12 col-12">
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
-                                            <h5>Total Spending and Left Budgets</h5>
-                                            <div id="total_budget"></div>
+                                            <h5>{{current_month}} Cash Flow</h5>
+                                            <div id="cash_flow_bar"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xl-12 col-md-12 col-12">
-                                    <div class="card card-congratulation-medal">
-                                        <div class="card-body">
-                                            <h5>Budgets and Spending</h5>
-                                            <div id="budgets-bar"></div>
+                                <div class="col-xl-6 col-md-12 col-12">
+                                    <div class="card">
+                                    <div class="card-body">
+                                        <span><b>{{current_month}} Spending Categories</b>
+                                        <ul class="nav nav-pills" style="float:right" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center" id="budget_bar_tab" data-toggle="tab" href="#budget_bar_data" aria-controls="budget_bar_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        </span>
+                                        <div class="tab-content">
+                                        <div class="tab-pane active" id="budget_pie_data" aria-labelledby="budget_pie_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="total_budget"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="tab-pane" id="budget_bar_data" aria-labelledby="budget_bar_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="budgets-bar"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
                                         </div>
                                     </div>
+                                    </div>
+                                </div>
                                 </div>
                             </div>
                         </section>

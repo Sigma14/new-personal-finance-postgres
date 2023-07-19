@@ -37,7 +37,7 @@
                                 </div>
                                 <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                     <div class="card-body">
-                                        Welcome to <strong>Personal Finance!</strong> On this page you get a quick overview of your finances. For more information, check out Accounts → <a href="{% url 'account_list' %}">Asset Accounts</a> and of course the <a href="{% url 'budget_list' %}">Budgets</a>, <a href="{% url 'bill_list' %}">Bills</a> and <a href="{% url 'transaction_list' %}">Transactions pages</a>. Or just take a look around and see where you end up.
+                                        Welcome to <strong>Personal Finance!</strong> On this page you get a quick overview of your finances. For more information, check out Accounts → <a href="{% url 'account_box' %}">Asset Accounts</a> and of course the <a href="{% url 'budgets' %}">Budgets</a>, <a href="{% url 'bill_list' %}">Bills</a> and <a href="{% url 'transaction_list' %}">Transactions pages</a>. Or just take a look around and see where you end up.
                                     </div>
                                 </div>
                             </div>
@@ -133,7 +133,7 @@
                 <section id="dashboard-ecommerce">
                     <div class="row match-height">
                         <!-- Medal Card -->
-                        <a href="/account_list" class="col-xl-8 col-md-12 col-12">
+                        <a href="/accounts" class="col-xl-8 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <h5>Bank Accounts</h5>
@@ -142,13 +142,11 @@
                             </div>
                         </a>
                         <!--/ Medal Card -->
-
-                        <!-- Statistics Card -->
-                        <a href="/bill_list" class="col-xl-4 col-md-12 col-12">
+                        <a href="/budgets/current" class="col-xl-4 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <h5>Bills Expenses</h5>
-                                    <div id="bill-chart"></div>
+                                    <h5>Budgets Expenses</h5>
+                                    <div id="budget-chart"></div>
                                 </div>
                             </div>
                         </a>
@@ -157,7 +155,7 @@
                 <section id="dashboard-ecommer">
                     <div class="row match-height">
                         <!-- Medal Card -->
-                        <a href="/income_list" class="col-xl-6 col-md-6 col-6">
+                        <a href="/budgets/current" class="col-xl-6 col-md-6 col-6">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
                                     <h5>Incomes</h5>
@@ -165,11 +163,11 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="/budget_list" class="col-xl-6 col-md-6 col-6">
+                        <a href="/bill_list" class="col-xl-6 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <h5>Budgets Expenses</h5>
-                                    <div id="budget-chart"></div>
+                                    <h5>Bills Expenses</h5>
+                                    <div id="bill-chart"></div>
                                 </div>
                             </div>
                         </a>

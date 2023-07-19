@@ -207,12 +207,20 @@ $('#expense_table').DataTable( {
 
     });
 
-    $('.new_category').on('click', function(e)
+    $("body").delegate(".new_category", "click", function(e)
     {
         e.preventDefault();
         var category_name = $(this).text().trim()
+        var method_name = $(this).attr('method_name')
         var csrftoken = getCookie('csrftoken');
-        $(this).remove();
+        if(method_name == 'group_add')
+        {
+            var category_name = $("#category_group_name").val().trim();
+        }
+        else
+        {
+            $(this).remove();
+        }
         Swal.fire({
                     title: 'Added',
                     icon: 'success',
@@ -229,20 +237,81 @@ $('#expense_table').DataTable( {
             'csrfmiddlewaretoken': csrftoken
             },
             dataType: 'json',
-            success: function()
+            success: function(response)
             {
+                console.log(response)
+            }
+        })
+        location.assign("/budget_add/");
+    });
 
+    $("body").delegate(".sub_cat_popup", "click", function(e)
+    {
+        var csrftoken = getCookie('csrftoken');
+        group_id = $("#id_categories").val()
+        $.ajax({
+            type: 'POST',
+            url: "/subcategory_suggestion",
+            data: {
+            'category_pk': group_id,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            dataType: 'json',
+            success: function(response)
+            {
+                $(".sub_cat_sugg").empty();
+                sugg_html = ""
+                $.each(response.subcategory_suggestions, function(i, val)
+                {
+                    sugg_html += "<a style='margin:5px; font-size: 12px;' url='/subcategory_add/" + response.category_pk + "' class='btn btn-outline-secondary new_subcategory'>" + val + "&nbsp;<i class='fa fa-plus'></i></a>"
+                });
+                $("#sub_cat_add_btn").attr('url', '/subcategory_add/' + response.category_pk )
+                $(".sub_cat_sugg").append(sugg_html)
             }
         })
     });
 
-    $('.new_subcategory').on('click', function(e)
+    $("body").delegate(".sub_cat_select", "change", function(e)
+    {
+        var csrftoken = getCookie('csrftoken');
+        group_id = $("#category_group").val()
+        $.ajax({
+            type: 'POST',
+            url: "/subcategory_suggestion",
+            data: {
+            'category_pk': group_id,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            dataType: 'json',
+            success: function(response)
+            {
+                $(".sub_cat_sugg").empty();
+                sugg_html = ""
+                $.each(response.subcategory_suggestions, function(i, val)
+                {
+                    sugg_html += "<a style='margin:5px; font-size: 12px;' url='/subcategory_add/" + response.category_pk + "' class='btn btn-outline-secondary new_subcategory'>" + val + "&nbsp;<i class='fa fa-plus'></i></a>"
+                });
+                $("#sub_cat_add_btn").attr('url', '/subcategory_add/' + response.category_pk )
+                $(".sub_cat_sugg").append(sugg_html)
+            }
+        })
+    });
+
+    $("body").delegate(".new_subcategory", "click", function(e)
     {
         e.preventDefault();
         var category_name = $(this).text().trim()
         var sub_url = $(this).attr('url')
+        method_name = $(this).attr('method_name')
         var csrftoken = getCookie('csrftoken');
-        $(this).remove();
+        if(method_name == 'sub_cat_budget')
+        {
+            var category_name = $("#sub_category_name").val().trim();
+        }
+        else
+        {
+            $(this).remove();
+        }
         Swal.fire({
                     title: 'Added',
                     icon: 'success',
@@ -264,6 +333,29 @@ $('#expense_table').DataTable( {
 
             }
         })
+
+        location.assign("/budget_add/");
+    });
+
+    $("body").delegate(".show_bdgt_exp", "click", function(e)
+    {
+        method_name = $(this).attr('method_name')
+        $("." + method_name).toggle();
+        if(method_name == 'expenses_budgets_cls')
+        {
+            $(".expense_drp_sign").toggle();
+            $(".daily_week_records").hide();
+            $(".daily_week_drop").show();
+        }
+        else
+        {
+            $(".income_drp_sign").toggle();
+        }
+    });
+    $("body").delegate(".daily_bdgt_data", "click", function(e)
+    {
+        class_name = $(this).attr('class_name')
+        $(class_name).toggle();
     });
 
 function inputHTML(formHtml, name, value)
@@ -581,6 +673,30 @@ $('.check_primary').on("click", function(e)
         $("#period_filter_form").submit();
     });
 
+// Budget type selection
+
+    $("body").delegate(".select_cmp_type", "change", function(e)
+    {
+        type = $(this).val();
+        if(type == 'Incomes')
+        {
+            $('.select_income_budget').show();
+            $('.select_exp_budget').hide();
+        }
+        else
+        {
+            $('.select_income_budget').hide();
+            $('.select_exp_budget').show();
+        }
+    });
+
+// Budget Transactions
+
+$("body").delegate(".show_bdgt_trans", "click", function(e)
+{
+    method_name = $(this).attr('method_name')
+    $('.' + method_name).toggle();
+});
 
 
 // RENTAL PROPERTY JS
@@ -1655,8 +1771,18 @@ $("body").delegate(".pick_category", "change", function(event)
     $("#id_amount").val('');
     $("#id_amount").attr('disabled', false);
     $('#customRadio1').prop('checked', true);
-
     category_group = $(this).val()
+    method_name = $(this).attr('method_name')
+    category_group_name = $(this).find("option:selected").text().trim();
+    if(method_name == 'add_budget')
+    {
+        if(category_group_name.includes('Bills'))
+        {
+            location.assign('/bill_add/')
+        }
+
+    }
+    $("#category_group").val(category_group);
     var csrftoken = getCookie('csrftoken');
     $.ajax({
         type: 'POST',
@@ -1689,39 +1815,39 @@ $("body").delegate(".show_due_bills", "change", function(event)
     var category_name = $('#id_category option:selected').text();
     sub_category = $(this).val()
     var csrftoken = getCookie('csrftoken');
-    if (category_name == "Income")
-    {
-
-        $.ajax({
-            type: 'POST',
-            url:'/income/uncredited_list',
-            data: {
-            'sub_category': sub_category,
-            'category_id': category_id,
-            'csrfmiddlewaretoken': csrftoken
-            },
-            success: function(response)
-            {
-                if(response.status == 'error')
-                {
-                    $(".transaction_income_list").hide();
-                    $("#trans_income").empty();
-                }
-                else
-                {
-                    var income_dict = response.income_dict
-                    var optionHtml = "<select class='form-control' amount_dict='" + response.amount_dict + "' id='due_income' name='due_income' required><option value='' selected=''>Select uncredited income</option>"
-                    $("#trans_income").empty();
-                    $.each(income_dict, function(key, value) {
-                        optionHtml += "<option value='" + key + "'>" + value + "</option>"
-                    });
-                    optionHtml += "</select>"
-                    $("#trans_income").append(optionHtml);
-                    $(".transaction_income_list").show();
-                }
-            }
-        });
-    }
+//    if (category_name == "Income")
+//    {
+//
+//        $.ajax({
+//            type: 'POST',
+//            url:'/income/uncredited_list',
+//            data: {
+//            'sub_category': sub_category,
+//            'category_id': category_id,
+//            'csrfmiddlewaretoken': csrftoken
+//            },
+//            success: function(response)
+//            {
+//                if(response.status == 'error')
+//                {
+//                    $(".transaction_income_list").hide();
+//                    $("#trans_income").empty();
+//                }
+//                else
+//                {
+//                    var income_dict = response.income_dict
+//                    var optionHtml = "<select class='form-control' amount_dict='" + response.amount_dict + "' id='due_income' name='due_income' required><option value='' selected=''>Select uncredited income</option>"
+//                    $("#trans_income").empty();
+//                    $.each(income_dict, function(key, value) {
+//                        optionHtml += "<option value='" + key + "'>" + value + "</option>"
+//                    });
+//                    optionHtml += "</select>"
+//                    $("#trans_income").append(optionHtml);
+//                    $(".transaction_income_list").show();
+//                }
+//            }
+//        });
+//    }
     if (category_name == "Bills")
     {
         $.ajax({
@@ -1798,6 +1924,15 @@ $("body").delegate("#id_amount", "change paste keypress", function(event)
 $("body").delegate(".check_budget_category", "change", function(event)
 {
     category_name = $("#id_category").val()
+    cat_name =$('#id_category option:selected').text();
+    if(cat_name == 'Income')
+    {
+        $('#customRadio2').prop('checked', true);
+    }
+    else
+    {
+        $('#customRadio1').prop('checked', true);
+    }
     sub_category_name = $("#subcategory").val()
     var csrftoken = getCookie('csrftoken');
     $.ajax({

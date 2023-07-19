@@ -889,6 +889,7 @@ var options = {
             }
           }
         }],
+        colors: ['#2AAA8A', '#DE3163'],
         plotOptions: {
           bar: {
             horizontal: false,
@@ -911,5 +912,52 @@ var options = {
         };
 
         var chart = new ApexCharts(document.querySelector(budget_id), options);
+        chart.render();
+}
+
+// BudgetCashFlowChart
+
+function BudgetCashFlowChart(cash_flow_names, cash_flow_data, budget_cashflow_id)
+{
+var options = {
+          series: cash_flow_data,
+          chart: {
+          height: 350,
+          type: 'bar',
+          events: {
+            click: function(chart, w, e) {
+              // console.log(chart, w, e)
+            }
+          }
+        },
+        colors: ['#2AAA8A', '#DE3163'],
+        plotOptions: {
+          bar: {
+            columnWidth: '90%',
+            distributed: true,
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          style: {
+      fontSize: '12px',
+      colors: ["#304758"]
+    }
+        },
+        legend: {
+          show: false
+        },
+        xaxis: {
+          categories: cash_flow_names,
+          labels: {
+            style: {
+              colors: ['#2AAA8A', '#DE3163'],
+              fontSize: '12px'
+            }
+          }
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector(budget_cashflow_id), options);
         chart.render();
 }

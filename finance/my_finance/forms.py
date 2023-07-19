@@ -140,7 +140,7 @@ class ExpenseForm(forms.ModelForm):
 class BudgetForm(forms.ModelForm):
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
     auto_budget = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
-    budget_period = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
+    budget_period = forms.CharField(initial='Monthly', widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'},))
     categories = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, *args, **kwargs):
@@ -148,10 +148,11 @@ class BudgetForm(forms.ModelForm):
             self.request = kwargs.pop('request')
             user_name = self.request.user
             super(BudgetForm, self).__init__(*args, **kwargs)
-            self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Bills", "Goals", "Funds", "Income"]),
+            self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Goals", "Funds"]),
                                                              empty_label="Select Category Group",
                                                              widget=forms.Select(
-                                                                 attrs={'class': 'form-control pick_category'}))
+                                                                 attrs={'class': 'form-control pick_category',
+                                                                        'method_name': 'add_budget'}))
         except Exception as msg:
             print(msg)
 

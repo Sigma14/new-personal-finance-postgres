@@ -10,12 +10,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Bills</h2>
+                            <h2 class="content-header-title float-left mb-0">Bills & Subscriptions</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Bills
+                                    <li class="breadcrumb-item">Bills & Subscriptions
                                     </li>
                                 </ol>
                             </div>
@@ -29,12 +29,11 @@
                         <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
                             <div class="card">
                                 <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Bill PageInfo</span>
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i>&nbsp;Description</span>
                                 </div>
                                 <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                     <div class="card-body">
-                                        This page have calendar tab in which paid or unpaid bills are show with calendar date and bills tab shows all the bills
-                                        list.
+                                        This page have bills & subscriptions calendar tab in which paid or unpaid bills are show with calendar date and all bills & subscriptions tab shows all the bills & subscriptions lists.
                                     </div>
                                 </div>
                             </div>
@@ -48,12 +47,12 @@
 							<ul class="nav nav-pills" role="tablist">
 								<li class="nav-item">
 									<a class="nav-link d-flex align-items-center active" id="calendar_bills_tab" data-toggle="tab" href="#calendar_bills_data" aria-controls="calendar_bills_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Bills with calendar</span>
+										<span class="d-none d-sm-block">Bills & Subscriptions Calendar</span>
 									</a>
 								</li>
                                 <li class="nav-item">
                                     <a class="nav-link d-flex align-items-center" id="bills_tab" data-toggle="tab" href="#bills_data" aria-controls="bills_data" role="tab" aria-selected="false">
-                                        <span class="d-none d-sm-block">Bills List</span>
+                                        <span class="d-none d-sm-block">All Bills & Subscriptions</span>
                                     </a>
                                 </li>
                             </ul>
@@ -62,7 +61,10 @@
                     <div class="tab-content">
                         <div class="tab-pane active" id="calendar_bills_data" aria-labelledby="calendar_bills_tab" role="tabpanel">
                             <section>
-                                <div class="app-calendar overflow-hidden border">
+                                <div class="content-body">
+                                    <div class="row match-height">
+                                        <div class="col-8">
+                                            <div class="app-calendar overflow-hidden border">
                                     <div class="row no-gutters">
                                         <!-- Sidebar -->
                                         <div class="col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column" id="app-calendar-sidebar">
@@ -107,6 +109,50 @@
                                         </div>
                                         <!-- /Calendar -->
                                         <div class="body-content-overlay"></div>
+                                    </div>
+                                </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="card">
+                                                <div class="card-header border-bottom">
+                                                    <h4 class="card-title">Upcoming Transactions</h4>
+                                                </div>
+                                                <div class="card-datatable">
+                                                    <table class="table table-responsive" id="bills">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Amount</th>
+                                                                <th>Due Date</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for data in bill_data %}
+                                                            {% if today_date <= data.date %}
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="font-weight-bolder mr-1"><a href="{% url 'bill_details' pk=data.id %}">{{data.label}}</a></span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="font-weight-bolder mr-1 text-danger">{{data.amount}}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="font-weight-bolder mr-1">{{data.date}}</span>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </section>

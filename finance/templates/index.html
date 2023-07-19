@@ -150,9 +150,9 @@
                 </li>
                 <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="user"></i><span class="menu-title text-truncate" data-i18n="Accounts">Accounts</span></a>
                     <ul class="menu-content">
-                        <li class="{% if request.resolver_match.view_name == 'account_list' or request.resolver_match.view_name == 'account_add' or request.resolver_match.view_name == 'account_detail' or request.resolver_match.view_name == 'account_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Bank Accounts</span></a>
+                        <li class="{% if request.resolver_match.view_name == 'account_box' or request.resolver_match.view_name == 'account_list' or request.resolver_match.view_name == 'account_add' or request.resolver_match.view_name == 'account_detail' or request.resolver_match.view_name == 'account_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'account_box' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Bank Accounts</span></a>
                         </li>
-                        <li class="{% if request.resolver_match.view_name == 'loan_add' or request.resolver_match.view_name == 'loan_list' or request.resolver_match.view_name == 'loan_details' or request.resolver_match.view_name == 'loan_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'loan_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Mortgages and Loans Accounts</span></a>
+                        <li class="{% if request.resolver_match.view_name == 'loan_accounts_box' or request.resolver_match.view_name == 'loan_add' or request.resolver_match.view_name == 'loan_list' or request.resolver_match.view_name == 'loan_details' or request.resolver_match.view_name == 'loan_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'loan_accounts_box' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Mortgages and Loans Accounts</span></a>
                         </li>
                         <li class="{% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_add' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'fund_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Available Funds</span></a>
                         </li>
@@ -160,9 +160,9 @@
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' or request.resolver_match.view_name == 'bill_add' or request.resolver_match.view_name == 'bill_detail' or request.resolver_match.view_name == 'bill_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'bill_list' %}"><i
-                        data-feather="file-text"></i><span class="menu-title text-truncate" data-i18n="Bills">Bills</span></a>
+                        data-feather="file-text"></i><span class="menu-title text-truncate" data-i18n="Bills">Bills & Subscriptions</span></a>
                 </li>
-                <li class="nav-item"><a class="d-flex align-items-center" href="{% url 'budget_list' %}"><i data-feather="pie-chart"></i><span class="menu-title text-truncate" data-i18n="Calculators">Budgets</span></a>
+                <li class="nav-item {% if request.resolver_match.view_name == 'budgets' or request.resolver_match.view_name == 'sample-budgets' or request.resolver_match.view_name == 'current-budgets' or request.resolver_match.view_name == 'compare-budgets' or request.resolver_match.view_name == 'budget_detail' or request.resolver_match.view_name == 'budget_add' or request.resolver_match.view_name == 'budget_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'budgets' %}"><i data-feather="pie-chart"></i><span class="menu-title text-truncate" data-i18n="Calculators">Budgets</span></a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.view_name == 'income_list' or request.resolver_match.view_name == 'income_add' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'income_list' %}"><i data-feather="dollar-sign"></i><span class="menu-title text-truncate" data-i18n="Calculators">Incomes</span></a>
                 </li>
@@ -302,7 +302,14 @@
 <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
 
 <script>BudgetsBarChart({{ budget_graph_data | safe }}, {{ budget_names | safe }}, "{{budget_bar_id | safe}}");</script>
+<script>BudgetsBarChart({{ week_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{week_budget_bar_id | safe}}");</script>
+<script>BudgetsBarChart({{ quart_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{quart_budget_bar_id | safe}}");</script>
+<script>BudgetsBarChart({{ yearly_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{yearly_budget_bar_id | safe}}");</script>
 <script>BudgetsBarChart({{ template_budget_graph_data | safe }}, {{ template_budget_names | safe }}, "{{template_budget_bar_id | safe}}");</script>
+<script>BudgetChart({{ budget_names | safe }}, {{ budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_names | safe }}, {{ week_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{week_budget_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_names | safe }}, {{ quart_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{quart_budget_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_names | safe }}, {{ yearly_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{yearly_budget_graph_id | safe}}");</script>
 <script>LinesGraph({{ balance_graph_data | safe }});</script>
 <script>LinesGraph({{close_graph_data | safe}});</script>
 <script>MortgageChart({{ mortgage_graph_data | safe }}, {{ mortgage_date_data | safe}});</script>
@@ -311,15 +318,12 @@
 <script>BudgetChart({{ graph_label | safe }}, {{ graph_value | safe }}, "{{ graph_currency | safe }}", "{{graph_id | safe}}");</script>
 <script>BudgetChart({{ bill_label | safe }}, {{ bill_value | safe }}, "{{ bill_currency | safe }}", "{{bill_id | safe}}");</script>
 <script>BudgetChart({{ income_label | safe }}, {{ income_value | safe }}, "{{ income_currency | safe }}", "{{income_id | safe}}");</script>
-<script>BudgetChart({{ budget_graph_label | safe }}, {{ budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_graph_id | safe}}");</script>
 <script>BudgetChart({{ budget_graph_label | safe }}, {{ template_budget_graph_value | safe }}, "{{ template_budget_graph_currency | safe }}", "{{template_budget_graph_id | safe}}");</script>
 <script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_budget_value | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_month_graph_id | safe}}");</script>
 <script>AllCompareBudgets( {{ week_pie_chart | safe }}, {{ monthly_pie_chart | safe }}, {{ quart_pie_chart | safe }}, {{ yearly_pie_chart | safe }}, "{{ budget_graph_currency | safe }}");</script>
-<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_week_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_week_list_id | safe}}");</script>
-<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_quart_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_quart_list_id | safe}}");</script>
-<script>BudgetChart({{ budget_graph_label | safe }}, {{ cmp_yearly_list | safe }}, "{{ budget_graph_currency | safe }}", "{{cmp_yearly_list_id | safe}}");</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_series | safe}}, "#column-chart");</script>
+<script>BudgetCashFlowChart({{ cash_flow_names | safe }}, {{ cash_flow_data | safe}}, "#cash_flow_bar");</script>
 <script>barChart({{ categories_name | safe }}, {{ categories_series | safe}}, "#future-net-chart");</script>
 <script>CategorySpentChart({{ projection_key | safe }}, {{ cash_on_cash_return_data | safe}}, "#cash-bar-chart");</script>
 <script>CategorySpentChart({{ projection_key | safe }}, {{ return_on_investment_data | safe}}, "#return-bar");</script>

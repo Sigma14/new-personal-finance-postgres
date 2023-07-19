@@ -9,12 +9,14 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Accounts | Bank accounts</h2>
+                            <h2 class="content-header-title float-left mb-0">{{name}} | Bank accounts</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                     </li>
-                                    <li class="breadcrumb-item">Accounts
+                                    <li class="breadcrumb-item"><a href="{% url 'account_box' %}">Accounts</a>
+                                    </li>
+                                    <li class="breadcrumb-item">{{name}}
                                     </li>
                                 </ol>
                             </div>
@@ -31,12 +33,12 @@
                 </div>
                 <br/>
                 <section id="ecommerce-products" class="list-view">
-                    {% for object in object_list %}
+                    {% for object in account_qs %}
                     <div class="card ecommerce-card">
                         <div class="item-img text-center">
                             <a href="{% url 'account_detail' pk=object.id %}">
                                 <div class="card-body">
-                                    <h2 style="float: left;">{{ object.name }} ({{object.account_type}})</h2>
+                                    <h2 style="float: left;">{{ object.name }}</h2>
                                     <h2 style="float: right;">
                                         <div class="avatar bg-light-info" float="right">
                                             <div class="avatar-content">{{ object.transaction_count }}</div>
