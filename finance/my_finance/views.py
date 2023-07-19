@@ -3688,7 +3688,7 @@ def loan_add(request):
                                        mortgage_monthly_payment=monthly_payment, mortgage_date=mortgage_date,
                                        mortgage_year=mortgage_year,
                                        include_net_worth=include_net_worth)
-                return redirect("/loan_accounts_box/")
+                return redirect("/mortgages-loans-accounts/")
             loan_error = "The monthly payment is not sufficient to cover the interest and principal."
         else:
             loan_error = "Name is already exist"
@@ -3757,7 +3757,7 @@ def loan_update(request, pk):
                 if mortgage_year:
                     account.mortgage_year = mortgage_year
                     account.save()
-                    return redirect(f"/loan_list/{loan_type}")
+                    return redirect(f"/mortgages-loans-accounts/{loan_type}")
                 loan_error = "The monthly payment is not sufficient to cover the interest and principal."
             else:
                 loan_error = "Name is already exist"
@@ -3766,7 +3766,7 @@ def loan_update(request, pk):
             if mortgage_year:
                 account.mortgage_year = mortgage_year
                 account.save()
-                return redirect(f"/loan_list/{loan_type}")
+                return redirect(f"/mortgages-loans-accounts/{loan_type}")
             loan_error = "The monthly payment is not sufficient to cover the interest and principal."
 
     category = Category.objects.filter(user=user)
@@ -3794,7 +3794,7 @@ def loan_delete(request, pk):
         delete_transaction_details(data.pk, user)
     sub_category.delete()
     account.delete()
-    return JsonResponse({"status": "Successfully", "path": f"/loan_list/{account_type}"})
+    return JsonResponse({"status": "Successfully", "path": f"/mortgages-loans-accounts/{account_type}"})
 
 
 def loan_details(request, pk):
