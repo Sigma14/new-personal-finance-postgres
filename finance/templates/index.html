@@ -164,8 +164,6 @@
                 </li>
                 <li class="nav-item {% if request.resolver_match.view_name == 'budgets' or request.resolver_match.view_name == 'sample-budgets' or request.resolver_match.view_name == 'current-budgets' or request.resolver_match.view_name == 'compare-budgets' or request.resolver_match.view_name == 'budget_detail' or request.resolver_match.view_name == 'budget_add' or request.resolver_match.view_name == 'budget_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'budgets' %}"><i data-feather="pie-chart"></i><span class="menu-title text-truncate" data-i18n="Calculators">Budgets</span></a>
                 </li>
-<!--                <li class="nav-item {% if request.resolver_match.view_name == 'income_list' or request.resolver_match.view_name == 'income_add' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'income_list' %}"><i data-feather="dollar-sign"></i><span class="menu-title text-truncate" data-i18n="Calculators">Incomes</span></a>-->
-<!--                </li>-->
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' or request.resolver_match.view_name == 'goal_add' or request.resolver_match.view_name == 'goal_detail' or request.resolver_match.view_name == 'goal_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
                         data-feather="target"></i><span class="menu-title text-truncate" data-i18n="Goal">Goals</span></a>
