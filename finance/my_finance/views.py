@@ -3688,7 +3688,7 @@ def loan_add(request):
                                        mortgage_monthly_payment=monthly_payment, mortgage_date=mortgage_date,
                                        mortgage_year=mortgage_year,
                                        include_net_worth=include_net_worth)
-                return redirect("/loan_list/")
+                return redirect("/loan_accounts_box/")
             loan_error = "The monthly payment is not sufficient to cover the interest and principal."
         else:
             loan_error = "Name is already exist"
@@ -3757,7 +3757,7 @@ def loan_update(request, pk):
                 if mortgage_year:
                     account.mortgage_year = mortgage_year
                     account.save()
-                    return redirect("/loan_list/")
+                    return redirect(f"/loan_list/{loan_type}")
                 loan_error = "The monthly payment is not sufficient to cover the interest and principal."
             else:
                 loan_error = "Name is already exist"
@@ -3766,7 +3766,7 @@ def loan_update(request, pk):
             if mortgage_year:
                 account.mortgage_year = mortgage_year
                 account.save()
-                return redirect("/loan_list/")
+                return redirect(f"/loan_list/{loan_type}")
             loan_error = "The monthly payment is not sufficient to cover the interest and principal."
 
     category = Category.objects.filter(user=user)
@@ -3786,6 +3786,7 @@ def loan_update(request, pk):
 def loan_delete(request, pk):
     user = request.user
     account = Account.objects.get(pk=pk)
+    account_type = account.account_type
     sub_category = SubCategory.objects.get(category__user=user, name=account.name)
     user = request.user
     transaction_details = Transaction.objects.filter(user=user, categories=sub_category)
@@ -3793,7 +3794,7 @@ def loan_delete(request, pk):
         delete_transaction_details(data.pk, user)
     sub_category.delete()
     account.delete()
-    return JsonResponse({"status": "Successfully", "path": "/loan_list/"})
+    return JsonResponse({"status": "Successfully", "path": f"/loan_list/{account_type}"})
 
 
 def loan_details(request, pk):
