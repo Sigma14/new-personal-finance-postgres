@@ -278,7 +278,7 @@ class Account(models.Model):
         return str(self.name + "(" + self.currency + ")")
 
     def get_absolute_url(self):
-        return reverse('account_list')
+        return reverse('account_box')
 
 
 class BillDetail(models.Model):
@@ -346,7 +346,7 @@ class Budget(models.Model):
         return f"{self.name}{self.id}{self.currency}"
 
     def get_absolute_url(self):
-        return reverse('budget_list')
+        return reverse('current-budgets')
 
 
 class AvailableFunds(models.Model):
