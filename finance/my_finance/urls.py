@@ -103,14 +103,14 @@ urlpatterns = [
 
 
     # Income Urls :-
-    path('income_add/', income_add, name='income_add'),
-    path('income_list/', income_list, name='income_list'),
-    path('income_details/<int:pk>', income_details, name='income_details'),
-    path('income_update/<int:pk>', income_update, name='income_update'),
-    path('income_delete/<int:pk>', income_delete, name='income_delete'),
-    path('income_edit/<int:pk>', income_edit, name='income_edit'),
-    path('income_date_delete/<int:pk>', income_date_delete, name='income_date_delete'),
-    path('income/uncredited_list', income_uncredited_list, name='income_uncredited_list'),
+    # path('income_add/', income_add, name='income_add'),
+    # path('income_list/', income_list, name='income_list'),
+    # path('income_details/<int:pk>', income_details, name='income_details'),
+    # path('income_update/<int:pk>', income_update, name='income_update'),
+    # path('income_delete/<int:pk>', income_delete, name='income_delete'),
+    # path('income_edit/<int:pk>', income_edit, name='income_edit'),
+    # path('income_date_delete/<int:pk>', income_date_delete, name='income_date_delete'),
+    # path('income/uncredited_list', income_uncredited_list, name='income_uncredited_list'),
     # path('revenue_update/<str:pk>', revenue_update, name='revenue_update'),
     # path('revenue_update_name/<str:pk>', revenue_update_name, name='revenue_update_name'),
 
