@@ -34,13 +34,9 @@
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label>Date</label>
-
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
                                             {{form.transaction_date}}
                                         </div>
                                     </div>
@@ -49,13 +45,10 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Payee</label>
+                                        <label for="fname-icon">Description</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             <input type="text" id="fname-icon" class="form-control" name="payee" required
                                                    placeholder="Payee"/>
                                         </div>
@@ -69,9 +62,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                            {{ form.account }}
                                         </div>
                                     </div>
@@ -84,9 +74,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             {{ form.category }}
                                         </div>
                                     </div>
@@ -99,9 +86,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_sub_cat">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -113,9 +97,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_bills">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,9 +108,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_income">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -141,9 +119,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             {{ form.bill }}
                                         </div>
                                     </div>
@@ -156,26 +131,7 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             <input type="text" class="form-control" id="budget_name" name="budget_name" readonly>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="transaction_tags">Tags</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" id="transaction_tags" class="form-control" name="tags"
-                                                   placeholder="Tags"/>
                                         </div>
                                     </div>
                                 </div>
@@ -187,12 +143,34 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
                                             {{form.amount}}
                                         </div>
                                         <p id="amount_error" class="text-danger" style="display:None"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="transaction_tags">Tags</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input data-toggle="modal" data-target="#tag_toggle" type="text" id="transaction_tags" class="form-control" name="tag_name"
+                                                   placeholder="Add Tags" readonly/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Notes</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.notes }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -220,6 +198,63 @@
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="tag_toggle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel1">Select and add tags for this transaction</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Basic Vertical form layout section start -->
+                    <section id="basic-vertical-layouts" >
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card" style="margin-bottom:0px;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <h5>Name</h5>
+                                                    <input type="text" id="tag_name" name="tag_name" class="form-control" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary add_tag_btn">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Basic Vertical form layout section end -->
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">All tags</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row tag_sugg">
+                                        {% for tag in tags %}
+                                        <a style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary close select_tag" data-dismiss="modal" aria-label="Close">
+                                            {{tag.name}}&nbsp;<i class="fa fa-plus"></i>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -358,6 +358,187 @@ $('#expense_table').DataTable( {
         $(class_name).toggle();
     });
 
+    // Add Tags for Transactions
+    $("body").delegate(".select_tag", "click", function(e)
+    {
+        tag_name = $(this).text().trim();
+        $("#transaction_tags").val(tag_name);
+    });
+
+
+    $("body").delegate(".add_tag_btn", "click", function(e)
+    {
+        tag_name = $("#tag_name").val().trim();
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            type: 'POST',
+            url: '/tag_add/',
+            data: {
+            'name': tag_name,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            dataType: 'json',
+            success: function(response)
+            {
+                console.log(response)
+                if(response.status == 'success')
+                {
+                    Swal.fire({
+                        title: 'Added',
+                        icon: 'success',
+                        customClass: {
+                          confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                      });
+
+                    tagHTML = "<a style='margin:5px; font-size: 12px;' class='btn btn-outline-secondary close select_tag' data-dismiss='modal' aria-label='Close'>" + response.name + "&nbsp;<i class='fa fa-plus'></i></a>"
+                    $(".tag_sugg").append(tagHTML)
+                }
+                else
+                {
+                    Swal.fire({
+                        title: 'Tag already exists',
+                        icon: 'error',
+                        customClass: {
+                          confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                      });
+                }
+            }
+        })
+    });
+
+// Select Split Category
+$("body").delegate(".select_split_category", "change", function(e)
+{
+    e.preventDefault();
+    select_value = $(this).val()
+    cat_list = JSON.parse($(".save_split_cat_btn").attr("split_cat_list"))
+    amount_list = JSON.parse($(".save_split_cat_btn").attr("split_amount_list"))
+    len_cat_list = cat_list.length
+    if(select_value)
+    {
+      if(cat_list.includes(select_value))
+      {
+          Swal.fire
+         ({
+            title: 'Category already selected',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+      }
+      else
+      {
+         cat_list.push(select_value)
+         amount_list.push("0")
+         tdHTML = "<tr><td><div class='d-flex align-items-center'><div class='font-weight-bolder'>" + select_value + "</div></div></td><td><div class='d-flex align-items-center'><div class='font-weight-bolder'><input type='text' class='form-control change_split_amount' amount_index='" + len_cat_list + "' value='0'></div></div></i></button></td><td><button class='btn btn-danger delete_split_cat' cat_value='" + select_value  + "'><i class='fa fa-minus'></td></tr>"
+         $(".split_cat_table").append(tdHTML)
+         $(".save_split_cat_btn").attr("split_cat_list", JSON.stringify(cat_list))
+         $(".save_split_cat_btn").attr("split_amount_list", JSON.stringify(amount_list))
+      }
+    }
+});
+$("body").delegate(".delete_split_cat", "click", function(e)
+{
+    cat_value = $(this).attr("cat_value")
+    cat_list = JSON.parse($(".save_split_cat_btn").attr("split_cat_list"))
+    list_index = cat_list.indexOf(cat_value)
+    amount_list = JSON.parse($(".save_split_cat_btn").attr("split_amount_list"))
+    cat_list.splice(list_index, 1);
+    amount_list.splice(list_index, 1);
+    $(".save_split_cat_btn").attr("split_cat_list", JSON.stringify(cat_list))
+    $(".save_split_cat_btn").attr("split_amount_list", JSON.stringify(amount_list))
+    $(this).parent().parent().remove()
+    var amount_index_cls = $(".change_split_amount");
+    var amount_index = 0
+    amount_index_cls.each(function(index)
+    {
+        $(this).attr("amount_index", amount_index);
+        amount_index += 1
+    });
+
+});
+$("body").delegate(".change_split_amount", "change", function(e)
+{
+    amount_val = $(this).val()
+    amount_index = $(this).attr("amount_index")
+    amount_list = JSON.parse($(".save_split_cat_btn").attr("split_amount_list"))
+    amount_list[amount_index] = amount_val
+    $(".save_split_cat_btn").attr("split_amount_list", JSON.stringify(amount_list))
+});
+
+$("body").delegate(".save_split_cat_btn", "click", function(e)
+{
+    cat_list = JSON.parse($(this).attr("split_cat_list"))
+    amount_list = JSON.parse($(this).attr("split_amount_list"))
+    method_name = $(this).attr("method_name")
+    original_split_amount = parseFloat($("#original_split_amount").text().trim())
+    total_sum = amount_list.reduce((acc, val) => acc + parseFloat(val), 0);
+    if(original_split_amount != total_sum)
+    {
+        Swal.fire
+         ({
+            title: 'Split amount should be equal to original amount',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+    else
+    {
+        transaction_id = $(this).attr("transaction_id")
+        console.log(transaction_id)
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+        $.ajax
+        ({
+            type: 'POST',
+            url: "/transaction_split",
+            data: {
+                    'original_amount': total_sum,
+                    'category_list': JSON.stringify(cat_list),
+                    'amount_list': JSON.stringify(amount_list),
+                    'transaction_id': transaction_id,
+                    'method_name': method_name,
+                    'csrfmiddlewaretoken': csrfmiddlewaretoken
+                    },
+            success: function(response)
+            {
+                if(response.status == "success")
+                {
+                    Swal.fire({
+                                title: "Transaction Split Successfully",
+                                icon: 'success',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                              });
+                }
+                else
+                {
+                        Swal.fire({
+                                title: response.message,
+                                icon: 'error',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                              });
+
+                }
+            }
+        });
+    }
+});
+// Save Split Transaction Amount
+
 function inputHTML(formHtml, name, value)
 {
     formHtml += "<input type='hidden' name='" + name +"' value='" + value + "' >"

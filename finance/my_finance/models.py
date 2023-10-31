@@ -481,17 +481,29 @@ class RentalPropertyModel(models.Model):
         return str(self.name)
 
 
+class Tag(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tag_user')
+    name = models.CharField(max_length=30)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction_user')
     amount = models.CharField(max_length=255)
     remaining_amount = models.CharField(max_length=10)
     transaction_date = models.DateField(blank=True, null=True)
     categories = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+    split_transactions = models.CharField(max_length=255, blank=True, null=True)
+    original_amount = models.CharField(max_length=255, blank=True, null=True)
     budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
     payee = models.CharField(max_length=25)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
-    tags = models.CharField(max_length=225, blank=True, null=True)
+    tags = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True, blank=True)
+    notes = models.CharField(max_length=255, blank=True, null=True)
     in_flow = models.BooleanField(default=False)
     out_flow = models.BooleanField(default=True)
     plaid_account_id = models.CharField(max_length=255, blank=True, null=True)

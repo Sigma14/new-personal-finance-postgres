@@ -188,6 +188,8 @@ class TransactionForm(forms.ModelForm):
     out_flow = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     cleared = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}), required=False)
     amount = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    notes = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tag_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     category = forms.ModelChoiceField(queryset=None)
 
     def __init__(self, *args, **kwargs):
@@ -213,7 +215,7 @@ class TransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        exclude = ('user', 'plaid_account_id', 'plaid_transaction_id', 'remaining_amount', 'created_at', 'budgets')
+        exclude = ('user', 'split_transactions', 'original_amount', 'plaid_account_id', 'plaid_transaction_id', 'remaining_amount', 'created_at', 'budgets')
 
 
 class AccountForm(forms.ModelForm):

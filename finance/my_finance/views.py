@@ -51,7 +51,7 @@ from .helper import create_categories, check_subcategory_exists, save_fund_obj, 
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings
+    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings, Tag
 from .mortgage import calculator, calculate_tenure
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
@@ -725,13 +725,15 @@ def compare_budgets(user_name, start, end, budget_names_list):
     return transaction_budget, [total_budget_spent, total_budget_left], cmp_budgets_dict, cmp_transaction_budgets
 
 
-def transaction_summary(transaction_data, select_filter):
-    tags_data = ['All']
+def transaction_summary(transaction_data, select_filter, user_name):
     credit_date_dict = {}
     debit_date_dict = {}
     credit_date_list = []
     debit_date_list = []
     date_list = []
+    tags_data = []
+    start_date = ""
+    end_date = ""
     for transaction_name in transaction_data:
         if transaction_name.cleared:
             transaction_date = str(transaction_name.transaction_date)
@@ -748,12 +750,13 @@ def transaction_summary(transaction_data, select_filter):
                 else:
                     credit_date_dict[transaction_date] = float(transaction_amount)
             date_list.append(str(transaction_date))
-        if transaction_name.tags:
-            tags_data.append(transaction_name.tags)
 
-    tags_data = list(dict.fromkeys(tags_data))
     date_list = list(dict.fromkeys(date_list))
-
+    if transaction_data:
+        start_date = date_list[-1]
+        end_date = date_list[0]
+    tags_data = list(Tag.objects.filter(user=user_name).values_list('name', flat=True))
+    tags_data.insert(0, 'All')
     for value in date_list:
         if value in debit_date_dict:
             debit_date_list.append(debit_date_dict[value])
@@ -777,10 +780,9 @@ def transaction_summary(transaction_data, select_filter):
         'transaction_date_data_dumbs': json.dumps(date_list),
         'debit_graph_data_dumbs': json.dumps(debit_date_list),
         'credit_graph_data_dumbs': json.dumps(credit_date_list),
+        'start_date': start_date,
+        'end_date': end_date,
     }
-    if date_list:
-        context['start_date'] = date_list[0],
-        context['end_date'] = date_list[-1],
 
     return context
 
@@ -799,7 +801,11 @@ def transaction_checks(username, transaction_amount, account, bill_name, budget_
             date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
             start_month_date, end_month_date = start_end_date(date_check, "Monthly")
             budget_obj = Budget.objects.filter(user=username, name=budget_name, start_date=start_month_date,
-                                               end_date=end_month_date)[0]
+                                               end_date=end_month_date)
+            if budget_obj:
+                budget_obj = budget_obj[0]
+            else:
+                budget_obj = False
         else:
             budget_obj = False
 
@@ -2151,6 +2157,7 @@ def current_budget_box(request):
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list, \
         budgets_dict, income_bdgt_dict, total_bgt_income = make_budgets_values(user_name, budget_data, "budget_page")
 
+    print("budget_values=======>", budget_values)
     bills_qs = Bill.objects.filter(user=user_name, date__range=(start_date, end_date)).order_by('-created_at')
     week_daily_dict = {}
     for bill_data in bills_qs:
@@ -2161,15 +2168,17 @@ def current_budget_box(request):
         bill_spent_amount = round(bill_amount - bill_left_amount, 2)
         bill_start_date = datetime.datetime.strftime(bill_data.date, "%b %d, %Y")
         transaction_qs = Transaction.objects.filter(user=user_name, bill=bill_data,
-                                                    transaction_date__range=(start_date, end_date)).order_by('transaction_date')
+                                                    transaction_date__range=(start_date, end_date)).order_by(
+            'transaction_date')
         current_spent_amount = 0
         for trans_data in transaction_qs:
             current_spent_amount += float(trans_data.amount)
 
-        budget_values[0] += current_spent_amount
-        budget_graph_data[0]['data'].append(current_spent_amount)
-        budget_graph_data[1]['data'].append(bill_left_amount)
-        budget_graph_data[2]['data'].append(0)
+        if budget_values:
+            budget_values[0] += current_spent_amount
+            budget_graph_data[0]['data'].append(current_spent_amount)
+            budget_graph_data[1]['data'].append(bill_left_amount)
+            budget_graph_data[2]['data'].append(0)
         current_budget_names_list.append(bill_name)
         bill_bgt_list = [bill_name, bill_amount, current_spent_amount, bill_left_amount, bill.id, bill.frequency,
                          bill_start_date, bill_start_date, bill_data.currency, bill_spent_amount]
@@ -2789,6 +2798,170 @@ class TemplateDelete(LoginRequiredMixin, DeleteView):
 #     form_class = BillForm
 #     template_name = 'bill/bill_delete.html'
 
+# Tag Views
+
+def tag_add(request):
+    name = request.POST['name'].title()
+    user_name = request.user
+    tag_obj = Tag.objects.filter(user=user_name, name=name)
+    if tag_obj:
+        return JsonResponse({"status": "Already Exist"})
+    else:
+        Tag.objects.create(user=user_name, name=name)
+        return JsonResponse({"status": "success", "name": name})
+
+
+@login_required(login_url="/login")
+def transaction_split(request):
+    user_name = request.user
+    print(request.POST)
+    method_name = request.POST['method_name']
+    transaction_id = request.POST['transaction_id']
+    category_list = ast.literal_eval(request.POST['category_list'])
+    amount_list = ast.literal_eval(request.POST['amount_list'])
+    original_amount = request.POST['original_amount']
+    transaction_obj = Transaction.objects.get(user=user_name, pk=transaction_id)
+    transaction_account = transaction_obj.account.name
+    try:
+        transaction_tags = transaction_obj.tags
+    except:
+        transaction_tags = None
+    transaction_notes = transaction_obj.notes
+    transaction_out_flow = transaction_obj.out_flow
+    transaction_date = transaction_obj.transaction_date
+    transaction_description = transaction_obj.payee
+    cleared_amount = "True"
+    split_trans_obj_list = []
+    split_amount_dict = {}
+    list_length = len(category_list)
+    for list_index in range(list_length):
+        split_amount = round(float(amount_list[list_index]), 2)
+        if split_amount == 0.0:
+            del amount_list[list_index]
+            del category_list[list_index]
+
+    if len(category_list) <= 1:
+        return JsonResponse({"status": "error", "message": "Please add more than one category with amount"})
+    else:
+        print("mehtod_name========>", method_name)
+        if method_name == "update_split":
+            print("update=============>")
+            split_dict = ast.literal_eval(transaction_obj.split_transactions)
+            update_cat_list = []
+            for key, val in split_dict.items():
+                old_category_name = val[0]
+                trans_obj = Transaction.objects.get(pk=int(key))
+                print("old_category_name", old_category_name)
+                print(category_list)
+                if old_category_name in category_list:
+                    old_amount = round(float(val[1]), 2)
+                    split_index = category_list.index(old_category_name)
+                    new_amount = round(float(amount_list[split_index]), 2)
+                    update_cat_list.append(old_category_name)
+                    split_amount_dict[trans_obj.id] = [old_category_name, new_amount]
+                    split_trans_obj_list.append(trans_obj)
+                    if new_amount != old_amount:
+                        print("amount-different")
+                        trans_obj.amount = new_amount
+                        trans_obj.save()
+                else:
+                    print("Delete---------->", old_category_name)
+                    update_cat_list.append(old_category_name)
+                    trans_obj.delete()
+            print("update_cat_list====>", update_cat_list)
+            print("category_list====>", category_list)
+            for i in range(len(category_list)):
+                if category_list[i] not in update_cat_list:
+                    print("NewCategory======>", category_list[i])
+                    split_obj = Transaction()
+                    subcategory_obj = SubCategory.objects.get(name=category_list[i], category__user=user_name)
+                    transaction_amount = float(amount_list[i])
+                    bill_name = ""
+                    budget_name = ""
+                    out_flow = "False"
+                    if subcategory_obj.category.name == "Bills & Subscriptions":
+                        bill_name = subcategory_obj.name
+                    budget_qs = Budget.objects.filter(user=user_name, category=subcategory_obj)
+                    if budget_qs:
+                        budget_name = subcategory_obj.name
+                    if transaction_out_flow:
+                        out_flow = "True"
+
+                    account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account, bill_name,
+                                                                 budget_name, cleared_amount, out_flow, str(transaction_date))
+                    split_obj.user = user_name
+                    split_obj.categories = subcategory_obj
+                    split_obj.amount = round(transaction_amount, 2)
+                    split_obj.remaining_amount = account_obj.available_balance
+                    split_obj.account = account_obj
+                    if transaction_tags:
+                        split_obj.tags = transaction_tags
+                    split_obj.notes = transaction_notes
+                    split_obj.transaction_date = transaction_date
+                    split_obj.original_amount = original_amount
+                    split_obj.payee = transaction_description
+                    split_obj.out_flow = transaction_out_flow
+                    if budget_obj:
+                        split_obj.budgets = budget_obj
+                    if bill_name:
+                        split_obj.bill = Bill.objects.get(user=user_name, name=bill_name)
+                    split_obj.cleared = True
+                    split_obj.save()
+                    split_trans_obj_list.append(split_obj)
+                    split_amount_dict[split_obj.id] = [category_list[i], split_obj.amount]
+        else:
+            transaction_obj.original_amount = original_amount
+            transaction_obj.amount = amount_list[0]
+            split_trans_obj_list.append(transaction_obj)
+            split_amount_dict[transaction_obj.id] = [category_list[0], round(float(amount_list[0]), 2)]
+            print(split_amount_dict)
+            for i in range(1, len(category_list)):
+                split_obj = Transaction()
+                subcategory_obj = SubCategory.objects.get(name=category_list[i], category__user=user_name)
+                transaction_amount = float(amount_list[i])
+                bill_name = ""
+                budget_name = ""
+                out_flow = "False"
+                if subcategory_obj.category.name == "Bills & Subscriptions":
+                    bill_name = subcategory_obj.name
+                budget_qs = Budget.objects.filter(user=user_name, category=subcategory_obj)
+                if budget_qs:
+                    budget_name = subcategory_obj.name
+                if transaction_out_flow:
+                    out_flow = "True"
+
+                account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account, bill_name,
+                                                             budget_name, cleared_amount, out_flow, str(transaction_date))
+                split_obj.user = user_name
+                split_obj.categories = subcategory_obj
+                split_obj.amount = round(transaction_amount, 2)
+                split_obj.remaining_amount = account_obj.available_balance
+                split_obj.account = account_obj
+                if transaction_tags:
+                    split_obj.tags = transaction_tags
+                split_obj.notes = transaction_notes
+                split_obj.transaction_date = transaction_date
+                split_obj.original_amount = original_amount
+                split_obj.payee = transaction_description
+                split_obj.out_flow = transaction_out_flow
+                if budget_obj:
+                    split_obj.budgets = budget_obj
+                if bill_name:
+                    split_obj.bill = Bill.objects.get(user=user_name, name=bill_name)
+                split_obj.cleared = True
+                split_obj.save()
+                split_trans_obj_list.append(split_obj)
+                split_amount_dict[split_obj.id] = [category_list[i], split_obj.amount]
+
+        print(split_amount_dict)
+        print(split_trans_obj_list)
+        for obj in split_trans_obj_list:
+            obj.split_transactions = split_amount_dict
+            obj.tags = obj.tags
+            obj.save()
+
+        return JsonResponse({"status": "success"})
+
 
 @login_required(login_url="/login")
 def transaction_list(request):
@@ -2797,7 +2970,8 @@ def transaction_list(request):
         tag_name = request.POST['tag_name']
         tags_data = request.POST['tags_data']
         if tag_name != 'All':
-            transaction_data = Transaction.objects.filter(user=user_name, tags=tag_name).order_by('-transaction_date')
+            transaction_data = Transaction.objects.filter(user=user_name, tags__name=tag_name).order_by(
+                '-transaction_date')
         else:
             transaction_data = Transaction.objects.filter(user=user_name).order_by('-transaction_date')
         select_filter = tag_name
@@ -2805,7 +2979,7 @@ def transaction_list(request):
         transaction_data = Transaction.objects.filter(user=user_name).order_by('-transaction_date')
         select_filter = 'All'
 
-    context = transaction_summary(transaction_data, select_filter)
+    context = transaction_summary(transaction_data, select_filter, user_name)
     return render(request, 'transaction/transaction_list.html', context=context)
 
 
@@ -2818,10 +2992,12 @@ def transaction_report(request):
         start_date = request.POST['start_date']
         end_date = request.POST['end_date']
         tags_data = ast.literal_eval(tags_data)
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
         if tag_name != 'All':
             transaction_data = Transaction.objects.filter(user=user_name,
                                                           transaction_date__range=(start_date, end_date),
-                                                          tags=tag_name).order_by('transaction_date')
+                                                          tags__name=tag_name).order_by('transaction_date')
         else:
             transaction_data = Transaction.objects.filter(user=user_name,
                                                           transaction_date__range=(start_date, end_date)).order_by(
@@ -2831,6 +3007,8 @@ def transaction_report(request):
         start_date = request.GET['start_date']
         end_date = request.GET['end_date']
         if start_date != "" and end_date != "":
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
             transaction_data = Transaction.objects.filter(user=user_name,
                                                           transaction_date__range=(start_date, end_date)).order_by(
                 'transaction_date')
@@ -2838,9 +3016,9 @@ def transaction_report(request):
         else:
             return redirect("/transaction_list/")
 
-    context = transaction_summary(transaction_data, select_filter)
-    context['start_date'] = start_date
-    context['end_date'] = end_date
+    context = transaction_summary(transaction_data, select_filter, user_name)
+    context['start_date'] = str(start_date)
+    context['end_date'] = str(end_date)
     return render(request, 'transaction/transaction_list.html', context=context)
 
 
@@ -2862,6 +3040,14 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         kwargs['request'] = self.request
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        # self.request = kwargs.pop('request')
+        user_name = self.request.user
+        tags = Tag.objects.filter(user=user_name)
+        data = super(TransactionAdd, self).get_context_data(**kwargs)
+        data['tags'] = tags
+        return data
+
     def get_success_url(self):
         """Detect the submit button used and act accordingly"""
         if 'add_other' in self.request.POST:
@@ -2881,9 +3067,14 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         obj.categories = subcategory_obj
         account = form.cleaned_data.get('account')
         transaction_amount = round(float(form.cleaned_data.get('amount')), 2)
-        tags = form.cleaned_data.get('tags')
+        tags = form.cleaned_data.get('tag_name')
+        notes = form.cleaned_data.get('notes')
+        print("tags=====>", tags)
+        print("notes=====>", notes)
         if tags:
-            obj.tags = tags
+            obj.tags = Tag.objects.get(name=tags, user=user_name)
+        if notes:
+            obj.notes = notes
         out_flow = form.cleaned_data.get('out_flow')
         cleared_amount = "True"
         bill_name = form.cleaned_data.get('bill')
@@ -2893,7 +3084,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         #     income_obj.credited = True
         #     income_obj.save()
 
-        if category_name.name == 'Bills' or category_name.name == 'Bill':
+        if category_name.name == 'Bills & Subscriptions' or category_name.name == 'Bills':
             due_bill_id = int(self.request.POST['due_bill'])
             bill_name = Bill.objects.get(pk=due_bill_id)
             obj.bill = bill_name
@@ -2928,13 +3119,45 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         user_name = self.request.user
         transaction_obj = Transaction.objects.get(pk=self.kwargs['pk'])
         data = super(TransactionUpdate, self).get_context_data(**kwargs)
+        categories_data = Category.objects.filter(user=user_name)
+        subcategories_data = SubCategory.objects.filter(category__user=user_name)
+        select_subcategory = transaction_obj.categories
+        subcategory_data = SubCategory.objects.filter(category=select_subcategory.category)
+        select_category_id = select_subcategory.category.id
+        select_subcategory_id = select_subcategory.id
+        select_subcategory_name = select_subcategory.name
+        original_amount = transaction_obj.original_amount
         try:
-            select_budget_name = transaction_obj.budgets.name
+            select_budget_name = transaction_obj.budgets
         except:
-            select_budget_name = "Select Budget"
-        data['budgets_name'] = get_budgets(user_name)
-        data['select_name'] = select_budget_name
+            select_budget_name = None
+        try:
+            tag_name = transaction_obj.tags.name
+        except:
+            tag_name = None
 
+        split_category = transaction_obj.split_transactions
+        if split_category:
+            split_category = ast.literal_eval(split_category)
+            amount_list = []
+            split_cat = []
+            for key, value in split_category.items():
+                split_cat.append(value[0])
+                amount_list.append(value[1])
+            data['split_category'] = split_category
+            data['split_cat'] = json.dumps(split_cat)
+            data['amount_list'] = json.dumps(amount_list)
+        data['tags'] = Tag.objects.filter(user=user_name)
+        data['select_budget_name'] = select_budget_name
+        data['select_category_id'] = select_category_id
+        data['select_subcategory_id'] = select_subcategory_id
+        data['categories'] = categories_data
+        data['subcategories'] = subcategory_data
+        data['tag_name'] = tag_name
+        data['original_amount'] = original_amount
+        data['select_subcategory_name'] = select_subcategory_name
+        data['subcategories_data'] = subcategories_data
+        data['transaction_id'] = self.kwargs['pk']
         return data
 
     def form_valid(self, form):
@@ -2972,7 +3195,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             income_obj.credited = False
             income_obj.save()
 
-        if transaction_obj.categories.category.name == 'Bills' == category_name.name:
+        if transaction_obj.categories.category.name == 'Bills & Subscriptions' == category_name.name:
             bill_obj = transaction_obj.bill
             bill_amount = float(bill_obj.remaining_amount)
             if transaction_amount != update_transaction_amount:
@@ -2987,14 +3210,14 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 bill_obj.remaining_amount = bill_amount
             bill_obj.save()
 
-        if transaction_obj.categories.category.name == 'Bills' != category_name.name:
+        if transaction_obj.categories.category.name == 'Bills & Subscriptions' != category_name.name:
             bill_obj = transaction_obj.bill
             bill_amount = float(bill_obj.remaining_amount)
             bill_obj.status = "unpaid"
             bill_obj.remaining_amount = bill_amount + transaction_amount
             bill_obj.save()
             obj.bill = None
-        if transaction_obj.categories.category.name != 'Bills' == category_name.name:
+        if transaction_obj.categories.category.name != 'Bills & Subscriptions' == category_name.name:
             due_bill_id = int(self.request.POST['due_bill'])
             bill_obj = Bill.objects.get(pk=due_bill_id)
             bill_amount = float(bill_obj.remaining_amount) - update_transaction_amount

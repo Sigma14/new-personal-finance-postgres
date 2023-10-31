@@ -33,4 +33,5 @@ admin.site.register(PropertyExpense)
 admin.site.register(PlaidItem)
 admin.site.register(SubCategory)
 admin.site.register(StockHoldings)
+admin.site.register(Tag)
 

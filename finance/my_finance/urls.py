@@ -57,6 +57,7 @@ urlpatterns = [
     path('transaction_delete/<int:pk>', TransactionDelete.as_view(), name='transaction_delete'),
     path('transaction_upload', transaction_upload, name='transaction_upload'),
     path('transaction_report', transaction_report, name='transaction_report'),
+    path('transaction_split', transaction_split, name='transaction_split'),
 
     # Goal urls :-
     path('goal_add/', goal_add, name='goal_add'),
@@ -101,6 +102,8 @@ urlpatterns = [
     path('bill/automatic_amount', bill_automatic_amount, name='bill_automatic_amount'),
     path('bill/due_list', unpaid_bills, name='bill_due_list'),
 
+    # Tag urls :-
+    path('tag_add/', tag_add, name='tag_add'),
 
     # Income Urls :-
     # path('income_add/', income_add, name='income_add'),

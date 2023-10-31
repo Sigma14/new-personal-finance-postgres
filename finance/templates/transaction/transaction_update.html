@@ -38,9 +38,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
                                             {{form.transaction_date}}
                                         </div>
                                     </div>
@@ -49,13 +46,10 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Payee</label>
+                                        <label for="fname-icon">Description</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             <input type="text" value="{{form.payee.value}}" id="fname-icon" class="form-control" name="payee" required
                                                    placeholder="Payee"/>
                                         </div>
@@ -69,9 +63,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                            {{ form.account }}
                                         </div>
                                     </div>
@@ -84,24 +75,37 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            {{ form.category }}
+                                            <select name="category" class="form-control pick_category" required="" id="id_category">
+                                                <option value="">Select Category Group</option>
+                                                {% for category in categories %}
+                                                    {% if category.id == select_category_id %}
+                                                        <option value="{{category.id}}" selected>{{category.name}}</option>
+                                                    {% else %}
+                                                        <option value="{{category.id}}">{{category.name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 transaction_cat_list" style="display:None;">
+                            <div class="col-12 transaction_cat_list">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Categories</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_sub_cat">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
+                                            <select class="form-control show_due_bills check_budget_category" id="subcategory" name="subcategory">
+                                                <option value="">Select Category</option>
+                                                {% for subcategory in subcategories %}
+                                                    {% if subcategory.id == select_subcategory_id %}
+                                                        <option selected>{{subcategory.name}}</option>
+                                                    {% else %}
+                                                        <option>{{subcategory.name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -113,9 +117,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_bills">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,9 +128,6 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_income">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -142,41 +140,19 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
                                             {{ form.bill }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 budget_div" style="display:None;">
+                            <div class="col-12 budget_div" style="{% if not select_budget_name %}display:None;{% endif %}">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Budget</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" class="form-control" id="budget_name" name="budget_name" readonly>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <div class="col-sm-3 col-form-label">
-                                        <label for="transaction_tags">Tags</label>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="user"></i></span>
-                                            </div>
-                                            <input type="text" value="{{form.tags.value}}" id="transaction_tags" class="form-control" name="tags"
-                                                   placeholder="Tags"/>
+                                            <input type="text" class="form-control" value="{{select_budget_name.name}}" id="budget_name" name="budget_name" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -188,13 +164,48 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i data-feather="mail"></i></span>
-                                            </div>
                                             <input type="text" id="email-icon" value="{{form.amount.value}}" class="form-control" name="amount" required
                                                    placeholder="Amount"/>
                                         </div>
                                         <p id="amount_error" class="text-danger" style="display:None"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Split Transactions</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input data-toggle="modal" data-target="#split_toggle" type="text" id="split_transactions" class="form-control" name="split_transactions"
+                                                   placeholder="Add Split Amount" readonly/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="transaction_tags">Tags</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input data-toggle="modal" value="{% if tag_name %}{{tag_name}}{%endif%}" data-target="#tag_toggle" type="text" id="transaction_tags" class="form-control" name="tag_name"
+                                                   placeholder="Add Tags" readonly/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Notes</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.notes }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -233,6 +244,195 @@
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="tag_toggle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel1">Select and add tags for this transaction</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Basic Vertical form layout section start -->
+                    <section id="basic-vertical-layouts" >
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card" style="margin-bottom:0px;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <h5>Name</h5>
+                                                    <input type="text" id="tag_name" name="tag_name" class="form-control" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <button class="btn btn-primary add_tag_btn">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Basic Vertical form layout section end -->
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">All tags</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row tag_sugg">
+                                        {% for tag in tags %}
+                                        <a style="margin:5px; font-size: 12px;" class="btn btn-outline-secondary close select_tag" data-dismiss="modal" aria-label="Close">
+                                            {{tag.name}}&nbsp;<i class="fa fa-plus"></i>
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="split_toggle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="split_toggle1">Split Transaction</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Basic Vertical form layout section start -->
+                    <section id="basic-vertical-layout" >
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card" style="margin-bottom:0px;">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="card-datatable table-responsive">
+                                                     <table class="table">
+                                                         <thead>
+                                                         <tr><th>Original Transaction</th></tr>
+                                                         </thead>
+                                                     </table>
+                                                     <table class="table">
+                                                         <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                        <div class="text-muted">Description</div>
+                                                                        <div class="font-weight-bolder">{{form.payee.value}}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                        <div class="text-muted">Amount</div>
+                                                                        <div class="font-weight-bolder" id="original_split_amount">{% if original_amount %}{{original_amount}}{% else %}{{form.amount.value}}{% endif %}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                         </tbody>
+                                                     </table>
+                                                     <table class="table">
+                                                         <thead>
+                                                         <tr><th colspan="3">Splits Into</th></tr>
+                                                         </thead>
+                                                         <tbody class="split_cat_table">
+                                                            {% if split_category %}
+                                                            {% for key, val in split_category.items %}
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div class="font-weight-bolder">{{val.0}}</div>
+                                                                        </div>
+                                                                    </td>
+                                                                    {% if forloop.counter0 == 0 %}
+                                                                        <td colspan="2">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <div class="font-weight-bolder"><input type="text" class="form-control change_split_amount" amount_index="{{forloop.counter0}}" value="{{val.1}}"></div>
+                                                                            </div>
+                                                                        </td>
+                                                                    {% else %}
+                                                                        <td>
+                                                                            <div class="d-flex align-items-center">
+                                                                                <div class="font-weight-bolder"><input type="text" class="form-control change_split_amount" amount_index="{{forloop.counter0}}" value="{{val.1}}"></div>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <button class="btn btn-danger delete_split_cat" cat_value="{{val.0}}">
+                                                                                <i class="fa fa-minus"></i>
+                                                                            </button>
+                                                                        </td>
+                                                                    {% endif %}
+                                                                </tr>
+                                                            {% endfor %}
+                                                            {% else %}
+                                                                <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="font-weight-bolder">{{select_subcategory_name}}</div>
+                                                                    </div>
+                                                                </td>
+                                                                <td colspan="2">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="font-weight-bolder"><input type="text" class="form-control change_split_amount" amount_index="0" value="{{form.amount.value}}"></div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                         </tbody>
+                                                     </table>
+                                                </div>
+                                                <br/>
+                                                <div class="form-group">
+                                                    <select class="form-control select_split_category">
+                                                        <option value="">Select Category</option>
+                                                        {% for data in subcategories_data %}
+                                                            <option>{{data.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Basic Vertical form layout section end -->
+                </div>
+                <div class="modal-footer">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    {% if split_cat %}
+                                        <button class="btn btn-primary save_split_cat_btn" transaction_id="{{transaction_id}}" split_cat_list='{{split_cat}}' method_name="update_split" split_amount_list='{{amount_list}}'>Update</button>
+                                    {% else %}
+                                        <button class="btn btn-primary save_split_cat_btn" transaction_id="{{transaction_id}}" method_name="save_split" split_cat_list='["{{select_subcategory_name}}"]' split_amount_list='["{{form.amount.value}}"]'>Save</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
