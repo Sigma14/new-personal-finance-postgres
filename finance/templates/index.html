@@ -140,11 +140,6 @@
                         data-feather="home"></i><span class="menu-title text-truncate"
                                                       data-i18n="Dashboard">Home</span></a>
                 </li>
-                <li class=" nav-item {% if request.resolver_match.view_name == 'dashboard' %}active{% endif %}"><a
-                        class="d-flex align-items-center" href="{% url 'dashboard' %}"><i
-                        data-feather="inbox"></i><span class="menu-title text-truncate"
-                                                      data-i18n="Dashboard">Dashboard</span></a>
-                </li>
                 <li class=" nav-item {% if request.resolver_match.view_name == 'category_list' or request.resolver_match.view_name == 'category_add' or request.resolver_match.view_name == 'category_detail' or request.resolver_match.view_name == 'category_update' %}active{% endif %}"><a
                     class="d-flex align-items-center" href="{% url 'category_list' %}"><i data-feather='list'></i><span class="menu-title text-truncate" data-i18n="Category">Categories</span></a>
                 </li>

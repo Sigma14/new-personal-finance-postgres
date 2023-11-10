@@ -1579,6 +1579,7 @@ def subcategory_update(request, pk):
     if request.method == 'POST':
         category_obj = Category.objects.get(user=user, name=request.POST.get('category'))
         name = request.POST.get('name').title()
+        old_name = subcategory_obj.name
         sub_category_exist = check_subcategory_exists(subcategory_obj, name, category_obj)
         if sub_category_exist:
             context['error'] = 'Subcategory already exists'
@@ -1586,6 +1587,10 @@ def subcategory_update(request, pk):
         subcategory_obj.name = name
         subcategory_obj.category = category_obj
         subcategory_obj.save()
+        if subcategory_obj.category.name == "Bills & Subscriptions":
+            bill_obj = BillDetail.objects.get(user=user, label=old_name)
+            bill_obj.label = name
+            bill_obj.save()
         return redirect("/category_list")
 
     return render(request, "subcategory/update.html", context=context)
@@ -1622,6 +1627,7 @@ def subcategory_budget(request):
         budget_name = budget[0].name
     except:
         budget_name = False
+
     return JsonResponse({"budget_name": budget_name})
 
 
@@ -2213,6 +2219,10 @@ def current_budget_box(request):
                     current_budget_names_list.pop(current_index)
 
     left_over_cash = round(total_bgt_income - sum(total_expense_list), 2)
+    transaction_key = ['Date', 'Amount', 'Account', 'Categories', 'Budget']
+    transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False,
+                                                  transaction_date__range=(start_date, end_date)).order_by(
+            'transaction_date')
     context = {"list_of_months": list_of_months, "current_month": current_month,
                "budget_graph_currency": budget_currency, 'total_income': total_bgt_income,
                'income_bdgt_dict': income_bdgt_dict, 'left_over_cash': left_over_cash,
@@ -2223,7 +2233,9 @@ def current_budget_box(request):
                "budget_bar_id": "#budgets-bar",
                'budget_names': current_budget_names_list,
                "budget_graph_value": total_expense_list,
-               "budget_graph_id": "#total_budget"
+               "budget_graph_id": "#total_budget",
+               "transaction_key": transaction_key,
+               "transaction_data": transaction_data
                }
     return render(request, 'budget/current_budget_box.html', context=context)
 

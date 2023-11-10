@@ -352,6 +352,17 @@ $('#expense_table').DataTable( {
             $(".income_drp_sign").toggle();
         }
     });
+
+    $("body").delegate(".show_transaction", "click", function(e)
+    {
+        method_name = $(this).attr('method_name')
+        $("." + method_name).toggle();
+        if(method_name == 'transactions_cls')
+        {
+            $(".transactions_drp_sign").toggle();
+        }
+    });
+
     $("body").delegate(".daily_bdgt_data", "click", function(e)
     {
         class_name = $(this).attr('class_name')
@@ -2126,6 +2137,7 @@ $("body").delegate(".check_budget_category", "change", function(event)
         },
         success: function(response)
         {
+
             if(response.budget_name)
             {
                 $("#budget_name").val(response.budget_name);
