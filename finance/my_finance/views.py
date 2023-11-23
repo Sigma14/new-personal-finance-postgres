@@ -88,6 +88,10 @@ api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
 
+from django.utils.translation import gettext as _
+
+
+
 @ensure_csrf_cookie
 def create_link_token(request):
     user = request.user
@@ -1078,12 +1082,25 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
         for date_value in date_range_list:
             balance_graph_data.append(round(current_balance, 2))
 
+# from django.utils.translation import get_language, activate, gettext
+
 
 # Personal Finance Home Page
 def home(request):
+    # trans = translate(language='fr')
     print("home")
     return render(request, "home.html")
 
+
+# def translate(language):
+#     cur_language = get_language()
+#     try:
+#         activate(language)
+#         text = gettext('hello')
+#     finally:
+#         activate(cur_language)
+#     return text 
+    
 
 # Real Estate Home Page
 def real_estate_home(request):

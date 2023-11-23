@@ -1,0 +1,181 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-22 19:05+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\finance\urls.py:28
+msgid "admin/"
+msgstr "administratrice/"
+
+#: .\templates\home.html:30
+msgid "Personal Finance"
+msgstr "Finances personnelles"
+
+#: .\templates\home.html:30
+msgid ""
+"is an application to manage your personal finance. It can help you keep "
+"track of your expenses and income, so you can spend less and save more."
+msgstr ""
+"est une application pour gérer vos finances personnelles. Elle vous permet "
+"de suivre vos dépenses et vos revenus, afin que vous puissiez dépenser moins "
+"et économiser davantage."
+
+#: .\templates\home.html:30
+msgid ""
+"You can store, edit and remove withdrawals, deposits and transfers. This "
+"allows you full financial management. Using this you can manage different "
+"types of accounts like Asset accounts, Saving accounts, Liabilities (loans, "
+"mortgages). It provides a facility to create, change and manage money using "
+"budgets. You can organize transactions using categories and also track your "
+"goals and bills."
+msgstr ""
+"Vous pouvez stocker, modifier et supprimer des retraits, des dépôts et des "
+"transferts. Cela vous permet une gestion financière complète. Grâce à cela, "
+"vous pouvez gérer différents types de comptes tels que des comptes d'actifs, "
+"des comptes d'épargne, des passifs (prêts, hypothèques). Il offre la "
+"possibilité de créer, modifier et gérer de l'argent en utilisant des "
+"budgets. Vous pouvez organiser des transactions en utilisant des catégories "
+"et suivre également vos objectifs et vos factures."
+
+#: .\templates\home.html:30
+msgid "More.."
+msgstr "Plus"
+
+#: .\templates\home.html:60
+msgid "BUDGET"
+msgstr ""
+
+#: .\templates\home.html:63
+msgid ""
+"It shows you an overview of your budgets. It shows you to how many amount "
+"spent and left in budget. you can compare your budget period wise with "
+"pretty charts"
+msgstr ""
+"Il vous offre un aperçu de vos budgets, affichant le montant dépensé et le "
+"solde restant dans le budget. Vous pouvez comparer votre budget sur "
+"différentes périodes à l'aide de graphiques attrayants."
+
+#: .\templates\home.html:75
+msgid "BILLS"
+msgstr "FACTURES"
+
+#: .\templates\home.html:78
+msgid ""
+"It provides a facility to add bills and shows all the bills with calender. "
+"Using calender you can easily filter which bill is paid or unpaid."
+msgstr ""
+"Il offre une fonctionnalité pour ajouter des factures et affiche toutes les "
+"factures sur un calendrier. En utilisant le calendrier, vous pouvez "
+"facilement filtrer les factures payées ou impayées."
+
+#: .\templates\home.html:90
+msgid "CATEGORY"
+msgstr "CATÉGORIE"
+
+#: .\templates\home.html:93
+msgid ""
+"It provides a facility to add category and shows all the category with "
+"spending amount. so its very easy to find out which category spent the most."
+msgstr ""
+"Il propose une fonctionnalité pour ajouter des catégories et affiche toutes "
+"les catégories avec leur montant de dépenses, ce qui facilite "
+"l'identification de la catégorie ayant le plus dépensé."
+
+#: .\templates\home.html:105
+msgid "ACCOUNTS"
+msgstr "Compte"
+
+#: .\templates\home.html:108
+msgid ""
+"It manage different types of accounts like Asset accounts, Saving accounts, "
+"Liabilities (loans, mortgages).It shows your current balance and all "
+"transactions data of account with charts. you can add, update and delete "
+"your account data."
+msgstr ""
+"Il gère différents types de comptes tels que les comptes d'actifs, les "
+"comptes d'épargne, les passifs (prêts, hypothèques). Il affiche votre solde "
+"actuel et toutes les données de transaction de compte à l'aide de "
+"graphiques. Vous pouvez ajouter, mettre à jour et supprimer vos données de "
+"compte."
+
+#: .\templates\home.html:120
+msgid "TRANSACTIONS"
+msgstr "TRANSACTIONS"
+
+#: .\templates\home.html:123
+msgid ""
+"It manage transaction records. It provides facility to import transactions "
+"of your bank account and also import transaction files. you can export "
+"transaction data with date range. It shows all credit and debit transactions "
+"with charts."
+msgstr ""
+"Il gère les enregistrements de transactions, permettant l'importation et "
+"l'exportation de fichiers de transactions bancaires. Affiche les "
+"transactions de crédit et de débit avec des graphiques."
+
+#: .\templates\home.html:135
+msgid "GOALS"
+msgstr "OBJECTIFS"
+
+#: .\templates\home.html:138
+msgid ""
+"It provides a facility to manage you goals and helps to achieving goals. you "
+"can add, update and delete goals and also see goals are completed or not "
+"with pretty charts."
+msgstr ""
+"Aide à gérer et à atteindre des objectifs, permettant l'ajout, la mise à "
+"jour, la suppression et le suivi de l'atteinte des objectifs avec des "
+"graphiques."
+
+#: .\templates\home.html:150
+msgid "CALCULATORS"
+msgstr "CALCULATRICES"
+
+#: .\templates\home.html:153
+msgid ""
+"It has Mortgage calculator and Future net worth calculator. Mortgage "
+"calculator calculates your mortgage payments details according to interest "
+"periods. Future net worth calculator calculates a net worth projection of "
+"what your actual net worth in future over age and time will be."
+msgstr ""
+"Il comprend un calculateur hypothécaire et un calculateur de valeur nette "
+"future. Le calculateur d'hypothèque calcule vos paiements hypothécaires en "
+"fonction des périodes d'intérêt. Le calculateur de valeur nette future "
+"projette votre valeur nette future en fonction du temps et de l'âge."
+
+#: .\templates\home.html:165
+msgid "REAL ESTATE"
+msgstr "IMMOBILIER"
+
+#: .\templates\home.html:168
+msgid ""
+"It has property manage and property model sections.Property manage section "
+"useful to create property details, set rental terms and add tenants. "
+"Property model sections useful to analyse rental property investment "
+"summary, capital expenditure budget, yearly projection for revenue, expenses "
+"and income, investor contribution, mortgage."
+msgstr ""
+"Il comprend des sections de gestion immobilière et de modélisation immobilière. La section de "
+"gestion immobilière aide à créer des détails de propriété, à définir les conditions de location "
+"et à ajouter des locataires. Les sections de modélisation immobilière aident à analyser les "
+"investissements immobiliers locatifs, les budgets de dépenses en capital, les revenus annuels, "
+"les dépenses, les projections de revenus, les contributions des investisseurs et les hypothèques."
+
+#: .\templates\index.html:99
+msgid "Change"
+msgstr "Changement"

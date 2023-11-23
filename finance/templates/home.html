@@ -5,7 +5,7 @@
 <body>
 
 {% extends "index.html" %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ecommerce-application">
@@ -27,7 +27,7 @@
                         <div class="col-sm-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <p><strong style="font-size:18px;">Personal Finance </strong><small style="font-size:14px;">is an application to manage your personal finance. It can help you keep track of your expenses and income, so you can spend less and save more. </small><small class="see_more_summary" style="display:None; font-size:14px;">You can store, edit and remove withdrawals, deposits and transfers. This allows you full financial management. Using this you can manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages). It provides a facility to create, change and manage money using budgets. You can organize transactions using categories and also track your goals and bills. </small><small class="text-primary table-hover more_button" style="font-size:14px;">More..</small></p>
+                                    <p><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> {% trans "is an application to manage your personal finance. It can help you keep track of your expenses and income, so you can spend less and save more." %} </small><small class="see_more_summary" style="display:None; font-size:14px;"> {% trans "You can store, edit and remove withdrawals, deposits and transfers. This allows you full financial management. Using this you can manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages). It provides a facility to create, change and manage money using budgets. You can organize transactions using categories and also track your goals and bills." %} </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
                                 </div>
                             </div>
                         </div>
@@ -57,10 +57,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'budgets' %}">BUDGET</a>
+                                <a href="{% url 'budgets' %}">{% trans 'BUDGET' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It shows you an overview of your budgets. It shows you to how many amount spent and left in budget. you can compare your budget period wise with pretty charts</p>
+                                <p class="card-text">{% trans 'It shows you an overview of your budgets. It shows you to how many amount spent and left in budget. you can compare your budget period wise with pretty charts' %}</p>
                             </div>
                         </div>
                     </div>
@@ -72,10 +72,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'bill_list' %}">BILLS</a>
+                                <a href="{% url 'bill_list' %}">{% trans 'BILLS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It provides a facility to add bills and shows all the bills with calender. Using calender you can easily filter which bill is paid or unpaid.</p>
+                                <p class="card-text">{% trans 'It provides a facility to add bills and shows all the bills with calender. Using calender you can easily filter which bill is paid or unpaid.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -87,10 +87,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'category_list' %}">CATEGORY</a>
+                                <a href="{% url 'category_list' %}">{% trans 'CATEGORY' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It provides a facility to add category and shows all the category with spending amount. so its very easy to find out which category spent the most.</p>
+                                <p class="card-text">{% trans 'It provides a facility to add category and shows all the category with spending amount. so its very easy to find out which category spent the most.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -102,10 +102,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'account_box' %}">ACCOUNTS</a>
+                                <a href="{% url 'account_box' %}">{% trans 'ACCOUNTS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages).It shows your current balance and all transactions data of account with charts. you can add, update and delete your account data.</p>
+                                <p class="card-text">{% trans 'It manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages).It shows your current balance and all transactions data of account with charts. you can add, update and delete your account data.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -117,10 +117,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'transaction_list' %}">TRANSACTIONS</a>
+                                <a href="{% url 'transaction_list' %}">{% trans 'TRANSACTIONS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It manage transaction records. It provides facility to import transactions of your bank account and also import transaction files. you can export transaction data with date range. It shows all credit and debit transactions with charts</p>
+                                <p class="card-text">{% trans 'It manage transaction records. It provides facility to import transactions of your bank account and also import transaction files. you can export transaction data with date range. It shows all credit and debit transactions with charts.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -132,10 +132,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'goal_list' %}">GOALS</a>
+                                <a href="{% url 'goal_list' %}">{% trans 'GOALS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It provides a facility to manage you goals and helps to achieving goals. you can add, update and delete goals and also see goals are completed or not with pretty charts.</p>
+                                <p class="card-text">{% trans 'It provides a facility to manage you goals and helps to achieving goals. you can add, update and delete goals and also see goals are completed or not with pretty charts.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -147,10 +147,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'mortgagecalculator_list' %}">CALCULATORS</a>
+                                <a href="{% url 'mortgagecalculator_list' %}">{% trans 'CALCULATORS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It has Mortgage calculator and Future net worth calculator. Mortgage calculator calculates your mortgage payments details according to interest periods. Future net worth calculator calculates a net worth projection of what your actual net worth in future over age and time will be</p>
+                                <p class="card-text">{% trans 'It has Mortgage calculator and Future net worth calculator. Mortgage calculator calculates your mortgage payments details according to interest periods. Future net worth calculator calculates a net worth projection of what your actual net worth in future over age and time will be.' %}</p>
                             </div>
                         </div>
                     </div>
@@ -162,10 +162,10 @@
                         </div>
                         <div class="card-body">
                             <div class="item-name">
-                                <a href="{% url 'real_estate_home' %}">REAL ESTATE</a>
+                                <a href="{% url 'real_estate_home' %}">{% trans 'REAL ESTATE' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">It has property manage and property model sections.Property manage section useful to create property details, set rental terms and add tenants. Property model sections useful to analyse rental property investment summary, capital expenditure budget, yearly projection for revenue, expenses and income, investor contribution, mortgage.</p>
+                                <p class="card-text">{% trans 'It has property manage and property model sections.Property manage section useful to create property details, set rental terms and add tenants. Property model sections useful to analyse rental property investment summary, capital expenditure budget, yearly projection for revenue, expenses and income, investor contribution, mortgage.' %}</p>
                             </div>
                         </div>
                     </div>
