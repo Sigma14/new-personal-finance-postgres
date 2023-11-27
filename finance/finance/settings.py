@@ -38,7 +38,8 @@ INSTALLED_APPS = [
 
     # apps
     'my_finance',
-    'mathfilters'
+    'mathfilters',
+    # 'google_translate'
 ]
 
 MIDDLEWARE = [
@@ -64,7 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages'
+                'django.contrib.messages.context_processors.messages',
+                'my_finance.context_processors.google_analytics', 
             ],
         },
     },
@@ -118,6 +120,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+# Google Analytics Settings
+GOOGLE_ANALYTICS = {
+    # 'google_analytics_id': 'G-H3J0TBSGTV',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+    'google_analytics_id': 'G-EXPQGENY93',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
