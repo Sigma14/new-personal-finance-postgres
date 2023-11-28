@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     # apps
     'my_finance',
     'mathfilters',
-    'google_translate'
+    'autotranslate'
 ]
 
 MIDDLEWARE = [
@@ -126,9 +126,13 @@ LOCALE_PATHS = [
 ]
 
 LANGUAGES = [  
-  ['en', 'English'],
-  ['fr', 'Français']
+    ['en', 'English'],
+    ['fr', 'Français'],
+    ['zh-hans', 'Simplified Chinese'],
 ]
+
+AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
+GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
 
 
 # Static files (CSS, JavaScript, Images)
