@@ -1,4 +1,8 @@
 {% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title  %}ACCOUNTS{% endblock title  %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -9,7 +13,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrmbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Account</h2>
+                            <h2 class="content-header-title float-left mb-0">Add Account </h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>

@@ -66,7 +66,8 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages'
+                'django.contrib.messages.context_processors.messages',
+                'my_finance.context_processors.google_analytics', 
             ],
         },
     },
@@ -134,6 +135,12 @@ LANGUAGES = [
 AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
 GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
 
+
+# Google Analytics Settings
+GOOGLE_ANALYTICS = {
+    'google_analytics_id': 'G-H3J0TBSGTV',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+    # 'google_analytics_id': 'G-EXPQGENY93',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
