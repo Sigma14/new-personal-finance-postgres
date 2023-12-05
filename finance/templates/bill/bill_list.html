@@ -1,8 +1,8 @@
 {% extends "index.html" %}
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <head>
-    {% block title %} BILL LIST {% endblock title %} 
+    {% block title %} Bill List {% endblock title %} 
 </head>
 <body>
 {% block content %}
@@ -15,7 +15,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Bills & Subscriptions</h2>
+                            <h2 class="content-header-title float-left mb-0">{% trans 'Bills & Subscriptions' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -38,13 +38,13 @@
                                 </div>
                                 <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                     <div class="card-body">
-                                        This page have bills & subscriptions calendar tab in which paid or unpaid bills are show with calendar date and all bills & subscriptions tab shows all the bills & subscriptions lists.
+                                        {% trans 'This page have bills & subscriptions calendar tab in which paid or unpaid bills are show with calendar date and all bills & subscriptions tab shows all the bills & subscriptions lists.' %}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>  
                 <br/>
                 <section class="app-user-edit">
                     <div class="content-body">

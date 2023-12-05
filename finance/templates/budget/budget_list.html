@@ -1,5 +1,9 @@
 {% extends "index.html" %}
 {% load mathfilters %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Budget List {% endblock title %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -10,13 +14,12 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Budgets</h2>
+                            <h2 class="content-header-title float-left mb-0">{{ _('Budget')}}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item">Budgets
-                                    </li>
+                                    <li class="breadcrumb-item">{{ _('Budget')}}</li>
                                 </ol>
                             </div>
                         </div>
@@ -29,11 +32,11 @@
                         <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
                             <div class="card">
                                 <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Budget PageInfo</span>
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> {% trans 'Budget PageInfo' %}</span>
                                 </div>
                                 <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                     <div class="card-body">
-                                        This page shows you an overview of your budgets. Budget table shows -> How many amount spent and left in budget.
+                                        {% trans 'This page shows you an overview of your budgets. Budget table shows -> How many amount spent and left in budget.' %} 
                                     </div>
                                 </div>
                             </div>
@@ -47,22 +50,22 @@
 							<ul class="nav nav-pills" role="tablist">
 								<li class="nav-item">
 									<a class="nav-link d-flex align-items-center {{template_page}}" id="template_budget_tab" data-toggle="tab" href="#template_budget_data" aria-controls="template_budget_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Template Budget</span>
+										<span class="d-none d-sm-block">{% trans 'Template' %} {{ _('Budget')}}</span>
 									</a>
 								</li>
 								<li class="nav-item">
 									<a class="nav-link d-flex align-items-center {{budget_page}}" id="current_budget_tab" data-toggle="tab" href="#current_budget_data" aria-controls="current_budget_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Current Budget</span>
+										<span class="d-none d-sm-block">{{ _('Current')}} {{ _('Budget')}}</span>
 									</a>
 								</li>
 <!--								<li class="nav-item">-->
 <!--									<a class="nav-link d-flex align-items-center" id="target_budget_tab" data-toggle="tab" href="#target_budget_data" aria-controls="target_budget_data" role="tab" aria-selected="false">-->
-<!--										<span class="d-none d-sm-block">Target Budget</span>-->
+<!--										<span class="d-none d-sm-block">Target {{ _('Budget')}}</span>-->
 <!--									</a>-->
 <!--								</li>-->
 								<li class="nav-item">
 									<a class="nav-link d-flex align-items-center" id="compare_budget_tab" data-toggle="tab" href="#compare_budget_data" aria-controls="compare_budget_data" role="tab" aria-selected="false">
-										<span class="d-none d-sm-block">Compare Budget</span>
+										<span class="d-none d-sm-block">{{ _('Compare')}} {{ _('Budget')}}</span>
 									</a>
 								</li>
 <!--								<li class="nav-item">-->
@@ -83,22 +86,22 @@
                                     <ul class="nav nav-pills" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center" id="weekly_tab" data-toggle="tab" href="#weekly_data" aria-controls="weekly_data" role="tab" aria-selected="false">
-                                                <span class="d-none d-sm-block">Weekly</span>
+                                                <span class="d-none d-sm-block">{{ _('Weekly')}}</span>
                                             </a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center active" id="monthly_tab" data-toggle="tab" href="#monthly_data" aria-controls="monthly_data" role="tab" aria-selected="false">
-                                                <span class="d-none d-sm-block">Monthly</span>
+                                                <span class="d-none d-sm-block">{{ _('Monthly')}}</span>
                                             </a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center" id="quarterly_tab" data-toggle="tab" href="#quarterly_data" aria-controls="quarterly_data" role="tab" aria-selected="false">
-                                                <span class="d-none d-sm-block">Quarterly</span>
+                                                <span class="d-none d-sm-block">{{ _('Quarterly')}}</span>
                                             </a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center" id="yearly_tab" data-toggle="tab" href="#yearly_data" aria-controls="yearly_data" role="tab" aria-selected="false">
-                                                <span class="d-none d-sm-block">Yearly</span>
+                                                <span class="d-none d-sm-block">{{ _('Yearly')}}</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -115,7 +118,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Current Week Transactions</h4>
+                                                        <h4 class="card-title mb-25">{% trans 'Current Week Transactions' %} </h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -125,7 +128,7 @@
                                                                 {% for name in transaction_key %}
                                                                 <th>{{name}}</th>
                                                                 {% endfor %}
-                                                                <th>Actions</th>
+                                                                <th>{% trans 'Actions' %}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -241,7 +244,7 @@
                                         <div class="col-xl-3 col-md-12 col-12">
                                             <div class="card card-congratulation-medal">
                                                 <div class="card-body">
-                                                    <h5>Total Spending and Left All Budgets</h5>
+                                                    <h5>{% trans 'Total Spending and Left All Budgets' %} </h5>
                                                     <div id="cmp_week_list"></div>
                                                 </div>
                                             </div>
@@ -255,13 +258,13 @@
                                                             {% if forloop.counter0 == 0 %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="week{{forloop.counter0}}_tab" data-toggle="tab" href="#week{{forloop.counter0}}_data" aria-controls="week{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% else %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center" id="week{{forloop.counter0}}_tab" data-toggle="tab" href="#week{{forloop.counter0}}_data" aria-controls="week{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -284,7 +287,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{week_start}} to {{week_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{% trans 'All the transactions for' %} "{{name}}" {{ _('Budget')}} {% trans 'between' %} {{week_start}} {{ _('to')}} {{week_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -294,7 +297,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -429,7 +432,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{week_start}} to {{week_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}}  {{ _('between')}}	 {{week_start}} {{ _('to')}} {{week_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -439,7 +442,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -559,7 +562,7 @@
                                                                                 <div class="col-xl-3 col-md-12 col-12">
                                                                                     <div class="card card-congratulation-medal">
                                                                                         <div class="card-body">
-                                                                                            <h5>Total Spending and Left Budgets</h5>
+                                                                                            <h5>{% trans 'Total Spending and Left Budgets' %} </h5>
                                                                                             <div id="week-pie-chart{{forloop.counter}}"></div>
                                                                                         </div>
                                                                                     </div>
@@ -586,7 +589,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Current Month Transactions</h4>
+                                                        <h4 class="card-title mb-25">{% trans 'Current Month Transactions' %} </h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -596,7 +599,7 @@
                                                                 {% for name in transaction_key %}
                                                                 <th>{{name}}</th>
                                                                 {% endfor %}
-                                                                <th>Actions</th>
+                                                                <th>{{ _('Actions')}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -712,7 +715,7 @@
                                         <div class="col-xl-3 col-md-12 col-12">
                                             <div class="card card-congratulation-medal">
                                                 <div class="card-body">
-                                                    <h5>Total Spending and Left All Budgets</h5>
+                                                    <h5>{{ _('Total Spending and Left All Budgets')}}	</h5>
                                                     <div id="cmp_month_budget"></div>
                                                 </div>
                                             </div>
@@ -726,13 +729,13 @@
                                                             {% if forloop.counter0 == 0 %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="month{{forloop.counter}}_tab" data-toggle="tab" href="#month{{forloop.counter0}}_data" aria-controls="month{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% else %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center" id="month{{forloop.counter0}}_tab" data-toggle="tab" href="#month{{forloop.counter0}}_data" aria-controls="month{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -750,7 +753,7 @@
                                                                                     <div class="card-body">
                                                                                         <div class="download_csv_form"></div>
                                                                                         <div class="card-header border-bottom">
-                                                                                            <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{month_start}} to {{month_end}}</h4>
+                                                                                            <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}} {{ _('between')}}	 {{month_start}} {{ _('to')}} {{month_end}}</h4>
                                                                                             <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                         </div>
                                                                                         <div class="card-datatable table-responsive">
@@ -760,7 +763,7 @@
                                                                                                     {% for name in transaction_key %}
                                                                                                     <th>{{name}}</th>
                                                                                                     {% endfor %}
-                                                                                                    <th>Actions</th>
+                                                                                                    <th>{{ _('Actions')}}</th>
                                                                                                 </tr>
                                                                                                 </thead>
                                                                                                 <tbody>
@@ -894,7 +897,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{month_start}} to {{month_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}} {{ _('between')}}	 {{month_start}} {{ _('to')}} {{month_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -904,7 +907,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -1024,7 +1027,7 @@
                                                                                 <div class="col-xl-3 col-md-12 col-12">
                                                                                     <div class="card card-congratulation-medal">
                                                                                         <div class="card-body">
-                                                                                            <h5>Total Spending and Left Budgets</h5>
+                                                                                            <h5>{{ _('Total Spending and Left Budgets')}}</h5>
                                                                                             <div id="month-pie-chart{{forloop.counter}}"></div>
                                                                                         </div>
                                                                                     </div>
@@ -1051,7 +1054,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Current Quarter Transactions</h4>
+                                                        <h4 class="card-title mb-25">{% trans 'Current Quarter Transactions'%}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1061,7 +1064,7 @@
                                                                 {% for name in transaction_key %}
                                                                 <th>{{name}}</th>
                                                                 {% endfor %}
-                                                                <th>Actions</th>
+                                                                <th>{{ _('Actions')}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -1177,7 +1180,7 @@
                                         <div class="col-xl-3 col-md-12 col-3">
                                             <div class="card card-congratulation-medal">
                                                 <div class="card-body">
-                                                    <h5>Total Spending and Left Budgets All Budgets</h5>
+                                                    <h5>{{ _('Total Spending and Left Budgets')}} {% trans 'All Budgets' %}</h5>
                                                     <div id="cmp_quart_list"></div>
                                                 </div>
                                             </div>
@@ -1191,13 +1194,13 @@
                                                             {% if forloop.counter0 == 0 %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="quart{{forloop.counter0}}_tab" data-toggle="tab" href="#quart{{forloop.counter0}}_data" aria-controls="quart{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% else %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center" id="quart{{forloop.counter0}}_tab" data-toggle="tab" href="#quart{{forloop.counter0}}_data" aria-controls="quart{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -1215,7 +1218,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{quart_start}} to {{quart_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}} {{ _('between')}}	 {{quart_start}} {{ _('to')}} {{quart_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1225,7 +1228,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -1341,7 +1344,7 @@
                                                                             <div class="col-xl-3 col-md-12 col-12">
                                                                                 <div class="card card-congratulation-medal">
                                                                                     <div class="card-body">
-<!--                                                                                        <h5>Total Spending and Left Budgets</h5>-->
+<!--                                                                                        <h5>{{ _('Total Spending and Left Budgets')}}</h5>-->
                                                                                         <div id="quart-pie-chart{{forloop.counter}}"></div>
                                                                                     </div>
                                                                                 </div>
@@ -1358,7 +1361,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{quart_start}} to {{quart_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}} {{ _('between')}}	 {{quart_start}} {{ _('to')}} {{quart_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1368,7 +1371,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -1488,7 +1491,7 @@
                                                                             <div class="col-xl-3 col-md-12 col-12">
                                                                                 <div class="card card-congratulation-medal">
                                                                                     <div class="card-body">
-                                                                                        <h5>Total Spending and Left Budgets</h5>
+                                                                                        <h5>{{ _('Total Spending and Left Budgets')}}</h5>
                                                                                         <div id="quart-pie-chart{{forloop.counter}}"></div>
                                                                                     </div>
                                                                                 </div>
@@ -1514,7 +1517,7 @@
                                                 <div class="card-body">
                                                     <div class="download_csv_form"></div>
                                                     <div class="card-header border-bottom">
-                                                        <h4 class="card-title mb-25">Current Year Transactions</h4>
+                                                        <h4 class="card-title mb-25">{% trans 'Current Year Transactions' %}</h4>
                                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                     <div class="card-datatable table-responsive">
@@ -1524,7 +1527,7 @@
                                                                 {% for name in transaction_key %}
                                                                 <th>{{name}}</th>
                                                                 {% endfor %}
-                                                                <th>Actions</th>
+                                                                <th>{{ _('Actions')}}</th>
                                                             </tr>
                                                             </thead>
                                                             <tbody>
@@ -1640,7 +1643,7 @@
                                         <div class="col-xl-3 col-md-12 col-12">
                                             <div class="card card-congratulation-medal">
                                                 <div class="card-body">
-                                                    <h5>Total Spending and Left All Budgets</h5>
+                                                    <h5>{{ _('Total Spending and Left All Budgets')}}	</h5>
                                                     <div id="cmp_yearly_list"></div>
                                                 </div>
                                             </div>
@@ -1654,13 +1657,13 @@
                                                             {% if forloop.counter0 == 0 %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="year{{forloop.counter0}}_tab" data-toggle="tab" href="#year{{forloop.counter0}}_data" aria-controls="year{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% else %}
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center" id="year{{forloop.counter0}}_tab" data-toggle="tab" href="#year{{forloop.counter0}}_data" aria-controls="year{{forloop.counter0}}_data" role="tab" aria-selected="false">
-                                                                        <span class="d-none d-sm-block">{{name}} Budget</span>
+                                                                        <span class="d-none d-sm-block">{{name}} {{ _('Budget')}}</span>
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -1678,7 +1681,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All transactions for "{{name}}" budgets between {{yearly_start}} to {{yearly_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}} "{{name}}" {{ _('Budget')}} {{ _('between')}} {{yearly_start}} {{ _('to')}} {{yearly_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1688,7 +1691,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -1804,7 +1807,7 @@
                                                                             <div class="col-xl-3 col-md-12 col-12">
                                                                                 <div class="card card-congratulation-medal">
                                                                                     <div class="card-body">
-<!--                                                                                        <h5>Total Spending and Left Budgets</h5>-->
+<!--                                                                                        <h5>{{ _('Total Spending and Left Budgets')}}</h5>-->
                                                                                         <div id="year-pie-chart{{forloop.counter}}"></div>
                                                                                     </div>
                                                                                 </div>
@@ -1821,7 +1824,7 @@
                                                                                         <div class="card-body">
                                                                                             <div class="download_csv_form"></div>
                                                                                             <div class="card-header border-bottom">
-                                                                                                <h4 class="card-title mb-25">All the transactions for "{{name}}" budgets between {{yearly_start}} to {{yearly_end}}</h4>
+                                                                                                <h4 class="card-title mb-25">{{ _('All the transactions for')}}	 "{{name}}" {{ _('Budget')}} {{ _('between')}} {{yearly_start}} {{ _('to')}} {{yearly_end}}</h4>
                                                                                                 <button class="btn btn-primary download_csv" file_name="{{name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#monthly_budget" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                                                             </div>
                                                                                             <div class="card-datatable table-responsive">
@@ -1831,7 +1834,7 @@
                                                                                                         {% for name in transaction_key %}
                                                                                                         <th>{{name}}</th>
                                                                                                         {% endfor %}
-                                                                                                        <th>Actions</th>
+                                                                                                        <th>{{ _('Actions')}}</th>
                                                                                                     </tr>
                                                                                                     </thead>
                                                                                                     <tbody>
@@ -1951,7 +1954,7 @@
                                                                             <div class="col-xl-3 col-md-12 col-12">
                                                                                 <div class="card card-congratulation-medal">
                                                                                     <div class="card-body">
-                                                                                        <h5>Total Spending and Left Budgets</h5>
+                                                                                        <h5>{{ _('Total Spending and Left Budgets')}}</h5>
                                                                                         <div id="year-pie-chart{{forloop.counter}}"></div>
                                                                                     </div>
                                                                                 </div>
@@ -1981,7 +1984,7 @@
                                             <div class="card-header border-bottom">
                                                  <div class="col-sm-40 offset-sm-20">
                                                     <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
-                                                        class="fa fa-plus"></i> Add Budget</a>
+                                                        class="fa fa-plus"></i> {{ _('Add')}} {{ _('Budget')}}</a>
                                                  </div>
                                                 <div class="basic-modal">
                                                     <form method="post" action="{% url 'budget_list' %}" id="period_filter_form">
@@ -1989,9 +1992,9 @@
                                                     <select class="form-control budget_period_filter" name="select_period" style="width:200px">
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
-                                                                <option selected value="{{month}}">{{month}} Budget</option>
+                                                                <option selected value="{{month}}">{{month}} {{ _('Budget')}}</option>
                                                             {% else %}
-                                                                <option value="{{month}}">{{month}} Budget</option>
+                                                                <option value="{{month}}">{{month}} {{ _('Budget')}}</option>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </select>
@@ -2005,7 +2008,7 @@
                                                 <table class="table">
                                                     <thead>
                                                         <tr class="show_bdgt_exp" method_name="expenses_income_cls">
-                                                            <th><h5><b>Income</b></h5></th>
+                                                            <th><h5><b>{{ _('Income')}}</b></h5></th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
@@ -2029,7 +2032,7 @@
                                                                         <a href="{% url 'budget_detail' pk=object.4 %}">
                                                                             <div class="card-body">
                                                                                 <h6 style="float: left;"><a href="{% url 'budget_detail' pk=object.4 %}">{{object.0}}</a></h6>
-                                                                                <span class="text-danger">{{object.8}}{{object.3}} left</span>
+                                                                                <span class="text-danger">{{object.8}}{{object.3}} {{_('left')}}</span>
                                                                                 <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
                                                                             </div>
                                                                             <br/>
@@ -2038,8 +2041,8 @@
                                                                                 </div>
                                                                             </div>
                                                                             <div class="card-body" style="padding-bottom:40px;">
-                                                                                <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> {% trans 'of' %} {{object.8}}{{object.1}}</h6>
+                                                                                <span class="font-small-2 text-muted"> {% trans 'This amount applies' %} {% trans 'from'%} {{object.6}} {{ _('to')}} {{object.7}}</span>
                                                                                 <span style="float: right;" class="text-success">
                                                                                 <div class="d-flex align-items-center">
                                                                                     <span class="font-weight-bolder mr-1">
@@ -2074,7 +2077,7 @@
                                                                         <a>
                                                                             <div class="card-body">
                                                                                 <h6 style="float: left;"><a href="{% url 'budget_detail' pk=daily_data.4 %}">{{daily_data.0}}</a></h6>
-                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
+                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} {{_('left')}}</span>
                                                                                 <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
                                                                                 <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
 
@@ -2121,9 +2124,9 @@
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
                                                                                 {% if object.5 == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {% trans 'at' %} {{daily_data.6}}.</span>
                                                                                 {% else %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{daily_data.6}} {{ _('to')}} {{daily_data.7}}.</span>
                                                                                 {% endif %}
                                                                                 <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
                                                                             </div>
@@ -2137,7 +2140,7 @@
                                                         {% endfor %}
                                                         {% endfor %}
                                                         <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
-                                                            <th><h5><b>Expenses</b></h5></th>
+                                                            <th><h5><b>{{ _('Expenses')}}</b></h5></th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
@@ -2161,7 +2164,7 @@
                                                                         <a href="{% url 'budget_detail' pk=object.4 %}">
                                                                             <div class="card-body">
                                                                                 <h6 style="float: left;"><a href="{% url 'budget_detail' pk=object.4 %}">{{object.0}}</a></h6>
-                                                                                <span class="text-danger">{{object.8}}{{object.3}} left</span>
+                                                                                <span class="text-danger">{{object.8}}{{object.3}} {{_('left')}}</span>
                                                                                 <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
                                                                             </div>
                                                                             <br/>
@@ -2171,7 +2174,7 @@
                                                                             </div>
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>
                                                                                 <span style="float: right;" class="text-success">
                                                                                 <div class="d-flex align-items-center">
                                                                                     <span class="font-weight-bolder mr-1">
@@ -2206,7 +2209,7 @@
                                                                         <a>
                                                                             <div class="card-body">
                                                                                 <h6 style="float: left;"><a href="{% url 'budget_detail' pk=daily_data.4 %}">{{daily_data.0}}</a></h6>
-                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
+                                                                                <span class="text-danger">{{daily_data.8}}{{daily_data.3}} {{_('left')}}</span>
                                                                                 <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
                                                                                 <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
 
@@ -2253,9 +2256,9 @@
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
                                                                                 {% if object.5 == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('at')}} {{daily_data.6}}.</span>
                                                                                 {% else %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{daily_data.6}} {{ _('to')}} {{daily_data.7}}.</span>
                                                                                 {% endif %}
                                                                                 <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
                                                                             </div>
@@ -2269,7 +2272,7 @@
                                                         {% endfor %}
                                                         {% endfor %}
                                                         <tr>
-                                                            <th><h5><b>Leftover cash</b></h5></th>
+                                                            <th><h5><b>{% trans 'Leftover cash' %}</b></h5></th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
@@ -2295,7 +2298,7 @@
 <!--                                                        {% for name in budget_key %}-->
 <!--                                                            <th>{{name}}</th>-->
 <!--                                                        {% endfor %}-->
-<!--                                                        <th>Actions</th>-->
+<!--                                                        <th>{{ _('Actions')}}</th>-->
 <!--                                                    </tr>-->
 <!--                                                    </thead>-->
 <!--                                                    <tbody>-->
@@ -2310,9 +2313,9 @@
 <!--                                                                        <span class="font-weight-bolder mb-25">{{ value }}</span>-->
 <!--                                                                        {% if object.6 %}-->
 <!--                                                                            {% if object.5 == 'Daily' %}-->
-<!--                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>-->
+<!--                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('at')}} {{object.6}}:</span>-->
 <!--                                                                            {% else %}-->
-<!--                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}:</span>-->
+<!--                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{object.6}} {{ _('to')}} {{object.7}}:</span>-->
 <!--                                                                            {% endif %}-->
 <!--                                                                        {% endif %}-->
 <!--                                                                    </div>-->
@@ -2421,9 +2424,9 @@
 <!--                                                                        <div class="d-flex flex-column">-->
 <!--                                                                            <span class="font-weight-bolder mb-25">{{ object.1 }}</span>-->
 <!--                                                                            {% if key == 'daily' %}-->
-<!--                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>-->
+<!--                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('at')}} {{object.6}}:</span>-->
 <!--                                                                            {% else %}-->
-<!--                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>-->
+<!--                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>-->
 <!--                                                                            {% endif %}-->
 <!--                                                                        </div>-->
 <!--                                                                    </td>-->
@@ -2456,7 +2459,7 @@
                                 <div class="col-xl-6 col-md-12 col-12">
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
-                                            <h5>{{current_month}} Cash Flow</h5>
+                                            <h5>{{current_month}} {{ _('Cash Flow')}}</h5>
                                             <div id="cash_flow_bar"></div>
                                         </div>
                                     </div>
@@ -2464,7 +2467,7 @@
                                 <div class="col-xl-6 col-md-12 col-12">
                                     <div class="card">
                                     <div class="card-body">
-                                        <span><b>{{current_month}} Spending Categories</b>
+                                        <span><b>{{current_month}} {{ _('Spending Categories')}}</b>
                                         <ul class="nav nav-pills" style="float:right" role="tablist">
                                             <li class="nav-item">
                                                 <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
@@ -2515,17 +2518,17 @@
                                             <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
                                                     <div class="card">
                                                         <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                                            <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Template Budget</span>
+                                                            <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> {{ _('Template')}} {{ _('Budget')}}</span>
                                                         </div>
                                                         <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
                                                             <div class="card-body">
-                                                                A template budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see all the budgets and their total spending and left budgets.
+                                                                {% trans 'A template budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see all the budgets and their total spending and left budgets.' %}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             <div class="card-header border-bottom">
-                                                <h4 class="card-title mb-25">Template Budgets</h4>
+                                                <h4 class="card-title mb-25">{{ _('Template')}} {{ _('Budget')}}</h4>
                                             </div>
                                             <div class="card-datatable table-responsive">
                                                 <table class="table" id="template_budgets">
@@ -2534,7 +2537,7 @@
                                                         {% for name in budget_key %}
                                                             <th>{{name}}</th>
                                                         {% endfor %}
-                                                        <th>Actions</th>
+                                                        <th>{{ _('Actions')}}</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -2551,13 +2554,13 @@
                                                                         <div class="d-flex flex-column">
                                                                             <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
                                                                             {% if key == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">Daily Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                                <span class="font-small-2 text-muted">{% trans 'Daily' %} {{ _('Budget')}} <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
                                                                             {% endif %}
                                                                             {% if key == 'Weekly' %}
-                                                                                <span class="font-small-2 text-muted">Weekly Budget <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
+                                                                                <span class="font-small-2 text-muted">{{ _('Weekly')}} {{ _('Budget')}} <i class="fa fa-chevron-right dropdown_{{object.4}}" style="display:None;"></i><i class="fa fa-chevron-down dropdown_{{object.4}}"></i></span>
                                                                             {% endif %}
                                                                             {% if key == 'Monthly' or key == 'Quarterly' or key == 'Yearly' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>
                                                                             {% endif %}
                                                                         </div>
                                                                     </td>
@@ -2601,9 +2604,9 @@
                                                                         <div class="d-flex flex-column">
                                                                             <span class="font-weight-bolder mb-25">{{ object.1 }}</span>
                                                                             {% if key == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{object.6}}:</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('at')}} {{object.6}}:</span>
                                                                             {% else %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies')}} {{_('from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>
                                                                             {% endif %}
                                                                         </div>
                                                                     </td>
@@ -2634,7 +2637,7 @@
                                 <div class="col-xl-4 col-md-12 col-12">
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
-                                            <h5>Total Spending and Left Budgets</h5>
+                                            <h5>{{ _('Total Spending and Left Budgets')}}</h5>
                                             <div id="template_total_budget"></div>
                                         </div>
                                     </div>
@@ -2642,7 +2645,7 @@
                                 <div class="col-xl-12 col-md-12 col-12">
                                     <div class="card card-congratulation-medal">
                                         <div class="card-body">
-                                            <h5>Budgets and Spending</h5>
+                                            <h5>{% trans 'Budgets and Spending' %}</h5>
                                             <div id="template-budgets-bar"></div>
                                         </div>
                                     </div>
@@ -2735,7 +2738,7 @@
 <!--                                                        <th>Category</th>-->
 <!--                                                        <th>Month</th>-->
 <!--                                                        <th>Amount</th>-->
-<!--                                                        <th>Actions</th>-->
+<!--                                                        <th>{{ _('Actions')}}</th>-->
 <!--                                                    </tr>-->
 <!--                                                    </thead>-->
 <!--                                                    <tbody>-->

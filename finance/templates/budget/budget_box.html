@@ -1,9 +1,9 @@
 {% extends "index.html" %}
-{% load static %}
+{% load static i18n %}
 
 <!DOCTYPE html>
 <head>
-    {% block title %} BUDGETS PAGE {% endblock title %}
+    {% block title %} Budget Box {% endblock title %}
 </head>
 <body>
 {% block content %}
@@ -15,13 +15,13 @@
             <div class="content-header row">
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
-                        <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Budgets</h2>
+                        <div class="col-12"> 
+                            <h2 class="content-header-title float-left mb-0">{% trans 'Budgets' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans 'Home' %}</a>
                                     </li>
-                                    <li class="breadcrumb-item">Budgets
+                                    <li class="breadcrumb-item">{{ _('Budgets')}}
                                     </li>
                                 </ol>
                             </div>
@@ -31,35 +31,35 @@
             </div>
             <div class="content-body">
                  <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
-                                            class="fa fa-plus"></i> Create Budget</a>
+                                            class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
                 <section id="stocks_grid_view" class="grid-view">
                     <div class="card ecommerce-card">
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'sample-budgets' %}">Sample Budget</a>
+                                <a href="{% url 'sample-budgets' %}">{% trans "Sample Budget" %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">A sample budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see total earning and spending from the budgets. This section also visualize budget spending according to the categories.</p>
+                                <p class="card-text">{% blocktrans %} A sample budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see total earning and spending from the budgets. This section also visualize budget spending according to the categories.  {% endblocktrans %}</p>
                             </div>
                         </div>
                     </div>
                     <div class="card ecommerce-card">
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'current-budgets' %}">Current Budget</a>
+                                <a href="{% url 'current-budgets' %}">{% trans "Current Budget" %} </a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">A current budget showing the overview of your budget structure. You can see total income and expenses of the budget according to the categories. You can also see budget cashflows and budget spending with categories.</p>
+                                <p class="card-text"> {% blocktrans %} current budget showing the overview of your budget structure. You can see total income and expenses of the budget according to the categories. You can also see budget cashflows and budget spending with categories. {% endblocktrans %}</p>
                             </div>
                         </div>
                     </div>
                     <div class="card ecommerce-card">
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'compare-budgets' %}">Compare Budget</a>
+                                <a href="{% url 'compare-budgets' %}"> {% trans "Compare Budget" %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">A compare budget provides the facility to the users to compare selected budgets. Its comparing budgets with time ranges and spending amount.</p>
+                                <p class="card-text">{% blocktrans %} A compare budget provides the facility to the users to compare selected budgets. Its comparing budgets with time ranges and spending amount.{% endblocktrans %}</p>
                             </div>
                         </div>
                     </div>

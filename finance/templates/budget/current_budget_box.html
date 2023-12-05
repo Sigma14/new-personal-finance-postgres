@@ -1,5 +1,9 @@
 {% extends "index.html" %}
-{% load mathfilters %}
+{% load mathfilters i18n %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Current Budget Box {% endblock title %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -10,14 +14,14 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Current Budgets</h2>
+                            <h2 class="content-header-title float-left mb-0">{% trans 'Current Budgets' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">{{ _('Budgets')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item">Current</li>
+                                    <li class="breadcrumb-item">{% trans 'Current' %}</li>
                                 </ol>
                             </div>
                         </div>
@@ -34,7 +38,7 @@
                                             <div class="card-header border-bottom" style="padding-top: 0px;">
                                                 <div class="col-sm-40 offset-sm-20">
                                                     <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
-                                                        class="fa fa-plus"></i> Create Budget</a>
+                                                        class="fa fa-plus"></i> {{ _('Create Budget')}}</a>
                                                  </div>
                                                 <div class="basic-modal">
                                                     <form method="post" action="{% url 'current-budgets' %}" id="period_filter_form">
@@ -42,9 +46,9 @@
                                                     <select class="form-control budget_period_filter" name="select_period" style="width:200px">
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
-                                                                <option selected value="{{month}}">{{month}} Budget</option>
+                                                                <option selected value="{{month}}">{{month}} {{ _('Budget')}}</option>
                                                             {% else %}
-                                                                <option value="{{month}}">{{month}} Budget</option>
+                                                                <option value="{{month}}">{{month}} {{ _('Budget')}}</option>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </select>
@@ -58,7 +62,7 @@
                                                 <table class="table">
                                                     <thead>
                                                         <tr class="show_bdgt_exp" method_name="expenses_income_cls">
-                                                            <th><h5><b>Income</b></h5></th>
+                                                            <th><h5><b>{{ _('Income')}}</b></h5></th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
@@ -92,7 +96,7 @@
                                                                             </div>
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>
                                                                                 <span style="float: right;" class="text-success">
                                                                                 <div class="d-flex align-items-center">
                                                                                     <span class="font-weight-bolder mr-1">
@@ -181,9 +185,9 @@
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
                                                                                 {% if object.5 == 'Daily' %}
-                                                                                <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                <span class="font-small-2 text-muted">{% trans 'This amount applies at' %} {{daily_data.6}}.</span>
                                                                                 {% else %}
-                                                                                <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{ _('to')}} {{daily_data.7}}.</span>
                                                                                 {% endif %}
                                                                                 <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
                                                                             </div>
@@ -197,7 +201,7 @@
                                                         {% endfor %}
                                                         {% endfor %}
                                                         <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
-                                                            <th><h5><b>Expenses</b></h5></th>
+                                                            <th><h5><b>{{ _('Expenses')}}</b></h5></th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
@@ -234,7 +238,7 @@
                                                                                 {% if ex_key == 'Bills & Subscriptions' %}
                                                                                     <span class="font-small-2 text-muted">Due on {{object.6}}.</span>
                                                                                 {% else %}
-                                                                                    <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                                                    <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {% trans 'to'%} {{object.7}}</span>
                                                                                 {% endif %}
                                                                                 <span style="float: right;" class="text-success">
                                                                                 <div class="d-flex align-items-center">
@@ -330,12 +334,12 @@
                                                                             <div class="card-body" style="padding-bottom:40px;">
                                                                                 <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
                                                                                 {% if ex_key == 'Bills & Subscriptions' %}
-                                                                                    <span class="font-small-2 text-muted">Due on {{daily_data.6}}.</span>
+                                                                                    <span class="font-small-2 text-muted">{% trans 'Due on' %} {{daily_data.6}}.</span>
                                                                                 {% else %}
                                                                                     {% if object.5 == 'Daily' %}
-                                                                                    <span class="font-small-2 text-muted">This amount applies at {{daily_data.6}}.</span>
+                                                                                    <span class="font-small-2 text-muted">{{ _('This amount applies at')}} {{daily_data.6}}.</span>
                                                                                     {% else %}
-                                                                                    <span class="font-small-2 text-muted">This amount applies from {{daily_data.6}} to {{daily_data.7}}.</span>
+                                                                                    <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{daily_data.6}} {{ _('to')}} {{daily_data.7}}.</span>
                                                                                     {% endif %}
                                                                                 {% endif %}
                                                                                 <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
@@ -511,7 +515,7 @@
                                 <div class="col-xl-6 col-md-12 col-12">
                                     <div class="card">
                                     <div class="card-body">
-                                        <span><b>{{current_month}} Spending Categories</b>
+                                        <span><b>{{current_month}} {{ _('Spending Categories')}}</b>
                                         <ul class="nav nav-pills" style="float:right" role="tablist">
                                             <li class="nav-item">
                                                 <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">

@@ -1,5 +1,9 @@
 {% extends "index.html" %}
 {% load mathfilters %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Budget Detials {% endblock title %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -10,14 +14,14 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">{{budget_obj.name}} Budget</h2>
+                            <h2 class="content-header-title float-left mb-0">{{budget_obj.name}} {{ _('Budget')}}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">{{ _('Budget')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item">{{budget_obj.name}} Budget
+                                    <li class="breadcrumb-item">{{budget_obj.name}} {{ _('Budget')}}
                                     </li>
                                 </ol>
                                 </ol>
@@ -29,7 +33,7 @@
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
                     <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Transaction</a>
+                            class="fa fa-plus"></i> {% trans 'Add Transaction' %} </a>
                 </div>
                 <br/>
 <!--                <section id="ecommerce-products" class="list-view">-->
@@ -61,33 +65,33 @@
                                             {% if start_date %}
                                             <div class="col-md-3">
                                                 <div class="form-group">
-													<label for="start_date">From</label>
+													<label for="start_date">{{ _('from')}}</label>
                                     				<input type="text" name="start_date" class="form-control flatpickr-basic" value="{{start_date}}">
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-													<label for="end_date">To</label>
+													<label for="end_date">{{ _('To')}}</label>
                                     				<input type="text" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}">
                                                 </div>
                                             </div>
                                             {% else %}
                                             <div class="col-md-3">
                                                 <div class="form-group">
-													<label for="start_date">From</label>
+													<label for="start_date">{{ _('from')}}</label>
                                     				<input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD">
                                                 </div>
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-													<label for="end_date">To</label>
+													<label for="end_date">{{ _('To')}}</label>
                                     				<input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" >
                                                 </div>
                                             </div>
                                             {% endif %}
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">{% trans 'Report' %}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -96,9 +100,9 @@
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         {% if start_date %}
-                                            <h4 class="card-title mb-25">"{{budget_obj.name}}" Budget Transactions {{start_date}} to {{end_date}}</h4>
+                                            <h4 class="card-title mb-25">"{{budget_obj.name}}" {% trans 'Budget Transactions' %} {{start_date}} {{ _('to')}} {{end_date}}</h4>
                                         {% else %}
-                                        <h4 class="card-title mb-25">"{{budget_obj.name}}" Budget Transactions</h4>
+                                        <h4 class="card-title mb-25">"{{budget_obj.name}}" {{ _('Budget Transactions')}}</h4>
                                         {% endif %}
                                         <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>

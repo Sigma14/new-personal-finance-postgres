@@ -1,0 +1,27 @@
+.my-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(24, 31, 48, 0.9); 
+    z-index: 9999;
+    animation: colorAnimation 3s ease infinite alternate;
+}
+
+.my-loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes colorAnimation {
+    0% {
+        background-color: rgba(40, 48, 70, 1); 
+    }
+    100% {
+        background-color: rgba(24, 31, 48, 0.9); 
+    }
+}

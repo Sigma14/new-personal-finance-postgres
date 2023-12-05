@@ -2363,10 +2363,16 @@ def sample_budget_box(request):
     budget_graph_data = [{'name': 'Spent', 'data': budget_graph_value},
                          {'name': 'Left', 'data': [50.0, 30.0, 160.0, 50.0, 160.0]},
                          {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
+    translated_data = {
+        'earned': _('Earned'),
+        'spending': _('Spending')
+    }
     context = {"month_start": start_date, "month_end": end_date, "cash_flow_names": cash_flow_names,
                "cash_flow_data": cash_flow_data, "budget_bar_id": "#budgets-bar",
                "budget_graph_data": budget_graph_data, "budget_names": budget_names, "budget_graph_id": "#total_budget",
-               "budget_graph_value": budget_graph_value, "budget_graph_currency": "$"}
+               "budget_graph_value": budget_graph_value, "budget_graph_currency": "$",
+               'translated_data': json.dumps(translated_data)
+               }
     return render(request, 'budget/sample_budget_box.html', context=context)
 
 

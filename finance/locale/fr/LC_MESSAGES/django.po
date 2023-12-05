@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-22 19:05+0530\n"
+"POT-Creation-Date: 2023-12-04 18:41+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,702 @@ msgstr ""
 
 #: .\finance\urls.py:28
 msgid "admin/"
-msgstr "administratrice/"
+msgstr "administrateur/"
+
+#: .\my_finance\views.py:2367
+msgid "Earned"
+msgstr "Gagné"
+
+#: .\my_finance\views.py:2368 .\templates\budget\compare_budget_box.html:179
+#: .\templates\budget\compare_budget_box.html:272
+#: .\templates\budget\compare_budget_box.html:365
+#: .\templates\budget\compare_budget_box.html:458
+#: .\templates\budget\sample_budget_box.html:67
+#: .\templates\budget\sample_budget_box.html:104
+#: .\templates\budget\sample_budget_box.html:124
+#: .\templates\budget\sample_budget_box.html:150
+#: .\templates\budget\sample_budget_box.html:175
+#: .\templates\budget\sample_budget_box.html:195
+msgid "Spending"
+msgstr "Dépenses"
+
+#: .\templates\bill\bill_list.html:18
+msgid "Bills & Subscriptions"
+msgstr "Factures et abonnements"
+
+#: .\templates\bill\bill_list.html:41
+msgid ""
+"This page have bills & subscriptions calendar tab in which paid or unpaid "
+"bills are show with calendar date and all bills & subscriptions tab shows "
+"all the bills & subscriptions lists."
+msgstr ""
+"Cette page comporte un onglet de calendrier des factures et des abonnements "
+"dans lequel les factures payées ou impayées sont affichées avec la date du "
+"calendrier et l&#39;onglet Toutes les factures et abonnements affiche toutes"
+" les listes de factures et d&#39;abonnements."
+
+#: .\templates\budget\budget_add.html:17 .\templates\budget\budget_add.html:25
+msgid "Add budget"
+msgstr "Ajouter un budget"
+
+#: .\templates\budget\budget_add.html:20 .\templates\budget\budget_box.html:22
+#: .\templates\budget\budget_detail.html:20
+#: .\templates\budget\budget_list.html:20
+#: .\templates\budget\budget_update.html:19
+#: .\templates\budget\compare_budget_box.html:20
+#: .\templates\budget\current_budget_box.html:20
+#: .\templates\budget\sample_budget_box.html:21
+msgid "Home"
+msgstr "Maison"
+
+#: .\templates\budget\budget_add.html:22 .\templates\budget\budget_box.html:19
+#: .\templates\budget\budget_box.html:24
+#: .\templates\budget\compare_budget_box.html:60
+#: .\templates\budget\compare_budget_box.html:72
+#: .\templates\budget\current_budget_box.html:22
+#: .\templates\budget\sample_budget_box.html:23
+msgid "Budgets"
+msgstr "Budgets"
+
+#: .\templates\budget\budget_add.html:38
+msgid "Budget already exist!"
+msgstr "Le budget existe déjà !"
+
+#: .\templates\budget\budget_add.html:44
+#: .\templates\budget\budget_update.html:59
+msgid "Category Groups"
+msgstr "Groupes de catégories"
+
+#: .\templates\budget\budget_add.html:59
+#: .\templates\budget\budget_update.html:83
+#: .\templates\budget\budget_update.html:88
+#: .\templates\budget\compare_budget_box.html:179
+#: .\templates\budget\compare_budget_box.html:272
+#: .\templates\budget\compare_budget_box.html:365
+#: .\templates\budget\compare_budget_box.html:458
+msgid "Categories"
+msgstr "Catégories"
+
+#: .\templates\budget\budget_add.html:73
+#: .\templates\budget\budget_update.html:104
+msgid "Currency"
+msgstr "Devise"
+
+#: .\templates\budget\budget_add.html:88
+#: .\templates\budget\budget_update.html:127
+#: .\templates\budget\compare_budget_box.html:155
+msgid "Amount"
+msgstr "Montant"
+
+#: .\templates\budget\budget_add.html:105
+#: .\templates\budget\budget_update.html:166
+msgid "Auto-budget period"
+msgstr "Période de budgétisation automatique"
+
+#: .\templates\budget\budget_add.html:120
+#: .\templates\budget\budget_update.html:201
+msgid "Start Date"
+msgstr "Date de début"
+
+#: .\templates\budget\budget_add.html:139
+#: .\templates\budget\budget_update.html:245
+msgid "Auto-budget"
+msgstr "Budget automatique"
+
+#: .\templates\budget\budget_add.html:144
+msgid "Create"
+msgstr "Créer"
+
+#: .\templates\budget\budget_add.html:145
+#: .\templates\budget\budget_update.html:251
+msgid "Cancel"
+msgstr "Annuler"
+
+#: .\templates\budget\budget_add.html:157
+msgid "Add Category Group"
+msgstr "Ajouter un groupe de catégories"
+
+#: .\templates\budget\budget_add.html:172
+#: .\templates\budget\budget_add.html:239
+msgid "Name"
+msgstr "Nom"
+
+#: .\templates\budget\budget_add.html:178
+#: .\templates\budget\budget_add.html:245
+#: .\templates\budget\budget_list.html:1987
+msgid "Add"
+msgstr "Ajouter"
+
+#: .\templates\budget\budget_add.html:193
+#: .\templates\budget\budget_add.html:260
+msgid "Suggestions"
+msgstr "Suggestions"
+
+#: .\templates\budget\budget_add.html:214
+msgid "Add Category"
+msgstr "ajouter une catégorie"
+
+#: .\templates\budget\budget_add.html:231
+msgid "Select Group"
+msgstr "Sélectionner un groupe"
+
+#: .\templates\budget\budget_box.html:34
+#: .\templates\budget\current_budget_box.html:41
+msgid "Create Budget"
+msgstr "Créer un budget"
+
+#: .\templates\budget\budget_box.html:39
+msgid "Sample Budget"
+msgstr "Exemple de budget"
+
+#: .\templates\budget\budget_box.html:42
+msgid ""
+" A sample budget is a pre-structured budget format. It is showing the "
+"overview of your budget structure. You can see total earning and spending "
+"from the budgets. This section also visualize budget spending according to "
+"the categories.  "
+msgstr ""
+"Un exemple de budget est un format de budget pré-structuré. Il montre un "
+"aperçu de votre structure budgétaire. Vous pouvez voir le total des revenus "
+"et des dépenses des budgets. Cette section visualise également les dépenses "
+"budgétaires selon les catégories."
+
+#: .\templates\budget\budget_box.html:49
+msgid "Current Budget"
+msgstr "Budget actuel"
+
+#: .\templates\budget\budget_box.html:52
+msgid ""
+" current budget showing the overview of your budget structure. You can see "
+"total income and expenses of the budget according to the categories. You can"
+" also see budget cashflows and budget spending with categories. "
+msgstr ""
+"budget actuel montrant un aperçu de votre structure budgétaire. Vous pouvez "
+"voir le total des revenus et dépenses du budget selon les catégories. Vous "
+"pouvez également voir les flux de trésorerie budgétaires et les dépenses "
+"budgétaires avec des catégories."
+
+#: .\templates\budget\budget_box.html:59
+#: .\templates\budget\compare_budget_box.html:17
+msgid "Compare Budget"
+msgstr "Comparer le budget"
+
+#: .\templates\budget\budget_box.html:62
+msgid ""
+" A compare budget provides the facility to the users to compare selected "
+"budgets. Its comparing budgets with time ranges and spending amount."
+msgstr ""
+"Un budget de comparaison offre aux utilisateurs la possibilité de comparer "
+"les budgets sélectionnés. Il s&#39;agit de comparer les budgets avec les "
+"plages de temps et le montant des dépenses."
+
+#: .\templates\budget\budget_detail.html:17
+#: .\templates\budget\budget_detail.html:22
+#: .\templates\budget\budget_detail.html:24
+#: .\templates\budget\budget_list.html:17
+#: .\templates\budget\budget_list.html:22
+#: .\templates\budget\budget_list.html:53
+#: .\templates\budget\budget_list.html:58
+#: .\templates\budget\budget_list.html:63
+#: .\templates\budget\budget_list.html:68
+#: .\templates\budget\budget_list.html:261
+#: .\templates\budget\budget_list.html:267
+#: .\templates\budget\budget_list.html:290
+#: .\templates\budget\budget_list.html:435
+#: .\templates\budget\budget_list.html:732
+#: .\templates\budget\budget_list.html:738
+#: .\templates\budget\budget_list.html:756
+#: .\templates\budget\budget_list.html:900
+#: .\templates\budget\budget_list.html:1197
+#: .\templates\budget\budget_list.html:1203
+#: .\templates\budget\budget_list.html:1221
+#: .\templates\budget\budget_list.html:1364
+#: .\templates\budget\budget_list.html:1660
+#: .\templates\budget\budget_list.html:1666
+#: .\templates\budget\budget_list.html:1684
+#: .\templates\budget\budget_list.html:1827
+#: .\templates\budget\budget_list.html:1987
+#: .\templates\budget\budget_list.html:1995
+#: .\templates\budget\budget_list.html:1997
+#: .\templates\budget\budget_list.html:2521
+#: .\templates\budget\budget_list.html:2531
+#: .\templates\budget\budget_list.html:2557
+#: .\templates\budget\budget_list.html:2560
+#: .\templates\budget\budget_update.html:16
+#: .\templates\budget\budget_update.html:21
+#: .\templates\budget\budget_update.html:24
+#: .\templates\budget\budget_update.html:127
+#: .\templates\budget\compare_budget_box.html:22
+#: .\templates\budget\current_budget_box.html:49
+#: .\templates\budget\current_budget_box.html:51
+msgid "Budget"
+msgstr "Budget"
+
+#: .\templates\budget\budget_detail.html:36
+msgid "Add Transaction"
+msgstr "Ajouter une transaction"
+
+#: .\templates\budget\budget_detail.html:68
+#: .\templates\budget\budget_detail.html:81
+#: .\templates\budget\budget_list.html:2045
+#: .\templates\budget\budget_list.html:2129
+#: .\templates\budget\budget_list.html:2177
+#: .\templates\budget\budget_list.html:2261
+#: .\templates\budget\budget_list.html:2318
+#: .\templates\budget\budget_list.html:2429
+#: .\templates\budget\budget_list.html:2563
+#: .\templates\budget\budget_list.html:2609
+msgid "from"
+msgstr "depuis"
+
+#: .\templates\budget\budget_detail.html:74
+#: .\templates\budget\budget_detail.html:87
+msgid "To"
+msgstr "À"
+
+#: .\templates\budget\budget_detail.html:94
+msgid "Report"
+msgstr "Rapport"
+
+#: .\templates\budget\budget_detail.html:103
+#: .\templates\budget\budget_detail.html:105
+msgid "Budget Transactions"
+msgstr "Opérations budgétaires"
+
+#: .\templates\budget\budget_detail.html:103
+#: .\templates\budget\budget_list.html:290
+#: .\templates\budget\budget_list.html:435
+#: .\templates\budget\budget_list.html:756
+#: .\templates\budget\budget_list.html:900
+#: .\templates\budget\budget_list.html:1221
+#: .\templates\budget\budget_list.html:1364
+#: .\templates\budget\budget_list.html:1684
+#: .\templates\budget\budget_list.html:1827
+#: .\templates\budget\budget_list.html:2045
+#: .\templates\budget\budget_list.html:2129
+#: .\templates\budget\budget_list.html:2177
+#: .\templates\budget\budget_list.html:2261
+#: .\templates\budget\budget_list.html:2318
+#: .\templates\budget\budget_list.html:2429
+#: .\templates\budget\budget_list.html:2563
+#: .\templates\budget\budget_list.html:2609
+#: .\templates\budget\current_budget_box.html:99
+#: .\templates\budget\current_budget_box.html:190
+#: .\templates\budget\current_budget_box.html:241
+#: .\templates\budget\current_budget_box.html:342
+msgid "to"
+msgstr "à"
+
+#: .\templates\budget\budget_list.html:35
+msgid "Budget PageInfo"
+msgstr "Informations sur la page budgétaire"
+
+#: .\templates\budget\budget_list.html:39
+msgid ""
+"This page shows you an overview of your budgets. Budget table shows -> How "
+"many amount spent and left in budget."
+msgstr ""
+"Cette page vous montre un aperçu de vos budgets. Le tableau budgétaire "
+"montre -&gt; Combien de montant dépensé et restant dans le budget."
+
+#: .\templates\budget\budget_list.html:53
+#: .\templates\budget\budget_list.html:2521
+#: .\templates\budget\budget_list.html:2531
+msgid "Template"
+msgstr "Modèle"
+
+#: .\templates\budget\budget_list.html:58
+#: .\templates\budget\current_budget_box.html:24
+msgid "Current"
+msgstr "Actuel"
+
+#: .\templates\budget\budget_list.html:68
+#: .\templates\budget\compare_budget_box.html:24
+#: .\templates\budget\compare_budget_box.html:86
+msgid "Compare"
+msgstr "Comparer"
+
+#: .\templates\budget\budget_list.html:89
+#: .\templates\budget\budget_list.html:2560
+#: .\templates\budget\compare_budget_box.html:103
+#: .\templates\budget\compare_budget_box.html:225
+#: .\templates\budget\compare_budget_box.html:272
+msgid "Weekly"
+msgstr "Hebdomadaire"
+
+#: .\templates\budget\budget_list.html:94
+#: .\templates\budget\compare_budget_box.html:108
+#: .\templates\budget\compare_budget_box.html:132
+#: .\templates\budget\compare_budget_box.html:179
+msgid "Monthly"
+msgstr "Mensuel"
+
+#: .\templates\budget\budget_list.html:99
+#: .\templates\budget\compare_budget_box.html:113
+#: .\templates\budget\compare_budget_box.html:318
+#: .\templates\budget\compare_budget_box.html:365
+msgid "Quarterly"
+msgstr "Trimestriel"
+
+#: .\templates\budget\budget_list.html:104
+#: .\templates\budget\compare_budget_box.html:118
+#: .\templates\budget\compare_budget_box.html:411
+#: .\templates\budget\compare_budget_box.html:458
+msgid "Yearly"
+msgstr "Annuel"
+
+#: .\templates\budget\budget_list.html:121
+msgid "Current Week Transactions"
+msgstr "Transactions de la semaine en cours"
+
+#: .\templates\budget\budget_list.html:131
+#: .\templates\budget\budget_list.html:300
+#: .\templates\budget\budget_list.html:445
+#: .\templates\budget\budget_list.html:602
+#: .\templates\budget\budget_list.html:766
+#: .\templates\budget\budget_list.html:910
+#: .\templates\budget\budget_list.html:1067
+#: .\templates\budget\budget_list.html:1231
+#: .\templates\budget\budget_list.html:1374
+#: .\templates\budget\budget_list.html:1530
+#: .\templates\budget\budget_list.html:1694
+#: .\templates\budget\budget_list.html:1837
+#: .\templates\budget\budget_list.html:2301
+#: .\templates\budget\budget_list.html:2540
+#: .\templates\budget\budget_list.html:2741
+msgid "Actions"
+msgstr "Actions"
+
+#: .\templates\budget\budget_list.html:247
+#: .\templates\budget\budget_list.html:718
+#: .\templates\budget\budget_list.html:1646
+msgid "Total Spending and Left All Budgets"
+msgstr "Dépenses totales et tous les budgets laissés"
+
+#: .\templates\budget\budget_list.html:290
+#: .\templates\budget\budget_list.html:435
+#: .\templates\budget\budget_list.html:756
+#: .\templates\budget\budget_list.html:900
+#: .\templates\budget\budget_list.html:1221
+#: .\templates\budget\budget_list.html:1364
+#: .\templates\budget\budget_list.html:1684
+#: .\templates\budget\budget_list.html:1827
+msgid "All the transactions for"
+msgstr "Toutes les transactions pour"
+
+#: .\templates\budget\budget_list.html:290
+#: .\templates\budget\budget_list.html:435
+#: .\templates\budget\budget_list.html:756
+#: .\templates\budget\budget_list.html:900
+#: .\templates\budget\budget_list.html:1221
+#: .\templates\budget\budget_list.html:1364
+#: .\templates\budget\budget_list.html:1684
+#: .\templates\budget\budget_list.html:1827
+msgid "between"
+msgstr "entre"
+
+#: .\templates\budget\budget_list.html:565
+#: .\templates\budget\budget_list.html:1030
+#: .\templates\budget\budget_list.html:1183
+#: .\templates\budget\budget_list.html:1347
+#: .\templates\budget\budget_list.html:1494
+#: .\templates\budget\budget_list.html:1810
+#: .\templates\budget\budget_list.html:1957
+#: .\templates\budget\budget_list.html:2640
+msgid "Total Spending and Left Budgets"
+msgstr "Dépenses totales et budgets restants"
+
+#: .\templates\budget\budget_list.html:592
+msgid "Current Month Transactions"
+msgstr "Transactions du mois en cours"
+
+#: .\templates\budget\budget_list.html:1057
+msgid "Current Quarter Transactions"
+msgstr "Transactions du trimestre en cours"
+
+#: .\templates\budget\budget_list.html:1183
+msgid "All Budgets"
+msgstr "Tous les budgets"
+
+#: .\templates\budget\budget_list.html:1520
+msgid "Current Year Transactions"
+msgstr "Transactions de l&#39;année en cours"
+
+#: .\templates\budget\budget_list.html:2011
+#: .\templates\budget\compare_budget_box.html:179
+#: .\templates\budget\compare_budget_box.html:272
+#: .\templates\budget\compare_budget_box.html:365
+#: .\templates\budget\compare_budget_box.html:458
+#: .\templates\budget\current_budget_box.html:65
+#: .\templates\budget\sample_budget_box.html:44
+#: .\templates\budget\sample_budget_box.html:57
+msgid "Income"
+msgstr "Revenu"
+
+#: .\templates\budget\budget_list.html:2035
+#: .\templates\budget\budget_list.html:2080
+#: .\templates\budget\budget_list.html:2167
+#: .\templates\budget\budget_list.html:2212
+#: .\templates\budget\sample_budget_box.html:66
+#: .\templates\budget\sample_budget_box.html:103
+#: .\templates\budget\sample_budget_box.html:123
+#: .\templates\budget\sample_budget_box.html:132
+#: .\templates\budget\sample_budget_box.html:149
+#: .\templates\budget\sample_budget_box.html:158
+#: .\templates\budget\sample_budget_box.html:174
+#: .\templates\budget\sample_budget_box.html:183
+#: .\templates\budget\sample_budget_box.html:194
+msgid "left"
+msgstr "gauche"
+
+#: .\templates\budget\budget_list.html:2044
+#: .\templates\budget\sample_budget_box.html:112
+#: .\templates\budget\sample_budget_box.html:203
+msgid "of"
+msgstr "de"
+
+#: .\templates\budget\budget_list.html:2045
+#: .\templates\budget\budget_list.html:2127
+#: .\templates\budget\budget_list.html:2129
+#: .\templates\budget\budget_list.html:2177
+#: .\templates\budget\budget_list.html:2259
+#: .\templates\budget\budget_list.html:2261
+#: .\templates\budget\budget_list.html:2316
+#: .\templates\budget\budget_list.html:2318
+#: .\templates\budget\budget_list.html:2427
+#: .\templates\budget\budget_list.html:2429
+#: .\templates\budget\budget_list.html:2563
+#: .\templates\budget\budget_list.html:2607
+#: .\templates\budget\budget_list.html:2609
+msgid "This amount applies"
+msgstr "Ce montant s&#39;applique"
+
+#: .\templates\budget\budget_list.html:2127
+#: .\templates\budget\budget_list.html:2259
+#: .\templates\budget\budget_list.html:2316
+#: .\templates\budget\budget_list.html:2427
+#: .\templates\budget\budget_list.html:2607
+msgid "at"
+msgstr "à"
+
+#: .\templates\budget\budget_list.html:2143
+#: .\templates\budget\compare_budget_box.html:46
+#: .\templates\budget\compare_budget_box.html:48
+#: .\templates\budget\current_budget_box.html:204
+#: .\templates\budget\sample_budget_box.html:83
+msgid "Expenses"
+msgstr "Dépenses"
+
+#: .\templates\budget\budget_list.html:2275
+#: .\templates\budget\sample_budget_box.html:210
+msgid "Leftover cash"
+msgstr "Argent restant"
+
+#: .\templates\budget\budget_list.html:2462
+#: .\templates\budget\sample_budget_box.html:235
+msgid "Cash Flow"
+msgstr "Des flux de trésorerie"
+
+#: .\templates\budget\budget_list.html:2470
+#: .\templates\budget\current_budget_box.html:518
+#: .\templates\budget\sample_budget_box.html:243
+msgid "Spending Categories"
+msgstr "Catégories de dépenses"
+
+#: .\templates\budget\budget_list.html:2525
+msgid ""
+"A template budget is a pre-structured budget format. It is showing the "
+"overview of your budget structure. You can see all the budgets and their "
+"total spending and left budgets."
+msgstr ""
+"Un modèle de budget est un format de budget pré-structuré. Il montre un "
+"aperçu de votre structure budgétaire. Vous pouvez voir tous les budgets, "
+"leurs dépenses totales et les budgets restants."
+
+#: .\templates\budget\budget_list.html:2557
+msgid "Daily"
+msgstr "Tous les jours"
+
+#: .\templates\budget\budget_list.html:2648
+msgid "Budgets and Spending"
+msgstr "Budgets et dépenses"
+
+#: .\templates\budget\budget_update.html:16
+#: .\templates\budget\budget_update.html:24
+#: .\templates\budget\budget_update.html:38
+#: .\templates\budget\budget_update.html:250
+msgid "Update"
+msgstr "Mise à jour"
+
+#: .\templates\budget\budget_update.html:42
+msgid ""
+"If manual budget or auto budget have been used in any transaction, you can't"
+" update budget period and budget date. "
+msgstr ""
+"Si un budget manuel ou automatique a été utilisé dans une transaction, vous "
+"ne pouvez pas mettre à jour la période budgétaire et la date du budget."
+
+#: .\templates\budget\budget_update.html:43
+msgid ""
+"If manual budget or auto budget not have been used in any transactions, "
+"updated budget period and budget date will be apply on the current budget."
+msgstr ""
+"Si le budget manuel ou le budget automatique n&#39;ont été utilisés dans "
+"aucune transaction, la période budgétaire et la date du budget mises à jour "
+"seront appliquées au budget actuel."
+
+#: .\templates\budget\budget_update.html:67
+msgid "Select Category Group"
+msgstr "Sélectionnez un groupe de catégories"
+
+#: .\templates\budget\budget_update.html:88
+#: .\templates\budget\compare_budget_box.html:60
+#: .\templates\budget\compare_budget_box.html:72
+msgid "Select"
+msgstr "Sélectionner"
+
+#: .\templates\budget\budget_update.html:135
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget amount."
+msgstr ""
+"Si un budget manuel ou un budget automatique a été utilisé dans une "
+"transaction. vous ne pouvez pas modifier le montant du budget."
+
+#: .\templates\budget\budget_update.html:149
+msgid "Current Period Amount"
+msgstr "Montant de la période en cours"
+
+#: .\templates\budget\budget_update.html:156
+msgid ""
+"this amount not apply for previous budgets. it is only apply for current and"
+" next budget amount"
+msgstr ""
+"ce montant ne s&#39;applique pas aux budgets précédents. cela ne "
+"s&#39;applique qu&#39;au montant du budget actuel et du prochain"
+
+#: .\templates\budget\budget_update.html:174
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget period."
+msgstr ""
+"Si un budget manuel ou un budget automatique a été utilisé dans une "
+"transaction. vous ne pouvez pas modifier la période budgétaire."
+
+#: .\templates\budget\budget_update.html:209
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget start date."
+msgstr ""
+"Si un budget manuel ou un budget automatique a été utilisé dans une "
+"transaction. vous ne pouvez pas modifier la date de début du budget."
+
+#: .\templates\budget\budget_update.html:221
+msgid "Current Budget Date"
+msgstr "Date du budget actuel"
+
+#: .\templates\budget\compare_budget_box.html:43
+msgid "Type"
+msgstr "Taper"
+
+#: .\templates\budget\compare_budget_box.html:51
+#: .\templates\budget\compare_budget_box.html:53
+msgid "Incomes"
+msgstr "Revenus"
+
+#: .\templates\budget\compare_budget_box.html:154
+msgid "Date"
+msgstr "Date"
+
+#: .\templates\budget\current_budget_box.html:17
+msgid "Current Budgets"
+msgstr "Budgets actuels"
+
+#: .\templates\budget\current_budget_box.html:99
+#: .\templates\budget\current_budget_box.html:190
+#: .\templates\budget\current_budget_box.html:241
+#: .\templates\budget\current_budget_box.html:342
+#: .\templates\budget\sample_budget_box.html:113
+#: .\templates\budget\sample_budget_box.html:133
+#: .\templates\budget\sample_budget_box.html:159
+#: .\templates\budget\sample_budget_box.html:184
+#: .\templates\budget\sample_budget_box.html:204
+msgid "This amount applies from"
+msgstr "Ce montant s&#39;applique à partir de"
+
+#: .\templates\budget\current_budget_box.html:188
+#: .\templates\budget\current_budget_box.html:340
+msgid "This amount applies at"
+msgstr "Ce montant s&#39;applique à"
+
+#: .\templates\budget\current_budget_box.html:337
+msgid "Due on"
+msgstr "Due le"
+
+#: .\templates\budget\sample_budget_box.html:18
+msgid "Sample Budgets"
+msgstr "Exemples de budgets"
+
+#: .\templates\budget\sample_budget_box.html:25
+msgid "Sample"
+msgstr "Échantillon"
+
+#: .\templates\budget\sample_budget_box.html:34
+msgid " Create Budget"
+msgstr "Créer un budget"
+
+#: .\templates\budget\sample_budget_box.html:65
+msgid "Salary"
+msgstr "Salaire"
+
+#: .\templates\budget\sample_budget_box.html:76
+msgid "THIS AMOUNT APPLIES FROM"
+msgstr "CE MONTANT S&#39;APPLIQUE À PARTIR DE"
+
+#: .\templates\budget\sample_budget_box.html:76
+#: .\templates\budget\sample_budget_box.html:113
+#: .\templates\budget\sample_budget_box.html:133
+#: .\templates\budget\sample_budget_box.html:159
+#: .\templates\budget\sample_budget_box.html:184
+#: .\templates\budget\sample_budget_box.html:204
+msgid "TO"
+msgstr "À"
+
+#: .\templates\budget\sample_budget_box.html:95
+msgid "Personal Care"
+msgstr "Soins personnels"
+
+#: .\templates\budget\sample_budget_box.html:102
+msgid "Hobbies"
+msgstr "Loisirs"
+
+#: .\templates\budget\sample_budget_box.html:122
+msgid "Clothes"
+msgstr "Vêtements"
+
+#: .\templates\budget\sample_budget_box.html:141
+msgid "Transportation"
+msgstr "Transport"
+
+#: .\templates\budget\sample_budget_box.html:148
+msgid "Gas & Fuel"
+msgstr "Gaz Combustible"
+
+#: .\templates\budget\sample_budget_box.html:166
+msgid "Food"
+msgstr "Nourriture"
+
+#: .\templates\budget\sample_budget_box.html:173
+msgid "Restaurants"
+msgstr "Restaurants"
+
+#: .\templates\budget\sample_budget_box.html:193
+msgid "Groceries"
+msgstr "Épiceries"
+
+#: .\templates\home.html:19
+msgid "HOME PAGE"
+msgstr "PAGE D&#39;ACCUEIL"
 
 #: .\templates\home.html:30
 msgid "Personal Finance"
@@ -31,9 +726,9 @@ msgid ""
 "is an application to manage your personal finance. It can help you keep "
 "track of your expenses and income, so you can spend less and save more."
 msgstr ""
-"est une application pour gérer vos finances personnelles. Elle vous permet "
-"de suivre vos dépenses et vos revenus, afin que vous puissiez dépenser moins "
-"et économiser davantage."
+"est une application pour gérer vos finances personnelles. Cela peut vous "
+"aider à suivre vos dépenses et vos revenus, afin que vous puissiez dépenser "
+"moins et économiser davantage."
 
 #: .\templates\home.html:30
 msgid ""
@@ -46,19 +741,19 @@ msgid ""
 msgstr ""
 "Vous pouvez stocker, modifier et supprimer des retraits, des dépôts et des "
 "transferts. Cela vous permet une gestion financière complète. Grâce à cela, "
-"vous pouvez gérer différents types de comptes tels que des comptes d'actifs, "
-"des comptes d'épargne, des passifs (prêts, hypothèques). Il offre la "
-"possibilité de créer, modifier et gérer de l'argent en utilisant des "
-"budgets. Vous pouvez organiser des transactions en utilisant des catégories "
-"et suivre également vos objectifs et vos factures."
+"vous pouvez gérer différents types de comptes comme les comptes "
+"d&#39;actifs, les comptes d&#39;épargne, les passifs (prêts, hypothèques). "
+"Il offre une possibilité de créer, de modifier et de gérer de l&#39;argent à"
+" l&#39;aide de budgets. Vous pouvez organiser les transactions en utilisant "
+"des catégories et également suivre vos objectifs et vos factures."
 
 #: .\templates\home.html:30
 msgid "More.."
-msgstr "Plus"
+msgstr "Plus.."
 
 #: .\templates\home.html:60
 msgid "BUDGET"
-msgstr ""
+msgstr "BUDGET"
 
 #: .\templates\home.html:63
 msgid ""
@@ -66,9 +761,9 @@ msgid ""
 "spent and left in budget. you can compare your budget period wise with "
 "pretty charts"
 msgstr ""
-"Il vous offre un aperçu de vos budgets, affichant le montant dépensé et le "
-"solde restant dans le budget. Vous pouvez comparer votre budget sur "
-"différentes périodes à l'aide de graphiques attrayants."
+"Il vous montre un aperçu de vos budgets. Il vous montre le montant dépensé "
+"et restant dans le budget. vous pouvez comparer votre période budgétaire "
+"avec de jolis graphiques"
 
 #: .\templates\home.html:75
 msgid "BILLS"
@@ -79,9 +774,9 @@ msgid ""
 "It provides a facility to add bills and shows all the bills with calender. "
 "Using calender you can easily filter which bill is paid or unpaid."
 msgstr ""
-"Il offre une fonctionnalité pour ajouter des factures et affiche toutes les "
-"factures sur un calendrier. En utilisant le calendrier, vous pouvez "
-"facilement filtrer les factures payées ou impayées."
+"Il offre la possibilité d&#39;ajouter des factures et affiche toutes les "
+"factures avec un calendrier. En utilisant le calendrier, vous pouvez "
+"facilement filtrer quelle facture est payée ou impayée."
 
 #: .\templates\home.html:90
 msgid "CATEGORY"
@@ -92,13 +787,13 @@ msgid ""
 "It provides a facility to add category and shows all the category with "
 "spending amount. so its very easy to find out which category spent the most."
 msgstr ""
-"Il propose une fonctionnalité pour ajouter des catégories et affiche toutes "
-"les catégories avec leur montant de dépenses, ce qui facilite "
-"l'identification de la catégorie ayant le plus dépensé."
+"Il offre la possibilité d&#39;ajouter une catégorie et affiche toutes les "
+"catégories avec le montant des dépenses. il est donc très facile de savoir "
+"quelle catégorie a dépensé le plus."
 
 #: .\templates\home.html:105
 msgid "ACCOUNTS"
-msgstr "Compte"
+msgstr "COMPTES"
 
 #: .\templates\home.html:108
 msgid ""
@@ -107,11 +802,11 @@ msgid ""
 "transactions data of account with charts. you can add, update and delete "
 "your account data."
 msgstr ""
-"Il gère différents types de comptes tels que les comptes d'actifs, les "
-"comptes d'épargne, les passifs (prêts, hypothèques). Il affiche votre solde "
-"actuel et toutes les données de transaction de compte à l'aide de "
-"graphiques. Vous pouvez ajouter, mettre à jour et supprimer vos données de "
-"compte."
+"Il gère différents types de comptes comme les comptes d&#39;actifs, les "
+"comptes d&#39;épargne, les passifs (prêts, hypothèques). Il affiche votre "
+"solde actuel et toutes les données de transactions du compte avec des "
+"graphiques. vous pouvez ajouter, mettre à jour et supprimer les données de "
+"votre compte."
 
 #: .\templates\home.html:120
 msgid "TRANSACTIONS"
@@ -121,12 +816,14 @@ msgstr "TRANSACTIONS"
 msgid ""
 "It manage transaction records. It provides facility to import transactions "
 "of your bank account and also import transaction files. you can export "
-"transaction data with date range. It shows all credit and debit transactions "
-"with charts."
+"transaction data with date range. It shows all credit and debit transactions"
+" with charts."
 msgstr ""
-"Il gère les enregistrements de transactions, permettant l'importation et "
-"l'exportation de fichiers de transactions bancaires. Affiche les "
-"transactions de crédit et de débit avec des graphiques."
+"Il gère les enregistrements de transactions. Il permet d&#39;importer les "
+"transactions de votre compte bancaire et également d&#39;importer des "
+"fichiers de transactions. vous pouvez exporter les données de transaction "
+"avec une plage de dates. Il montre toutes les transactions de crédit et de "
+"débit avec des graphiques."
 
 #: .\templates\home.html:135
 msgid "GOALS"
@@ -134,13 +831,14 @@ msgstr "OBJECTIFS"
 
 #: .\templates\home.html:138
 msgid ""
-"It provides a facility to manage you goals and helps to achieving goals. you "
-"can add, update and delete goals and also see goals are completed or not "
+"It provides a facility to manage you goals and helps to achieving goals. you"
+" can add, update and delete goals and also see goals are completed or not "
 "with pretty charts."
 msgstr ""
-"Aide à gérer et à atteindre des objectifs, permettant l'ajout, la mise à "
-"jour, la suppression et le suivi de l'atteinte des objectifs avec des "
-"graphiques."
+"Il fournit une fonctionnalité pour gérer vos objectifs et vous aide à "
+"atteindre vos objectifs. vous pouvez ajouter, mettre à jour et supprimer des"
+" objectifs et également voir que les objectifs sont atteints ou non avec de "
+"jolis graphiques."
 
 #: .\templates\home.html:150
 msgid "CALCULATORS"
@@ -153,10 +851,12 @@ msgid ""
 "periods. Future net worth calculator calculates a net worth projection of "
 "what your actual net worth in future over age and time will be."
 msgstr ""
-"Il comprend un calculateur hypothécaire et un calculateur de valeur nette "
-"future. Le calculateur d'hypothèque calcule vos paiements hypothécaires en "
-"fonction des périodes d'intérêt. Le calculateur de valeur nette future "
-"projette votre valeur nette future en fonction du temps et de l'âge."
+"Il dispose d&#39;un calculateur hypothécaire et d&#39;un calculateur de "
+"valeur nette future. Le calculateur hypothécaire calcule les détails de vos "
+"versements hypothécaires en fonction des périodes d&#39;intérêt. Le "
+"calculateur de valeur nette future calcule une projection de valeur nette de"
+" ce que sera votre valeur nette réelle à l&#39;avenir en fonction de "
+"l&#39;âge et du temps."
 
 #: .\templates\home.html:165
 msgid "REAL ESTATE"
@@ -167,15 +867,13 @@ msgid ""
 "It has property manage and property model sections.Property manage section "
 "useful to create property details, set rental terms and add tenants. "
 "Property model sections useful to analyse rental property investment "
-"summary, capital expenditure budget, yearly projection for revenue, expenses "
-"and income, investor contribution, mortgage."
+"summary, capital expenditure budget, yearly projection for revenue, expenses"
+" and income, investor contribution, mortgage."
 msgstr ""
-"Il comprend des sections de gestion immobilière et de modélisation immobilière. La section de "
-"gestion immobilière aide à créer des détails de propriété, à définir les conditions de location "
-"et à ajouter des locataires. Les sections de modélisation immobilière aident à analyser les "
-"investissements immobiliers locatifs, les budgets de dépenses en capital, les revenus annuels, "
-"les dépenses, les projections de revenus, les contributions des investisseurs et les hypothèques."
-
-#: .\templates\index.html:99
-msgid "Change"
-msgstr "Changement"
+"Il comporte des sections de gestion de propriété et de modèle de propriété. "
+"Section de gestion de propriété utile pour créer des détails sur la "
+"propriété, définir les conditions de location et ajouter des locataires. "
+"Sections du modèle de propriété utiles pour analyser le résumé de "
+"l&#39;investissement immobilier locatif, le budget des dépenses en capital, "
+"la projection annuelle des revenus, des dépenses et des revenus, la "
+"contribution de l&#39;investisseur, l&#39;hypothèque."
