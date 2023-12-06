@@ -4619,8 +4619,9 @@ def bill_pay(request, pk):
     label = bill_obj.label
     user = bill_obj.user
     categories = SubCategory.objects.get(name=label, category__name='Bills & Subscriptions', category__user=user)
+    tag_obj, tag_created = Tag.objects.get_or_create(user=user, name="Bills")
     save_transaction(user, label, bill_amount, remaining_amount, today_date, categories, account_obj,
-                     "bills", True, True, bill_obj)
+                     tag_obj, True, True, bill_obj)
     account_obj.available_balance = remaining_amount
     account_obj.transaction_count += 1
     account_obj.save()
@@ -6232,10 +6233,11 @@ def income_add(request):
                 if auto_credit:
                     account_balance = float(account.available_balance)
                     remaining_amount = round(account_balance + income_amount, 2)
+                    tag_obj, tag_created = Tag.objects.get_or_create(user=income.user, name="Incomes")
                     save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date,
                                      sub_category,
                                      account,
-                                     "income", False, True)
+                                     tag_obj, False, True)
                     account.available_balance = remaining_amount
                     account.transaction_count += 1
                     account.save()
@@ -6376,9 +6378,10 @@ def income_edit(request, pk):
 
         if income_obj.credited is False and credited is True:
             account.available_balance = round(float(account.available_balance) + new_amount, 2)
+            tag_obj, tag_created = Tag.objects.get_or_create(user=income_obj.income.user, name="Incomes")
             save_transaction(income_obj.income.user, income_obj.income.sub_category.name, new_amount,
                              account.available_balance,
-                             income_date, income_obj.income.sub_category, account, "income", False, True)
+                             income_date, income_obj.income.sub_category, account, tag_obj, False, True)
             account.transaction_count += 1
             account.save()
         income_obj.income_amount = new_amount

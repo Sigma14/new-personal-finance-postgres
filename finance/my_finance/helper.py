@@ -202,8 +202,9 @@ def check_bill_is_due():
         if auto_pay:
             remaining_amount = round(account_balance - bill_amount, 2)
             categories = SubCategory.objects.get(name=label, category__user=bill.user)
+            tag_obj, tag_created = Tag.objects.get_or_create(user=bill.user, name="Bills")
             save_transaction(bill.user, label, bill_amount, remaining_amount, bill.date, categories, account_obj,
-                             "bills", True, True, bill)
+                             tag_obj, True, True, bill)
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
@@ -295,9 +296,10 @@ def check_income_date():
             income.income_date = next_bill_date
         if auto_credit:
             remaining_amount = round(account_balance + income_amount, 2)
+            tag_obj, tag_created = Tag.objects.get_or_create(user=income.user, name="Incomes")
             save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date, sub_category,
                              account_obj,
-                             "income", False, True)
+                             tag_obj, False, True)
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
