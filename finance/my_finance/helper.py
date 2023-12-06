@@ -4,7 +4,7 @@ import calendar
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
-    Income, IncomeDetail, Budget
+    Income, IncomeDetail, Budget, Tag
 
 sub_category_suggested_list = {
     "Entertainment": ["Concerts", "Movies", "Music", "Games", "Hobbies"],
@@ -83,7 +83,11 @@ def save_fund_obj(request, user_name):
     transaction_obj.transaction_date = datetime.today().date()
     transaction_obj.categories = sub_category
     transaction_obj.account = account_obj
-    transaction_obj.tags = "Funds"
+    tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name="Adding Funds")
+    if tag_created:
+        transaction_obj.tags = tag_obj
+    else:
+        transaction_obj.tags = tag_obj
     transaction_obj.out_flow = True
     transaction_obj.cleared = True
     transaction_obj.save()

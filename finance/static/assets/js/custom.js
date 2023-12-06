@@ -2261,6 +2261,96 @@ $("body").delegate(".show_daily_budget", "click", function(event)
     $("." + "dropdown_" + id_name).toggle();
 });
 
+
+// change mortgage down payment amount according to mortgage amount
+$("body").delegate("#add_category_group", "change", function(event)
+{
+    category_name = $(this).val()
+    var csrfmiddlewaretoken = getCookie('csrftoken');
+    $.ajax(
+        {
+            type: 'POST',
+            url: "/category_group_add/",
+            data: {
+                    'category_name': category_name,
+                    'csrfmiddlewaretoken': csrfmiddlewaretoken
+                  },
+            success: function(response)
+            {
+                if(response.status == 'success')
+                {
+                    Swal.fire
+                             ({
+                                title: 'Category Created Successfully',
+                                icon: 'success',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                    location.reload();
+                }
+                else
+                {
+                    Swal.fire
+                             ({
+                                title: 'Category already exists!',
+                                icon: 'error',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary'
+                                },
+                                buttonsStyling: false
+                             });
+                }
+
+            }
+        });
+});
+
+
+// change mortgage down payment amount according to mortgage amount
+$("body").delegate("#mortgage_amount", "change", function(event)
+{
+    amount = $(this).val()
+    percentage = parseFloat($("#down_pay_per").val())
+    down_payment = (amount * percentage) / 100
+    $("#down_pay_amount").val(down_payment)
+});
+
+// change mortgage down payment percentage
+$("body").delegate("#down_pay_amount", "change", function(event)
+{
+    down_payment = $(this).val()
+    amount = $("#mortgage_amount").val()
+    if(amount)
+    {
+        percentage = (down_payment / amount) * 100
+    }
+    else
+    {
+        percentage = 0
+    }
+    percentage = $("#down_pay_per").val(percentage)
+});
+
+// change mortgage percentage
+$("body").delegate("#down_pay_per", "change", function(event)
+{
+    percentage = parseFloat($(this).val())
+    console.log(percentage)
+    amount = $("#mortgage_amount").val()
+    if(amount)
+    {
+        down_payment = (amount * percentage) / 100
+    }
+    else
+    {
+        down_payment = 0
+    }
+    $("#down_pay_amount").val(down_payment)
+    $("#down_pay_per").val(percentage)
+});
+
 // Pay bill amount
 
 // Pay bill

@@ -17,6 +17,7 @@ urlpatterns = [
     path('category_add/', CategoryAdd.as_view(), name='category_add'),
     path('category_update/<int:pk>', CategoryUpdate.as_view(), name='category_update'),
     path('category_delete/<int:pk>', CategoryDelete.as_view(), name='category_delete'),
+    path('category_group_add/', category_group_add, name='category_group_add'),
 
     # SubCategory urls :-
 
@@ -127,7 +128,8 @@ urlpatterns = [
     path('fund_update/<int:pk>', fund_update, name='fund_update'),
     path('fund_delete/<int:pk>', fund_delete, name='fund_delete'),
     path('fund_overtime', fund_overtime, name='fund_overtime'),
-    path('fund_add/', fund_add, name='fund_add'),
+    path('fund_add/<str:name>', fund_add, name='fund_add'),
+    path('fund_accounts/', fund_accounts, name='fund_accounts'),
 
     # Calculators
 

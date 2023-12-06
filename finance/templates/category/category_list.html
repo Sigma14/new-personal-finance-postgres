@@ -70,6 +70,11 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                            <tr><td colspan="4">
+                                                <div class="input-group input-group-merge">
+                                                        <input type="text" id="add_category_group" class="form-control" name="category_name" placeholder="Enter Category Name"/>
+                                                </div>
+                                            </td></tr>
                                                 {% for key, value in sub_category_data.items %}
                                                     <tr class="category" class_name="subcategory{{forloop.counter}}">
                                                         <td>

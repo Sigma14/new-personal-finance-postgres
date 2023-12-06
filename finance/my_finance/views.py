@@ -1535,6 +1535,19 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
+def category_group_add(request):
+    if request.method == 'POST' and request.is_ajax():
+        user_name = request.user
+        category_name = request.POST['category_name'].title()
+        category_obj = Category.objects.filter(user=user_name, name=category_name)
+        if category_obj:
+            return JsonResponse({'status': "error"})
+        else:
+            Category.objects.create(user=user_name, name=category_name)
+            return JsonResponse({'status': "success"})
+
+
+
 # Subcategory views
 
 def subcategory_suggestion(request):
@@ -2219,7 +2232,7 @@ def current_budget_box(request):
                     current_budget_names_list.pop(current_index)
 
     left_over_cash = round(total_bgt_income - sum(total_expense_list), 2)
-    transaction_key = ['Date', 'Amount', 'Account', 'Categories', 'Budget']
+    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget']
     transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False,
                                                   transaction_date__range=(start_date, end_date)).order_by(
             'transaction_date')
@@ -4384,7 +4397,13 @@ def fund_overtime(request):
 
 
 @login_required(login_url="/login")
-def fund_add(request):
+def fund_accounts(request):
+    context = {}
+    return render(request, 'funds/fund_account_box.html', context=context)
+
+
+@login_required(login_url="/login")
+def fund_add(request, name):
     user_name = request.user
     error = False
     if request.method == 'POST':
@@ -4395,10 +4414,8 @@ def fund_add(request):
         else:
             return redirect('/goal_list')
 
-    account_data = Account.objects.filter(user=user_name,
-                                          account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                            'Line of Credit'])
-    context = {'account_data': account_data}
+    account_data = Account.objects.filter(user=user_name, account_type=name)
+    context = {'account_data': account_data, 'name': name}
     if error:
         context['error'] = error
     return render(request, 'funds/funds_add.html', context=context)
@@ -4436,7 +4453,11 @@ def fund_update(request, pk):
             transaction_obj.transaction_date = datetime.datetime.today().date()
             transaction_obj.categories = sub_category
             transaction_obj.account = account_obj
-            transaction_obj.tags = "Funds"
+            tag_obj, tag_created = Tag.objects.get_or_create(user=fund_data.user, name="Adding Funds")
+            if tag_created:
+                transaction_obj.tags = tag_obj
+            else:
+                transaction_obj.tags = tag_obj
             transaction_obj.cleared = True
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
@@ -4826,7 +4847,9 @@ def make_mortgage_data(data, total_month, mortgage_date):
 def mortgagecalculator(request):
     form = MortgageForm(request.POST or None)
     if form.is_valid():
-        amount = form.cleaned_data.get('amount')
+        initial_amount = form.cleaned_data.get('amount')
+        down_payment = form.cleaned_data.get('down_payment')
+        amount = float(initial_amount) - float(down_payment)
         interest = form.cleaned_data.get('interest')
         tenure = form.cleaned_data.get('tenure')
         mortgage_date = form.cleaned_data.get('mortgage_date')
@@ -4835,6 +4858,7 @@ def mortgagecalculator(request):
         total_month = tenure * 12
         json_records = table.reset_index().to_json(orient='records')
         data = json.loads(json_records)
+        print(data[0]['initial_balance'])
         monthly_payment = abs(data[0]['principle'] + data[0]['interest'])
         mortgage_key, mortgage_graph_data, last_month, mortgage_date_data = make_mortgage_data(data, total_month,
                                                                                                mortgage_date)
@@ -4846,6 +4870,7 @@ def mortgagecalculator(request):
             'days': total_month,
             'total_payment': total_payment,
             'mortgage_key': mortgage_key,
+            'initial_amount': initial_amount,
             'mortgage_key_dumbs': json.dumps(mortgage_key),
             'mortgage_graph_data': mortgage_graph_data,
             'mortgage_date_data': mortgage_date_data
