@@ -221,6 +221,7 @@ def request_bill():
     """
     while True:
         check_bill_is_due()
+        time.sleep(60 * 60)
 
 
 def create_bill_request():
@@ -360,6 +361,7 @@ def check_budget_date():
     today_date = datetime.today().date()
     budget_data = Budget.objects.filter(ended_at__lt=today_date, auto_budget=True, budget_status=False)
     for budget in budget_data:
+        print("===========auto pay budget call================")
         budget_name = budget.name
         budget_start_date = budget.ended_at + relativedelta(days=1)
         budget_period = budget.budget_period
@@ -408,6 +410,7 @@ def request_budget():
     """
     while True:
         check_budget_date()
+        time.sleep(60 * 60)
 
 
 def create_budget_request():

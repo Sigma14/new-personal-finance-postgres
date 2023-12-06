@@ -1974,9 +1974,16 @@ def make_budgets_values(user_name, budget_data, page_method):
             ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
         budget_values = [total_spent, total_left]
     else:
-        list_of_months = []
-        budget_values = []
-        budget_currency = None
+        earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+        if earliest:
+            start = earliest[0].start_date
+        else:
+            start = datetime.datetime.today().date()
+        end = datetime.datetime.today().date()
+        list_of_months = list(OrderedDict(
+            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
+        budget_values = [0, 0]
+        budget_currency = ""
 
     budget_names_list = list(spent_data.keys())
     spent_data = dict_value_to_list(spent_data)
@@ -2171,12 +2178,13 @@ def current_budget_box(request):
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
         start_date, end_date = start_end_date(date_value, "Monthly")
+
     budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
+    
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list, \
         budgets_dict, income_bdgt_dict, total_bgt_income = make_budgets_values(user_name, budget_data, "budget_page")
 
-    print("budget_values=======>", budget_values)
     bills_qs = Bill.objects.filter(user=user_name, date__range=(start_date, end_date)).order_by('-created_at')
     week_daily_dict = {}
     for bill_data in bills_qs:
