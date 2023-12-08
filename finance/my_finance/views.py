@@ -2167,6 +2167,68 @@ def budgets_box(request):
 
 
 @login_required(login_url="/login")
+def budgets_walk_through(request):
+    user_name = request.user
+    if request.method == "POST":
+        category_group = request.POST['category_group']
+        category_name = request.POST['category_name']
+        category_obj = Category.objects.get(id=int(category_group))
+        try:
+            subcategory_obj = SubCategory.objects.get(name=category_name, category=category_obj)
+        except:
+            subcategory_obj = SubCategory.objects.create(name=category_name, category=category_obj)
+        budget_amount = request.POST['amount']
+        budget_currency = request.POST['currency']
+        budget_start_date = request.POST['budget_date']
+        budget_period = request.POST['budget_period']
+        budget_auto = request.POST['auto_budget']
+        if budget_auto == 'on':
+            budget_auto = True
+        budget_name = category_name
+        budget_check = Budget.objects.filter(user=user_name, name=budget_name)
+        if budget_check:
+            return redirect("/budgets/current")
+
+        budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
+        start_month_date, end_month_date = start_end_date(budget_start_date.date(), "Monthly")
+        budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
+        budget_obj = Budget()
+        budget_obj.user = user_name
+        budget_obj.category = subcategory_obj
+        budget_obj.name = budget_name
+        budget_obj.start_date = start_month_date
+        budget_obj.end_date = end_month_date
+        budget_obj.initial_amount = budget_amount
+        budget_obj.amount = budget_amount
+        budget_obj.budget_left = budget_amount
+        budget_obj.created_at = budget_start_date
+        budget_obj.currency = budget_currency
+        budget_obj.auto_budget = budget_auto
+        budget_obj.ended_at = budget_end_date
+        budget_obj.budget_start_date = budget_start_date
+        budget_obj.save()
+        if budget_period == 'Quarterly':
+            for month_value in range(2):
+                start_month_date = start_month_date + relativedelta(months=1)
+                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                             budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
+                             budget_start_date, subcategory_obj, None, budget_status=True)
+        if budget_period == 'Yearly':
+            for month_value in range(11):
+                start_month_date = start_month_date + relativedelta(months=1)
+                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                             budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
+                             budget_start_date, subcategory_obj, None, budget_status=True)
+        create_budget_request()
+        return redirect("/budgets/current")
+    category_groups = Category.objects.filter(user=user_name)
+    context = {"category_groups": category_groups, "today_date": str(today_date)}
+    return render(request, 'budget/budget_walk_through.html', context=context)
+
+
+@login_required(login_url="/login")
 def current_budget_box(request):
     user_name = request.user
     if request.method == 'POST':
@@ -2460,7 +2522,6 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         budget_name = name
         obj.name = budget_name
         budget_check = Budget.objects.filter(user=user_name, name=budget_name)
-        print(budget_check)
         if budget_check:
             form.add_error('name', 'Budget already exist')
             return self.form_invalid(form)

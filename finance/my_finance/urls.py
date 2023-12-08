@@ -31,6 +31,7 @@ urlpatterns = [
     # Budget urls :-
 
     path('budgets/', budgets_box, name='budgets'),
+    path('budgets/walk_through', budgets_walk_through, name='budgets_walk_through'),
     path('budgets/sample', sample_budget_box, name='sample-budgets'),
     path('budgets/current', current_budget_box, name='current-budgets'),
     path('budgets/compare', compare_budget_box, name='compare-budgets'),
