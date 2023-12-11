@@ -1,0 +1,246 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+{% block content %}
+<div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{heading_name}}</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{{property_url}}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Walk through
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Horizontal Wizard -->
+                <section class="modern-horizontal-wizard">
+                    <div class="bs-stepper wizard-modern modern-wizard-example">
+                        <div class="bs-stepper-header">
+                            <div class="step" data-target="#account-details">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">1</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">BUDGET WELCOME PAGE</span>
+                                        <span class="bs-stepper-subtitle">Description</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#personal-info">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">2</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET CATEGORIES</span>
+                                        <span class="bs-stepper-subtitle">Select category related to groups</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#address-step">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">3</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET EXPENSES AMOUNT</span>
+                                        <span class="bs-stepper-subtitle">Set amount with currency</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="step" data-target="#budget-step">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">4</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
+                                        <span class="bs-stepper-subtitle">Set date with budget periods & auto budget functionality</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bs-stepper-content">
+                            <form action="{% url 'budgets_walk_through' %}" id="frm1" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div id="account-details" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-md-12 col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Welcome to the Budget Creation Page.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text">Begin by selecting your preferred category groups and the currency for your budget allocation. Next, choose the specific category within the selected group and estimate your budgeted expenses or incomes. Our platform offers various budget periods, including Daily, Weekly, Monthly, Quarterly, and Yearly, facilitating the automatic generation of budgets. This eliminates the need for users to manually input budget data for every period.</p>
+                                                        <p class="card-text">Rest assured that achieving budget perfection is an ongoing process, and adjustments can be effortlessly made at any time. Our user-friendly interface ensures a seamless experience in managing your finances, allowing you to adapt and refine your budget as needed.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="personal-info" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-xl-8 col-md-6 col-12">
+                                                <div class="row match-height">
+                                                    <div class="col-12">
+                                                        <h4 class="mb-1 mt-2">
+                                                            <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                            <span class="align-middle">SET CATEGORIES</span>
+                                                        </h4>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div class="form-group">
+                                                            <h5>Group</h5>
+                                                            <select class="form-control sub_cat_select" id="category_group" name="category_group" required>
+                                                                <option value="">Select Group</option>
+                                                                {% for category in category_groups %}
+                                                                    {% if category.name == 'Personal Care'%}
+                                                                        <option value="{{category.id}}" selected>{{category.name}}</option>
+                                                                    {% else %}
+                                                                        <option value="{{category.id}}">{{category.name}}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-group">
+                                                            <h5>Name</h5>
+                                                            <input type="text" id="sub_category_name" value="Clothes" name="category_name" class="form-control" required/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="col-12"><hr /></div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div id="address-step" class="content">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h4 class="mb-1 mt-2">
+                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                <span class="align-middle">SET EXPENSES AMOUNT</span>
+                                            </h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <h5>Amount</h5>
+                                                <input type="text" id="amount" value="50" name="amount" class="form-control" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="form-group">
+                                                <h5>Currency</h5>
+                                                <select name="currency" class="form-control" id="id_currency" required>
+                                                      <option value="$">US Dollar ($)</option>
+                                                      <option value="€">Euro (€)</option>
+                                                      <option value="₹">Indian rupee (₹)</option>
+                                                      <option value="£">British Pound (£)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="budget-step" class="content">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h4 class="mb-1 mt-2">
+                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                <span class="align-middle">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
+                                            </h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <h5>Start Date</h5>
+                                                <input type="text" id="budget_date" name="budget_date" value="{{today_date}}" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="form-group">
+                                                <h5>Auto-budget period</h5>
+                                                <select name="budget_period" class="form-control" id="id_budget_period">
+                                                  <option value="Daily">Daily</option>
+                                                  <option value="Weekly">Weekly</option>
+                                                  <option value="Monthly" selected>Monthly</option>
+                                                  <option value="Quarterly">Quarterly</option>
+                                                  <option value="Yearly">Yearly</option>
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" name="auto_budget" checked="" class="custom-control-input" id="customCheck1">
+                                                    <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-budget</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <button class="btn btn-success btn-submit">Complete</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <!-- /Horizontal Wizard -->
+            </div>
+        </div>
+    </div>
+{% endblock content %}

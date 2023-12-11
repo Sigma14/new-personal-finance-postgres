@@ -17,6 +17,7 @@ urlpatterns = [
     path('category_add/', CategoryAdd.as_view(), name='category_add'),
     path('category_update/<int:pk>', CategoryUpdate.as_view(), name='category_update'),
     path('category_delete/<int:pk>', CategoryDelete.as_view(), name='category_delete'),
+    path('category_group_add/', category_group_add, name='category_group_add'),
 
     # SubCategory urls :-
 
@@ -30,6 +31,7 @@ urlpatterns = [
     # Budget urls :-
 
     path('budgets/', budgets_box, name='budgets'),
+    path('budgets/walk_through', budgets_walk_through, name='budgets_walk_through'),
     path('budgets/sample', sample_budget_box, name='sample-budgets'),
     path('budgets/current', current_budget_box, name='current-budgets'),
     path('budgets/compare', compare_budget_box, name='compare-budgets'),
@@ -127,7 +129,8 @@ urlpatterns = [
     path('fund_update/<int:pk>', fund_update, name='fund_update'),
     path('fund_delete/<int:pk>', fund_delete, name='fund_delete'),
     path('fund_overtime', fund_overtime, name='fund_overtime'),
-    path('fund_add/', fund_add, name='fund_add'),
+    path('fund_add/<str:name>', fund_add, name='fund_add'),
+    path('fund_accounts/', fund_accounts, name='fund_accounts'),
 
     # Calculators
 

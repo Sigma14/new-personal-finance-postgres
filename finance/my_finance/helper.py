@@ -4,7 +4,7 @@ import calendar
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
-    Income, IncomeDetail, Budget
+    Income, IncomeDetail, Budget, Tag
 
 sub_category_suggested_list = {
     "Entertainment": ["Concerts", "Movies", "Music", "Games", "Hobbies"],
@@ -83,7 +83,11 @@ def save_fund_obj(request, user_name):
     transaction_obj.transaction_date = datetime.today().date()
     transaction_obj.categories = sub_category
     transaction_obj.account = account_obj
-    transaction_obj.tags = "Funds"
+    tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name="Adding Funds")
+    if tag_created:
+        transaction_obj.tags = tag_obj
+    else:
+        transaction_obj.tags = tag_obj
     transaction_obj.out_flow = True
     transaction_obj.cleared = True
     transaction_obj.save()
@@ -198,8 +202,9 @@ def check_bill_is_due():
         if auto_pay:
             remaining_amount = round(account_balance - bill_amount, 2)
             categories = SubCategory.objects.get(name=label, category__user=bill.user)
+            tag_obj, tag_created = Tag.objects.get_or_create(user=bill.user, name="Bills")
             save_transaction(bill.user, label, bill_amount, remaining_amount, bill.date, categories, account_obj,
-                             "bills", True, True, bill)
+                             tag_obj, True, True, bill)
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
@@ -217,6 +222,7 @@ def request_bill():
     """
     while True:
         check_bill_is_due()
+        time.sleep(60 * 60)
 
 
 def create_bill_request():
@@ -290,9 +296,10 @@ def check_income_date():
             income.income_date = next_bill_date
         if auto_credit:
             remaining_amount = round(account_balance + income_amount, 2)
+            tag_obj, tag_created = Tag.objects.get_or_create(user=income.user, name="Incomes")
             save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date, sub_category,
                              account_obj,
-                             "income", False, True)
+                             tag_obj, False, True)
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
@@ -356,6 +363,7 @@ def check_budget_date():
     today_date = datetime.today().date()
     budget_data = Budget.objects.filter(ended_at__lt=today_date, auto_budget=True, budget_status=False)
     for budget in budget_data:
+        print("===========auto pay budget call================")
         budget_name = budget.name
         budget_start_date = budget.ended_at + relativedelta(days=1)
         budget_period = budget.budget_period
@@ -404,6 +412,7 @@ def request_budget():
     """
     while True:
         check_budget_date()
+        time.sleep(60 * 60)
 
 
 def create_budget_request():

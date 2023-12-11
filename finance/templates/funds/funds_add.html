@@ -31,7 +31,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" action="{% url 'fund_add' %}" method="post">
+                    <form class="form form-horizontal" action="/fund_add/{{name}}" method="post">
                         {% if error %}
                             <p class="text-danger">{{error}}</p>
                         {% endif %}
@@ -61,6 +61,7 @@
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
+                                            {% if account_data %}
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
@@ -69,6 +70,10 @@
                                                 <option value="{{value.name}}">{{value}}</option>
                                                 {% endfor %}
                                             </select>
+                                            {% else %}
+                                            <a href="{% url 'account_add' %}" class="btn btn-primary"><i
+                                            class="fa fa-plus"></i> Add Account</a>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

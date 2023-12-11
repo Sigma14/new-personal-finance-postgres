@@ -36,7 +36,17 @@
                     <div class="card ecommerce-card">
                         <div class="card-body">
                             <div class="item-name" style="text-align:center;">
-                                <a href="{% url 'sample-budgets' %}">{% trans "Sample Budget" %}</a>
+                                <a href="{% url 'budgets_walk_through' %}">{% trans 'Walk Through For Budget' %}</a>
+                            </div>
+                            <div class="item-name">
+                                <p class="card-text">{% blocktrans %} In this budget walkthrough, we provide a professional guide on the essential steps to help users create a well-structured budget by defining categories and allocating amounts. {% endblocktrans %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card ecommerce-card">
+                        <div class="card-body">
+                            <div class="item-name" style="text-align:center;">
+                                <a href="{% url 'sample-budgets' %}">{{_('Sample Budget')}}</a>
                             </div>
                             <div class="item-name">
                                 <p class="card-text">{% blocktrans %} A sample budget is a pre-structured budget format. It is showing the overview of your budget structure. You can see total earning and spending from the budgets. This section also visualize budget spending according to the categories.  {% endblocktrans %}</p>

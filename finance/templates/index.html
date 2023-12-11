@@ -173,8 +173,6 @@
                         </li>
                         <li class="{% if request.resolver_match.view_name == 'loan_accounts_box' or request.resolver_match.view_name == 'loan_add' or request.resolver_match.view_name == 'loan_list' or request.resolver_match.view_name == 'loan_details' or request.resolver_match.view_name == 'loan_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'loan_accounts_box' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Mortgages and Loans Accounts</span></a>
                         </li>
-                        <li class="{% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_add' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'fund_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Available Funds</span></a>
-                        </li>
                     </ul>
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'bill_list' or request.resolver_match.view_name == 'bill_add' or request.resolver_match.view_name == 'bill_detail' or request.resolver_match.view_name == 'bill_update' %}active{% endif %}"><a
@@ -183,9 +181,13 @@
                 </li>
                 <li class="nav-item {% if request.resolver_match.view_name == 'budgets' or request.resolver_match.view_name == 'sample-budgets' or request.resolver_match.view_name == 'current-budgets' or request.resolver_match.view_name == 'compare-budgets' or request.resolver_match.view_name == 'budget_detail' or request.resolver_match.view_name == 'budget_add' or request.resolver_match.view_name == 'budget_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'budgets' %}"><i data-feather="pie-chart"></i><span class="menu-title text-truncate" data-i18n="Calculators">Budgets</span></a>
                 </li>
-                <li class=" nav-item  {% if request.resolver_match.view_name == 'goal_list' or request.resolver_match.view_name == 'goal_add' or request.resolver_match.view_name == 'goal_detail' or request.resolver_match.view_name == 'goal_update' %}active{% endif %}"><a
-                        class="d-flex align-items-center" href="{% url 'goal_list' %}"><i
-                        data-feather="target"></i><span class="menu-title text-truncate" data-i18n="Goal">Goals</span></a>
+                <li class=" nav-item"><a class="d-flex align-items-center" href="#"><i data-feather="target"></i><span class="menu-title text-truncate" data-i18n="Accounts">Goals</span></a>
+                    <ul class="menu-content">
+                        <li class="{% if request.resolver_match.view_name == 'goal_list' or request.resolver_match.view_name == 'goal_add' or request.resolver_match.view_name == 'goal_detail' or request.resolver_match.view_name == 'goal_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'goal_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Goals List</span></a>
+                        </li>
+                        <li class="{% if request.resolver_match.view_name == 'fund_list' or request.resolver_match.view_name == 'fund_detail' or request.resolver_match.view_name == 'fund_update' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'fund_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Collapsed Menu">Available Funds</span></a>
+                        </li>
+                    </ul>
                 </li>
                 <li class=" nav-item  {% if request.resolver_match.view_name == 'transaction_list' or request.resolver_match.view_name == 'transaction_add' or request.resolver_match.view_name == 'transaction_detail' or request.resolver_match.view_name == 'transaction_update' %}active{% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'transaction_list' %}"><i
