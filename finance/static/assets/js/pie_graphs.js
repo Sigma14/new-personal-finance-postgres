@@ -26,10 +26,6 @@
 
 function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
 {
-  console.log("graph_id", graph_id)
-  console.log("graph_label", graph_label)
-  console.log("graph_data", graph_data)
-  console.log("graph_currency", graph_currency)
 
   var donutChartEl = document.querySelector(graph_id),
     donutChartConfig = {

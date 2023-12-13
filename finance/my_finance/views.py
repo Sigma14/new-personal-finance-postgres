@@ -1547,7 +1547,6 @@ def category_group_add(request):
             return JsonResponse({'status': "success"})
 
 
-
 # Subcategory views
 
 def subcategory_suggestion(request):
@@ -2243,7 +2242,7 @@ def current_budget_box(request):
 
     budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
-    
+
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list, \
         budgets_dict, income_bdgt_dict, total_bgt_income = make_budgets_values(user_name, budget_data, "budget_page")
 
@@ -2305,7 +2304,7 @@ def current_budget_box(request):
     transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget']
     transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False,
                                                   transaction_date__range=(start_date, end_date)).order_by(
-            'transaction_date')
+        'transaction_date')
     context = {"list_of_months": list_of_months, "current_month": current_month,
                "budget_graph_currency": budget_currency, 'total_income': total_bgt_income,
                'income_bdgt_dict': income_bdgt_dict, 'left_over_cash': left_over_cash,
@@ -2324,7 +2323,92 @@ def current_budget_box(request):
 
 
 @login_required(login_url="/login")
-def compare_budget_box(request):
+def compare_boxes(request):
+    user_name = request.user
+    return render(request, "budget/compare_boxes.html")
+
+
+@login_required(login_url="/login")
+def compare_target_budget_box(request):
+    user_name = request.user
+    budget_graph_currency = "$"
+    budget_type = "Expenses"
+    budgets_qs = Budget.objects.filter(user=user_name).exclude(
+        category__category__name__in=["Bills", "Goals", "Funds"])
+    bill_qs = Bill.objects.filter(user=user_name)
+    if budgets_qs:
+        budget_graph_currency = budgets_qs[0].currency
+    if bill_qs:
+        budget_graph_currency = bill_qs[0].currency
+    budgets = list(budgets_qs.values_list('name', flat=True).distinct())
+    bill_budgets = list(bill_qs.values_list('label', flat=True).distinct())
+    budgets += bill_budgets
+    if budgets:
+        earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+        start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+        list_of_months = list(OrderedDict(
+            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
+        budget_name = budgets[0]
+    if request.method == 'POST':
+        month_name = "01-" + request.POST['select_period']
+        budget_name = request.POST['budget_name']
+        date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
+        transaction_data = Transaction.objects.filter(user=user_name, categories__name=budget_name,
+                                                      transaction_date__range=(start_date, end_date)).order_by(
+            'transaction_date')
+    else:
+        date_value = datetime.datetime.today().date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
+    if budgets:
+        transaction_data = Transaction.objects.filter(user=user_name, categories__name=budget_name,
+                                                      transaction_date__range=(start_date, end_date)).order_by('transaction_date')
+
+        print(start_date)
+        print(end_date)
+        print("transaction_data==>", transaction_data)
+    else:
+        transaction_data = []
+
+    type_list = ['Spent Amount', "Left Amount", "Surplus Amount"]
+    budget_graph_data = []
+    bar_graph_data = []
+    if transaction_data:
+        if transaction_data[0].categories.category.name == "Income":
+            budget_type = "Incomes"
+    if budgets:
+        try:
+            budget_obj = Budget.objects.get(user=user_name, name=budget_name, start_date=start_date, end_date=end_date)
+            budget_amount = float(budget_obj.amount)
+            budget_spent = float(budget_obj.budget_spent)
+            budget_left = float(budget_obj.budget_left)
+            surplus_amount = 0
+            if budget_spent - budget_amount > 0:
+                surplus_amount = budget_spent - budget_amount
+            budget_graph_data = [budget_spent, budget_left, surplus_amount]
+            bar_graph_data = [{'name': 'Amount', 'data': [budget_spent, budget_left, surplus_amount]}]
+        except:
+            pass
+    transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account']
+    context = {"budgets": budgets, "list_of_months": list_of_months,
+               'budget_name': budget_name,
+               "current_month": current_month, "transaction_data": transaction_data,
+               "transaction_key": transaction_key,
+               'budget_names': type_list,
+               "budget_graph_value": budget_graph_data,
+               "budget_graph_data": bar_graph_data,
+               "budget_graph_id": "#total_budget",
+               "budget_graph_currency": budget_graph_currency,
+               "budget_type": budget_type,
+               "budget_bar_id": "#budgets-bar"
+               }
+    return render(request, 'budget/compare_target_box.html', context=context)
+
+
+@login_required(login_url="/login")
+def compare_different_budget_box(request):
     user_name = request.user
     budget_type = "Expenses"
     current_date = datetime.datetime.today().date()
@@ -2981,8 +3065,10 @@ def transaction_split(request):
                     if transaction_out_flow:
                         out_flow = "True"
 
-                    account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account, bill_name,
-                                                                 budget_name, cleared_amount, out_flow, str(transaction_date))
+                    account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account,
+                                                                 bill_name,
+                                                                 budget_name, cleared_amount, out_flow,
+                                                                 str(transaction_date))
                     split_obj.user = user_name
                     split_obj.categories = subcategory_obj
                     split_obj.amount = round(transaction_amount, 2)
@@ -3024,8 +3110,10 @@ def transaction_split(request):
                 if transaction_out_flow:
                     out_flow = "True"
 
-                account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account, bill_name,
-                                                             budget_name, cleared_amount, out_flow, str(transaction_date))
+                account_obj, budget_obj = transaction_checks(user_name, transaction_amount, transaction_account,
+                                                             bill_name,
+                                                             budget_name, cleared_amount, out_flow,
+                                                             str(transaction_date))
                 split_obj.user = user_name
                 split_obj.categories = subcategory_obj
                 split_obj.amount = round(transaction_amount, 2)

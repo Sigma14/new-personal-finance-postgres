@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<head>
+    <title>COMPARE BUDGETS PAGE</title>
+</head>
+<body>
+
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Budgets</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                      Compare Budgets
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <section id="stocks_grid_view" class="grid-view">
+                    <div class="card ecommerce-card">
+                        <div class="card-body">
+                            <div class="item-name" style="text-align:center;">
+                                <a href="{% url 'compare-target-budgets' %}">Compare Spending against target</a>
+                            </div>
+                            <div class="item-name">
+                                <p class="card-text">in this comparison functionality users can see spending and transaction comparison for selected budgets</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card ecommerce-card">
+                        <div class="card-body">
+                            <div class="item-name" style="text-align:center;">
+                                <a href="{% url 'compare-different-budgets' %}">Compare 2 different budgets</a>
+                            </div>
+                            <div class="item-name">
+                                <p class="card-text">A compare 2 different budgets provides the facility to the users to compare different budgets. Its comparing budgets with time ranges and spending amount.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

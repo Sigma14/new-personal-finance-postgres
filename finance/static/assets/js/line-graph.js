@@ -889,7 +889,7 @@ var options = {
             }
           }
         }],
-        colors: ['#2AAA8A', '#DE3163'],
+        colors: ['#3176de', '#DE3163'],
         plotOptions: {
           bar: {
             horizontal: false,
