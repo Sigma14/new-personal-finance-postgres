@@ -297,11 +297,17 @@
 <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
 
 <script>BudgetsBarChart({{ budget_graph_data | safe }}, {{ budget_names | safe }}, "{{budget_bar_id | safe}}");</script>
+<script>BudgetsBarChart({{ budget_graph_data2 | safe }}, {{ budget_names2 | safe }}, "{{budget_bar_id2 | safe}}");</script>
+<script>BudgetsBarChart({{ budget_income_graph_data | safe }}, {{ budget_income_names | safe }}, "{{budget_income_bar_id | safe}}");</script>
+<script>BudgetsBarChart({{ budget_income_graph_data2 | safe }}, {{ budget_income_names2 | safe }}, "{{budget_income_bar_id2 | safe}}");</script>
 <script>BudgetsBarChart({{ week_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{week_budget_bar_id | safe}}");</script>
 <script>BudgetsBarChart({{ quart_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{quart_budget_bar_id | safe}}");</script>
 <script>BudgetsBarChart({{ yearly_budget_graph_data | safe }}, {{ budget_names | safe }}, "{{yearly_budget_bar_id | safe}}");</script>
 <script>BudgetsBarChart({{ template_budget_graph_data | safe }}, {{ template_budget_names | safe }}, "{{template_budget_bar_id | safe}}");</script>
 <script>BudgetChart({{ budget_names | safe }}, {{ budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_names2 | safe }}, {{ budget_graph_value2 | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_graph_id2 | safe}}");</script>
+<script>BudgetChart({{ budget_income_names | safe }}, {{ budget_income_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_income_graph_id | safe}}");</script>
+<script>BudgetChart({{ budget_income_names2 | safe }}, {{ budget_income_graph_value2 | safe }}, "{{ budget_graph_currency | safe }}", "{{budget_income_graph_id2 | safe}}");</script>
 <script>BudgetChart({{ budget_names | safe }}, {{ week_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{week_budget_graph_id | safe}}");</script>
 <script>BudgetChart({{ budget_names | safe }}, {{ quart_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{quart_budget_graph_id | safe}}");</script>
 <script>BudgetChart({{ budget_names | safe }}, {{ yearly_budget_graph_value | safe }}, "{{ budget_graph_currency | safe }}", "{{yearly_budget_graph_id | safe}}");</script>

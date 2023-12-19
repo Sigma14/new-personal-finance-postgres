@@ -507,6 +507,42 @@ def get_template_budget():
     return template_dict, template_values, template_name_list, template_graph_data
 
 
+def get_cmp_diff_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
+                      budget_transaction_data_dict, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, total_bgt_spend_amount=None, total_bgt_earned_amount=None):
+    for bgt_name in budget_names:
+        transaction_budget = Transaction.objects.filter(user=user_name, categories__name=bgt_name,
+                                                        transaction_date__range=(month_start, month_end)).order_by(
+            '-transaction_date')
+        total_spent_amount = 0
+        total_earn_amount = 0
+        trans_type = "spend"
+        budget_transaction_data_dict[bgt_name] = []
+        for t in transaction_budget:
+            if t.categories.category.name == "Income":
+                total_earn_amount += float(t.amount)
+                total_bgt_earned_amount += float(t.amount)
+                trans_type = "earned"
+            else:
+                total_spent_amount += float(t.amount)
+                total_bgt_spend_amount += float(t.amount)
+
+            budget_transaction_data_dict[bgt_name].append([str(t.transaction_date), float(t.amount), trans_type])
+
+        if trans_type == "spend":
+            budget_graph_value.append(total_spent_amount)
+            budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_spent_amount])
+            budget_bar_value[0]['data'].append(total_spent_amount)
+            expense_bdgt_names.append(bgt_name)
+        else:
+            budget_income_graph_value.append(total_earn_amount)
+            budget_income_bar_value[0]['data'].append(total_earn_amount)
+            budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_earn_amount])
+            income_bdgt_names.append(bgt_name)
+
+    return budget_bar_value, budget_graph_value, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, budget_transaction_data_dict, total_bgt_spend_amount,\
+           total_bgt_earned_amount
+
+
 def get_cmp_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
                  budget_transaction_data_dict):
     for bgt_name in budget_names:

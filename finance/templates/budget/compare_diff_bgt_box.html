@@ -19,7 +19,7 @@
                                     </li>
                                     <li class="breadcrumb-item"><a href="{% url 'compare_boxes' %}">Compare</a>
                                     </li>
-                                    <li class="breadcrumb-item">Target</li>
+                                    <li class="breadcrumb-item">different</li>
                                 </ol>
                             </div>
                         </div>
@@ -32,14 +32,14 @@
                         <div class="col-xl-12 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <form id="compare_bgt_form" action="/budgets/compare/target" method="post">
+                                    <form id="compare_bgt_form" action="/budgets/compare/different" method="post">
                                         {% csrf_token %}
                                         <div class="">
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
                                                     <label>Budget 1</label>
-                                                    <select class="select2 form-control" name="budget1_name" multiple>
+                                                    <select class="select2 form-control" name="budget1_name" multiple required>
                                                         {% for name in budgets %}
                                                         {% if name in budget1_names %}
                                                             <option value="{{name}}" selected>{{name}}</option>
@@ -53,7 +53,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
                                                     <label>Budget 2</label>
-                                                    <select class="select2 form-control" name="budget2_name" multiple>
+                                                    <select class="select2 form-control" name="budget2_name" multiple required>
                                                         {% for name in budgets %}
                                                         {% if name in budget2_names %}
                                                             <option value="{{name}}" selected>{{name}}</option>
@@ -67,7 +67,7 @@
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
                                                     <label>Select Month</label>
-                                                    <select class="form-control" name="select_period">
+                                                    <select class="form-control" name="select_period" required>
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
                                                                 <option selected value="{{month}}">{{month}}</option>
@@ -80,7 +80,7 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Check</button>
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Compare</button>
                                                 </div>
                                             </div>
                                         </div>
