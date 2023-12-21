@@ -98,6 +98,7 @@ urlpatterns = [
     path('bill_details/<int:pk>/', bill_details, name='bill_details'),
     path('bill_edit/<int:pk>/', bill_edit, name='bill_edits'),
     path('bill_detail/<int:pk>', bill_detail, name='bill_detail'),
+    path('bill_walk_through/', bill_walk_through, name='bill_walk_through'),
     path('bill_add/', bill_add, name='bill_add'),
     path('bill_update/<int:pk>', bill_update, name='bill_update'),
     path('bill_delete/<int:pk>', bill_delete, name='bill_delete'),

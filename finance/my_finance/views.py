@@ -2222,7 +2222,7 @@ def budgets_walk_through(request):
                              budget_start_date, subcategory_obj, None, budget_status=True)
         create_budget_request()
         return redirect("/budgets/current")
-    category_groups = Category.objects.filter(user=user_name)
+    category_groups = Category.objects.filter(user=user_name).exclude(name='Bills & Subscriptions')
     context = {"category_groups": category_groups, "today_date": str(today_date)}
     return render(request, 'budget/budget_walk_through.html', context=context)
 
@@ -2385,9 +2385,15 @@ def compare_different_budget_box(request):
     expense_bgt1_names = []
     expense_bgt2_names = []
 
-    budget1_bar_value, budget1_graph_value, budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names, transaction_data_dict1, spending_amount_bgt1, earned_amount_bgt1 = get_cmp_diff_data(budget1_names, user_name, start_date, end_date, budget1_bar_value, budget1_graph_value, transaction_data_dict1, budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names, spending_amount_bgt1, earned_amount_bgt1)
+    budget1_bar_value, budget1_graph_value, budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names, transaction_data_dict1, spending_amount_bgt1, earned_amount_bgt1 = get_cmp_diff_data(
+        budget1_names, user_name, start_date, end_date, budget1_bar_value, budget1_graph_value, transaction_data_dict1,
+        budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names,
+        spending_amount_bgt1, earned_amount_bgt1)
 
-    budget2_bar_value, budget2_graph_value, budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names, transaction_data_dict2, spending_amount_bgt2, earned_amount_bgt2 = get_cmp_diff_data(budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2, budget2_income_graph_value, budget1_income_bar_value, expense_bgt2_names, income_bgt2_names, spending_amount_bgt2, earned_amount_bgt1)
+    budget2_bar_value, budget2_graph_value, budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names, transaction_data_dict2, spending_amount_bgt2, earned_amount_bgt2 = get_cmp_diff_data(
+        budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2,
+        budget2_income_graph_value, budget1_income_bar_value, expense_bgt2_names, income_bgt2_names,
+        spending_amount_bgt2, earned_amount_bgt1)
     context = {"budgets": budgets, "list_of_months": list_of_months,
                "budget1_names": budget1_names,
                "budget2_names": budget2_names,
@@ -2427,95 +2433,73 @@ def compare_different_budget_box(request):
 @login_required(login_url="/login")
 def compare_target_budget_box(request):
     user_name = request.user
+    budget_graph_currency = "$"
     budget_type = "Expenses"
-    current_date = datetime.datetime.today().date()
-    week_start, week_end = start_end_date(current_date, "Weekly")
-    month_start, month_end = start_end_date(current_date, "Monthly")
-    quart_end, quart_start = start_end_date(current_date, "Quarterly")
-    yearly_start, yearly_end = start_end_date(current_date, "Yearly")
-    week_budget_graph_value = []
-    week_budget_bar_value = [{'name': 'Spent', 'data': []}]
-    week_budget_transaction_data_dict = {}
-    month_budget_graph_value = []
-    month_budget_bar_value = [{'name': 'Spent', 'data': []}]
-    month_budget_transaction_data_dict = {}
-    quart_budget_graph_value = []
-    quart_budget_bar_value = [{'name': 'Spent', 'data': []}]
-    quart_budget_transaction_data_dict = {}
-    yearly_budget_graph_value = []
-    yearly_budget_bar_value = [{'name': 'Spent', 'data': []}]
-    yearly_budget_transaction_data_dict = {}
-    budget_names = []
-    budget_graph_currency = '$'
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
-        category__category__name__in=["Income", "Bills", "Goals", "Funds"])
+        category__category__name__in=["Bills", "Goals", "Funds"])
     bill_qs = Bill.objects.filter(user=user_name)
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
     if bill_qs:
         budget_graph_currency = bill_qs[0].currency
     budgets = list(budgets_qs.values_list('name', flat=True).distinct())
-    income_budgets = Budget.objects.filter(user=user_name, category__category__name="Income").values('name').distinct()
     bill_budgets = list(bill_qs.values_list('label', flat=True).distinct())
     budgets += bill_budgets
-    budget_names = budgets[:2]
+    total_budget_count = len(budgets)
+    budget1_names = []
+    spending_amount_bgt1 = 0
+    earned_amount_bgt1 = 0
+    if budgets:
+        earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
+        start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+        list_of_months = list(OrderedDict(
+            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
+        split_budgets_count = int(total_budget_count / 2)
+        budget1_names = budgets[0:split_budgets_count]
+    if request.method == 'POST':
+        month_name = "01-" + request.POST['select_period']
+        budget1_names = request.POST.getlist('budget1_name')
+        date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
+    else:
+        date_value = datetime.datetime.today().date()
+        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
+        start_date, end_date = start_end_date(date_value, "Monthly")
 
-    if request.method == "POST":
-        budget_type = request.POST['budget_type']
-        if budget_type == "Incomes":
-            budget_names = request.POST.getlist('income_bgt')
-        else:
-            budget_names = request.POST.getlist('expense_bgt')
+    transaction_data_dict1 = {}
+    budget1_graph_value = []
+    budget1_bar_value = [{'name': 'Spent', 'data': []}]
+    budget1_income_graph_value = []
+    budget1_income_bar_value = [{'name': 'Earned', 'data': []}]
+    income_bgt1_names = []
+    expense_bgt1_names = []
 
-    week_budget_bar_value, week_budget_graph_value, week_budget_transaction_data_dic = get_cmp_data(budget_names,
-                                                                                                    user_name,
-                                                                                                    week_start,
-                                                                                                    week_end,
-                                                                                                    week_budget_bar_value,
-                                                                                                    week_budget_graph_value,
-                                                                                                    week_budget_transaction_data_dict)
+    budget1_bar_value, budget1_graph_value, budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names, transaction_data_dict1, spending_amount_bgt1, earned_amount_bgt1 = get_cmp_diff_data(
+        budget1_names, user_name, start_date, end_date, budget1_bar_value, budget1_graph_value, transaction_data_dict1,
+        budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names,
+        spending_amount_bgt1, earned_amount_bgt1)
 
-    budget_bar_value, budget_graph_value, budget_transaction_data_dict = get_cmp_data(budget_names, user_name,
-                                                                                      month_start, month_end,
-                                                                                      month_budget_bar_value,
-                                                                                      month_budget_graph_value,
-                                                                                      month_budget_transaction_data_dict)
-
-    quart_budget_bar_value, quart_budget_graph_value, quart_budget_transaction_data_dic = get_cmp_data(budget_names,
-                                                                                                       user_name,
-                                                                                                       quart_start,
-                                                                                                       quart_end,
-                                                                                                       quart_budget_bar_value,
-                                                                                                       quart_budget_graph_value,
-                                                                                                       quart_budget_transaction_data_dict)
-
-    yearly_budget_bar_value, yearly_budget_graph_value, yearly_budget_transaction_data_dic = get_cmp_data(budget_names,
-                                                                                                          user_name,
-                                                                                                          yearly_start,
-                                                                                                          yearly_end,
-                                                                                                          yearly_budget_bar_value,
-                                                                                                          yearly_budget_graph_value,
-                                                                                                          yearly_budget_transaction_data_dict)
-
-    context = {"budgets": budgets, "budget_type": budget_type, "income_budgets": income_budgets,
-               "budget_names": budget_names, "budget_graph_id": "#total_budget",
-               "budget_graph_value": budget_graph_value, "budget_graph_currency": budget_graph_currency,
-               "budget_graph_data": budget_bar_value, "budget_bar_id": "#budgets-bar",
-               "transaction_dict": budget_transaction_data_dict,
-               "week_budget_graph_id": "#week_total_budget",
-               "week_budget_graph_value": week_budget_graph_value,
-               "week_budget_graph_data": week_budget_bar_value, "week_budget_bar_id": "#week-budgets-bar",
-               "week_transaction_dict": week_budget_transaction_data_dict,
-               "quart_budget_graph_id": "#quart_total_budget",
-               "quart_budget_graph_value": quart_budget_graph_value,
-               "quart_budget_graph_data": quart_budget_bar_value, "quart_budget_bar_id": "#quart-budgets-bar",
-               "quart_transaction_dict": quart_budget_transaction_data_dict,
-               "yearly_budget_graph_id": "#yearly_total_budget",
-               "yearly_budget_graph_value": yearly_budget_graph_value,
-               "yearly_budget_graph_data": yearly_budget_bar_value, "yearly_budget_bar_id": "#yearly-budgets-bar",
-               "yearly_transaction_dict": yearly_budget_transaction_data_dict,
+    context = {"budgets": budgets, "list_of_months": list_of_months,
+               "budget1_names": budget1_names,
+               "current_month": current_month,
+               "total_spent_amount_bgt1": spending_amount_bgt1,
+               "total_earn_amount_bgt1": earned_amount_bgt1,
+               "transaction_data1": transaction_data_dict1,
+               "budget_graph_currency": budget_graph_currency,
+               'budget_names': expense_bgt1_names,
+               "budget_graph_value": budget1_graph_value,
+               "budget_graph_data": budget1_bar_value,
+               "budget_graph_id": "#total_budget",
+               "budget_bar_id": "#budgets-bar",
+               'budget_income_names': income_bgt1_names,
+               "budget_income_graph_value": budget1_income_graph_value,
+               "budget_income_graph_data": budget1_income_bar_value,
+               "budget_income_graph_id": "#total_income_budget",
+               "budget_income_bar_id": "#income-budgets-bar",
+               "budget_type": budget_type,
                }
-    return render(request, 'budget/compare_budget_box.html', context=context)
+    return render(request, 'budget/compare_target_box.html', context=context)
 
 
 @login_required(login_url="/login")
@@ -4828,8 +4812,7 @@ def bill_detail(request, pk):
     return render(request, "bill/bill_detail.html", context)
 
 
-@login_required(login_url="/login")
-def bill_add(request):
+def bill_adding_fun(request, method_name=None):
     form = BillForm(request.POST or None)
     error = ''
     user = request.user
@@ -4843,7 +4826,10 @@ def bill_add(request):
         currency = account_obj.currency
         check_bill_obj = Bill.objects.filter(user=request.user, label=label, account=account_obj)
         if check_bill_obj:
-            error = 'Bill Already Exit!!'
+            if method_name:
+                return "Bill_list"
+            else:
+                error = 'Bill Already Exit!!'
         else:
             bill_obj = Bill()
             bill_obj.user = request.user
@@ -4873,7 +4859,7 @@ def bill_add(request):
             bill_obj.bill_details = bill_details_obj
             bill_obj.save()
             create_bill_request()
-            return redirect("/bill_list")
+            return "Bill_list"
 
     bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
     bill_obj = Category.objects.get(user=user, name="Bills & Subscriptions")
@@ -4886,6 +4872,22 @@ def bill_add(request):
         'bill_category': bill_category,
         'bill_id': bill_obj.id
     }
+    return context
+
+
+@login_required(login_url="/login")
+def bill_walk_through(request):
+    context = bill_adding_fun(request, "bill_walk_through")
+    if context == "Bill_list":
+        return redirect("/bill_list")
+    return render(request, "bill/bill_walk_through.html", context=context)
+
+
+@login_required(login_url="/login")
+def bill_add(request):
+    context = bill_adding_fun(request, "bill_walk_through")
+    if context == "Bill_list":
+        return redirect("/bill_list")
     return render(request, "bill/bill_add.html", context=context)
 
 
