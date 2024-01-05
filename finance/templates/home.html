@@ -27,7 +27,7 @@
                         <div class="col-sm-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <p><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> {% trans "is an application to manage your personal finance. It can help you keep track of your expenses and income, so you can spend less and save more." %} </small><small class="see_more_summary" style="display:None; font-size:14px;"> {% trans "You can store, edit and remove withdrawals, deposits and transfers. This allows you full financial management. Using this you can manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages). It provides a facility to create, change and manage money using budgets. You can organize transactions using categories and also track your goals and bills." %} </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
+                                    <p class="card-text"><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> {% trans "is an application to manage your personal finance. It can help you keep track of your expenses and income, so you can spend less and save more." %} </small><small class="see_more_summary" style="display:None; font-size:14px;"> {% trans "You can store, edit and remove withdrawals, deposits and transfers. This allows you full financial management. Using this you can manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages). It provides a facility to create, change and manage money using budgets. You can organize transactions using categories and also track your goals and bills." %} </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
                                 </div>
                             </div>
                         </div>
@@ -112,7 +112,7 @@
                     <div class="card ecommerce-card">
                         <div class="item-img text-center">
                             <a href="{% url 'transaction_list' %}">
-                                <img src="{% static 'images/transaction.jpg' %}" class="img-fluid" alt="img-placeholder" />
+                                <img src="{% static 'images/transaction.jpeg' %}" class="img-fluid" alt="img-placeholder" />
                             </a>
                         </div>
                         <div class="card-body">
@@ -161,7 +161,7 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <div class="item-name">
+                            <div class="item-name" style="text-align:center;">
                                 <a href="{% url 'real_estate_home' %}">{% trans 'REAL ESTATE' %}</a>
                             </div>
                             <div class="item-name">

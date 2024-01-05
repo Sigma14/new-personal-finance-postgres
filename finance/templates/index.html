@@ -105,6 +105,17 @@
                     <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i class="ficon" data-feather="menu"> </i></a></li>
                 </ul>
             </div>
+            <ul class="nav navbar-nav bookmark-icons nav-pills" style="height: 15px;">
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'home' %} active {% endif %}" style="height:25px;" href="{% url 'home' %}" data-placement="top">Dashboard</a></li> 
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'budgets' %} active {% endif %}" style="height:25px;" href="{% url 'budgets' %}" data-placement="top">Budgets</a></li> 
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'bill_list' %} active {% endif %}" style="height:25px;" href="{% url 'bill_list' %}" data-placement="top">Bill List</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'category_list' %} active {% endif %}" style="height:25px;" href="{% url 'category_list' %}" data-placement="top">Category</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'account_box' %} active{% endif %}" style="height:25px;" href="{% url 'account_box' %}" data-placement="top">Accounts</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'transaction_list' %} active {% endif %}" style="height:25px;" href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'goal_add' %} active {% endif %}" style="height:25px;" href="{% url 'goal_add' %}" data-placement="top">Goals</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}" style="height:25px;" href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link " style="height:25px;" href="" data-placement="top">Real Estate</a></li>
+            </ul>
             <ul class="nav navbar-nav align-items-center ml-auto">
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown dropdown-user"><a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -159,7 +170,7 @@
             <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
                 <li class="navigation-header"><span data-i18n="Apps Pages">Apps & Pages</span>
                 </li>
-                <li class="nav-item {% if request.resolver_match.view_name == 'home' %}active{% endif %}"><a
+                <li class="nav-item {% if request.resolver_match.view_name == 'home' %} active {% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'home' %}"><i
                         data-feather="home"></i><span class="menu-title text-truncate"
                                                       data-i18n="Dashboard">Home</span></a>
@@ -391,7 +402,7 @@
 <script>$('#property_table').DataTable({"aaSorting": []});</script>
 <script>$('#categories').DataTable({"aaSorting": []});</script>
 <script>$('#accounts').DataTable({"aaSorting": []});</script>
-<script>$('#bills').DataTable({"aaSorting": []});</script>
+<script>$('#bills').DataTable({"aaSorting": [], "dom": 'rtip'});</script>
 <script>$('#budgets').DataTable({"aaSorting": []});</script>
 <script>$('#transactions').DataTable({"aaSorting": []});</script>
 <script>$('#goals').DataTable({"aaSorting": []});</script>
@@ -522,6 +533,8 @@
         window.location.href = newUrl; 
     }
 </script>
+
+
 </body>
 <!-- END: Body-->
 

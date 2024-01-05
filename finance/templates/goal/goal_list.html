@@ -31,14 +31,22 @@
             <div class="content-body" float="left">
                 <div class="row">
                     <div class="col-12">
-                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                        <div class="collapse-margin collapse-icon mt-2" id="goal-list-qna">
                             <div class="card">
-                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Goal PageInfo</span>
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;"  data-toggle="collapse" role="button" data-target="#goal-list-one" aria-expanded="false" aria-controls="goal-list-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Goal PageInfo</a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
-                                    <div class="card-body">
-                                        This page shows your goals and also shows goals are completed or not.
+                                <div id="goal-list-one" style="padding-top:0px; padding-left:20px;" class="collapse"  data-parent="#goal-list-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                This page shows your goals and also shows goals are completed or not.
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -141,15 +149,12 @@
                                                     </div>
                                                 </td>
                                                 {% else %}
-                                                <td>
+                                                <td style="width:15%;">
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">
                                                             <ul class="list-inline m-0">
                                                                 <li class="list-inline-item">
-                                                                    <a href="{% url 'fund_update' pk=data %}"
-                                                                       class="btn btn-success btn-sm rounded-0"><i
-                                                                            class="fa fa-edit"></i></a>
-
+                                                                    <a href="{% url 'fund_update' pk=data %}"class="btn btn-success btn-sm rounded-0"> <i class="fa fa-edit"></i></a>
                                                                 </li>
                                                                 <li class="list-inline-item">
                                                                     <button type="button" del_method="Funds" delete_name="{{ object.name }} Funds" url="{% url 'fund_delete' pk=data %}"

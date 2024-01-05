@@ -1088,8 +1088,8 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
 # Personal Finance Home Page
 def home(request):
     # trans = translate(language='fr')
-    print("home")
-    return render(request, "home.html")
+    context = {"page":"home"}
+    return render(request, "home.html", context)
 
 
 # def translate(language):
@@ -1493,6 +1493,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
         data['category_key'] = sub_category_key
+        data['page'] = "category_list"
         return data
 
 
@@ -2180,7 +2181,8 @@ def budget_list(request):
 
 @login_required(login_url="/login")
 def budgets_box(request):
-    return render(request, 'budget/budget_box.html')
+    context = {"page":"budgets"}
+    return render(request, 'budget/budget_box.html', context)
 
 
 @login_required(login_url="/login")
@@ -3097,6 +3099,7 @@ def transaction_list(request):
         select_filter = 'All'
 
     context = transaction_summary(transaction_data, select_filter, user_name)
+    context.update({"page":"transaction_list"})
     return render(request, 'transaction/transaction_list.html', context=context)
 
 
@@ -3797,7 +3800,7 @@ def goal_add(request):
                                           account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
                                                             'Line of Credit'])
     category_obj = Category.objects.get(name="Goals", user=user_name)
-    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj)}
+    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj), "page":"goal_add"}
 
     if error:
         context['error'] = error
@@ -3840,7 +3843,8 @@ class GoalDelete(LoginRequiredMixin, DeleteView):
 
 
 def account_box(request):
-    return render(request, 'account/account_box.html')
+    context = {"page":"account_box"}
+    return render(request, 'account/account_box.html', context)
 
 
 def account_list(request, name):
@@ -4734,7 +4738,7 @@ def bill_list(request):
 
         calendar_bill_data.append(data_dict)
 
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data, 'today_date': today_date}
+    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data, 'today_date': today_date, 'page':'bill_list'}
     return render(request, "bill/bill_list.html", context=context)
 
 
@@ -4966,12 +4970,14 @@ def mortgagecalculator(request):
             'initial_amount': initial_amount,
             'mortgage_key_dumbs': json.dumps(mortgage_key),
             'mortgage_graph_data': mortgage_graph_data,
-            'mortgage_date_data': mortgage_date_data
+            'mortgage_date_data': mortgage_date_data,
+            "page": "mortgagecalculator_list"
         }
         return render(request, 'mortgagecalculator_add.html', context)
 
     context = {
-        'form': form
+        'form': form,
+        "page": "mortgagecalculator_list"
     }
     return render(request, 'mortgagecalculator_add.html', context)
 

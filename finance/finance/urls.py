@@ -27,7 +27,6 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path(_('admin/'), admin.site.urls),
     path('', include('my_finance.urls')),
-    prefix_default_language=True,
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = 'my_finance.views.error_404'

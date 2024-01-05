@@ -27,15 +27,23 @@
             <section id="dashboard-ecommee">
                 <div class="row">
                     <div class="col-12">
-                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                        <div class="collapse-margin collapse-icon mt-2" id="mortgage-calculates-qna">
                             <div class="card">
-                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Mortgage PageInfo</span>
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#mortgage-calculates-one" aria-expanded="false" aria-controls="mortgage-calculates-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Mortgage PageInfo</a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
-                                    <div class="card-body">
-                                        A mortgage is a loan secured by real estate. The borrower agrees to repay the loan, with interest, over a specified term.
-                                        and this page calculates mortgage and shows your mortgage payments details according to interest periods.
+                                <div id="mortgage-calculates-one" style="padding-top:0px; padding-left:20px;" class="collapse" data-parent="#mortgage-calculates-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                A mortgage is a loan secured by real estate. The borrower agrees to repay the loan, with interest, over a specified term.
+                                                and this page calculates mortgage and shows your mortgage payments details according to interest periods.
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -49,146 +57,146 @@
                     <form class="form form-horizontal" method="post">
                         {% csrf_token %}
                         <div class="row">
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
-                                                        <label style="margin-bottom:0px;">
-                                                        <div class="collapse-margin collapse-icon " id="property_selected_price-qna">
-                                                            <div class="card mt-0">
-                                                                <div class="card-header" id="property_selected_priceOne" data-toggle="collapse" role="button" data-target="#property_selected_price-one" aria-expanded="false" aria-controls="property_selected_price-one">
-                                                                    <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Amount <strong class="text-danger">*</strong> </span>
-                                                                </div>
-                                                                <div id="property_selected_price-one" class="collapse" aria-labelledby="property_selected_priceOne" data-parent="#property_selected_price-qna">
-                                                                    <div class="card-body">
-                                                                        Please enter the desired mortgage amount for the property. This is the total loan amount you are seeking to finance your home purchase.
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        </label>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
+                                            <label style="margin-bottom:0px;">
+                                            <div class="collapse-margin collapse-icon " id="property_selected_price-qna">
+                                                <div class="card mt-0" style="width:300px;">
+                                                    <div class="card-header" id="property_selected_priceOne" data-toggle="collapse" role="button" data-target="#property_selected_price-one" aria-expanded="false" aria-controls="property_selected_price-one">
+                                                        <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Amount <strong class="text-danger">*</strong> </span>
                                                     </div>
-                                                <div class="col-sm-9">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="number" id="mortgage_amount" class="form-control purchase_price_value" value="{% if form.amount.value %}{{form.amount.value}}{% endif %}" name="amount" required
-                                                               placeholder="Mortgage Amount"/>
+                                                    <div id="property_selected_price-one" class="collapse" aria-labelledby="property_selected_priceOne" data-parent="#property_selected_price-qna">
+                                                        <div class="card-body">
+                                                            Please enter the desired mortgage amount for the property. This is the total loan amount you are seeking to finance your home purchase.
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            </label>
                                         </div>
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
-                                                        <label style="margin-bottom:0px;">
-                                                        <div class="collapse-margin collapse-icon " id="property_down-qna">
-                                                            <div class="card mt-0">
-                                                                <div class="card-header" id="property_downOne" data-toggle="collapse" role="button" data-target="#property_down-one" aria-expanded="false" aria-controls="property_down-one">
-                                                                    <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Down Payment Amount<strong class="text-danger">*</strong> </span>
-                                                                </div>
-                                                                <div id="property_down-one" class="collapse" aria-labelledby="property_downOne" data-parent="#property_down-qna">
-                                                                    <div class="card-body">
-                                                                        Input the down payment percentage. A higher down payment can lower your mortgage payments and improve cash flow, but it also ties up more capital in the property.                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        </label>
+                                    <div class="col-sm-7">
+                                        <div class="input-group input-group-merge">
+                                            <input type="number" id="mortgage_amount" class="form-control purchase_price_value" value="{% if form.amount.value %}{{form.amount.value}}{% endif %}" name="amount" required
+                                                    placeholder="Mortgage Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
+                                            <label style="margin-bottom:0px;">
+                                            <div class="collapse-margin collapse-icon " id="property_down-qna">
+                                                <div class="card mt-0" style="width:300px;">
+                                                    <div class="card-header" id="property_downOne" data-toggle="collapse" role="button" data-target="#property_down-one" aria-expanded="false" aria-controls="property_down-one">
+                                                        <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Down Payment Amount<strong class="text-danger">*</strong> </span>
                                                     </div>
-                                                <div class="col-sm-8">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="number" id="down_pay_amount" class="form-control" value="{% if form.down_payment.value %}{{form.down_payment.value}}{% endif %}" name="down_payment" required placeholder="Down Payment Amount"/>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-1" style="padding: 0px;">
-                                                    <div class="input-group">
-                                                        <input type="number" id="down_pay_per" class="touchspin-icon" method_name="worst_case" value="10" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success"/>
-                                                         <strong class="">%</strong>
+                                                    <div id="property_down-one" class="collapse" aria-labelledby="property_downOne" data-parent="#property_down-qna">
+                                                        <div class="card-body">
+                                                            Input the down payment percentage. A higher down payment can lower your mortgage payments and improve cash flow, but it also ties up more capital in the property.                                                                    </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            </label>
+                                        </div>
+                                    <div class="col-lg-7">
+                                        <div class="input-group input-group-merge">
+                                            <input type="number" id="down_pay_amount" class="form-control" value="{% if form.down_payment.value %}{{form.down_payment.value}}{% endif %}" name="down_payment" required placeholder="Down Payment Amount"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-1" style="padding: 0px;">
+                                        <div class="input-group">
+                                            <input type="number" id="down_pay_per" class="touchspin-icon" method_name="worst_case" value="10" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success"/>
+                                                <strong class="">%</strong>
+                                        </div>
+                                    </div>
 
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
-                                                        <label style="margin-bottom:0px;">
-                                                        <div class="collapse-margin collapse-icon " id="property_int-qna">
-                                                            <div class="card mt-0">
-                                                                <div class="card-header" id="property_intOne" data-toggle="collapse" role="button" data-target="#property_int-one" aria-expanded="false" aria-controls="property_int-one">
-                                                                    <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> <a href="https://www.theglobaleconomy.com/rankings/mortgage_interest_rate/" class="text-primary" target="_blank" title="see interest rates for different countries">&nbsp;Interest Rate on Mortgage(%) <strong class="text-danger">*</strong></a></span>
-                                                                </div>
-                                                                <div id="property_int-one" class="collapse" aria-labelledby="property_intOne" data-parent="#property_int-qna">
-                                                                    <div class="card-body">
-                                                                        Input the mortgage interest rate. Shop around for the best rates and consider the impact of a fixed or variable rate on your monthly payments.
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
+                                            <label style="margin-bottom:0px;">
+                                            <div class="collapse-margin collapse-icon " id="property_int-qna">
+                                                <div class="card mt-0" style="width:300px;">
+                                                    <div class="card-header" id="property_intOne" data-toggle="collapse" role="button" data-target="#property_int-one" aria-expanded="false" aria-controls="property_int-one">
+                                                        <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> <a href="https://www.theglobaleconomy.com/rankings/mortgage_interest_rate/" class="text-primary" target="_blank" title="see interest rates for different countries">&nbsp;Interest Rate on Mortgage(%) <strong class="text-danger">*</strong></a></span>
                                                     </div>
+                                                    <div id="property_int-one" class="collapse" aria-labelledby="property_intOne" data-parent="#property_int-qna">
+                                                        <div class="card-body">
+                                                            Input the mortgage interest rate. Shop around for the best rates and consider the impact of a fixed or variable rate on your monthly payments.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </label>
+                                        </div>
 <!--                                                <div class="col-sm-3 col-form-label">-->
 <!--                                                    <a class="bg-light-info show_interest_rate" data-feather="info"></a>-->
 <!--                                                    <a href="https://www.theglobaleconomy.com/rankings/mortgage_interest_rate/" target="_blank" title="see interest rates for different countries">&nbsp;Interest Rate on Mortgage(%) <strong class="text-danger">*</strong></a>-->
 <!--                                                </div>-->
-                                                <div class="col-sm-9">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="number" class="form-control" value="{% if form.interest.value %}{{form.interest.value}}{% endif %}" name="interest" placeholder="Interest Rate(%)" required/>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="col-sm-7">
+                                        <div class="input-group input-group-merge">
+                                            <input type="number" class="form-control" value="{% if form.interest.value %}{{form.interest.value}}{% endif %}" name="interest" placeholder="Interest Rate(%)" required/>
                                         </div>
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
-                                                        <label style="margin-bottom:0px;">
-                                                        <div class="collapse-margin collapse-icon " id="property_myear-qna">
-                                                            <div class="card mt-0">
-                                                                <div class="card-header" id="property_myearOne" data-toggle="collapse" role="button" data-target="#property_myear-one" aria-expanded="false" aria-controls="property_myear-one">
-                                                                    <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Amortization (Year) <strong class="text-danger">*</strong> </span>
-                                                                </div>
-                                                                <div id="property_myear-one" class="collapse" aria-labelledby="property_myearOne" data-parent="#property_myear-qna">
-                                                                    <div class="card-body">
-                                                                        Input the mortgage amortization period in years. A longer amortization period reduces monthly payments but increases the total interest paid over the life of the loan.
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
+                                            <label style="margin-bottom:0px;">
+                                            <div class="collapse-margin collapse-icon " id="property_myear-qna">
+                                                <div class="card mt-0" style="width:300px;">
+                                                    <div class="card-header" id="property_myearOne" data-toggle="collapse" role="button" data-target="#property_myear-one" aria-expanded="false" aria-controls="property_myear-one">
+                                                        <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Amortization (Year) <strong class="text-danger">*</strong> </span>
+                                                    </div>
+                                                    <div id="property_myear-one" class="collapse" aria-labelledby="property_myearOne" data-parent="#property_myear-qna">
+                                                        <div class="card-body">
+                                                            Input the mortgage amortization period in years. A longer amortization period reduces monthly payments but increases the total interest paid over the life of the loan.
                                                         </div>
-                                                        </label>
                                                     </div>
-                                                <div class="col-sm-8">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="text" id="mortgage_year" class="form-control" value="{% if form.tenure.value %}{{form.tenure.value}}{% else %}25{% endif %}" name="tenure" required placeholder="Mortgage Amortization (Year)"/>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-1">
-                                                    <a class="badge badge-pill badge-success get_mortgage_year" id="min_year" style="padding:12px; color:white;">25</a>
-                                                    <a class="badge badge-pill badge-primary get_mortgage_year" id="max_year" style="padding:12px; color:white;">30</a>
                                                 </div>
                                             </div>
+                                            </label>
                                         </div>
-                                        <div class="col-12">
-                                            <div class="form-group row">
-                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
-                                                        <label style="margin-bottom:0px;">
-                                                        <div class="collapse-margin collapse-icon " id="property_mstart-qna">
-                                                            <div class="card mt-0">
-                                                                <div class="card-header" id="property_mstartOne" data-toggle="collapse" role="button" data-target="#property_mstart-one" aria-expanded="false" aria-controls="property_mstart-one">
-                                                                    <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Start Date <strong class="text-danger">*</strong> </span>
-                                                                </div>
-                                                                <div id="property_mstart-one" class="collapse" aria-labelledby="property_mstartOne" data-parent="#property_mstart-qna">
-                                                                    <div class="card-body">
-                                                                        Input the mortgage start date. This date affects your mortgage payment schedule and the timing of your principal and interest payments.
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                    <div class="col-sm-7">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="mortgage_year" class="form-control" value="{% if form.tenure.value %}{{form.tenure.value}}{% else %}25{% endif %}" name="tenure" required placeholder="Mortgage Amortization (Year)"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="badge badge-pill badge-success get_mortgage_year" id="min_year" style="padding:12px; color:white;">25</a>
+                                        <a class="badge badge-pill badge-primary get_mortgage_year" id="max_year" style="padding:12px; color:white;">30</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
+                                            <label style="margin-bottom:0px;">
+                                            <div class="collapse-margin collapse-icon " id="property_mstart-qna">
+                                                <div class="card mt-0" style="width:300px;">
+                                                    <div class="card-header" id="property_mstartOne" data-toggle="collapse" role="button" data-target="#property_mstart-one" aria-expanded="false" aria-controls="property_mstart-one">
+                                                        <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Start Date <strong class="text-danger">*</strong> </span>
+                                                    </div>
+                                                    <div id="property_mstart-one" class="collapse" aria-labelledby="property_mstartOne" data-parent="#property_mstart-qna">
+                                                        <div class="card-body">
+                                                            Input the mortgage start date. This date affects your mortgage payment schedule and the timing of your principal and interest payments.
                                                         </div>
-                                                        </label>
-                                                    </div>
-                                                <div class="col-sm-9">
-                                                    <div class="input-group input-group-merge">
-                                                        <input type="text" name="mortgage_date" id="start_date" value="{% if form.mortgage_date.value %}{{form.mortgage_date.value}}{% endif %}" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
                                                     </div>
                                                 </div>
                                             </div>
+                                            </label>
                                         </div>
+                                    <div class="col-sm-7">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" name="mortgage_date" id="start_date" value="{% if form.mortgage_date.value %}{{form.mortgage_date.value}}{% endif %}" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-sm-9 offset-sm-3">
                                 <button type="submit" class="btn btn-primary mr-1">Calculate</button>
                                 <button type="reset" class="btn btn-outline-secondary">Reset</button>
