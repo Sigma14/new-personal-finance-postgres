@@ -2244,6 +2244,7 @@ def budgets_walk_through(request):
         return redirect("/budgets/current")
     category_groups = Category.objects.filter(user=user_name)
     context = {"category_groups": category_groups, "today_date": str(today_date)}
+    context.update({"page":"budgets"})
     return render(request, 'budget/budget_walk_through.html', context=context)
 
 
@@ -2337,8 +2338,10 @@ def current_budget_box(request):
                "budget_graph_value": total_expense_list,
                "budget_graph_id": "#total_budget",
                "transaction_key": transaction_key,
-               "transaction_data": transaction_data
+               "transaction_data": transaction_data,
+               "page":"budgets"
                }
+
     return render(request, 'budget/current_budget_box.html', context=context)
 
 
@@ -2432,6 +2435,7 @@ def compare_budget_box(request):
                "yearly_budget_graph_value": yearly_budget_graph_value,
                "yearly_budget_graph_data": yearly_budget_bar_value, "yearly_budget_bar_id": "#yearly-budgets-bar",
                "yearly_transaction_dict": yearly_budget_transaction_data_dict,
+                "page":"budgets"
                }
     return render(request, 'budget/compare_budget_box.html', context=context)
 
@@ -2456,7 +2460,8 @@ def sample_budget_box(request):
                "cash_flow_data": cash_flow_data, "budget_bar_id": "#budgets-bar",
                "budget_graph_data": budget_graph_data, "budget_names": budget_names, "budget_graph_id": "#total_budget",
                "budget_graph_value": budget_graph_value, "budget_graph_currency": "$",
-               'translated_data': json.dumps(translated_data)
+               'translated_data': json.dumps(translated_data),
+                "page":"budgets"
                }
     return render(request, 'budget/sample_budget_box.html', context=context)
 
@@ -2480,7 +2485,7 @@ def budget_details(request, pk):
     context = {
         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
         'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
-        'start_date': start_date, 'end_date': end_date
+    'start_date': start_date, 'end_date': end_date, "page":"budgets"
     }
     return render(request, "budget/budget_detail.html", context=context)
 
@@ -2756,7 +2761,8 @@ def budget_update(request, pk):
                'currency_dict': currency_dict, 'budget_period': budget_periods,
                'current_budget_date': str(budget_obj.created_at),
                'budget_date': str(budget_obj.budget_start_date), 'errors': error,
-               'budget_update_period': budget_update_period}
+               'budget_update_period': budget_update_period,
+                "page":"budgets"}
     return render(request, 'budget/budget_update.html', context=context)
 
 
@@ -2776,6 +2782,7 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 @login_required(login_url="/login")
 def template_budget_list(request):
     context = budgets_page_data(request, "", "active")
+    context.update({"page":"budgets"})
     return render(request, 'budget/budget_list.html', context=context)
 
 
