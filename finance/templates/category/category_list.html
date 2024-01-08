@@ -1,4 +1,10 @@
 {% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Category list{% endblock title %}
+</head>
+
+<body>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -25,14 +31,22 @@
             <div class="content-body" float="left">
                 <div class="row">
                     <div class="col-12">
-                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                        <div class="collapse-margin collapse-icon mt-2" id="categories-list-qna">
                             <div class="card">
-                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
-                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Category PageInfo</span>
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#categories-list-one" aria-expanded="false" aria-controls="categories-list-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Category PageInfo</a>
+                                        </li>
+                                    </ul>
                                 </div>
-                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
-                                    <div class="card-body">
-                                        This page shows you all categories list and also shows how many amount spent on particular category using bar graph.
+                                <div id="categories-list-one" style="padding-top:0px; padding-left:20px;" class="collapse" data-parent="#categories-list-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                This page shows you all categories list and also shows how many amount spent on particular category using bar graph.
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>

@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-{% load static %}
+{% load static i18n %}
+{% load google_analytics_gtag %}
+{% get_current_language as CURRENT_LANGUAGE %}
+{% get_static_prefix as STATIC_PREFIX %}
 <html class="loading dark-layout" lang="en" data-layout="dark-layout" data-textdirection="ltr">
 <!-- BEGIN: Head-->
 
@@ -11,6 +14,7 @@
     <meta name="keywords"
           content="admin template, Vuexy admin template, dashboard template, flat admin template, responsive admin template, web app">
     <meta name="author" content="PIXINVENT">
+    <title> {% block title %} {% endblock title %} </title>
     <link rel="apple-touch-icon" href="{% static 'app-assets/images/ico/apple-icon-120.png' %}">
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'app-assets/images/ico/favicon.ico' %}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600"
@@ -28,6 +32,9 @@
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/sweetalert2.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/wizard/bs-stepper.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/custom/style.css' %}">
+
+
 
 
     <!-- END: Vendor CSS-->
@@ -66,21 +73,51 @@
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
     <!-- END: Custom CSS-->
+
+    <!-- BEGIN: Google ANALYTICS  -->
+        {% google_analytics_gtag %}
+    <!-- ENG: Google ANALYTICS  -->
+    
+    <!-- Google Tag Manager --> 
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MZJCWMRQ');</script>
+    <!-- End Google Tag Manager -->
+
+    
 </head>
 <!-- END: Head-->
 
 <!-- BEGIN: Body-->
 
-<body class="vertical-layout vertical-menu-modern  navbar-floating footer-static   menu-collapsed" data-open="click" data-menu="vertical-menu-modern" data-col="">
+<body class="vertical-layout vertical-menu-modern  navbar-floating footer-static   menu-collapsed fixed-con" data-open="click" data-menu="vertical-menu-modern" data-col="">
+   
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MZJCWMRQ"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- BEGIN: Header-->
     <nav class="header-navbar navbar navbar-expand-lg align-items-center floating-nav navbar-dark navbar-shadow">
         <div class="navbar-container d-flex content">
             <div class="bookmark-wrapper d-flex align-items-center">
                 <ul class="nav navbar-nav d-xl-none">
-                    <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i class="ficon" data-feather="menu"></i></a></li>
+                    <li class="nav-item"><a class="nav-link menu-toggle" href="javascript:void(0);"><i class="ficon" data-feather="menu"> </i></a></li>
                 </ul>
             </div>
+            <ul class="nav navbar-nav bookmark-icons nav-pills" style="height: 15px;">
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'home' %} active {% endif %}" style="height:25px;" href="{% url 'home' %}" data-placement="top">Dashboard</a></li> 
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'budgets' %} active {% endif %}" style="height:25px;" href="{% url 'budgets' %}" data-placement="top">Budgets</a></li> 
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'bill_list' %} active {% endif %}" style="height:25px;" href="{% url 'bill_list' %}" data-placement="top">Bill List</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'category_list' %} active {% endif %}" style="height:25px;" href="{% url 'category_list' %}" data-placement="top">Category</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'account_box' %} active{% endif %}" style="height:25px;" href="{% url 'account_box' %}" data-placement="top">Accounts</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'transaction_list' %} active {% endif %}" style="height:25px;" href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'goal_add' %} active {% endif %}" style="height:25px;" href="{% url 'goal_add' %}" data-placement="top">Goals</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}" style="height:25px;" href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link " style="height:25px;" href="" data-placement="top">Real Estate</a></li>
+            </ul>
             <ul class="nav navbar-nav align-items-center ml-auto">
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown dropdown-user"><a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -92,7 +129,7 @@
                 </li>
                 {% else %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'user_login' %}" data-placement="top">Login</a></li>
-                {% endif %}
+                {% endif %}                
             </ul>
         </div>
     </nav>
@@ -135,7 +172,7 @@
             <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
                 <li class="navigation-header"><span data-i18n="Apps Pages">Apps & Pages</span>
                 </li>
-                <li class=" nav-item {% if request.resolver_match.view_name == 'home' %}active{% endif %}"><a
+                <li class="nav-item {% if request.resolver_match.view_name == 'home' %} active {% endif %}"><a
                         class="d-flex align-items-center" href="{% url 'home' %}"><i
                         data-feather="home"></i><span class="menu-title text-truncate"
                                                       data-i18n="Dashboard">Home</span></a>
@@ -222,10 +259,36 @@
                     <a class="d-flex align-items-center" href="{% url 'stock_holdings' %}"><i
                             data-feather="bar-chart"></i><span class="menu-title text-truncate" data-i18n="Stock Analysis">Stock Portfolios & Holdings</span></a>
                 </li>
+                <li class="nav-item">
+                    <a class="d-flex align-items-center" href="#">
+                        <i data-feather="globe"></i>
+                        <span class="menu-title text-truncate" data-i18n="Calculators">Languages</span>
+                    </a>
+                    <ul class="menu-content">
+                        {% get_current_language as CURRENT_LANGUAGE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                            <li class="nav-item">
+                                <a class="d-flex align-items-center" href="#" onclick="changeLanguage('{{ language.code }}')">
+                                    <i data-feather="circle"></i>
+                                    <span class="menu-title text-truncate">{{ language.name_local }} ({{ language.code }})</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
 <!-- END: Main Menu-->
+
+<div class='my-loader'> 
+    <img src="{% static 'assets/animations/loading_small.gif' %}" alt="Loading..." />
+</div>
+
+
+
 <!-- BEGIN: Content-->
     {% block content %}
     {% endblock content %}
@@ -295,6 +358,8 @@
 <script src="{% static 'assets/js/custom.js' %}"></script>
 <script src="{% static 'assets/js/pie_graphs.js' %}"></script>
 <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
+<script src="{% static 'assets/js/loader.js' %}"></script>
+
 
 <script>BudgetsBarChart({{ budget_graph_data | safe }}, {{ budget_names | safe }}, "{{budget_bar_id | safe}}");</script>
 <script>BudgetsBarChart({{ budget_graph_data2 | safe }}, {{ budget_names2 | safe }}, "{{budget_bar_id2 | safe}}");</script>
@@ -324,7 +389,7 @@
 <script>AllCompareBudgets( {{ week_pie_chart | safe }}, {{ monthly_pie_chart | safe }}, {{ quart_pie_chart | safe }}, {{ yearly_pie_chart | safe }}, "{{ budget_graph_currency | safe }}");</script>
 <script>TransactionGraph({{ debit_graph_data | safe }}, {{ credit_graph_data | safe }}, {{ transaction_date_data | safe }});</script>
 <script>CategorySpentChart({{ categories_name | safe }}, {{ categories_series | safe}}, "#column-chart");</script>
-<script>BudgetCashFlowChart({{ cash_flow_names | safe }}, {{ cash_flow_data | safe}}, "#cash_flow_bar");</script>
+<script>var translatedCategories = JSON.parse('{{ translated_data | safe }}');BudgetCashFlowChart({{ cash_flow_names | safe }}, {{ cash_flow_data | safe}}, translatedCategories, "#cash_flow_bar");</script>
 <script>barChart({{ categories_name | safe }}, {{ categories_series | safe}}, "#future-net-chart");</script>
 <script>CategorySpentChart({{ projection_key | safe }}, {{ cash_on_cash_return_data | safe}}, "#cash-bar-chart");</script>
 <script>CategorySpentChart({{ projection_key | safe }}, {{ return_on_investment_data | safe}}, "#return-bar");</script>
@@ -345,7 +410,7 @@
 <script>$('#property_table').DataTable({"aaSorting": []});</script>
 <script>$('#categories').DataTable({"aaSorting": []});</script>
 <script>$('#accounts').DataTable({"aaSorting": []});</script>
-<script>$('#bills').DataTable({"aaSorting": []});</script>
+<script>$('#bills').DataTable({"aaSorting": [], "dom": 'rtip'});</script>
 <script>$('#budgets').DataTable({"aaSorting": []});</script>
 <script>$('#transactions').DataTable({"aaSorting": []});</script>
 <script>$('#goals').DataTable({"aaSorting": []});</script>
@@ -465,7 +530,19 @@
         console.log("Inn")
       linkTokenFunc();
     };
+</script>   
+<script>
+    function changeLanguage(selectedLanguage) {
+        var currentUrl = window.location.href;
+        var baseUrl = currentUrl.split('/{{ CURRENT_LANGUAGE }}' + '/')[0]; 
+
+        var newUrl = baseUrl + '/' + selectedLanguage + '/' + currentUrl.split('/{{ CURRENT_LANGUAGE }}' + '/').slice(1).join('/{{ CURRENT_LANGUAGE }}' + '/');
+
+        window.location.href = newUrl; 
+    }
 </script>
+
+
 </body>
 <!-- END: Body-->
 

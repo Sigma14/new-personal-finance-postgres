@@ -916,8 +916,7 @@ var options = {
 }
 
 // BudgetCashFlowChart
-
-function BudgetCashFlowChart(cash_flow_names, cash_flow_data, budget_cashflow_id)
+function BudgetCashFlowChart(cash_flow_names, cash_flow_data, translatedCategories, budget_cashflow_id)
 {
 var options = {
           series: cash_flow_data,
@@ -948,7 +947,7 @@ var options = {
           show: false
         },
         xaxis: {
-          categories: cash_flow_names,
+          categories: [translatedCategories.earned, translatedCategories.spending],
           labels: {
             style: {
               colors: ['#2AAA8A', '#DE3163'],

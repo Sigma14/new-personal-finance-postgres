@@ -1,4 +1,9 @@
 {% extends "index.html" %}
+{% load i18n %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Budget Add {% endblock title %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -9,15 +14,15 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Add Budget</h2>
+                            <h2 class="content-header-title float-left mb-0">{% trans 'Add budget' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">{{ _('Budgets')}}</a>
                                     </li>
                                     <li class="breadcrumb-item">
-                                        Add Budget
+                                        {{ _('Add budget')}}
                                     </li>
                                 </ol>
                             </div>
@@ -30,13 +35,13 @@
                     <form class="form form-horizontal" method="post">
                         {% csrf_token %}
                         {% if form.errors %}
-                            <p class="text-danger">Budget already exist!</p>
+                            <p class="text-danger">{% trans 'Budget already exist!' %}</p>
                         {% endif %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon"><span class="lead add_categories" title="add category group" data-toggle="modal" data-target="#categories_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>Category Groups</label>
+                                        <label for="fname-icon"><span class="lead add_categories" title="add category group" data-toggle="modal" data-target="#categories_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>{% trans 'Category Groups' %}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -51,7 +56,7 @@
                             <div class="col-12 transaction_cat_list" style="display:None;">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label><span class="lead sub_cat_popup" method_name="budget_pop" title="add category" data-toggle="modal" data-target="#sub_category_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>Categories</label>
+                                        <label><span class="lead sub_cat_popup" method_name="budget_pop" title="add category" data-toggle="modal" data-target="#sub_category_toggle"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</span>{% trans 'Categories' %}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge" id="trans_sub_cat">
@@ -65,7 +70,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label>Currency</label>
+                                        <label>{{_('Currency')}}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -80,7 +85,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Amount</label>
+                                        <label for="fname-icon">{% trans 'Amount' %}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -97,7 +102,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Auto-budget period</label>
+                                        <label for="fname-icon">{% trans 'Auto-budget period' %}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -112,7 +117,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
-                                        <label for="fname-icon">Start Date</label>
+                                        <label for="fname-icon">{% trans 'Start Date' %}</label>
                                     </div>
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
@@ -131,13 +136,13 @@
                                     </div>
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" name="auto_budget" checked class="custom-control-input" id="customCheck1" />
-                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-budget</label>
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;{% trans 'Auto-budget' %}</label>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Create</button>
-                                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary mr-1">{% trans 'Create' %}</button>
+                                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">{% trans 'Cancel' %}</a>
                             </div>
                         </div>
                     </form>
@@ -149,7 +154,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel1">Add Category Group</h4>
+                    <h4 class="modal-title" id="myModalLabel1">{% trans 'Add Category Group' %}</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -164,13 +169,13 @@
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <h5>Name</h5>
+                                                    <h5>{% trans 'Name' %}</h5>
                                                     <input type="text" id="category_group_name" name="category_group_name" class="form-control" required/>
                                                 </div>
                                             </div>
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <button class="btn btn-primary new_category" method_name="group_add">Add</button>
+                                                    <button class="btn btn-primary new_category" method_name="group_add">{% trans 'Add' %}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -185,7 +190,7 @@
                     <div class="col-12">
                         <div class="card">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title">Suggestions</h4>
+                                    <h4 class="card-title">{% trans 'Suggestions' %}</h4>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
@@ -206,7 +211,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="sub_category1">Add Category</h4>
+                    <h4 class="modal-title" id="sub_category1">{% trans 'Add Category' %}</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -223,7 +228,7 @@
                                                 <div class="form-group">
                                                     <h5>Group</h5>
                                                     <select class="form-control sub_cat_select" id="category_group" name="category_group" required>
-                                                        <option value="">Select Group</option>
+                                                        <option value="">{% trans 'Select Group' %}</option>
                                                         {% for category in category_groups %}
                                                         <option value="{{category.id}}">{{category.name}}</option>
                                                         {% endfor %}
@@ -232,13 +237,13 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <h5>Name</h5>
+                                                    <h5>{{ _('Name')}}</h5>
                                                     <input type="text" id="sub_category_name" name="sub_category_name" class="form-control" required/>
                                                 </div>
                                             </div>
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <button class="btn btn-primary new_subcategory" method_name='sub_cat_budget' id="sub_cat_add_btn">Add</button>
+                                                    <button class="btn btn-primary new_subcategory" method_name='sub_cat_budget' id="sub_cat_add_btn">{{ _('Add')}}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -253,7 +258,7 @@
                     <div class="col-12">
                         <div class="card">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title">Suggestions</h4>
+                                    <h4 class="card-title">{{ _('Suggestions')}}</h4>
                                 </div>
                                 <div class="card-body">
                                     <div class="row sub_cat_sugg">

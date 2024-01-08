@@ -88,6 +88,10 @@ api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
 
+from django.utils.translation import gettext as _
+
+
+
 @ensure_csrf_cookie
 def create_link_token(request):
     user = request.user
@@ -1078,12 +1082,25 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
         for date_value in date_range_list:
             balance_graph_data.append(round(current_balance, 2))
 
+# from django.utils.translation import get_language, activate, gettext
+
 
 # Personal Finance Home Page
 def home(request):
-    print("home")
-    return render(request, "home.html")
+    # trans = translate(language='fr')
+    context = {"page":"home"}
+    return render(request, "home.html", context)
 
+
+# def translate(language):
+#     cur_language = get_language()
+#     try:
+#         activate(language)
+#         text = gettext('hello')
+#     finally:
+#         activate(cur_language)
+#     return text 
+    
 
 # Real Estate Home Page
 def real_estate_home(request):
@@ -1476,6 +1493,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
         data['category_key'] = sub_category_key
+        data['page'] = "category_list"
         return data
 
 
@@ -2162,7 +2180,8 @@ def budget_list(request):
 
 @login_required(login_url="/login")
 def budgets_box(request):
-    return render(request, 'budget/budget_box.html')
+    context = {"page":"budgets"}
+    return render(request, 'budget/budget_box.html', context)
 
 
 @login_required(login_url="/login")
@@ -2224,6 +2243,7 @@ def budgets_walk_through(request):
         return redirect("/budgets/current")
     category_groups = Category.objects.filter(user=user_name).exclude(name='Bills & Subscriptions')
     context = {"category_groups": category_groups, "today_date": str(today_date)}
+    context.update({"page":"budgets"})
     return render(request, 'budget/budget_walk_through.html', context=context)
 
 
@@ -2317,8 +2337,10 @@ def current_budget_box(request):
                "budget_graph_value": total_expense_list,
                "budget_graph_id": "#total_budget",
                "transaction_key": transaction_key,
-               "transaction_data": transaction_data
+               "transaction_data": transaction_data,
+               "page":"budgets"
                }
+
     return render(request, 'budget/current_budget_box.html', context=context)
 
 
@@ -2390,6 +2412,7 @@ def compare_different_budget_box(request):
         budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names,
         spending_amount_bgt1, earned_amount_bgt1)
 
+<<<<<<< HEAD
     budget2_bar_value, budget2_graph_value, budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names, transaction_data_dict2, spending_amount_bgt2, earned_amount_bgt2 = get_cmp_diff_data(
         budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2,
         budget2_income_graph_value, budget1_income_bar_value, expense_bgt2_names, income_bgt2_names,
@@ -2426,6 +2449,48 @@ def compare_different_budget_box(request):
                "budget_income_graph_id2": "#total_income_budget2",
                "budget_income_bar_id2": "#income-budgets-bar2",
                "budget_type": budget_type,
+=======
+    budget_bar_value, budget_graph_value, budget_transaction_data_dict = get_cmp_data(budget_names, user_name,
+                                                                                      month_start, month_end,
+                                                                                      month_budget_bar_value,
+                                                                                      month_budget_graph_value,
+                                                                                      month_budget_transaction_data_dict)
+
+    quart_budget_bar_value, quart_budget_graph_value, quart_budget_transaction_data_dic = get_cmp_data(budget_names,
+                                                                                                       user_name,
+                                                                                                       quart_start,
+                                                                                                       quart_end,
+                                                                                                       quart_budget_bar_value,
+                                                                                                       quart_budget_graph_value,
+                                                                                                       quart_budget_transaction_data_dict)
+
+    yearly_budget_bar_value, yearly_budget_graph_value, yearly_budget_transaction_data_dic = get_cmp_data(budget_names,
+                                                                                                          user_name,
+                                                                                                          yearly_start,
+                                                                                                          yearly_end,
+                                                                                                          yearly_budget_bar_value,
+                                                                                                          yearly_budget_graph_value,
+                                                                                                          yearly_budget_transaction_data_dict)
+
+    context = {"budgets": budgets, "budget_type": budget_type, "income_budgets": income_budgets,
+               "budget_names": budget_names, "budget_graph_id": "#total_budget",
+               "budget_graph_value": budget_graph_value, "budget_graph_currency": budget_graph_currency,
+               "budget_graph_data": budget_bar_value, "budget_bar_id": "#budgets-bar",
+               "transaction_dict": budget_transaction_data_dict,
+               "week_budget_graph_id": "#week_total_budget",
+               "week_budget_graph_value": week_budget_graph_value,
+               "week_budget_graph_data": week_budget_bar_value, "week_budget_bar_id": "#week-budgets-bar",
+               "week_transaction_dict": week_budget_transaction_data_dict,
+               "quart_budget_graph_id": "#quart_total_budget",
+               "quart_budget_graph_value": quart_budget_graph_value,
+               "quart_budget_graph_data": quart_budget_bar_value, "quart_budget_bar_id": "#quart-budgets-bar",
+               "quart_transaction_dict": quart_budget_transaction_data_dict,
+               "yearly_budget_graph_id": "#yearly_total_budget",
+               "yearly_budget_graph_value": yearly_budget_graph_value,
+               "yearly_budget_graph_data": yearly_budget_bar_value, "yearly_budget_bar_id": "#yearly-budgets-bar",
+               "yearly_transaction_dict": yearly_budget_transaction_data_dict,
+                "page":"budgets"
+>>>>>>> PF/develop/internationalization
                }
     return render(request, 'budget/compare_diff_bgt_box.html', context=context)
 
@@ -2514,10 +2579,17 @@ def sample_budget_box(request):
     budget_graph_data = [{'name': 'Spent', 'data': budget_graph_value},
                          {'name': 'Left', 'data': [50.0, 30.0, 160.0, 50.0, 160.0]},
                          {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
+    translated_data = {
+        'earned': _('Earned'),
+        'spending': _('Spending')
+    }
     context = {"month_start": start_date, "month_end": end_date, "cash_flow_names": cash_flow_names,
                "cash_flow_data": cash_flow_data, "budget_bar_id": "#budgets-bar",
                "budget_graph_data": budget_graph_data, "budget_names": budget_names, "budget_graph_id": "#total_budget",
-               "budget_graph_value": budget_graph_value, "budget_graph_currency": "$"}
+               "budget_graph_value": budget_graph_value, "budget_graph_currency": "$",
+               'translated_data': json.dumps(translated_data),
+                "page":"budgets"
+               }
     return render(request, 'budget/sample_budget_box.html', context=context)
 
 
@@ -2540,7 +2612,7 @@ def budget_details(request, pk):
     context = {
         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
         'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
-        'start_date': start_date, 'end_date': end_date
+    'start_date': start_date, 'end_date': end_date, "page":"budgets"
     }
     return render(request, "budget/budget_detail.html", context=context)
 
@@ -2816,7 +2888,8 @@ def budget_update(request, pk):
                'currency_dict': currency_dict, 'budget_period': budget_periods,
                'current_budget_date': str(budget_obj.created_at),
                'budget_date': str(budget_obj.budget_start_date), 'errors': error,
-               'budget_update_period': budget_update_period}
+               'budget_update_period': budget_update_period,
+                "page":"budgets"}
     return render(request, 'budget/budget_update.html', context=context)
 
 
@@ -2836,6 +2909,7 @@ class BudgetDelete(LoginRequiredMixin, DeleteView):
 @login_required(login_url="/login")
 def template_budget_list(request):
     context = budgets_page_data(request, "", "active")
+    context.update({"page":"budgets"})
     return render(request, 'budget/budget_list.html', context=context)
 
 
@@ -3163,6 +3237,7 @@ def transaction_list(request):
         select_filter = 'All'
 
     context = transaction_summary(transaction_data, select_filter, user_name)
+    context.update({"page":"transaction_list"})
     return render(request, 'transaction/transaction_list.html', context=context)
 
 
@@ -3863,7 +3938,7 @@ def goal_add(request):
                                           account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
                                                             'Line of Credit'])
     category_obj = Category.objects.get(name="Goals", user=user_name)
-    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj)}
+    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj), "page":"goal_add"}
 
     if error:
         context['error'] = error
@@ -3906,7 +3981,8 @@ class GoalDelete(LoginRequiredMixin, DeleteView):
 
 
 def account_box(request):
-    return render(request, 'account/account_box.html')
+    context = {"page":"account_box"}
+    return render(request, 'account/account_box.html', context)
 
 
 def account_list(request, name):
@@ -4800,7 +4876,7 @@ def bill_list(request):
 
         calendar_bill_data.append(data_dict)
 
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data, 'today_date': today_date}
+    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data, 'today_date': today_date, 'page':'bill_list'}
     return render(request, "bill/bill_list.html", context=context)
 
 
@@ -5050,12 +5126,14 @@ def mortgagecalculator(request):
             'initial_amount': initial_amount,
             'mortgage_key_dumbs': json.dumps(mortgage_key),
             'mortgage_graph_data': mortgage_graph_data,
-            'mortgage_date_data': mortgage_date_data
+            'mortgage_date_data': mortgage_date_data,
+            "page": "mortgagecalculator_list"
         }
         return render(request, 'mortgagecalculator_add.html', context)
 
     context = {
-        'form': form
+        'form': form,
+        "page": "mortgagecalculator_list"
     }
     return render(request, 'mortgagecalculator_add.html', context)
 

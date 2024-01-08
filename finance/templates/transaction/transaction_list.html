@@ -1,5 +1,9 @@
 {% extends "index.html" %}
 {% load static %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Transaction List {% endblock title %}
+</head>
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
@@ -67,6 +71,7 @@
                         <div class="col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
+                                    <h4 class="card-title text-center mb-25">TRANSACTIONS LIST</h4> <hr>
                                     <form action="{% url 'transaction_report' %}" id="date_filter_form">
                                     {% csrf_token %}
                                     <!-- users edit account form start -->
@@ -93,7 +98,6 @@
                                     <div class="card-header border-bottom">
                                         <div class="download_csv_form"></div>
                                         <div class="download_pdf_form"></div>
-                                        <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>
                                         <div class="basic-modal">
                                             {% if start_date %}
                                                 <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">
@@ -218,7 +222,7 @@
 <!--                                                        </div>-->
 <!--                                                    </td>-->
 <!--                                                    {% endif %}-->
-                                                <td>
+                                                <td style="width:15%">
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">
                                                             <ul class="list-inline m-0">

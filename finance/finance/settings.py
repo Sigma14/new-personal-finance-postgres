@@ -38,12 +38,16 @@ INSTALLED_APPS = [
 
     # apps
     'my_finance',
-    'mathfilters'
+    'mathfilters',
+    'autotranslate',
+    'analytical'
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -56,6 +60,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'finance.urls'
 LOGIN_URL = '/login'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -66,7 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages'
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -119,6 +124,31 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),  # base folder where manage.py resides
+]
+
+
+LANGUAGES = [  
+    ['en', 'English'],
+    ['fr', 'Français'],
+    ['zh-hans', 'Simplified Chinese'],
+    ['de', 'German'],
+]
+
+AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
+GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
+
+
+# Google Analytics Settings
+# GOOGLE_ANALYTICS = {
+#     'google_analytics_id': 'G-H3J0TBSGTV',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+#     # 'google_analytics_id': 'G-EXPQGENY93',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
+# }
+
+GOOGLE_ANALYTICS_GTAG_PROPERTY_ID = 'G-H3J0TBSGTV'
 
 
 # Static files (CSS, JavaScript, Images)

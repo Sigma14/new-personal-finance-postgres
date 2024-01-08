@@ -79,7 +79,6 @@ function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
               total: {
                 show: true,
                 fontSize: '1.5rem',
-                label: graph_label[0],
                 formatter: function (w) {
                   return graph_currency + parseInt(graph_data[0]);
                 }
