@@ -648,7 +648,7 @@ function TransactionGraph(debit_graph_data, credit_graph_data, transaction_date_
             dataLabels: {
               position: 'top',
             },
-            columnWidth: '10%'
+            columnWidth: '40%'
           }
         },
         dataLabels: {

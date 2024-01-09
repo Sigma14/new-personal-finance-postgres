@@ -2412,7 +2412,6 @@ def compare_different_budget_box(request):
         budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names,
         spending_amount_bgt1, earned_amount_bgt1)
 
-<<<<<<< HEAD
     budget2_bar_value, budget2_graph_value, budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names, transaction_data_dict2, spending_amount_bgt2, earned_amount_bgt2 = get_cmp_diff_data(
         budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2,
         budget2_income_graph_value, budget1_income_bar_value, expense_bgt2_names, income_bgt2_names,
@@ -2449,48 +2448,7 @@ def compare_different_budget_box(request):
                "budget_income_graph_id2": "#total_income_budget2",
                "budget_income_bar_id2": "#income-budgets-bar2",
                "budget_type": budget_type,
-=======
-    budget_bar_value, budget_graph_value, budget_transaction_data_dict = get_cmp_data(budget_names, user_name,
-                                                                                      month_start, month_end,
-                                                                                      month_budget_bar_value,
-                                                                                      month_budget_graph_value,
-                                                                                      month_budget_transaction_data_dict)
-
-    quart_budget_bar_value, quart_budget_graph_value, quart_budget_transaction_data_dic = get_cmp_data(budget_names,
-                                                                                                       user_name,
-                                                                                                       quart_start,
-                                                                                                       quart_end,
-                                                                                                       quart_budget_bar_value,
-                                                                                                       quart_budget_graph_value,
-                                                                                                       quart_budget_transaction_data_dict)
-
-    yearly_budget_bar_value, yearly_budget_graph_value, yearly_budget_transaction_data_dic = get_cmp_data(budget_names,
-                                                                                                          user_name,
-                                                                                                          yearly_start,
-                                                                                                          yearly_end,
-                                                                                                          yearly_budget_bar_value,
-                                                                                                          yearly_budget_graph_value,
-                                                                                                          yearly_budget_transaction_data_dict)
-
-    context = {"budgets": budgets, "budget_type": budget_type, "income_budgets": income_budgets,
-               "budget_names": budget_names, "budget_graph_id": "#total_budget",
-               "budget_graph_value": budget_graph_value, "budget_graph_currency": budget_graph_currency,
-               "budget_graph_data": budget_bar_value, "budget_bar_id": "#budgets-bar",
-               "transaction_dict": budget_transaction_data_dict,
-               "week_budget_graph_id": "#week_total_budget",
-               "week_budget_graph_value": week_budget_graph_value,
-               "week_budget_graph_data": week_budget_bar_value, "week_budget_bar_id": "#week-budgets-bar",
-               "week_transaction_dict": week_budget_transaction_data_dict,
-               "quart_budget_graph_id": "#quart_total_budget",
-               "quart_budget_graph_value": quart_budget_graph_value,
-               "quart_budget_graph_data": quart_budget_bar_value, "quart_budget_bar_id": "#quart-budgets-bar",
-               "quart_transaction_dict": quart_budget_transaction_data_dict,
-               "yearly_budget_graph_id": "#yearly_total_budget",
-               "yearly_budget_graph_value": yearly_budget_graph_value,
-               "yearly_budget_graph_data": yearly_budget_bar_value, "yearly_budget_bar_id": "#yearly-budgets-bar",
-               "yearly_transaction_dict": yearly_budget_transaction_data_dict,
-                "page":"budgets"
->>>>>>> PF/develop/internationalization
+               "page":"budgets"
                }
     return render(request, 'budget/compare_diff_bgt_box.html', context=context)
 
@@ -2563,6 +2521,7 @@ def compare_target_budget_box(request):
                "budget_income_graph_id": "#total_income_budget",
                "budget_income_bar_id": "#income-budgets-bar",
                "budget_type": budget_type,
+               "page":"budgets"
                }
     return render(request, 'budget/compare_target_box.html', context=context)
 
