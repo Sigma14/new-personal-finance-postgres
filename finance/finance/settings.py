@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     # apps
     'my_finance',
     'mathfilters',
-    'autotranslate',
     'analytical'
 ]
 
@@ -138,17 +137,11 @@ LANGUAGES = [
     ['de', 'German'],
 ]
 
-AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
-GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
+# AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
+# GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
 
 
-# Google Analytics Settings
-# GOOGLE_ANALYTICS = {
-#     'google_analytics_id': 'G-H3J0TBSGTV',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
-#     # 'google_analytics_id': 'G-EXPQGENY93',  # Replace with your actual ID (e.g., 'UA-XXXXX-Y')
-# }
-
-GOOGLE_ANALYTICS_GTAG_PROPERTY_ID = 'G-H3J0TBSGTV'
+GOOGLE_ANALYTICS_GTAG_PROPERTY_ID = 'G-EXPQGENY93'
 
 
 # Static files (CSS, JavaScript, Images)
