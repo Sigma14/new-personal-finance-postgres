@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 {% load static i18n %}
-{% load google_analytics_gtag %}
 {% get_current_language as CURRENT_LANGUAGE %}
 {% get_static_prefix as STATIC_PREFIX %}
 <html class="loading dark-layout" lang="en" data-layout="dark-layout" data-textdirection="ltr">
@@ -75,7 +74,14 @@
     <!-- END: Custom CSS-->
 
     <!-- BEGIN: Google ANALYTICS  -->
-        {% google_analytics_gtag %}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-EXPQGENY93"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-EXPQGENY93');
+        </script>
     <!-- ENG: Google ANALYTICS  -->
     
     <!-- Google Tag Manager --> 

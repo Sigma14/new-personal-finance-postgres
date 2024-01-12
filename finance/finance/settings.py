@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     # apps
     'my_finance',
     'mathfilters',
-    'analytical'
 ]
 
 
@@ -139,10 +138,6 @@ LANGUAGES = [
 
 # AUTOTRANSLATE_TRANSLATOR_SERVICE = 'autotranslate.services.GoogleAPITranslatorService'
 # GOOGLE_TRANSLATE_KEY = 'AIzaSyBzEC9MWjCMK_OrfI4CECEyctt_gLvXJhE'
-
-
-GOOGLE_ANALYTICS_GTAG_PROPERTY_ID = 'G-EXPQGENY93'
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
