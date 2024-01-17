@@ -17,7 +17,7 @@ sub_category_suggested_list = {
               "Spotify Subscription", "Netflix Spotify Subscription",
               "Amazon Prime Spotify Subscription"],
     "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
-    "Income": ["Salary", "Bonus"]
+    "Income": ["Job", "Business", "Bonus"]
 }
 
 
@@ -34,7 +34,7 @@ def create_categories(user):
                        "Funds": [],
                        "Food": ["Groceries", "Eating Out"],
                        "Personal Care": ["Electronic Items", "Clothes"],
-                       "Income": ["Salary", "Bonus"],
+                       "Income": ["Job", "Business", "Bonus"],
                        }
     for category, sub_category in categories_dict.items():
         category = Category.objects.create(user=user, name=category)

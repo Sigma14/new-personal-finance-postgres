@@ -1640,9 +1640,15 @@ def subcategory_list(request):
     if request.method == "POST" and request.is_ajax():
         user = request.user
         category_group = request.POST.get('category_group')
-        category = Category.objects.get(user=user, pk=category_group)
+        print("caategoty_group=====>", category_group)
+        try:
+            category = Category.objects.get(user=user, pk=category_group)
+        except:
+            category = Category.objects.get(user=user, name=category_group)
+
         subcategories = SubCategory.objects.filter(category=category)
         subcategories = list(subcategories.values_list('name', flat=True))
+        print("subcat======>", subcategories)
         return JsonResponse({"subcategories": subcategories})
     return redirect("/category_list")
 
@@ -2180,7 +2186,10 @@ def budget_list(request):
 
 @login_required(login_url="/login")
 def budgets_box(request):
-    context = {"page":"budgets"}
+    budgets_qs = Budget.objects.filter(user=request.user)
+    budgets = list(budgets_qs.values_list('name', flat=True).distinct())
+    print("budgets====>", budgets)
+    context = {"page": "budgets", "budgets_list": budgets}
     return render(request, 'budget/budget_box.html', context)
 
 
@@ -2190,7 +2199,7 @@ def budgets_walk_through(request):
     if request.method == "POST":
         category_group = request.POST['category_group']
         category_name = request.POST['category_name']
-        category_obj = Category.objects.get(id=int(category_group))
+        category_obj = Category.objects.get(user=user_name, name=category_group)
         try:
             subcategory_obj = SubCategory.objects.get(name=category_name, category=category_obj)
         except:
@@ -2246,6 +2255,25 @@ def budgets_walk_through(request):
     context.update({"page":"budgets"})
     return render(request, 'budget/budget_walk_through.html', context=context)
 
+
+@login_required(login_url="/login")
+def budgets_income_walk_through(request):
+    user_name = request.user
+    income_category = SubCategory.objects.filter(category__user=user_name, category__name='Income')
+    context = {"category_groups": "Income", "income_category": income_category, "today_date": str(today_date)}
+    context.update({"page": "budgets"})
+    return render(request, 'income/income_walk_through.html', context=context)
+
+
+@login_required(login_url="/login")
+def budgets_expenses_walk_through(request):
+    user_name = request.user
+    expense_groups = Category.objects.filter(user=user_name).exclude(name__in=["Bills & Subscriptions", "Goals", "Funds", "Income"])
+    if len(expense_groups) > 1:
+        category_names = SubCategory.objects.filter(category=expense_groups[0])
+    context = {"expense_groups": expense_groups, "category_names": category_names, "today_date": str(today_date)}
+    context.update({"page": "budgets"})
+    return render(request, 'expenses/expense_walk_through.html', context=context)
 
 @login_required(login_url="/login")
 def current_budget_box(request):

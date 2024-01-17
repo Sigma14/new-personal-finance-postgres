@@ -43,33 +43,36 @@
                             <div class="line">
                                 <i data-feather="chevron-right" class="font-medium-2"></i>
                             </div>
-                            <div class="step" data-target="#personal-info">
+                            <div class="step" data-target="#income-section">
                                 <button type="button" class="step-trigger">
                                     <span class="bs-stepper-box">2</span>
                                     <span class="bs-stepper-label">
-                                        <span class="bs-stepper-title">SET CATEGORIES</span>
-                                        <span class="bs-stepper-subtitle">Select category related to groups</span>
+                                        <span class="bs-stepper-title">INCOME SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for income creation walkthrough</span>
                                     </span>
                                 </button>
                             </div>
                             <div class="line">
                                 <i data-feather="chevron-right" class="font-medium-2"></i>
                             </div>
-                            <div class="step" data-target="#address-step">
+                            <div class="step" data-target="#bill-section">
                                 <button type="button" class="step-trigger">
                                     <span class="bs-stepper-box">3</span>
                                     <span class="bs-stepper-label">
-                                        <span class="bs-stepper-title">SET EXPENSES AMOUNT</span>
-                                        <span class="bs-stepper-subtitle">Set amount with currency</span>
+                                        <span class="bs-stepper-title">BILL SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for bills creation walkthrough</span>
                                     </span>
                                 </button>
                             </div>
-                            <div class="step" data-target="#budget-step">
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#expense-section">
                                 <button type="button" class="step-trigger">
                                     <span class="bs-stepper-box">4</span>
                                     <span class="bs-stepper-label">
-                                        <span class="bs-stepper-title">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
-                                        <span class="bs-stepper-subtitle">Set date with budget periods & auto budget functionality</span>
+                                        <span class="bs-stepper-title">EXPENSE SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for expenses creation walkthrough</span>
                                     </span>
                                 </button>
                             </div>
@@ -87,8 +90,8 @@
                                                     </div>
                                                     <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
                                                     <div class="card-body">
-                                                        <p class="card-text">Begin by selecting your preferred category groups and the currency for your budget allocation. Next, choose the specific category within the selected group and estimate your budgeted expenses or incomes. Our platform offers various budget periods, including Daily, Weekly, Monthly, Quarterly, and Yearly, facilitating the automatic generation of budgets. This eliminates the need for users to manually input budget data for every period.</p>
-                                                        <p class="card-text">Rest assured that achieving budget perfection is an ongoing process, and adjustments can be effortlessly made at any time. Our user-friendly interface ensures a seamless experience in managing your finances, allowing you to adapt and refine your budget as needed.</p>
+                                                        <p class="card-text"><strong>Description: </strong>A budget is a plan for how you'll spend your money over a certain period, this is a monthly budget planner. Creating a budget is useful because it helps you understand your financial situation, control your spending, and save for future goals.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Be realistic about your income and expenses. Remember, a budget is a tool to help you, not restrict you. Regularly review and adjust it as your financial situation changes.</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -105,134 +108,97 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div id="personal-info" class="content">
+                                <div id="income-section" class="content">
                                     <section>
                                         <div class="row match-height">
-                                            <div class="col-xl-8 col-md-6 col-12">
-                                                <div class="row match-height">
-                                                    <div class="col-12">
-                                                        <h4 class="mb-1 mt-2">
-                                                            <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
-                                                            <span class="align-middle">SET CATEGORIES</span>
-                                                        </h4>
+                                            <div class="col-md-12 col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Income Creation Walkthrough.</h4>
                                                     </div>
-                                                    <div class="col-lg-12 col-md-12">
-                                                        <div class="form-group">
-                                                            <h5>Group</h5>
-                                                            <select class="form-control sub_cat_select" id="category_group" name="category_group" required>
-                                                                <option value="">Select Group</option>
-                                                                {% for category in category_groups %}
-                                                                    {% if category.name == 'Personal Care'%}
-                                                                        <option value="{{category.id}}" selected>{{category.name}}</option>
-                                                                    {% else %}
-                                                                        <option value="{{category.id}}">{{category.name}}</option>
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="form-group">
-                                                            <h5>Name</h5>
-                                                            <input type="text" id="sub_category_name" value="Clothes" name="category_name" class="form-control" required/>
-                                                        </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Consider all your income sources when planning your budget. This includes your main job, any side jobs, and other income like rental income or investments.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Always use your net income (after-tax income) for budgeting. If your income varies, use an average of the last few months to estimate.</p>
+                                                        <br/>
+                                                        <a href="{% url 'budgets_income_walk_through' %}" class="btn btn-success"> Go for income creation walkthrough</a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </section>
-                                    <div class="col-12"><hr /></div>
                                     <div class="d-flex justify-content-between">
-                                        <div class="btn btn-primary btn-prev">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </div>
-                                        <div class="btn btn-primary btn-next" btn_id="true">
-                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
-                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
-                                        </div>
-
-                                    </div>
-                                </div>
-                                <div id="address-step" class="content">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h4 class="mb-1 mt-2">
-                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
-                                                <span class="align-middle">SET EXPENSES AMOUNT</span>
-                                            </h4>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <h5>Amount</h5>
-                                                <input type="text" id="amount" value="50" name="amount" class="form-control" required/>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-12">
-                                            <div class="form-group">
-                                                <h5>Currency</h5>
-                                                <select name="currency" class="form-control" id="id_currency" required>
-                                                      <option value="$">US Dollar ($)</option>
-                                                      <option value="€">Euro (€)</option>
-                                                      <option value="₹">Indian rupee (₹)</option>
-                                                      <option value="£">British Pound (£)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <div class="btn btn-primary btn-prev">
-                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
-                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </div>
+                                        </button>
                                         <div class="btn btn-primary btn-next" btn_id="true">
                                             <span class="align-middle d-sm-inline-block d-none">Next</span>
                                             <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
                                         </div>
                                     </div>
                                 </div>
-                                <div id="budget-step" class="content">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h4 class="mb-1 mt-2">
-                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
-                                                <span class="align-middle">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
-                                            </h4>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <h5>Start Date</h5>
-                                                <input type="text" id="budget_date" name="budget_date" value="{{today_date}}" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-12">
-                                            <div class="form-group">
-                                                <h5>Auto-budget period</h5>
-                                                <select name="budget_period" class="form-control" id="id_budget_period">
-                                                  <option value="Daily">Daily</option>
-                                                  <option value="Weekly">Weekly</option>
-                                                  <option value="Monthly" selected>Monthly</option>
-                                                  <option value="Quarterly">Quarterly</option>
-                                                  <option value="Yearly">Yearly</option>
+                                <div id="bill-section" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-md-12 col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Bill Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Track all your recurring transactions, including bills and subscriptions, whether they occur weekly, monthly, quarterly, or yearly. This helps you understand your fixed expenses.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Regularly review your subscriptions and bills. Sometimes, you might find services you no longer use and can cancel.</p>
+                                                        <p class="card-text"><strong>Autobill Button: </strong>Automatically creates a transaction log for your bill on the selected date and frequency.</p>
+                                                        <p class="card-text"><strong>Autopay Button: </strong>Automatically deducts the bill amount from your selected account, ensuring you never miss a payment.</p>
+                                                        <br/>
+                                                        <a href="{% url 'bill_walk_through' %}" class="btn btn-success"> Go for bill creation walkthrough</a>
 
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input type="checkbox" name="auto_budget" checked="" class="custom-control-input" id="customCheck1">
-                                                    <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-budget</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </section>
                                     <div class="d-flex justify-content-between">
-                                        <div class="btn btn-primary btn-prev">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
                                         </div>
-                                        <button class="btn btn-success btn-submit">Complete</button>
+                                    </div>
+                                </div>
+                                <div id="expense-section" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-md-12 col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Expense Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Expenses are what you spend money on regularly, like groceries, dining out, entertainment, and transportation. Understanding your expenses is crucial to managing your money effectively.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Categorize your expenses between 'needs' (essentials) and 'wants' (non-essentials). This helps in prioritizing spending and identifying areas where you can cut back if needed.</p>
+                                                        <br/>
+                                                        <a href="{% url 'budgets_expenses_walk_through' %}" class="btn btn-success"> Go for expense creation walkthrough</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
