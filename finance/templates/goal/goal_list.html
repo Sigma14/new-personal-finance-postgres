@@ -65,7 +65,7 @@
                         <div class="item-img text-center">
                             <a href="{% url 'goal_update' pk=object.id %}">
                                 <div class="card-body">
-                                    <h2 style="float: left;">{{ object.label }}</h2>
+                                    <h2 style="float: left;">{{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%)</h2>
                                     <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
                                 </div>
                                 <br/>

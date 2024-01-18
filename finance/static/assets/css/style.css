@@ -9,3 +9,38 @@ NOTE:
 ------
 PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
 WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+#custom-nav {
+    background-color: #283146;
+    /* Background color */
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    /* Left alignment */
+}
+#custom-nav .nav-item {
+    margin-right: 2px; /* Padding between li elements */
+}
+  
+#custom-nav .nav-link {
+    color: #fff;
+    /* Link color */
+    text-decoration: none;
+    padding: 10px 20px;
+}
+
+/* Optional: Hover effect for links */
+#custom-nav .nav-link:hover {
+    background-color: #7567f1;
+    /* Adjust hover color as desired */
+    color: #fff;
+    /* Adjust text color on hover */
+}
+
+
+#demo {
+    background-color: rgb(255, 0, 0);
+    background: rgb(254, 0, 42);
+    color: yellow;
+}
