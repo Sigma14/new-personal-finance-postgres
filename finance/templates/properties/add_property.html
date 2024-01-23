@@ -129,7 +129,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                     <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_name-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_nameOne" data-toggle="collapse" role="button" data-target="#property_name-one" aria-expanded="false" aria-controls="property_name-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Name / Address  <strong class="text-danger">*</strong></span>
                                                                 </div>
@@ -155,7 +155,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_img-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_imgOne" data-toggle="collapse" role="button" data-target="#property_img-one" aria-expanded="false" aria-controls="property_img-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Property Image </span>
                                                                 </div>
@@ -184,7 +184,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_curr-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_currOne" data-toggle="collapse" role="button" data-target="#property_curr-one" aria-expanded="false" aria-controls="property_curr-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Currency </span>
                                                                 </div>
@@ -231,7 +231,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_like_price-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_like_priceOne" data-toggle="collapse" role="button" data-target="#property_like_price-one" aria-expanded="false" aria-controls="property_like_price-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Likely Case Scenario Purchase Price <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -257,7 +257,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_best_price-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_best_priceOne" data-toggle="collapse" role="button" data-target="#property_best_price-one" aria-expanded="false" aria-controls="property_best_price-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Best Case Scenario Purchase Price <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -270,13 +270,13 @@
                                                         </div>
                                                         </label>
                                                     </div>
-                                                <div class="col-sm-8" style="padding-right: 0px;">
+                                                <div class="col-sm-7" style="padding-right: 0px;">
                                                     <div class="input-group input-group-merge">
                                                         <input type="text" readonly="readonly" id="best_case" value="{% if property_obj.purchase_price_detail.best_case_price %}{{property_obj.purchase_price_detail.best_case_price}}{% else%}49000{% endif %}" class="form-control" name="best_case" required
                                                                placeholder="Best Case Purchase Price"/>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-1" style="padding: 0px;">
+                                                <div class="col-sm-2" style="padding: 0px;">
                                                     <div class="input-group">
                                                         <input type="number" id="best_p_val" class="touchspin-icon" method_name="best_case" value="2" data-bts-button-down-class="btn btn-danger" data-bts-button-up-class="btn btn-danger"/>
                                                          <strong class="">%</strong>
@@ -289,7 +289,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon" id="property_worst_price-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_worst_priceOne" data-toggle="collapse" role="button" data-target="#property_worst_price-one" aria-expanded="false" aria-controls="property_worst_price-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Worst Case Scenario Purchase Price <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -302,13 +302,13 @@
                                                         </div>
                                                         </label>
                                                     </div>
-                                                <div class="col-sm-8" style="padding-right: 0px;">
+                                                <div class="col-sm-7" style="padding-right: 0px;">
                                                     <div class="input-group input-group-merge">
                                                         <input type="text" id="worst_case" readonly="readonly"  class="form-control" value="{% if property_obj.purchase_price_detail.worst_case_price %}{{property_obj.purchase_price_detail.worst_case_price}}{% else%}51000{% endif %}" name="worst_case" required
                                                                placeholder="Worst Case Purchase Price"/>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-1" style="padding: 0px;">
+                                                <div class="col-sm-2" style="padding: 0px;">
                                                     <div class="input-group">
                                                         <input type="number" id="worst_p_val" class="touchspin-icon price_percentage" method_name="worst_case" value="2" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success"/>
                                                          <strong class="">%</strong>
@@ -321,7 +321,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_select_price-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_select_priceOne" data-toggle="collapse" role="button" data-target="#property_select_price-one" aria-expanded="false" aria-controls="property_select_price-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Select a Scenario Purchase Price <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -358,7 +358,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_selected_price-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_selected_priceOne" data-toggle="collapse" role="button" data-target="#property_selected_price-one" aria-expanded="false" aria-controls="property_selected_price-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Purchase Price Selected <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -384,7 +384,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_down-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_downOne" data-toggle="collapse" role="button" data-target="#property_down-one" aria-expanded="false" aria-controls="property_down-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Down Payment(%) <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -423,7 +423,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_int-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_intOne" data-toggle="collapse" role="button" data-target="#property_int-one" aria-expanded="false" aria-controls="property_int-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> <a href="https://www.theglobaleconomy.com/rankings/mortgage_interest_rate/" class="text-primary" target="_blank" title="see interest rates for different countries">&nbsp;Interest Rate on Mortgage(%) <strong class="text-danger">*</strong></a></span>
                                                                 </div>
@@ -463,7 +463,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_myear-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_myearOne" data-toggle="collapse" role="button" data-target="#property_myear-one" aria-expanded="false" aria-controls="property_myear-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Amortization (Year) <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -476,12 +476,12 @@
                                                         </div>
                                                         </label>
                                                     </div>
-                                                <div class="col-sm-8">
+                                                <div class="col-sm-7">
                                                     <div class="input-group input-group-merge">
                                                         <input type="text" id="mortgage_year" class="form-control" value="{{property_obj.mortgage_detail.amortization_year}}" name="amortization_year" required placeholder="Mortgage Amortization (Year)"/>
                                                     </div>
                                                 </div>
-                                                <div class="col-sm-1">
+                                                <div class="col-sm-2">
                                                     <a class="badge badge-pill badge-success get_mortgage_year" id="min_year" style="padding:12px; color:white;">25</a>
                                                     <a class="badge badge-pill badge-primary get_mortgage_year" id="max_year" style="padding:12px; color:white;">30</a>
                                                 </div>
@@ -492,7 +492,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="property_mstart-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="property_mstartOne" data-toggle="collapse" role="button" data-target="#property_mstart-one" aria-expanded="false" aria-controls="property_mstart-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Mortgage Start Date <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -558,7 +558,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="land_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="land_feeOne" data-toggle="collapse" role="button" data-target="#land_fee-one" aria-expanded="false" aria-controls="land_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Land Transfer Taxes <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -589,7 +589,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="legal_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="legal_feeOne" data-toggle="collapse" role="button" data-target="#legal_fee-one" aria-expanded="false" aria-controls="legal_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Legal Fees and Professional Fees <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -620,7 +620,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="title_ins-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="title_insOne" data-toggle="collapse" role="button" data-target="#title_ins-one" aria-expanded="false" aria-controls="title_ins-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Title Insurance/Search <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -646,7 +646,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="home_insp-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="home_inspOne" data-toggle="collapse" role="button" data-target="#home_insp-one" aria-expanded="false" aria-controls="home_insp-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Home Inspection <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -677,7 +677,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="app_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="app_feeOne" data-toggle="collapse" role="button" data-target="#app_fee-one" aria-expanded="false" aria-controls="app_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Appraisal Fee <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -708,7 +708,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="appl-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="applOne" data-toggle="collapse" role="button" data-target="#appl-one" aria-expanded="false" aria-controls="appl-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Appliances <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -739,7 +739,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="reno_cost-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="reno_costOne" data-toggle="collapse" role="button" data-target="#reno_cost-one" aria-expanded="false" aria-controls="reno_cost-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Renovation Cost/Referbishment Cost <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -771,7 +771,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="land_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="land_feeOne" data-toggle="collapse" role="button" data-target="#land_fee-one" aria-expanded="false" aria-controls="land_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Land Transfer Taxes <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -802,7 +802,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="legal_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="legal_feeOne" data-toggle="collapse" role="button" data-target="#legal_fee-one" aria-expanded="false" aria-controls="legal_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Legal Fees and Professional Fees <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -833,7 +833,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="title_ins-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="title_insOne" data-toggle="collapse" role="button" data-target="#title_ins-one" aria-expanded="false" aria-controls="title_ins-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Title Insurance/Search <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -859,7 +859,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="home_insp-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="home_inspOne" data-toggle="collapse" role="button" data-target="#home_insp-one" aria-expanded="false" aria-controls="home_insp-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Home Inspection <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -890,7 +890,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="app_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="app_feeOne" data-toggle="collapse" role="button" data-target="#app_fee-one" aria-expanded="false" aria-controls="app_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Appraisal Fee <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -921,7 +921,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="appl-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="applOne" data-toggle="collapse" role="button" data-target="#appl-one" aria-expanded="false" aria-controls="appl-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Appliances <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -952,7 +952,7 @@
                                                <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="reno_cost-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="reno_costOne" data-toggle="collapse" role="button" data-target="#reno_cost-one" aria-expanded="false" aria-controls="reno_cost-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Renovation Cost/Referbishment Cost <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1078,7 +1078,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="unit1-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="unit1One" data-toggle="collapse" role="button" data-target="#unit1-one" aria-expanded="false" aria-controls="unit1-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Unit 1 <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1108,7 +1108,7 @@
                                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;" class="last_unit" unit_number="2">
                                                         <div class="collapse-margin collapse-icon " id="unit2-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="unit2One" data-toggle="collapse" role="button" data-target="#unit2-one" aria-expanded="false" aria-controls="unit2-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Unit 2 <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1168,7 +1168,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;" class="last_unit" unit_number="2">
                                                         <div class="collapse-margin collapse-icon " id="unit2-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="unit2One" data-toggle="collapse" role="button" data-target="#unit2-one" aria-expanded="false" aria-controls="unit2-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Unit 2 <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1203,7 +1203,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="annual_rent-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="annual_rentOne" data-toggle="collapse" role="button" data-target="#annual_rent-one" aria-expanded="false" aria-controls="annual_rent-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Annual % Rent Increase Assumption <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1279,7 +1279,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="prop_tax-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="prop_taxOne" data-toggle="collapse" role="button" data-target="#prop_tax-one" aria-expanded="false" aria-controls="prop_tax-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Property Taxes <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1310,7 +1310,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Insurance-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="InsuranceOne" data-toggle="collapse" role="button" data-target="#Insurance-one" aria-expanded="false" aria-controls="Insurance-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Insurance <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1341,7 +1341,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="rg_main-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="rg_mainOne" data-toggle="collapse" role="button" data-target="#rg_main-one" aria-expanded="false" aria-controls="rg_main-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Regular Maintenance <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1524,7 +1524,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="manage_fee-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="manage_feeOne" data-toggle="collapse" role="button" data-target="#manage_fee-one" aria-expanded="false" aria-controls="manage_fee-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Property Management Fees <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1555,7 +1555,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Vacancy-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="VacancyOne" data-toggle="collapse" role="button" data-target="#Vacancy-one" aria-expanded="false" aria-controls="Vacancy-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Vacancy <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1586,7 +1586,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="cap_exp-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="cap_expOne" data-toggle="collapse" role="button" data-target="#cap_exp-one" aria-expanded="false" aria-controls="cap_exp-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Capital Expenditure Budget <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1695,7 +1695,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="ann_inf-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="ann_infOne" data-toggle="collapse" role="button" data-target="#ann_inf-one" aria-expanded="false" aria-controls="ann_inf-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Annual Expense % Inflation Assumption <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1721,7 +1721,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="annual_apr-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="annual_aprOne" data-toggle="collapse" role="button" data-target="#annual_apr-one" aria-expanded="false" aria-controls="annual_apr-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Annual Property Appreciation Assumption <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1783,7 +1783,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Roof-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="RoofOne" data-toggle="collapse" role="button" data-target="#Roof-one" aria-expanded="false" aria-controls="Roof-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Roof <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1813,7 +1813,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Heater-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="HeaterOne" data-toggle="collapse" role="button" data-target="#Heater-one" aria-expanded="false" aria-controls="Heater-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Water Heater <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1843,7 +1843,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Appliances-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="AppliancesOne" data-toggle="collapse" role="button" data-target="#Appliances-one" aria-expanded="false" aria-controls="Appliances-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> All Appliances <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1872,7 +1872,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Bathroom-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="BathroomOne" data-toggle="collapse" role="button" data-target="#Bathroom-one" aria-expanded="false" aria-controls="Bathroom-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Bathroom Fixtures (Showers, Vanities, Toilets etc.) <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1902,7 +1902,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Driveway-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="DrivewayOne" data-toggle="collapse" role="button" data-target="#Driveway-one" aria-expanded="false" aria-controls="Driveway-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Driveway/Parking Lot <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1932,7 +1932,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Furnace-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="FurnaceOne" data-toggle="collapse" role="button" data-target="#Furnace-one" aria-expanded="false" aria-controls="Furnace-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Furnace <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1962,7 +1962,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Air-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="AirOne" data-toggle="collapse" role="button" data-target="#Air-one" aria-expanded="false" aria-controls="Air-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Air Conditioner <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -1992,7 +1992,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Flooring-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="FlooringOne" data-toggle="collapse" role="button" data-target="#Flooring-one" aria-expanded="false" aria-controls="Flooring-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Flooring <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2022,7 +2022,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Plumbing-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="PlumbingOne" data-toggle="collapse" role="button" data-target="#Plumbing-one" aria-expanded="false" aria-controls="Plumbing-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Plumbing <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2052,7 +2052,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Electrical-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="ElectricalOne" data-toggle="collapse" role="button" data-target="#Electrical-one" aria-expanded="false" aria-controls="Electrical-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Electrical <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2082,7 +2082,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Windows-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="WindowsOne" data-toggle="collapse" role="button" data-target="#Windows-one" aria-expanded="false" aria-controls="Windows-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Windows <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2112,7 +2112,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Paint-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="PaintOne" data-toggle="collapse" role="button" data-target="#Paint-one" aria-expanded="false" aria-controls="Paint-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Paint <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2142,7 +2142,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Kitchen-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="KitchenOne" data-toggle="collapse" role="button" data-target="#Kitchen-one" aria-expanded="false" aria-controls="Kitchen-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Kitchen Cabinets/Counters <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2172,7 +2172,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Structure-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="StructureOne" data-toggle="collapse" role="button" data-target="#Structure-one" aria-expanded="false" aria-controls="Structure-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Structure (foundation, framing) <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2202,7 +2202,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Components-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="ComponentsOne" data-toggle="collapse" role="button" data-target="#Components-one" aria-expanded="false" aria-controls="Components-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Components (garage door, etc.) <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2232,7 +2232,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Landscaping-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="LandscapingOne" data-toggle="collapse" role="button" data-target="#Landscaping-one" aria-expanded="false" aria-controls="Landscaping-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Landscaping <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2265,7 +2265,7 @@
                                                 <div class="col-sm-3 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="tbudget-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="tbudgetOne" data-toggle="collapse" role="button" data-target="#tbudget-one" aria-expanded="false" aria-controls="tbudget-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Total Budget Cost <strong class="text-danger">*</strong> </span>
                                                                 </div>
@@ -2344,7 +2344,7 @@
                                                                 {% if forloop.counter == 1 %}
                                                                 <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="IName-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="INameOne" data-toggle="collapse" role="button" data-target="#IName-one" aria-expanded="false" aria-controls="IName-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Name </span>
                                                                 </div>
@@ -2370,7 +2370,7 @@
                                                                 {% if forloop.counter == 1 %}
                                                                 <label style="margin-bottom:0px;">
                                                                     <div class="collapse-margin collapse-icon " id="Cap_cont-qna">
-                                                                    <div class="card mt-0">
+                                                                    <div class="card mt-0" style="width:300px;">
                                                                         <div class="card-header" id="Cap_contOne" data-toggle="collapse" role="button" data-target="#Cap_cont-one" aria-expanded="false" aria-controls="Cap_cont-one">
                                                                             <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Capital Contribution </span>
                                                                         </div>
@@ -2403,7 +2403,7 @@
                                                             <div class="col-sm-2 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="IName-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="INameOne" data-toggle="collapse" role="button" data-target="#IName-one" aria-expanded="false" aria-controls="IName-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Name </span>
                                                                 </div>
@@ -2425,7 +2425,7 @@
                                                             <div class="col-sm-2 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="Cap_cont-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:300px;">
                                                                 <div class="card-header" id="Cap_contOne" data-toggle="collapse" role="button" data-target="#Cap_cont-one" aria-expanded="false" aria-controls="Cap_cont-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Capital Contribution </span>
                                                                 </div>
@@ -2454,7 +2454,7 @@
                                                 <div class="col-sm-2 col-form-label" style="padding-top:0px; padding-bottom:0px;">
                                                         <label style="margin-bottom:0px;">
                                                         <div class="collapse-margin collapse-icon " id="IName-qna">
-                                                            <div class="card mt-0">
+                                                            <div class="card mt-0" style="width:200px">
                                                                 <div class="card-header" id="INameOne" data-toggle="collapse" role="button" data-target="#IName-one" aria-expanded="false" aria-controls="IName-one">
                                                                     <span class="lead collapse-title" style="font-size:13px;"><i class="bg-light-info" data-feather="info"></i> Name </span>
                                                                 </div>

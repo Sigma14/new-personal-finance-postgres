@@ -115,19 +115,15 @@
                 </section>
                 <br/>
                 <section class="app-user-edit">
-                    <div class="card">
-                        <div class="card-body">
-                            <ul class="nav nav-pills" role="tablist">
-                                {% for data in unit_list %}
-                                <li class="nav-item">
-                                    <a class="nav-link d-flex align-items-center {% if forloop.counter == 1 %}active{% endif %}" id="{{data.unit_name}}_tab" data-toggle="tab" href="#{{data.name}}_data" aria-controls="{{data.name}}_data" role="tab" aria-selected="false">
-                                        <span class="d-none d-sm-block">{{data.name | title}}</span>
-                                    </a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                    <ul class="nav nav-pills" role="tablist" id="custom-nav">
+                        {% for data in unit_list %}
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center {% if forloop.counter == 1 %}active{% endif %}" id="{{data.unit_name}}_tab" data-toggle="tab" href="#{{data.name}}_data" aria-controls="{{data.name}}_data" role="tab" aria-selected="false">
+                                <span class="d-none d-sm-block">{{data.name | title}}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </section>
                 <section>
                     <div class="tab-content">
