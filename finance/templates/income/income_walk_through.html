@@ -1,0 +1,240 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+{% block content %}
+<div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{heading_name}}</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                     <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Income walk through
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Horizontal Wizard -->
+                <section class="modern-horizontal-wizard">
+                    <div class="bs-stepper wizard-modern modern-wizard-example">
+                        <div class="bs-stepper-header">
+                            <div class="step" data-target="#page-details">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">1</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">WELCOME PAGE</span>
+                                        <span class="bs-stepper-subtitle">Description</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#category-info">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">2</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET CATEGORIES</span>
+                                        <span class="bs-stepper-subtitle">Select category related to incomes</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#amount-step">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">3</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET INCOME AMOUNT</span>
+                                        <span class="bs-stepper-subtitle">Set amount with currency</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#date-step">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">4</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
+                                        <span class="bs-stepper-subtitle">Set date with budget periods & auto budget functionality</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bs-stepper-content">
+                            <form action="{% url 'budgets_walk_through' %}" id="frm1" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div id="page-details" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-md-12 col-lg-12">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Welcome to the Income Creation Page.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text">Begin by selecting your preferred category for your bill allocation. Next, choose the bank account for deduction set bill amount. Our platform offers various bill periods, including Daily, Weekly, Monthly, Quarterly, and Yearly, facilitating the automatic generation of bills. This eliminates the need for users to manually input bill data for every period and also With Auto-Pay, you can set up automatic payments for your recurring bills, eliminating the need for manual data input every billing cycle.</p>
+                                                        <p class="card-text">Rest assured that achieving bill perfection is an ongoing process, and adjustments can be effortlessly made at any time. Our user-friendly interface ensures a seamless experience in managing your finances, allowing you to adapt and refine your bill as needed.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="category-info" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-xl-8 col-md-6 col-12">
+                                                <div class="row match-height">
+                                                    <div class="col-12">
+                                                        <h4 class="mb-1 mt-2">
+                                                            <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                            <span class="align-middle">SET CATEGORIES</span>
+                                                        </h4>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div class="form-group">
+                                                            <h5>Enter Category Name</h5>
+                                                            <input type="hidden" name="category_group" value="Income">
+                                                            <input list="browsers" type="text" class="form-control data_list_drop_down" id="sub_category_name" value="Job" name="category_name" placeholder="Name" required data-validation-required-message="This field is required"/>
+                                                            <datalist id="browsers" name="">
+                                                                {% for data in income_category %}
+                                                                    <option value="{{data.name}}" data-id="{{forloop.counter}}">{{data.name}}</option>
+                                                                {% endfor %}
+                                                            </datalist>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="col-12"><hr /></div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div id="amount-step" class="content">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h4 class="mb-1 mt-2">
+                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                <span class="align-middle">SET EXPENSES AMOUNT</span>
+                                            </h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <h5>Amount</h5>
+                                                <input type="text" id="amount" value="500" name="amount" class="form-control" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="form-group">
+                                                <h5>Currency</h5>
+                                                <select name="currency" class="form-control" id="id_currency" required>
+                                                      <option value="$">US Dollar ($)</option>
+                                                      <option value="€">Euro (€)</option>
+                                                      <option value="₹">Indian rupee (₹)</option>
+                                                      <option value="£">British Pound (£)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="date-step" class="content">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h4 class="mb-1 mt-2">
+                                                <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                <span class="align-middle">SET BUDGET DATE WITH AUTO FUNCTIONALITY</span>
+                                            </h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <h5>Start Date</h5>
+                                                <input type="text" id="budget_date" name="budget_date" value="{{today_date}}" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="form-group">
+                                                <h5>Auto-budget period</h5>
+                                                <select name="budget_period" class="form-control" id="id_budget_period">
+                                                  <option value="Daily">Daily</option>
+                                                  <option value="Weekly">Weekly</option>
+                                                  <option value="Monthly" selected>Monthly</option>
+                                                  <option value="Quarterly">Quarterly</option>
+                                                  <option value="Yearly">Yearly</option>
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" name="auto_budget" checked="" class="custom-control-input" id="customCheck1">
+                                                    <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-budget</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <button class="btn btn-success btn-submit">Complete</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <!-- /Horizontal Wizard -->
+            </div>
+        </div>
+    </div>
+{% endblock content %}

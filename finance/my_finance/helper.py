@@ -17,7 +17,7 @@ sub_category_suggested_list = {
               "Spotify Subscription", "Netflix Spotify Subscription",
               "Amazon Prime Spotify Subscription"],
     "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
-    "Income": ["Salary", "Bonus"]
+    "Income": ["Job", "Business", "Bonus"]
 }
 
 
@@ -34,7 +34,7 @@ def create_categories(user):
                        "Funds": [],
                        "Food": ["Groceries", "Eating Out"],
                        "Personal Care": ["Electronic Items", "Clothes"],
-                       "Income": ["Salary", "Bonus"],
+                       "Income": ["Job", "Business", "Bonus"],
                        }
     for category, sub_category in categories_dict.items():
         category = Category.objects.create(user=user, name=category)
@@ -151,6 +151,7 @@ def start_end_date(date_value, period):
         return week_start, week_end
 
     return date_value, ""
+
 
 def get_period_date(start_date, period):
     if period == "Daily":
@@ -373,6 +374,8 @@ def check_budget_date():
         budget_created_date = budget.budget_start_date
         auto_budget = budget.auto_budget
         start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+        print("budget_period=======>", budget_period)
+        print("budget_name=======>", budget_name)
         budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
         if budget_period == 'Quarterly':
             for month_value in range(3):

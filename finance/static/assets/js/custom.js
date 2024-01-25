@@ -193,7 +193,7 @@ $('#expense_table').DataTable( {
         var csrftoken = getCookie('csrftoken');
         $.ajax({
             type: 'POST',
-            url:'/bill/automatic_amount',
+            url: "/en/bill/automatic_amount",
             data: {
             'bill_id': bill_id,
             'csrfmiddlewaretoken': csrftoken
@@ -231,7 +231,7 @@ $('#expense_table').DataTable( {
                   });
         $.ajax({
             type: 'POST',
-            url:'/category_add/',
+            url: "/en/category_add/",
             data: {
             'name': category_name,
             'csrfmiddlewaretoken': csrftoken
@@ -251,7 +251,7 @@ $('#expense_table').DataTable( {
         group_id = $("#id_categories").val()
         $.ajax({
             type: 'POST',
-            url: "/subcategory_suggestion",
+            url: "/en/subcategory_suggestion",
             data: {
             'category_pk': group_id,
             'csrfmiddlewaretoken': csrftoken
@@ -277,7 +277,7 @@ $('#expense_table').DataTable( {
         group_id = $("#category_group").val()
         $.ajax({
             type: 'POST',
-            url: "/subcategory_suggestion",
+            url: "/en/subcategory_suggestion",
             data: {
             'category_pk': group_id,
             'csrfmiddlewaretoken': csrftoken
@@ -293,6 +293,38 @@ $('#expense_table').DataTable( {
                 });
                 $("#sub_cat_add_btn").attr('url', '/subcategory_add/' + response.category_pk )
                 $(".sub_cat_sugg").append(sugg_html)
+            }
+        })
+    });
+
+    // show subcategory of the group
+    $("body").delegate(".show_sub_category", "change", function(e)
+    {
+        var csrftoken = getCookie('csrftoken');
+        group_name = $("#category_group").val()
+        $.ajax({
+            type: 'POST',
+            url: "/en/subcategory_list",
+            data: {
+            'category_group': group_name,
+            'csrfmiddlewaretoken': csrftoken
+            },
+            dataType: 'json',
+            success: function(response)
+            {
+                var cat_list = response.subcategories
+                $("#browsers").empty();
+                optionHtml = ""
+                for(let i=0; i < cat_list.length; i++)
+                {
+                    if(i == 0)
+                    {
+                        $("#sub_category_name").val(cat_list[i])
+                    }
+                    optionHtml += "<option value='" + cat_list[i] + "' data-id='" + i + "'>" + cat_list[i] + "</option>"
+                }
+                console.log(optionHtml)
+                $("#browsers").append(optionHtml);
             }
         })
     });
@@ -383,7 +415,7 @@ $('#expense_table').DataTable( {
         var csrftoken = getCookie('csrftoken');
         $.ajax({
             type: 'POST',
-            url: '/tag_add/',
+            url: "/en/tag_add/",
             data: {
             'name': tag_name,
             'csrfmiddlewaretoken': csrftoken
@@ -510,7 +542,7 @@ $("body").delegate(".save_split_cat_btn", "click", function(e)
         $.ajax
         ({
             type: 'POST',
-            url: "/transaction_split",
+            url: "/en/transaction_split",
             data: {
                     'original_amount': total_sum,
                     'category_list': JSON.stringify(cat_list),
@@ -788,7 +820,7 @@ $('#upload_transaction_form').submit(function()
         {
             type: 'post',
             enctype: 'multipart/form-data',
-            url: '/transaction_upload',
+            url: "/en/transaction_upload",
             data: data,
             processData: false,
             contentType: false,
@@ -846,7 +878,7 @@ $('.check_primary').on("click", function(e)
         $.ajax(
         {
             type: 'POST',
-            url: '/fund_overtime',
+            url: "/en/fund_overtime",
             data: {
                     'account_name': account_name,
                     'csrfmiddlewaretoken': csrfmiddlewaretoken
@@ -1142,7 +1174,7 @@ $("body").delegate(".add_property_liab", "click", function()
             {
                 data: form_data, // get the form data
                 type: 'POST', // GET or POST
-                url: '/liability_add/', // the file to call
+                url: "/en/liability_add/", // the file to call
                 success: function(response)
                 {
                     location.reload()
@@ -1682,7 +1714,7 @@ $('.select_property').on('change', function(e)
         var csrftoken = getCookie('csrftoken');
         $.ajax({
             type: 'POST',
-            url:'/property/property_info/',
+            url: "/en/property/property_info/",
             data: {
                     'property_name': property_name,
                     'csrfmiddlewaretoken': csrftoken
@@ -1798,7 +1830,7 @@ $("body").delegate(".delete_payment", "click", function(event)
     var payment_index = currentRow.find("td:eq(0)").text();
     var paid_amount = currentRow.find("td:eq(4)").text();
     var invoice_id = $("#invoice_id").val()
-    location_url = "/property/invoice/payment_delete/" + invoice_id + "/" + payment_index + "/" + paid_amount
+    location_url = "/en/property/invoice/payment_delete/" + invoice_id + "/" + payment_index + "/" + paid_amount
     location.assign(location_url)
 
 });
@@ -1978,7 +2010,7 @@ $("body").delegate(".pick_category", "change", function(event)
     var csrftoken = getCookie('csrftoken');
     $.ajax({
         type: 'POST',
-        url:'/subcategory_list',
+        url: "/en/subcategory_list",
         data: {
         'category_group': category_group,
         'csrfmiddlewaretoken': csrftoken
@@ -2012,7 +2044,7 @@ $("body").delegate(".show_due_bills", "change", function(event)
 //
 //        $.ajax({
 //            type: 'POST',
-//            url:'/income/uncredited_list',
+//            url: "/en/income/uncredited_list',
 //            data: {
 //            'sub_category': sub_category,
 //            'category_id': category_id,
@@ -2044,7 +2076,7 @@ $("body").delegate(".show_due_bills", "change", function(event)
     {
         $.ajax({
             type: 'POST',
-            url:'/bill/due_list',
+            url: "/en/bill/due_list",
             data: {
             'sub_category': sub_category,
             'category_id': category_id,
@@ -2129,7 +2161,7 @@ $("body").delegate(".check_budget_category", "change", function(event)
     var csrftoken = getCookie('csrftoken');
     $.ajax({
         type: 'POST',
-        url:'/subcategory_budget',
+        url: "/en/subcategory_budget",
         data: {
         'category': category_name,
         'name': sub_category_name,
@@ -2181,7 +2213,7 @@ $("body").delegate(".add_portfolio_to_networth", "click", function(event)
     portfolio_name = $(this).attr('portfolio_name')
     portfolio_id = $(this).attr('portfolio_id')
     portfolio_currency = $(this).attr('portfolio_currency')
-    var url = '/add_port_in_networth'
+    var url = '/en/add_port_in_networth'
     var csrfmiddlewaretoken = getCookie('csrftoken');
     $.ajax(
         {
@@ -2270,7 +2302,7 @@ $("body").delegate("#add_category_group", "change", function(event)
     $.ajax(
         {
             type: 'POST',
-            url: "/category_group_add/",
+            url: "/en/category_group_add/",
             data: {
                     'category_name': category_name,
                     'csrfmiddlewaretoken': csrfmiddlewaretoken
@@ -2358,7 +2390,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $('.pay_bill_amount').on("click", function(e)
     {
         var pay_id = $(this).attr('pay_id')
-        var url = '/bill_pay/' + pay_id
+        var url = '/en/bill_pay/' + pay_id
         var csrfmiddlewaretoken = getCookie('csrftoken');
         $.ajax(
         {

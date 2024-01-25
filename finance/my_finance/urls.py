@@ -42,6 +42,8 @@ urlpatterns = [
     path('budget_add/', BudgetAdd.as_view(), name='budget_add'),
     path('budget_update/<int:pk>', budget_update, name='budget_update'),
     path('budget_delete/<int:pk>', BudgetDelete.as_view(), name='budget_delete'),
+    path('budgets/income/walk_through', budgets_income_walk_through, name='budgets_income_walk_through'),
+    path('budgets/expenses/walk_through', budgets_expenses_walk_through, name='budgets_expenses_walk_through'),
 
     # Template Budget urls :-
 
