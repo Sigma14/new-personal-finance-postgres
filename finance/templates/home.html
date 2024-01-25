@@ -27,7 +27,7 @@
                         <div class="col-sm-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <p class="card-text"><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> {% trans "is an application to manage your personal finance. It can help you keep track of your expenses and income, so you can spend less and save more." %} </small><small class="see_more_summary" style="display:None; font-size:14px;"> {% trans "You can store, edit and remove withdrawals, deposits and transfers. This allows you full financial management. Using this you can manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages). It provides a facility to create, change and manage money using budgets. You can organize transactions using categories and also track your goals and bills." %} </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
+                                    <p class="card-text"><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> Welcome to your one-stop solution for all things money-related! Our app is designed to help you understand, manage, and grow your finances, all in a user-friendly way. Whether you're looking to get a quick snapshot of your financial health, plan your spending, keep track of bills, or even save for your future dreams, we've got you covered. </small><small class="see_more_summary" style="display:None; font-size:14px;">  The app is laid out in easy-to-navigate boxes—each taking you to a specific feature like your Dashboard, Budget, Bills, and more. To start, simply click on any of the boxes to dive into the page you need. It's financial management made simple and effective, tailored just for you.   </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
                                 </div>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
                                 <a href="{% url 'budgets' %}">{% trans 'BUDGET' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It shows you an overview of your budgets. It shows you to how many amount spent and left in budget. you can compare your budget period wise with pretty charts' %}</p>
+                                <p class="card-text">The Budget section is your financial planning assistant, offering a simple walkthrough to create, monitor, and compare multiple budgets. It allows you to not only set financial goals but also track your income and expenses to ensure you achieve them, making it an indispensable tool for financial health and discipline.</p>
                             </div>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                                 <a href="{% url 'bill_list' %}">{% trans 'BILLS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It provides a facility to add bills and shows all the bills with calender. Using calender you can easily filter which bill is paid or unpaid.' %}</p>
+                                <p class="card-text">Our Bills feature serves as a centralized ledger for all your fixed and variable expenses, from utilities to subscriptions. By providing a comprehensive view in both calendar and table formats, it helps you stay on top of due dates, ensuring you never miss a payment, while also suggesting opportunities to cut costs and save money.</p>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,8 @@
                                 <a href="{% url 'category_list' %}">{% trans 'CATEGORY' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It provides a facility to add category and shows all the category with spending amount. so its very easy to find out which category spent the most.' %}</p>
+                                <p class="card-text">The Category feature simplifies data organization by allowing you to classify budgets and transactions into various groups. By keeping your financial data neatly categorized, you'll find it easier to analyze spending patterns, identify opportunities for savings, and make better-informed decisions.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -105,7 +106,7 @@
                                 <a href="{% url 'account_box' %}">{% trans 'ACCOUNTS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It manage different types of accounts like Asset accounts, Saving accounts, Liabilities (loans, mortgages).It shows your current balance and all transactions data of account with charts. you can add, update and delete your account data.' %}</p>
+                                <p class="card-text">Our Accounts section lets you track multiple financial accounts, including checking, savings, cash, credit cards, loans, and investments, in one place. Having all this information consolidated enables the app to provide more accurate net worth and financial forecasting calculations, offering you a more complete picture of your financial health.</p>
                             </div>
                         </div>
                     </div>
@@ -120,7 +121,7 @@
                                 <a href="{% url 'transaction_list' %}">{% trans 'TRANSACTIONS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It manage transaction records. It provides facility to import transactions of your bank account and also import transaction files. you can export transaction data with date range. It shows all credit and debit transactions with charts.' %}</p>
+                                <p class="card-text">The Transactions feature is closely tied with your Budget section, enabling you to track individual expenses and incomes as they occur. By associating each transaction with a specific budget, you'll gain real-time insights into how well you're adhering to your financial goals, thereby allowing for timely adjustments.</p>
                             </div>
                         </div>
                     </div>
@@ -135,7 +136,7 @@
                                 <a href="{% url 'goal_list' %}">{% trans 'GOALS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It provides a facility to manage you goals and helps to achieving goals. you can add, update and delete goals and also see goals are completed or not with pretty charts.' %}</p>
+                                <p class="card-text">The Goals section allows you to specify and work toward long-term financial aspirations, like buying a home or going on a dream vacation. By setting and tracking these goals within the app, you can systematically save and allocate funds, making those seemingly daunting financial milestones more achievable.</p>
                             </div>
                         </div>
                     </div>
@@ -150,7 +151,7 @@
                                 <a href="{% url 'mortgagecalculator_list' %}">{% trans 'CALCULATORS' %}</a>
                             </div>
                             <div class="item-name">
-                                <p class="card-text">{% trans 'It has Mortgage calculator and Future net worth calculator. Mortgage calculator calculates your mortgage payments details according to interest periods. Future net worth calculator calculates a net worth projection of what your actual net worth in future over age and time will be.' %}</p>
+                                <p class="card-text">Our Calculators offer specialized tools like mortgage, net worth, and debt calculators to take the guesswork out of complex financial equations. Whether you're planning to buy a house or pay off loans, these calculators empower you with the knowledge you need to make smarter financial decisions.</p>
                             </div>
                         </div>
                     </div>
