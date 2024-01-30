@@ -36,7 +36,7 @@
                                 <div id="bill-list-one" style="padding-top:0px; padding-left:20px;" class="collapse" data-parent="#bill-list-qna">
                                     <div class="card-header">
                                         <ul class="nav nav-pills">
-                                            <li class="nav-item"> {% trans 'This page have bills & subscriptions calendar tab in which paid or unpaid bills are show with calendar date and all bills & subscriptions tab shows all the bills & subscriptions lists.' %} </li>
+                                            <li class="nav-item"> The 'Bills and Subscriptions' page is designed to manage all your recurring financial commitments in one place. This includes utilities, rent, mortgage, and any subscription services like streaming or gym memberships. By centralizing this information, the page helps you keep track of your regular outgoings, ensuring you never miss a payment and maintain control over your finances. </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -61,6 +61,18 @@
                     <div class="content-body">
                         <div class="row match-height">
                             <div class="col-8">
+                                <div class="card shadow-sm">
+                                    <div class="card-header" data-toggle="collapse" href="#calendarCollapse">
+                                        <a><i class="bg-light-info" data-feather="info"></i> Tab to Description </a>
+                                        <div class="card-toolbar">
+                                            <i class="fa fa-chevron-down pull-right"></i>
+                                        </div>
+                                    </div>
+                                    <div id="calendarCollapse" class="collapse">
+                                        <div class="card-body">
+                                            The calendar view offers a monthly overview of your bill schedule. It visually marks the days when each bill is due, providing a clear and immediate understanding of your upcoming payments. This feature is particularly helpful for visualizing your financial commitments throughout the month and planning your cash flow accordingly.                                        </div>
+                                    </div>
+                                </div>
                                 <div class="app-calendar overflow-hidden border">
                                     <div class="row no-gutters">
                                         <!-- Sidebar -->
@@ -97,8 +109,14 @@
                                     <div class="card" style="height:100%;">
                                         <div class="card-body">
                                             <ul class="nav nav-pills" role="tablist">
-                                                <li class="nav-item"> <a class="nav-link d-flex align-items-center active" id="calendar_bills_tab" data-toggle="tab" href="#calendar_bills_data" aria-controls="calendar_bills_data" role="tab" aria-selected="false"> <span class="d-none d-sm-block">Upcoming Bills</span> </a> </li>
-                                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" id="bills_tab" data-toggle="tab" href="#bills_data" aria-controls="bills_data" role="tab" aria-selected="false"> <span class="d-none d-sm-block">All Bills & Subscriptions</span> </a> </li>
+                                                <li class="nav-item"> <a class="nav-link d-flex align-items-center active" id="calendar_bills_tab" data-toggle="tab" href="#calendar_bills_data" aria-controls="calendar_bills_data" role="tab" aria-selected="false"
+                                                    title="The 'Upcoming Bills' table lists all bills that are due soon. This includes details such as the bill name, amount, and due date. It serves as a timely reminder, ensuring you're always prepared for upcoming payments and helping you avoid late fees or service disruptions."> 
+                                                    <span class="d-none d-sm-block">Upcoming Bills</span> </a> 
+                                                </li>
+                                                <li class="nav-item"> <a class="nav-link d-flex align-items-center" id="bills_tab" data-toggle="tab" href="#bills_data" aria-controls="bills_data" role="tab" aria-selected="false"
+                                                    title="This comprehensive table includes every bill and subscription you have. It provides a detailed record, including the frequency, amount, and associated account. By having a complete overview of all your regular expenses, you can better understand your financial obligations and make informed budgeting decisions."> 
+                                                    <span class="d-none d-sm-block">All Bills & Subscriptions</span> </a> 
+                                                </li>
                                             </ul>
                                             <div class="tab-content">
                                                 <div class="tab-pane active" id="calendar_bills_data" aria-labelledby="calendar_bills_tab" role="tabpanel">

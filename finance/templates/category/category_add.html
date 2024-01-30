@@ -41,10 +41,13 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="form-group row">
-                                            <div class="col-sm-3 col-form-label">
-                                                <label>Name</label>
+                                            <div class="col-sm-1 col-form-label">
+                                                <label>
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#NameInfo"></i> 
+                                                    Name
+                                                </label>
                                             </div>
-                                            <div class="col-sm-9">
+                                            <div class="col-sm-11">
                                                 <div class="input-group input-group-merge">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i data-feather="user"></i></span>
@@ -54,7 +57,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-9 offset-sm-3">
+                                    <div class="col-sm-6 offset-sm-1">
                                         <input type="submit" class="btn btn-primary mr-1" value="Save">
                                         <input type="submit" class="btn btn-primary mr-1" name="add_other" value="Save and add another">
                                         <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
@@ -69,7 +72,9 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title">Suggestions</h4>
+                                    <h4 class="card-title">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#SuggestionsInfo"></i> 
+                                        Suggestions</h4>
                                 </div>
                                 <br/>
                                 <div class="card-body">
@@ -86,7 +91,37 @@
                     </div>
                 </section>
             </div>
+             <!-- Model -->
+            <div class="modal fade" id="NameInfo" tabindex="-1" role="dialog" aria-labelledby="NameInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="NameInfoModel">Name Categories Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            This feature allows you to input the name of a new category you wish to create. Just type in the desired name in the blank space and hit 'Enter' to add it to your budget. This could be anything from 'Groceries' to 'Vacation Savings', giving you the power to track exactly what matters to you.                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <div class="modal fade" id="SuggestionsInfo" tabindex="-1" role="dialog" aria-labelledby="SuggestionsInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="SuggestionsInfoModel">Suggestions Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Next to each category name, there's a '+' sign, which enables you to create subcategories. This feature is incredibly useful for breaking down larger categories into more manageable parts. For example, under 'Entertainment', you might have subcategories like 'Movies', 'Concerts', or 'Books'. This granular approach provides a more detailed and accurate view of your spending habits.
+                        </div>
+                    </div>
+                </div>
+            </div> 
         </div>
     </div>
-
 {% endblock content%}

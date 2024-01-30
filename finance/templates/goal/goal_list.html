@@ -44,7 +44,7 @@
                                     <div class="card-header">
                                         <ul class="nav nav-pills">
                                             <li class="nav-item">
-                                                This page shows your goals and also shows goals are completed or not.
+                                                The 'Goals Page' is designed to motivate and assist users in saving for their personal goals. It enables users to create specific financial goals, like saving for a new phone, a vacation, or an emergency fund. The page combines visual tools and practical functionalities to make saving for these goals more engaging and attainable. Users can allocate funds, track their progress, and see their savings grow, all within a user-friendly and visually appealing interface.
                                             </li>
                                         </ul>
                                     </div>
@@ -62,41 +62,45 @@
                 <section id="ecommerce-products" class="list-view">
                     {% for object in goal_data %}
                     <div class="card ecommerce-card">
-                        <div class="item-img text-center">
-                            <a href="{% url 'goal_update' pk=object.id %}">
-                                <div class="card-body">
-                                    <h2 style="float: left;">{{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%)</h2>
-                                    <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
-                                </div>
-                                <br/>
-                                {% if object.allocate_amount >= object.goal_amount %}
-                                <div class="progress progress-bar-success" style="height:30px;">
-                                    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
-                                        {{ 100 }}%
-                                    </div>
-                                </div>
-                                {% else %}
-                                <div class="progress progress-bar-warning" style="height:30px;">
-                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
-                                        {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%
-                                    </div>
-                                </div>
-                                {% endif %}
-
-                                <div class="card-body" style="padding-bottom:40px;">
-                                    <h4 style="float: left;">Goal Date :- {{ object.goal_date }}</h4>
-                                    <h4>Account :- {{object.account}}</h4>
-                                    <h4 style="float: right;">
-                                        <div class="col-sm-40 offset-sm-20">
-                                            <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
-                                            data-feather="edit-2"></i>&nbsp;Edit</a>
-                                            <button type="button" del_method="Goals" delete_name="{{ object.label.name }} Goal" url="{% url 'goal_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
-                                            data-feather="trash"></i>&nbsp;Delete</button>
-
+                        <div class="card-header">
+                            <h2 style="float: left;">
+                                <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#GoalDescription"></i> 
+                                {{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%)
+                            </h2>
+                            <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="item-img text-center">
+                                <a href="{% url 'goal_update' pk=object.id %}">
+                                    {% if object.allocate_amount >= object.goal_amount %}
+                                    <div class="progress progress-bar-success" style="height:30px;">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
+                                            {{ 100 }}%
                                         </div>
-                                    </h4>
-                                </div>
-                            </a>
+                                    </div>
+                                    {% else %}
+                                    <div class="progress progress-bar-warning" style="height:30px;">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
+                                            {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="card-body" style="padding-bottom:40px;">
+                                        <h4 style="float: left;">Goal Date :- {{ object.goal_date }}</h4>
+                                        <h4>Account :- {{object.account}}</h4>
+                                        <h4 style="float: right;">
+                                            <div class="col-sm-40 offset-sm-20">
+                                                <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
+                                                data-feather="edit-2"></i>&nbsp;Edit</a>
+                                                <button type="button" del_method="Goals" delete_name="{{ object.label.name }} Goal" url="{% url 'goal_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
+                                                data-feather="trash"></i>&nbsp;Delete</button>
+
+                                            </div>
+                                        </h4>
+                                    </div>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -109,11 +113,14 @@
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
                                         <div class="col-sm-40 offset-sm-20">
+                                            <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundAddInfo"></i> 
                                             <a href="{% url 'fund_accounts' %}" class="btn btn-primary"><i
                                                     class="fa fa-plus"></i> Add Fund</a>
                                         </div>
-
-                                        <h4 class="card-title mb-25">Fund List</h4>
+                                        <h4 class="card-title mb-25">
+                                            <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundListInfo"></i> 
+                                            Fund List
+                                        </h4>
                                         <button class="btn btn-primary download_csv" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
@@ -213,6 +220,70 @@
                         </div>
                     </div>
                 </section>
+            </div>
+            <div class="modal fade" id="GoalDescription" tabindex="-1" role="dialog" aria-labelledby="GoalDescriptionModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="GoalDescriptionModel">Goal Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        As an example, let's consider the goal of saving for a new phone. On this page, you can set this as your goal, specify the amount needed, and start allocating funds towards it. The process is made simple and visually rewarding, with progress bars and graphs to show how close you are to achieving your goal.
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="modal fade" id="FundListInfo" tabindex="-1" role="dialog" aria-labelledby="FundListInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="FundListInfoModel">FundList Table Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <li>
+                                See Overtime Graph: This graph shows the growth of your savings over time, giving you a visual representation of your progress towards your goal.
+                            </li>
+                            <li>
+                                Account Name: Displays the name of the account where the funds are being saved.
+                            </li>
+                            <li>
+                                Current Balance: Indicates the total amount of money in the account.
+                            </li>
+                            <li>
+                                Freeze Amount: The amount of the current balance that is 'frozen' or set aside for goals. Freezing funds helps in disciplined saving by saving this amount specifically for your goal.
+                            </li>
+                            <li>
+                                Used Locked Funds: This shows the funds that have already been allocated towards a goal.
+                            </li>
+                            <li>
+                                Available Funds: These are the frozen funds that have not yet been allocated towards a goal and are available for allocation. This figure helps you understand how much more you can commit to your current goals.
+                            </li>
+                        </ul>  
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="modal fade" id="FundAddInfo" tabindex="-1" role="dialog" aria-labelledby="FundAddInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="FundAddInfoModel">Add Funds Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        The '+ Add Fund' feature allows users to select an account and then freeze a portion of the funds in that account to allocate towards a goal. This function is crucial for users who have multiple savings accounts or who want to allocate funds from different sources for various goals. By freezing funds, users can methodically plan and track their savings, ensuring they are constantly moving towards their financial objectives.
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
     </div>

@@ -5,7 +5,7 @@
 <body>
 
 {% extends "index.html" %}
-{% load static %}
+{% load static i18n%}
 {% block content %}
     <!-- BEGIN: Content-->
     <div class="app-content content ecommerce-application">
@@ -33,6 +33,30 @@
                 </div>
             </div>
             <div class="content-body">
+                <!-- BEGIN: Info card-->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="compate-qna">
+                            <div class="card">
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#compate-one" aria-expanded="false" aria-controls="compate-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Compate Budget PageInfo</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id="compate-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#compate-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                This page is designed to help you compare two different budgets in a straightforward way. It's perfect for seeing how your current budget measures up against a future budget goal. By comparing, you can identify what changes are needed in your spending or saving habits to achieve your financial targets.                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--END: Info card-->
                 <section id="stocks_grid_view" class="grid-view">
                     <div class="card ecommerce-card">
                         <div class="card-body">

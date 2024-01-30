@@ -156,6 +156,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TagsInfo"></i> 
                                         <label for="transaction_tags">Tags</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -169,6 +170,7 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#NotesInfo"></i> 
                                         <label for="fname-icon">Notes</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -263,4 +265,35 @@
             </div>
         </div>
     </div>
+    <!--Model-->
+    <div class="modal fade" id="TagsInfo" tabindex="-1" role="dialog" aria-labelledby="TagsInfoModel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="TagsInfoModel">Tags Description</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                Tags help you categorize transactions in a way that makes sense for your personal finance management. You can tag transactions by type, purpose, or any other system that helps you stay organized.
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="modal fade" id="NotesInfo" tabindex="-1" role="dialog" aria-labelledby="NotesInfoModel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="NotesInfoModel">Notes Description</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                The notes section is a space to add additional information about the transaction. This could include details like the context of the expenditure, reminders about recurring payments, or any other relevant information that aids in your financial tracking and analysis.
+            </div>
+          </div>
+        </div>
+    </div>    
 {% endblock content %}

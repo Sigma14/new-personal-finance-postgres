@@ -788,7 +788,7 @@ $('#upload_transaction_form').submit(function()
         {
             type: 'post',
             enctype: 'multipart/form-data',
-            url: '/transaction_upload',
+            url: '/en/transaction_upload',
             data: data,
             processData: false,
             contentType: false,
