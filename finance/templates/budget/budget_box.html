@@ -30,8 +30,38 @@
                 </div>
             </div>
             <div class="content-body">
-                 <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
-                                            class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
+                <!-- BEGIN: Info card-->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="collapse-margin collapse-icon mt-2" id="Budgets-qna">
+                                <div class="card">
+                                    <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#Budgets-one" aria-expanded="false" aria-controls="Budgets-one">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Budgets PageInfo</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div id="Budgets-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#Budgets-qna">
+                                        <div class="card-header">
+                                            <ul class="nav nav-pills">
+                                                <li class="nav-item">
+                                                    Ready to take control of your finances? Click the '+ Create Budget' button to start building a personalized budget plan. This intuitive tool guides you through setting up categories, allocating funds, and tracking your progress towards financial stability and goals. Whether you're planning for a big purchase or simply aiming to reduce debt, creating a budget is your first step towards financial empowerment.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="padding-top:20px;" >
+                        <div class="col">
+                            <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
+                                                class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
+                        </div>
+                    </div>
+                <!--END: Info card-->
                 <section id="stocks_grid_view" class="grid-view">
                     <div class="card ecommerce-card">
                         <div class="card-body">

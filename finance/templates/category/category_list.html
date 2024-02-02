@@ -44,7 +44,7 @@
                                     <div class="card-header">
                                         <ul class="nav nav-pills">
                                             <li class="nav-item">
-                                                This page shows you all categories list and also shows how many amount spent on particular category using bar graph.
+                                                The 'Category Page' in our app is designed to help you organize your finances more efficiently. Here, you can create, view, and manage various categories and subcategories tailored to your spending and income patterns. This organization helps in better tracking, understanding, and managing your finances, allowing for a more personalized and effective budgeting experience.
                                             </li>
                                         </ul>
                                     </div>
@@ -55,8 +55,9 @@
                 </div>
                 <br/>
                 <div class="col-sm-40 offset-sm-20">
+                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#AddCategory"></i> 
                     <a href="{% url 'category_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Category Group</a>
+                        class="fa fa-plus"></i> Add Category Group</a>
                 </div>
                 <br/>
                 <section id="dashboard-ecommrc">
@@ -160,7 +161,10 @@
                         <div class="col-xl-12 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <h5>Category Groups Expenses</h5>
+                                    <h5>
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CategoryGraph"></i> 
+                                        Category Groups Expenses
+                                    </h5>
                                     <div id="column-chart"></div>
                                 </div>
                             </div>
@@ -168,6 +172,37 @@
                     </div>
                 </section>
             </div>
+             <!-- Model -->
+            <div class="modal fade" id="AddCategory" tabindex="-1" role="dialog" aria-labelledby="AddCategoryModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="AddCategoryModel">AddCategory Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            The '+ Add Category' button is a simple yet powerful tool for customizing your budget. By clicking this button, you can create new categories that reflect your unique financial situation and goals. Whether it's for a specific savings project, a new expense type, or an income source, this feature provides the flexibility to tailor your budget to your life.
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+            <div class="modal fade" id="CategoryGraph" tabindex="-1" role="dialog" aria-labelledby="CategoryGraphModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="CategoryGraphModel">CategoryGraph Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            The 'Category Group Expenses Graph' is an essential feature for visualizing your spending across different categories. This graph dynamically represents your expenses in each category, such as 'Housing', 'Food', 'Transportation', and 'Entertainment', among others. The visual format makes it easy to see at a glance where most of your money is going.
+                        </div>
+                    </div>
+                </div> 
+            </div> 
         </div>
     </div>
 {% endblock content%}

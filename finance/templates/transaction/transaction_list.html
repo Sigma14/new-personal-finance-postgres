@@ -7,77 +7,97 @@
 {% block content %}
 <!-- BEGIN: Content-->
 <div class="app-content content ">
-<div class="content-overlay"></div>
-<div class="header-navbar-shadow"></div>
-<div class="content-wrapper">
-    <div class="content-header row">
-        <div class="content-header-left col-md-9 col-12 mb-2">
-            <div class="row breadcrumbs-top">
-                <div class="col-12">
-                    <h2 class="content-header-title float-left mb-0">Transactions</h2>
-                    <div class="breadcrumb-wrapper">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
-                            </li>
-                            <li class="breadcrumb-item">Transactions
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="content-body" float="left">
-        <section>
-            <div class="row match-height">
-                <div class="col-12">
-                    <div class="card card-congratulation-medal">
-                        <div class="card-body">
-                            <div class="col-sm-40 offset-sm-20">
-                                <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
-                                    class="fa fa-plus"></i> Add Transaction</a>
-                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#plaid_accounts">
-                                Add Account Transactions
-                                </button>
-                            </div>
-                            <br/>
-                            <p>{{message}}</p>
-                            <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
-                            <form id="upload_transaction_form">
-                                {% csrf_token %}
-                                <div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label for="images" class="drop-container" id="dropcontainer">
-                                                <span class="drop-title">Drop transaction files here</span>
-                                                or
-                                                <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-left mb-0">Transactions</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                </li>
+                                <li class="breadcrumb-item">Transactions
+                                </li>
+                            </ol>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-        <section>
-            <div class="row match-height">
-                <div class="col-12">
-                    <div class="card card-congratulation-medal">
+        </div>
+        <div class="content-body" float="left">
+            <section>
+                <div class="row match-height">
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header" data-toggle="collapse" href="#TransactionPageInfo">
+                                <a><i class="bg-light-info" data-feather="info"></i> Transaction PageInfo </a>
+                                <div class="card-toolbar">
+                                    <i class="fa fa-chevron-down pull-right"></i>
+                                </div>
+                            </div>
+                            <div id="TransactionPageInfo" class="collapse">
                                 <div class="card-body">
-                                    <h4 class="card-title text-center mb-25">TRANSACTIONS LIST</h4> <hr>
-                                    <form action="{% url 'transaction_report' %}" id="date_filter_form">
+                                    The Transaction page is a central feature of our app, designed to help you keep track of all your financial transactions. Whether you prefer automated syncing with your bank account, bulk uploads, or manual entry, this page accommodates various methods to ensure all your transactions are accurately captured and organized for easy management and review.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card card-congratulation-medal">
+                            <div class="card-body">
+                                <div class="col-sm-40 offset-sm-20">
+                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#add_transaction_account"></i> 
+                                    <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
+                                        class="fa fa-plus"></i> Add Transaction</a>
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#transaction_account"></i> 
+                                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#plaid_accounts">
+                                            Add Account Transactions
+                                        </button>
+                                </div>
+                                <br/>
+                                <p>{{message}}</p>
+                                <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
+                                <form id="upload_transaction_form">
+                                    {% csrf_token %}
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="images" class="drop-container" id="dropcontainer">
+                                                    <span class="drop-title">Drop transaction files here</span>
+                                                    or
+                                                    <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#uploadInfo"></i> 
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <div class="row match-height">
+                    <div class="col-12">
+                        <div class="card card-congratulation-medal">
+                            <div class="card-body">
+                                <h4 class="card-title text-center mb-25">
+                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTabel"></i>                                     
+                                    TRANSACTIONS LIST
+                                </h4>
+                                <hr>
+                                <form action="{% url 'transaction_report' %}" id="date_filter_form">
                                     {% csrf_token %}
                                     <!-- users edit account form start -->
                                     <div class="row">
@@ -101,48 +121,48 @@
                                         <div class="col-md-3" >
                                             <div class="basic-modal" >
                                                 {% if start_date %}
-                                                    <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">
-                                                        <input type="hidden" name="start_date" value="{{start_date}}">
-                                                        <input type="hidden" name="end_date" value="{{end_date}}">
-                                                {% else %}
-                                                <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">
-                                                {% endif %}
-                                                    {% csrf_token %}
-                                                <input type="hidden" name="tags_data" value="{{tags_data}}">
-                                                <label>Filter By Tags</label>
-                                                <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags">
-                                                    {% for name in tags_data %}
-                                                    {% if select_filter == name %}
-                                                        <option selected>{{name}}</option>
-                                                    {% else %}
-                                                        <option>{{name}}</option>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                                {% if start_date %}
-                                                </form>
-                                                {% else %}
-                                                </form>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2" >
-                                            <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
-                                            <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
-                                            <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data_dumbs}}" credit_value="{{credit_graph_data_dumbs}}">
-                                        </div>  
-                                    </div>
-                                    <div class="card-datatable table-responsive">
-                                            <table class="dt-row-grouping table" id="transactions">
-                                            <thead>
+                                <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">
+                                <input type="hidden" name="start_date" value="{{start_date}}">
+                                <input type="hidden" name="end_date" value="{{end_date}}">
+                                {% else %}
+                                <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">
+                                {% endif %}
+                                {% csrf_token %}
+                                <input type="hidden" name="tags_data" value="{{tags_data}}">
+                                <label>Filter By Tags</label>
+                                <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags">
+                                {% for name in tags_data %}
+                                {% if select_filter == name %}
+                                <option selected>{{name}}</option>
+                                {% else %}
+                                <option>{{name}}</option>
+                                {% endif %}
+                                {% endfor %}
+                                </select>
+                                {% if start_date %}
+                                </form>
+                                {% else %}
+                                </form>
+                                {% endif %}
+                                </div>
+                                </div>
+                                <div class="col-md-2" >
+                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data_dumbs}}" credit_value="{{credit_graph_data_dumbs}}">
+                                </div>  
+                                </div>
+                                <div class="card-datatable table-responsive">
+                                    <table class="dt-row-grouping table" id="transactions">
+                                        <thead>
                                             <tr>
                                                 {% for name in transaction_key %}
                                                 <th>{{name}}</th>
                                                 {% endfor %}
                                                 <th>Actions</th>
                                             </tr>
-                                            </thead>
-                                            <tbody>
+                                        </thead>
+                                        <tbody>
                                             {% for data in transaction_data %}
                                             <tr>
                                                 <td>
@@ -186,7 +206,7 @@
                                                     </div>
                                                 </td>
                                                 {% else %}
-                                                 <td>
+                                                <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">-</span>
                                                     </div>
@@ -205,40 +225,40 @@
                                                     </div>
                                                 </td>
                                                 {% endif %}
-<!--                                                {% if data.cleared == True %}-->
-<!--                                                    <td>-->
-<!--                                                        <div class="d-flex align-items-center">-->
-<!--                                                        <span class="font-weight-bolder text-success mr-1">-->
-<!--                                                            <input type="hidden" value="True" class="cleared{{forloop.counter}}">-->
-<!--                                                            <i class="fa fa-check" aria-hidden="true"></i>-->
-<!--                                                        </span>-->
-<!--                                                        </div>-->
-<!--                                                    </td>-->
-<!--                                                    {% else %}-->
-<!--                                                    <td>-->
-<!--                                                        <div class="d-flex align-items-center">-->
-<!--                                                        <span class="font-weight-bolder text-danger mr-1">-->
-<!--                                                            <input type="hidden" value="False" class="cleared{{forloop.counter}}">-->
-<!--                                                            <i class="fa fa-times" aria-hidden="true"></i>-->
-<!--                                                        </span>-->
-<!--                                                        </div>-->
-<!--                                                    </td>-->
-<!--                                                    {% endif %}-->
+                                                <!--                                                {% if data.cleared == True %}-->
+                                                <!--                                                    <td>-->
+                                                <!--                                                        <div class="d-flex align-items-center">-->
+                                                <!--                                                        <span class="font-weight-bolder text-success mr-1">-->
+                                                <!--                                                            <input type="hidden" value="True" class="cleared{{forloop.counter}}">-->
+                                                <!--                                                            <i class="fa fa-check" aria-hidden="true"></i>-->
+                                                <!--                                                        </span>-->
+                                                <!--                                                        </div>-->
+                                                <!--                                                    </td>-->
+                                                <!--                                                    {% else %}-->
+                                                <!--                                                    <td>-->
+                                                <!--                                                        <div class="d-flex align-items-center">-->
+                                                <!--                                                        <span class="font-weight-bolder text-danger mr-1">-->
+                                                <!--                                                            <input type="hidden" value="False" class="cleared{{forloop.counter}}">-->
+                                                <!--                                                            <i class="fa fa-times" aria-hidden="true"></i>-->
+                                                <!--                                                        </span>-->
+                                                <!--                                                        </div>-->
+                                                <!--                                                    </td>-->
+                                                <!--                                                    {% endif %}-->
                                                 <td style="width:15%">
                                                     <div class="d-flex align-items-center">
                                                         <span class="font-weight-bolder mr-1">
                                                             <ul class="list-inline m-0">
                                                                 <li class="list-inline-item">
                                                                     <a href="{% url 'transaction_update' pk=data.id %}"
-                                                                       class="btn btn-success btn-sm rounded-0" type="button"
-                                                                       data-toggle="tooltip" data-placement="top" title="Edit"><i
-                                                                            class="fa fa-edit"></i></a>
+                                                                        class="btn btn-success btn-sm rounded-0" type="button"
+                                                                        data-toggle="tooltip" data-placement="top" title="Edit"><i
+                                                                        class="fa fa-edit"></i></a>
                                                                 </li>
                                                                 <li class="list-inline-item">
                                                                     <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"
-                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                            class="fa fa-trash"></i></button>
+                                                                        class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                        data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                        class="fa fa-trash"></i></button>
                                                                 </li>
                                                             </ul>
                                                         </span>
@@ -246,350 +266,442 @@
                                                 </td>
                                             </tr>
                                             {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section id="dashboard-ecommrc">
-                    <div class="row match-height">
-                        <div class="col-12">
-                            <div class="card card-congratulation-medal">
-                                <div class="card-body">
-                                    <div class="card-header border-bottom">
-                                        <h4 class="card-title mb-25">Transactions</h4>
-                                    </div>
-                                    <br/>
-                                    <br/>
-                                    <div class="col-12">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div id="transaction-chart"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Line Chart Ends -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                    <!-- PORTFOLIO -->
-        <div class="modal fade text-left" id="plaid_accounts" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <form class="form form-vertical" action="{% url 'get-transactions' %}" id="import-transaction-form" method="post">
-        {% csrf_token %}
-        <div class="modal-header">
-        <h4 class="modal-title" id="myModalLabel1">Import Transactions </h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-        </button>
-        </div>
-        <div class="modal-body">
-        <!-- Basic Vertical form layout section start -->
-        <section id="basic-vertical-layouts" >
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <h5>From Date</h5>
-                                        <input type="text" id="start_date" name="start_date" class="form-control flatpickr-basic" required data-validation-required-message="This field is required">
-                                    </div>
-                                    <div class="form-group">
-                                        <h5>To Date</h5>
-                                        <input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" required data-validation-required-message="This field is required">
-                                    </div>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </section>
+            <section id="dashboard-ecommrc">
+                <div class="row match-height">
+                    <div class="col-12">
+                        <div class="card card-congratulation-medal">
+                            <div class="card-body">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionGraph"></i> 
+                                        Transactions
+                                    </h4>
+                                </div>
+                                <br/>
+                                <br/>
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div id="transaction-chart"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Line Chart Ends -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- PORTFOLIO -->
+            <div class="modal fade text-left" id="plaid_accounts" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form class="form form-vertical" action="{% url 'get-transactions' %}" id="import-transaction-form" method="post">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel1">Import Transactions </h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Basic Vertical form layout section start -->
+                                <section id="basic-vertical-layouts" >
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <div class="form-group">
+                                                                <h5>From Date</h5>
+                                                                <input type="text" id="start_date" name="start_date" class="form-control flatpickr-basic" required data-validation-required-message="This field is required">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <h5>To Date</h5>
+                                                                <input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" required data-validation-required-message="This field is required">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <!-- Basic Vertical form layout section end -->
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary get_transaction_btn">Add</button>
+                                <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </section>
-        <!-- Basic Vertical form layout section end -->
+            <!-- PORTFOLIO -->
+            <!--				<section class="app-user-edit">-->
+            <!--					<div class="card">-->
+            <!--						<div class="card-body">-->
+            <!--							<ul class="nav nav-pills" role="tablist">-->
+            <!--								<li class="nav-item">-->
+            <!--									<a class="nav-link d-flex align-items-center active" id="manually_tab" data-toggle="tab" href="#manually_data" aria-controls="manually_data" role="tab" aria-selected="false">-->
+            <!--										<span class="d-none d-sm-block">Manually Transactions</span>-->
+            <!--									</a>-->
+            <!--								</li>-->
+            <!--								<li class="nav-item">-->
+            <!--									<a class="nav-link d-flex align-items-center" id="import_tab" data-toggle="tab" href="#import_data" aria-controls="import_data" role="tab" aria-selected="false">-->
+            <!--										<span class="d-none d-sm-block">Import Transactions</span>-->
+            <!--									</a>-->
+            <!--								</li>-->
+            <!--                            </ul>-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                </section>-->
+            <!--                <div class="tab-content">-->
+            <!--                    <div class="tab-pane active" id="manually_data" aria-labelledby="manually_tab" role="tabpanel">-->
+            <!--                        <section>-->
+            <!--                            <div class="row match-height">-->
+            <!--                                <div class="col-12">-->
+            <!--                                    <div class="card card-congratulation-medal">-->
+            <!--                                        <div class="card-body">-->
+            <!--                                            <div class="col-sm-40 offset-sm-20">-->
+            <!--                                                <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i-->
+            <!--                                                        class="fa fa-plus"></i> Add Transaction</a>-->
+            <!--                                            </div>-->
+            <!--                                            <br/>-->
+            <!--                                            <form action="{% url 'transaction_upload' %}" id="upload_transaction_form" method="post" enctype="multipart/form-data">-->
+            <!--                                                {% csrf_token %}-->
+            <!--                                            <div class="form-validate">-->
+            <!--                                                <div class="row">-->
+            <!--                                                    <div class="col-md-2">-->
+            <!--                                                        <div class="form-group">-->
+            <!--                                                            <label>Transaction File</label>-->
+            <!--                                                            <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>-->
+            <!--                                                        </div>-->
+            <!--                                                    </div>-->
+            <!--                                                    <div class="col-md-2">-->
+            <!--                                                        <div class="form-group">-->
+            <!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect analyse_tab">Upload</button>-->
+            <!--                                                        </div>-->
+            <!--                                                    </div>-->
+            <!--                                                </div>-->
+            <!--                                            </div>-->
+            <!--                                            </form>-->
+            <!--                                            <p>{{message}}</p>-->
+            <!--                                            <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>-->
+            <!--                                        </div>-->
+            <!--                                    </div>-->
+            <!--                                </div>-->
+            <!--                            </div>-->
+            <!--                        </section>-->
+            <!--                        <section>-->
+            <!--                            <div class="row match-height">-->
+            <!--                                <div class="col-12">-->
+            <!--                                    <div class="card card-congratulation-medal">-->
+            <!--                                        <div class="card-body">-->
+            <!--                                            <form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">-->
+            <!--                                                {% csrf_token %}-->
+            <!--                                            &lt;!&ndash; users edit account form start &ndash;&gt;-->
+            <!--                                            <div class="form-validate">-->
+            <!--                                                <div class="row">-->
+            <!--                                                    <div class="col-md-3">-->
+            <!--                                                        <div class="form-group">-->
+            <!--                                                            <label for="start_date">From</label>-->
+            <!--                                                            <input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD">-->
+            <!--                                                        </div>-->
+            <!--                                                    </div>-->
+            <!--                                                    <div class="col-md-3">-->
+            <!--                                                        <div class="form-group">-->
+            <!--                                                            <label for="end_date">To</label>-->
+            <!--                                                            <input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" >-->
+            <!--                                                        </div>-->
+            <!--                                                    </div>-->
+            <!--                                                    <div class="col-md-3">-->
+            <!--                                                        <div class="form-group">-->
+            <!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>-->
+            <!--                                                        </div>-->
+            <!--                                                    </div>-->
+            <!--                                                </div>-->
+            <!--                                            </div>-->
+            <!--                                            </form>-->
+            <!--                                            <div class="download_csv_form"></div>-->
+            <!--                                            <div class="download_pdf_form"></div>-->
+            <!--                                            <div class="card-header border-bottom">-->
+            <!--                                                <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>-->
+            <!--                                                <div class="basic-modal">-->
+            <!--                                                    {% if start_date %}-->
+            <!--                                                        <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">-->
+            <!--                                                            <input type="hidden" name="start_date" value="{{start_date}}">-->
+            <!--                                                            <input type="hidden" name="end_date" value="{{end_date}}">-->
+            <!--                                                    {% else %}-->
+            <!--                                                    <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">-->
+            <!--                                                    {% endif %}-->
+            <!--                                                        {% csrf_token %}-->
+            <!--                                                    <input type="hidden" name="tags_data" value="{{tags_data}}">-->
+            <!--                                                    <label>Filter By Tags</label>-->
+            <!--                                                    <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags" style="width:200px">-->
+            <!--                                                        {% for name in tags_data %}-->
+            <!--                                                        {% if select_filter == name %}-->
+            <!--                                                            <option selected>{{name}}</option>-->
+            <!--                                                        {% else %}-->
+            <!--                                                            <option>{{name}}</option>-->
+            <!--                                                        {% endif %}-->
+            <!--                                                        {% endfor %}-->
+            <!--                                                    </select>-->
+            <!--                                                    </form>-->
+            <!--                                                </div>-->
+            <!--                                                <div float="right">-->
+            <!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>-->
+            <!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>-->
+            <!--                                                <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data}}" credit_value="{{credit_graph_data}}">-->
+            <!--                                                </div>-->
+            <!--                                            </div>-->
+            <!--                                            <div class="card-datatable table-responsive">-->
+            <!--                                                    <table class="dt-row-grouping table" id="transactions">-->
+            <!--                                                    <thead>-->
+            <!--                                                    <tr>-->
+            <!--                                                        {% for name in transaction_key %}-->
+            <!--                                                        <th>{{name}}</th>-->
+            <!--                                                        {% endfor %}-->
+            <!--                                                        <th>Actions</th>-->
+            <!--                                                    </tr>-->
+            <!--                                                    </thead>-->
+            <!--                                                    <tbody>-->
+            <!--                                                    {% for data in transaction_data %}-->
+            <!--                                                    <tr>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                {% if data.out_flow %}-->
+            <!--                                                                <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>-->
+            <!--                                                                {% else %}-->
+            <!--                                                                <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>-->
+            <!--                                                                {% endif %}-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.payee}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.account.name}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.categories}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        {% if data.bill.label %}-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        {% else %}-->
+            <!--                                                         <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        {% endif %}-->
+            <!--                                                        {% if data.budgets.name %}-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        {% else %}-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                        {% endif %}-->
+            <!--                                                        {% if data.cleared == True %}-->
+            <!--                                                            <td>-->
+            <!--                                                                <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder text-success mr-1">-->
+            <!--                                                                    <input type="hidden" value="True" class="cleared{{forloop.counter}}">-->
+            <!--                                                                    <i class="fa fa-check" aria-hidden="true"></i>-->
+            <!--                                                                </span>-->
+            <!--                                                                </div>-->
+            <!--                                                            </td>-->
+            <!--                                                            {% else %}-->
+            <!--                                                            <td>-->
+            <!--                                                                <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder text-danger mr-1">-->
+            <!--                                                                    <input type="hidden" value="False" class="cleared{{forloop.counter}}">-->
+            <!--                                                                    <i class="fa fa-times" aria-hidden="true"></i>-->
+            <!--                                                                </span>-->
+            <!--                                                                </div>-->
+            <!--                                                            </td>-->
+            <!--                                                            {% endif %}-->
+            <!--                                                        <td>-->
+            <!--                                                            <div class="d-flex align-items-center">-->
+            <!--                                                                <span class="font-weight-bolder mr-1">-->
+            <!--                                                                    <ul class="list-inline m-0">-->
+            <!--                                                                        <li class="list-inline-item">-->
+            <!--                                                                            <a href="{% url 'transaction_update' pk=data.id %}"-->
+            <!--                                                                               class="btn btn-success btn-sm rounded-0" type="button"-->
+            <!--                                                                               data-toggle="tooltip" data-placement="top" title="Edit"><i-->
+            <!--                                                                                    class="fa fa-edit"></i></a>-->
+            <!--                                                                        </li>-->
+            <!--                                                                        <li class="list-inline-item">-->
+            <!--                                                                            <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"-->
+            <!--                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"-->
+            <!--                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i-->
+            <!--                                                                                    class="fa fa-trash"></i></button>-->
+            <!--                                                                        </li>-->
+            <!--                                                                    </ul>-->
+            <!--                                                                </span>-->
+            <!--                                                            </div>-->
+            <!--                                                        </td>-->
+            <!--                                                    </tr>-->
+            <!--                                                    {% endfor %}-->
+            <!--                                                    </tbody>-->
+            <!--                                                </table>-->
+            <!--                                            </div>-->
+            <!--                                        </div>-->
+            <!--                                    </div>-->
+            <!--                                </div>-->
+            <!--                            </div>-->
+            <!--                        </section>-->
+            <!--                        <section id="dashboard-ecommrc">-->
+            <!--                            <div class="row match-height">-->
+            <!--                                <div class="col-12">-->
+            <!--                                    <div class="card card-congratulation-medal">-->
+            <!--                                        <div class="card-body">-->
+            <!--                                            <div class="card-header border-bottom">-->
+            <!--                                                <h4 class="card-title mb-25">Transactions</h4>-->
+            <!--                                            </div>-->
+            <!--                                            <br/>-->
+            <!--                                            <br/>-->
+            <!--                                            <div class="col-12">-->
+            <!--                                                <div class="card">-->
+            <!--                                                    <div class="card-body">-->
+            <!--                                                        <div id="transaction-chart"></div>-->
+            <!--                                                    </div>-->
+            <!--                                                </div>-->
+            <!--                                            </div>-->
+            <!--                                            &lt;!&ndash; Line Chart Ends &ndash;&gt;-->
+            <!--                                        </div>-->
+            <!--                                    </div>-->
+            <!--                                </div>-->
+            <!--                            </div>-->
+            <!--                        </section>-->
+            <!--                    </div>-->
+            <!--                    <div class="tab-pane" id="import_data" aria-labelledby="import_tab" role="tabpanel">-->
+            <!--                    </div>-->
+            <!--                </div>-->
         </div>
-        <div class="modal-footer">
-        <button class="btn btn-primary get_transaction_btn">Add</button>
-        <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+        <!-- Model -->
+        <div class="modal fade" id="transaction_account" tabindex="-1" role="dialog" aria-labelledby="transaction_accountModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="transaction_accountModel">Account Transaction Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    This feature allows you to seamlessly sync your account with your bank using Plaid's secure API. With Plaid, you can automatically download your transaction information while ensuring your financial data is protected. Learn more about Plaid's security and functionality here: What is Plaid?
+                </div>
+            </div>
+          </div>
+        </div>   
+        <div class="modal fade" id="uploadInfo" tabindex="-1" role="dialog" aria-labelledby="uploadInfoModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="uploadInfoModel">Upload button Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  The 'Upload' option enables users to upload a bulk list of transactions using our provided format. This is particularly useful for those who prefer a manual approach or have a large number of transactions to record at once, streamlining the process while maintaining accuracy.
+                </div>
+              </div>
+            </div>
         </div>
-        </form>
+        <div class="modal fade" id="add_transaction_account" tabindex="-1" role="dialog" aria-labelledby="add_transaction_accountModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="add_transaction_accountModel">Add_transaction_Account Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    The '+ Add Transaction' feature allows for manual entry of individual transactions. This is ideal for users who prefer a hands-on approach or need to enter transactions not captured through automatic sync or bulk upload. The process is straightforward: simply click the button, fill in the transaction details like amount, date, category, and any relevant tags or notes, and save. This feature ensures even the smallest transactions are accounted for in your financial tracking.
+                </div>
+              </div>
+            </div>
         </div>
+        <div class="modal fade" id="TransactionTabel" tabindex="-1" role="dialog" aria-labelledby="TransactionTabelModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="TransactionTabelModel">Transaction Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            The 'Transaction List Table' is a comprehensive display of all your financial transactions. It's where you can view, sort, and analyze your spending and income. Key features of this table include:
+                        </li>
+                        <li class="list-group-item">
+                            Date Range Selection: Select specific date ranges to focus on certain periods. This tool is invaluable for tracking your spending habits over time or reviewing transactions for a particular month or week.
+                        </li>
+                        <li class="list-group-item">
+                            Report Button: Once you've chosen a date range, use the 'Report' button to refresh the table with transactions from that period. This ensures you're always analyzing the most current and relevant data.
+                        </li>
+                        <li class="list-group-item">
+                            Filter by Tags: This functionality allows you to filter transactions based on the tags you've assigned. Whether you're looking for all transactions tagged as 'Groceries' or 'Utilities,' this feature makes it simple to find exactly what you're looking for.
+                        </li>
+                    </ul>
+                </div>
+              </div>
+            </div>
         </div>
-        </div>
-        <!-- PORTFOLIO -->
-        <!--				<section class="app-user-edit">-->
-        <!--					<div class="card">-->
-        <!--						<div class="card-body">-->
-        <!--							<ul class="nav nav-pills" role="tablist">-->
-        <!--								<li class="nav-item">-->
-        <!--									<a class="nav-link d-flex align-items-center active" id="manually_tab" data-toggle="tab" href="#manually_data" aria-controls="manually_data" role="tab" aria-selected="false">-->
-        <!--										<span class="d-none d-sm-block">Manually Transactions</span>-->
-        <!--									</a>-->
-        <!--								</li>-->
-        <!--								<li class="nav-item">-->
-        <!--									<a class="nav-link d-flex align-items-center" id="import_tab" data-toggle="tab" href="#import_data" aria-controls="import_data" role="tab" aria-selected="false">-->
-        <!--										<span class="d-none d-sm-block">Import Transactions</span>-->
-        <!--									</a>-->
-        <!--								</li>-->
-        <!--                            </ul>-->
-        <!--                        </div>-->
-        <!--                    </div>-->
-        <!--                </section>-->
-        <!--                <div class="tab-content">-->
-        <!--                    <div class="tab-pane active" id="manually_data" aria-labelledby="manually_tab" role="tabpanel">-->
-        <!--                        <section>-->
-        <!--                            <div class="row match-height">-->
-        <!--                                <div class="col-12">-->
-        <!--                                    <div class="card card-congratulation-medal">-->
-        <!--                                        <div class="card-body">-->
-        <!--                                            <div class="col-sm-40 offset-sm-20">-->
-        <!--                                                <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i-->
-        <!--                                                        class="fa fa-plus"></i> Add Transaction</a>-->
-        <!--                                            </div>-->
-        <!--                                            <br/>-->
-        <!--                                            <form action="{% url 'transaction_upload' %}" id="upload_transaction_form" method="post" enctype="multipart/form-data">-->
-        <!--                                                {% csrf_token %}-->
-        <!--                                            <div class="form-validate">-->
-        <!--                                                <div class="row">-->
-        <!--                                                    <div class="col-md-2">-->
-        <!--                                                        <div class="form-group">-->
-        <!--                                                            <label>Transaction File</label>-->
-        <!--                                                            <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>-->
-        <!--                                                        </div>-->
-        <!--                                                    </div>-->
-        <!--                                                    <div class="col-md-2">-->
-        <!--                                                        <div class="form-group">-->
-        <!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect analyse_tab">Upload</button>-->
-        <!--                                                        </div>-->
-        <!--                                                    </div>-->
-        <!--                                                </div>-->
-        <!--                                            </div>-->
-        <!--                                            </form>-->
-        <!--                                            <p>{{message}}</p>-->
-        <!--                                            <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>-->
-        <!--                                        </div>-->
-        <!--                                    </div>-->
-        <!--                                </div>-->
-        <!--                            </div>-->
-        <!--                        </section>-->
-        <!--                        <section>-->
-        <!--                            <div class="row match-height">-->
-        <!--                                <div class="col-12">-->
-        <!--                                    <div class="card card-congratulation-medal">-->
-        <!--                                        <div class="card-body">-->
-        <!--                                            <form action="{% url 'transaction_report' %}" id="jquery-val-form" method="get" target="">-->
-        <!--                                                {% csrf_token %}-->
-        <!--                                            &lt;!&ndash; users edit account form start &ndash;&gt;-->
-        <!--                                            <div class="form-validate">-->
-        <!--                                                <div class="row">-->
-        <!--                                                    <div class="col-md-3">-->
-        <!--                                                        <div class="form-group">-->
-        <!--                                                            <label for="start_date">From</label>-->
-        <!--                                                            <input type="text" name="start_date" id="start_date" class="form-control flatpickr-basic" value="{{start_date}}" placeholder="YYYY-MM-DD">-->
-        <!--                                                        </div>-->
-        <!--                                                    </div>-->
-        <!--                                                    <div class="col-md-3">-->
-        <!--                                                        <div class="form-group">-->
-        <!--                                                            <label for="end_date">To</label>-->
-        <!--                                                            <input type="text" id="end_date" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" >-->
-        <!--                                                        </div>-->
-        <!--                                                    </div>-->
-        <!--                                                    <div class="col-md-3">-->
-        <!--                                                        <div class="form-group">-->
-        <!--                                                            <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>-->
-        <!--                                                        </div>-->
-        <!--                                                    </div>-->
-        <!--                                                </div>-->
-        <!--                                            </div>-->
-        <!--                                            </form>-->
-        <!--                                            <div class="download_csv_form"></div>-->
-        <!--                                            <div class="download_pdf_form"></div>-->
-        <!--                                            <div class="card-header border-bottom">-->
-        <!--                                                <h4 class="card-title mb-25">TRANSACTIONS LIST</h4>-->
-        <!--                                                <div class="basic-modal">-->
-        <!--                                                    {% if start_date %}-->
-        <!--                                                        <form action="{% url 'transaction_report' %}" method="post" id="filter_tags_form">-->
-        <!--                                                            <input type="hidden" name="start_date" value="{{start_date}}">-->
-        <!--                                                            <input type="hidden" name="end_date" value="{{end_date}}">-->
-        <!--                                                    {% else %}-->
-        <!--                                                    <form action="{% url 'transaction_list' %}" method="post" id="filter_tags_form">-->
-        <!--                                                    {% endif %}-->
-        <!--                                                        {% csrf_token %}-->
-        <!--                                                    <input type="hidden" name="tags_data" value="{{tags_data}}">-->
-        <!--                                                    <label>Filter By Tags</label>-->
-        <!--                                                    <select class="form-control" onchange="document.getElementById('filter_tags_form').submit();" name="tag_name" id="filter_tags" style="width:200px">-->
-        <!--                                                        {% for name in tags_data %}-->
-        <!--                                                        {% if select_filter == name %}-->
-        <!--                                                            <option selected>{{name}}</option>-->
-        <!--                                                        {% else %}-->
-        <!--                                                            <option>{{name}}</option>-->
-        <!--                                                        {% endif %}-->
-        <!--                                                        {% endfor %}-->
-        <!--                                                    </select>-->
-        <!--                                                    </form>-->
-        <!--                                                </div>-->
-        <!--                                                <div float="right">-->
-        <!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>-->
-        <!--                                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>-->
-        <!--                                                <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data}}" credit_value="{{credit_graph_data}}">-->
-        <!--                                                </div>-->
-        <!--                                            </div>-->
-        <!--                                            <div class="card-datatable table-responsive">-->
-        <!--                                                    <table class="dt-row-grouping table" id="transactions">-->
-        <!--                                                    <thead>-->
-        <!--                                                    <tr>-->
-        <!--                                                        {% for name in transaction_key %}-->
-        <!--                                                        <th>{{name}}</th>-->
-        <!--                                                        {% endfor %}-->
-        <!--                                                        <th>Actions</th>-->
-        <!--                                                    </tr>-->
-        <!--                                                    </thead>-->
-        <!--                                                    <tbody>-->
-        <!--                                                    {% for data in transaction_data %}-->
-        <!--                                                    <tr>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.transaction_date}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                {% if data.out_flow %}-->
-        <!--                                                                <span class="font-weight-bolder text-danger mr-1">-{{data.account.currency}}{{data.amount}}</span>-->
-        <!--                                                                {% else %}-->
-        <!--                                                                <span class="font-weight-bolder text-success mr-1">+{{data.account.currency}}{{data.amount}}</span>-->
-        <!--                                                                {% endif %}-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.payee}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.account.name}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.categories}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        {% if data.bill.label %}-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.bill.label}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        {% else %}-->
-        <!--                                                         <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        {% endif %}-->
-        <!--                                                        {% if data.budgets.name %}-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">{{data.budgets.name}}</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        {% else %}-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">-</span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                        {% endif %}-->
-        <!--                                                        {% if data.cleared == True %}-->
-        <!--                                                            <td>-->
-        <!--                                                                <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder text-success mr-1">-->
-        <!--                                                                    <input type="hidden" value="True" class="cleared{{forloop.counter}}">-->
-        <!--                                                                    <i class="fa fa-check" aria-hidden="true"></i>-->
-        <!--                                                                </span>-->
-        <!--                                                                </div>-->
-        <!--                                                            </td>-->
-        <!--                                                            {% else %}-->
-        <!--                                                            <td>-->
-        <!--                                                                <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder text-danger mr-1">-->
-        <!--                                                                    <input type="hidden" value="False" class="cleared{{forloop.counter}}">-->
-        <!--                                                                    <i class="fa fa-times" aria-hidden="true"></i>-->
-        <!--                                                                </span>-->
-        <!--                                                                </div>-->
-        <!--                                                            </td>-->
-        <!--                                                            {% endif %}-->
-        <!--                                                        <td>-->
-        <!--                                                            <div class="d-flex align-items-center">-->
-        <!--                                                                <span class="font-weight-bolder mr-1">-->
-        <!--                                                                    <ul class="list-inline m-0">-->
-        <!--                                                                        <li class="list-inline-item">-->
-        <!--                                                                            <a href="{% url 'transaction_update' pk=data.id %}"-->
-        <!--                                                                               class="btn btn-success btn-sm rounded-0" type="button"-->
-        <!--                                                                               data-toggle="tooltip" data-placement="top" title="Edit"><i-->
-        <!--                                                                                    class="fa fa-edit"></i></a>-->
-        <!--                                                                        </li>-->
-        <!--                                                                        <li class="list-inline-item">-->
-        <!--                                                                            <button type="button" delete_name="{{ data.payee }} Transaction" url="{% url 'transaction_delete' pk=data.id %}"-->
-        <!--                                                                               class="btn btn-danger btn-sm rounded-0 delete_button"-->
-        <!--                                                                               data-toggle="tooltip" data-placement="top" title="Delete"><i-->
-        <!--                                                                                    class="fa fa-trash"></i></button>-->
-        <!--                                                                        </li>-->
-        <!--                                                                    </ul>-->
-        <!--                                                                </span>-->
-        <!--                                                            </div>-->
-        <!--                                                        </td>-->
-        <!--                                                    </tr>-->
-        <!--                                                    {% endfor %}-->
-        <!--                                                    </tbody>-->
-        <!--                                                </table>-->
-        <!--                                            </div>-->
-        <!--                                        </div>-->
-        <!--                                    </div>-->
-        <!--                                </div>-->
-        <!--                            </div>-->
-        <!--                        </section>-->
-        <!--                        <section id="dashboard-ecommrc">-->
-        <!--                            <div class="row match-height">-->
-        <!--                                <div class="col-12">-->
-        <!--                                    <div class="card card-congratulation-medal">-->
-        <!--                                        <div class="card-body">-->
-        <!--                                            <div class="card-header border-bottom">-->
-        <!--                                                <h4 class="card-title mb-25">Transactions</h4>-->
-        <!--                                            </div>-->
-        <!--                                            <br/>-->
-        <!--                                            <br/>-->
-        <!--                                            <div class="col-12">-->
-        <!--                                                <div class="card">-->
-        <!--                                                    <div class="card-body">-->
-        <!--                                                        <div id="transaction-chart"></div>-->
-        <!--                                                    </div>-->
-        <!--                                                </div>-->
-        <!--                                            </div>-->
-        <!--                                            &lt;!&ndash; Line Chart Ends &ndash;&gt;-->
-        <!--                                        </div>-->
-        <!--                                    </div>-->
-        <!--                                </div>-->
-        <!--                            </div>-->
-        <!--                        </section>-->
-        <!--                    </div>-->
-        <!--                    <div class="tab-pane" id="import_data" aria-labelledby="import_tab" role="tabpanel">-->
-        <!--                    </div>-->
-        <!--                </div>-->
+        <div class="modal fade" id="TransactionGraph" tabindex="-1" role="dialog" aria-labelledby="TransactionGraphModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="TransactionGraphModel">Transaction Graph Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    The 'Transaction Graph' displays two bar graphs for each day, representing the total amount of debit and credit transactions. This visual differentiation between incomes (credit) and expenditures (debit) provides an immediate understanding of your daily financial flow, making it easier to identify spending trends and manage your finances more effectively.
+                </div>
+              </div>
+            </div>
         </div>
     </div>
 </div>

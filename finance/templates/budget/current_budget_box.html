@@ -62,7 +62,10 @@
                                     <thead>
                                         <tr class="show_bdgt_exp" method_name="expenses_income_cls">
                                             <th>
-                                                <h5><b>{{ _('Income')}}</b></h5>
+                                                <h5>
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#incomeModel"></i>
+                                                    <b>{{ _('Income')}}</b>
+                                                </h5>
                                             </th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -204,7 +207,10 @@
                                         {% endfor %}
                                         <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
                                             <th>
-                                                <h5><b>{{ _('Expenses')}}</b></h5>
+                                                <h5>
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#ExpensesModel"></i>
+                                                    <b>{{ _('Expenses')}}</b>
+                                                </h5>
                                             </th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -361,7 +367,10 @@
                                         {% endfor %}
                                         <tr>
                                             <th>
-                                                <h5><b>Leftover cash</b></h5>
+                                                <h5>
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#LeftoverModel"></i>
+                                                    <b>Leftover cash</b>
+                                                </h5>
                                             </th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -383,7 +392,10 @@
                                         </tr>
                                         <tr class="show_transaction" method_name="transactions_cls">
                                             <th>
-                                                <h5><b>Transactions</b></h5>
+                                                <h5>
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionsModel"></i>
+                                                    <b>Transactions</b>
+                                                </h5>
                                             </th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -523,7 +535,10 @@
                     <div class="col-xl-6 col-md-12 col-12">
                         <div class="card card-congratulation-medal">
                             <div class="card-body">
-                                <h5>{{current_month}} Cash Flow</h5>
+                                <h5>
+                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CashFlowModel"></i>
+                                    {{current_month}} Cash Flow
+                                </h5>
                                 <div id="cash_flow_bar"></div>
                             </div>
                         </div>
@@ -532,7 +547,10 @@
                         <div class="card">
                             <div class="card-body">
                                 <span>
-                                    <b>{{current_month}} {{ _('Spending Categories')}}</b>
+                                    <b>
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#SpendingModel"></i>
+                                        {{current_month}} {{ _('Spending Categories')}}
+                                    </b>
                                     <ul class="nav nav-pills" style="float:right" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
@@ -573,5 +591,97 @@
         </section>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="incomeModel" tabindex="-1" role="dialog" aria-labelledby="incomeModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="incomeModelLabel">Income Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The 'Income Section' is where you'll enter all your sources of income, including salaries, bonuses, and any other earnings. This comprehensive view allows you to understand your total monthly or annual income, providing the foundation for effective budget planning. It's designed to accommodate various income streams, ensuring a realistic financial overview.
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="ExpensesModel" tabindex="-1" role="dialog" aria-labelledby="ExpensesModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ExpensesModelLabel">Expenses Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    In the 'Expenses' section, you can track all your outgoing payments, such as rent, utilities, groceries, and leisure activities. This detailed categorization helps you identify areas where you might be overspending and opportunities for savings. By keeping an accurate record of your expenses, you'll gain insights into your spending habits, empowering you to make smarter financial decisions.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="LeftoverModel" tabindex="-1" role="dialog" aria-labelledby="LeftoverModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="LeftoverModelLabel">Leftover Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The 'Leftover Cash' area shows the balance of your income minus your expenses. This figure is crucial for understanding your financial health – it indicates whether you're living within your means or overspending. This section helps in planning for savings, investments, or debt repayment, and encourages responsible financial behavior.
+                </div>            
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="TransactionsModel" tabindex="-1" role="dialog" aria-labelledby="TransactionsModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="TransactionsModelLabel">Transactions Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The 'Transaction Tables' provide a detailed ledger of all your financial activities. Each transaction is logged with information like date, amount, and category, giving you a clear and organized view of your financial history. This tool is essential for tracking and analyzing your spending patterns over time.
+                </div>            
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="CashFlowModel" tabindex="-1" role="dialog" aria-labelledby="CashFlowModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CashFlowModelLabel">CashFlow Graph Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The 'Cash Flow Graph' visually represents your income (earned) and expenses (spent) over a selected period. This graphical representation makes it easier to understand the dynamics of your cash flow, highlighting periods of high spending or income. It's a powerful tool for visual learners and anyone looking to get a quick snapshot of their financial status.            </div>            
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="SpendingModel" tabindex="-1" role="dialog" aria-labelledby="SpendingModelLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="SpendingModelLabel">Spending Graph Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The 'Spending Category' section offers a visual analysis of your expenses, breaking them down into different categories like food, entertainment, bills, etc. This feature helps you easily identify which areas of your life are consuming the most resources, allowing for targeted budget adjustments. The visual breakdown simplifies complex financial data, making it more approachable and understandable.
+                </div>
+            </div>
+        </div>  
+    </div>
+    
 </div>
 {% endblock content%}

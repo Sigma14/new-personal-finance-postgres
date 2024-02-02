@@ -27,6 +27,30 @@
                 </div>
             </div>
             <div class="content-body" float="left">
+                <!-- BEGIN: Info card-->
+                <div class="row" style="padding-bottom:20px;">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="TargetBudgets-qna">
+                            <div class="card">
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#TargetBudgets-one" aria-expanded="false" aria-controls="TargetBudgets-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Compare Target Budgets PageInfo</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id="TargetBudgets-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#TargetBudgets-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                This page helps you compare a chosen budget and its categories against your actual spending for selected months. By doing this, you can identify where you've managed to save money or overspent. This comparison is key to learning how to fine-tune your budget for better financial management.
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--END: Info card-->
 				<section id="current-bgt">
                     <div class="row match-height">
                         <div class="col-xl-12 col-md-12 col-12">
@@ -38,7 +62,10 @@
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label>Target Budget</label>
+                                                    <label>
+                                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TargetBudget"></i> 
+                                                        Target Budget
+                                                    </label>
                                                     <select class="select2 form-control" name="budget1_name" multiple required>
                                                         {% for name in budgets %}
                                                         {% if name in budget1_names %}
@@ -52,7 +79,10 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label>Select Month</label>
+                                                    <label>
+                                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#SelectMonth"></i> 
+                                                        Select Month
+                                                    </label>
                                                     <select class="form-control" name="select_period" required>
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
@@ -82,7 +112,10 @@
                         <div class="col-xl-6 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title mb-25">Transactions For Target Budgets</h4>
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionsForTargetBudgets"></i> 
+                                        Transactions For Target Budgets
+                                    </h4>
                                 </div>
                                 <div class="card-body" style="padding:0px;">
                                         <div class="card-datatable table-responsive">
@@ -147,7 +180,7 @@
                         <div class="col-xl-6 col-md-12 col-12">
                             <section class="app-user-edit">
                                 <div class="card">
-                                    <div class="card-body">
+                                    <div class="card-header">
                                         <ul class="nav nav-pills" role="tablist">
                                             <li class="nav-item">
                                                 <a class="nav-link d-flex align-items-center active" id="expense_diff_tab" data-toggle="tab" href="#expense_diff_data" aria-controls="expense_diff_data" role="tab" aria-selected="false">
@@ -161,6 +194,7 @@
                                             </li>
                                         </ul>
                                     </div>
+                                </div>
                                     <div class="tab-content" style="background-color:#161D31;">
                                         <div class="tab-pane active" id="expense_diff_data" aria-labelledby="expense_diff_tab" role="tabpanel">
                                             <section>
@@ -168,7 +202,10 @@
                                                     <div class="col-xl-12 col-md-12 col-12">
                                                         <div class="card">
                                                         <div class="card-body">
-                                                            <span><strong style="font-size:17px;">Expenses For Target Budget</strong>
+                                                            <span><strong style="font-size:17px;">
+                                                                <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#ExpensesForTargetBudget"></i> 
+                                                                Expenses For Target Budget
+                                                            </strong>
                                                                 <ul class="nav nav-pills" style="float:right" role="tablist">
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
@@ -214,7 +251,11 @@
                                                     <div class="col-xl-12 col-md-12 col-12">
                                                         <div class="card">
                                                         <div class="card-body">
-                                                            <span><strong style="font-size:17px;">Incomes For Target Budget</strong>
+                                                            <span>
+                                                                <strong style="font-size:17px;">
+                                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#IncomesForTargetBudget"></i> 
+                                                                    Incomes For Target Budget
+                                                                </strong>
                                                                 <ul class="nav nav-pills" style="float:right" role="tablist">
                                                                 <li class="nav-item">
                                                                     <a class="nav-link d-flex align-items-center active" id="income_pie_tab" data-toggle="tab" href="#income_pie_data" aria-controls="income_pie_data" role="tab" aria-selected="false">
@@ -255,12 +296,85 @@
                                             </section>
                                         </div>
                                     </div>
-                                </div>
                             </section>
                         </div>
                     </div>
                 </section>
             </div>
+            <div class="modal fade" id="TargetBudget" tabindex="-1" role="dialog" aria-labelledby="TargetBudgetModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="TargetBudgetModel">Traget Budget Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        Select the budget you want to compare. This is useful for focusing your analysis on a specific budget plan, like your monthly or yearly budget.                  </div>
+                </div>
+              </div>
+            </div>  
+            <div class="modal fade" id="SelectMonth" tabindex="-1" role="dialog" aria-labelledby="SelectModelModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="SelectModelModel">Month Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Pick which month's spending you want to compare with your budget. This lets you track how your spending habits change over time or see how well you stick to your budget in different months.                
+                        </div>
+                    </div>
+                </div>
+            </div>  
+            <div class="modal fade" id="TransactionsForTargetBudgets" tabindex="-1" role="dialog" aria-labelledby="TransactionsForTargetBudgetsModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="TransactionsForTargetBudgetsModel">TransactionsForTarget Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Pick which month's spending you want to compare with your budget. This lets you track how your spending habits change over time or see how well you stick to your budget in different months.                
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <div class="modal fade" id="IncomesForTargetBudget" tabindex="-1" role="dialog" aria-labelledby="IncomesForTargetBudgetModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="IncomesForTargetBudgetModel">Income For Traget Budget Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Provides a side-by-side view of your targeted spending versus actual spending in each category. It's a visual way to easily spot where you're over or under your planned budget. 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="ExpensesForTargetBudget" tabindex="-1" role="dialog" aria-labelledby="ExpensesForTargetBudgetModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ExpensesForTargetBudgetModel">Income For Traget Budget Description</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            See how your expected income for the month stacks up against your actual income. This visual comparison is useful for understanding income fluctuations and their impact on your budgeting.
+                        </div>
+                    </div>
+                </div>
+            </div>     
         </div>
     </div>
 {% endblock content%}

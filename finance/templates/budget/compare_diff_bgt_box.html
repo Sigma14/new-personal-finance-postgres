@@ -38,7 +38,7 @@
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label>Budget 1</label>
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget 1</label>
                                                     <select class="select2 form-control" name="budget1_name" multiple required>
                                                         {% for name in budgets %}
                                                         {% if name in budget1_names %}
@@ -52,7 +52,7 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label>Budget 2</label>
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget 2</label>
                                                     <select class="select2 form-control" name="budget2_name" multiple required>
                                                         {% for name in budgets %}
                                                         {% if name in budget2_names %}
@@ -66,7 +66,7 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label>Select Month</label>
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#MonthSelect"></i> Select Month</label>
                                                     <select class="form-control" name="select_period" required>
                                                         {% for month in list_of_months %}
                                                             {% if month == current_month %}
@@ -96,7 +96,10 @@
                         <div class="col-xl-6 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title mb-25">Transactions For Budget 1</h4>
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTable"></i> 
+                                        Transactions For Budget 1
+                                    </h4>
                                 </div>
                                 <div class="card-body" style="padding:0px;">
                                         <div class="card-datatable table-responsive">
@@ -161,7 +164,10 @@
                         <div class="col-xl-6 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-header border-bottom">
-                                    <h4 class="card-title mb-25">Transactions For Budget 2</h4>
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTable"></i> 
+                                        Transactions For Budget 2
+                                    </h4>
                                 </div>
                                 <div class="card-body" style="padding:0px;">
                                         <div class="card-datatable table-responsive">
@@ -251,9 +257,51 @@
                 </section>
                 <section class="app-user-edit">
                     <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="expense_diff_tab" data-toggle="tab" href="#expense_diff_data" aria-controls="expense_diff_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Expense Comparison</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="income_diff_tab" data-toggle="tab" href="#income_diff_data" aria-controls="income_diff_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Income Comparison</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <section class="app-user-edit">
+                    <div class="card">
                         <div class="tab-content" style="background-color:#161D31;">
                             <div class="tab-pane active" id="expense_diff_data" aria-labelledby="expense_diff_tab" role="tabpanel">
                                 <section>
+                                    <!-- BEGIN: Info card-->
+                                    <div class="row" style="padding-bottom:20px;">
+                                        <div class="col-12">
+                                            <div class="collapse-margin collapse-icon mt-2" id="Expense-qna">
+                                                <div class="card">
+                                                    <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#Expense-one" aria-expanded="false" aria-controls="Expense-one">
+                                                        <ul class="nav nav-pills">
+                                                            <li class="nav-item">
+                                                                <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Expense Comparison PageInfo</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div id="Expense-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#Expense-qna">
+                                                        <div class="card-header">
+                                                            <ul class="nav nav-pills">
+                                                                <li class="nav-item">
+                                                                This provides a visual breakdown of your expenses in both budgets. You can switch between pie charts for a percentage view or bar graphs for a direct comparison. This visual aid helps in quickly understanding how your spending differs between the two budgets.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--END: Info card-->
                                     <div class="row match-height">
                                         <div class="col-xl-6 col-md-12 col-12">
                                             <div class="card">
@@ -340,6 +388,29 @@
                             </div>
                             <div class="tab-pane" id="income_diff_data" aria-labelledby="income_diff_tab" role="tabpanel">
                                 <section>
+                                    <!-- BEGIN: Info card-->
+                                    <div class="row" style="padding-bottom:20px;">
+                                        <div class="col-12">
+                                            <div class="collapse-margin collapse-icon mt-2" id="income-qna">
+                                                <div class="card">
+                                                    <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#income-one" aria-expanded="false" aria-controls="income-one">
+                                                        <ul class="nav nav-pills">
+                                                            <li class="nav-item">
+                                                                <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Income Comparison PageInfo</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div id="income-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#income-qna">
+                                                        <div class="card-header">
+                                                            <ul class="nav nav-pills">
+                                                                <li class="nav-item">
+                                                                    This section shows how your income sources stack up in each budget. Whether it's your salary, freelance income, or any other earnings, the pie or bar graphs make it easy to see where your money comes from in each scenario.                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--END: Info card-->
                                     <div class="row match-height">
                                         <div class="col-xl-6 col-md-12 col-12">
                                             <div class="card">
@@ -428,6 +499,70 @@
                     </div>
                 </section>
             </div>
+            <!-- Models-->
+            <div class="modal fade" id="CompareModel" tabindex="-1" role="dialog" aria-labelledby="CompareModelTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="CompareModelTitle">Budget Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        Here, you select which parts of each budget you want to compare. For example, you might choose to compare your spending on groceries or entertainment from one budget to another. This feature helps focus on areas most relevant to your financial planning.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="MonthSelect" tabindex="-1" role="dialog" aria-labelledby="MonthSelectModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="MonthSelectModel">Months Selection Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        Choose a specific month to compare the budgets. This is useful for understanding how your spending habits change month-to-month, or for comparing the same month across different years.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="TransactionTable" tabindex="-1" role="dialog" aria-labelledby="TransactionTableModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="TransactionTableModel">TransactionTable Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        These tables give a detailed view of your income and expenses for each budget. They break down your spending into categories, making it easy to compare where your money is going in each budget.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="ExpenseComparison" tabindex="-1" role="dialog" aria-labelledby="ExpenseComparisonModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="ExpenseComparisonModel">Expenses For Budget 1 Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        This provides a visual breakdown of your expenses in both budgets. You can switch between pie charts for a percentage view or bar graphs for a direct comparison. This visual aid helps in quickly understanding how your spending differs between the two budgets.                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>            
         </div>
     </div>
 {% endblock content%}
