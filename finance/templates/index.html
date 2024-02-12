@@ -99,15 +99,15 @@
                     </ul>
                 </div>
                 <ul class="nav navbar-nav bookmark-icons nav-pills" style="height: 15px;">
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'home' %} active {% endif %}" style="height:25px;" href="{% url 'home' %}" data-placement="top">Home</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'category_list' %} active {% endif %}" style="height:25px;" href="{% url 'category_list' %}" data-placement="top">Category</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'account_box' %} active{% endif %}" style="height:25px;" href="{% url 'account_box' %}" data-placement="top">Accounts</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'bill_list' %} active {% endif %}" style="height:25px;" href="{% url 'bill_list' %}" data-placement="top">Bill List</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'budgets' %} active {% endif %}" style="height:25px;" href="{% url 'budgets' %}" data-placement="top">Budgets</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'goal_add' %} active {% endif %}" style="height:25px;" href="{% url 'goal_list' %}" data-placement="top">Goals</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'transaction_list' %} active {% endif %}" style="height:25px;" href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link " style="height:25px;" href="" data-placement="top">Real Estate</a></li>
-                    <li class="nav-item d-none d-lg-block" style="padding: 2px 7px;"> <a class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}" style="height:25px;" href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'home' %} active {% endif %}"  href="{% url 'home' %}" data-placement="top">Home</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'category_list' %} active {% endif %}"  href="{% url 'category_list' %}" data-placement="top">Category</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'account_box' %} active{% endif %}"  href="{% url 'account_box' %}" data-placement="top">Accounts</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'bill_list' %} active {% endif %}"  href="{% url 'bill_list' %}" data-placement="top">Bill List</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'budgets' %} active {% endif %}"  href="{% url 'budgets' %}" data-placement="top">Budgets</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'goal_add' %} active {% endif %}"  href="{% url 'goal_list' %}" data-placement="top">Goals</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'transaction_list' %} active {% endif %}"  href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'real_estate_home' %} active {% endif %}"   href="{% url 'real_estate_home'%}" data-placement="top">Real Estate</a></li>
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}"  href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
                 </ul>
                 <ul class="nav navbar-nav align-items-center ml-auto">
                     {% if user.is_authenticated %}

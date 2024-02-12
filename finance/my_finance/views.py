@@ -90,6 +90,8 @@ client = plaid_api.PlaidApi(api_client)
 
 from django.utils.translation import gettext as _
 
+wordpress_domain = "https://simplefinancial.org"
+wordpress_api_key = "F4ARzxSFjQpZxqjt5jiJn7HlXqMu23Y"
 
 
 @ensure_csrf_cookie
@@ -1105,7 +1107,8 @@ def home(request):
 # Real Estate Home Page
 def real_estate_home(request):
     print("real_estate")
-    return render(request, "real_estate_home.html")
+    context = {"page":"real_estate_home"}
+    return render(request, "real_estate_home.html", context)
 
 
 @login_required(login_url="/login")
@@ -1501,6 +1504,12 @@ class CategoryDetail(LoginRequiredMixin, DetailView):
     model = Category
     template_name = 'category/category_detail.html'
 
+    def get_context_data(self, **kwargs):
+        data = super(CategoryDetail, self).get_context_data(**kwargs)
+        data['page'] = "category_list"
+        return data
+
+
 
 class CategoryAdd(LoginRequiredMixin, CreateView):
     model = Category
@@ -1809,31 +1818,98 @@ def user_login(request):
     if request.method == "POST":
         username = request.POST['register-username']
         user_password = request.POST['register-password']
-        user = authenticate(username=username, password=user_password)
-        if user:
-            login(request, user)
-            category = Category.objects.filter(user=request.user)
-            suggest_category = SuggestiveCategory.objects.filter()
-            if not category:
-                create_categories(request.user)
-            if not suggest_category:
-                create_category_group()
+        check_jwt_authentication = False
+        check_user_membership = False
+        try:
+            user = authenticate(username=username, password=user_password)
+            if user.is_superuser:
+                login(request, user)
+                try:
+                    redirect_url = request.POST['redirect_url']
+                    return redirect(redirect_url)
+                except:
+                    return render(request, "home.html", context=context)
+
+        except Exception as e:
+            print("admin check===>", e)
+            pass
+
+        # Create User JWT Token
+        token_url = f"{wordpress_domain}/wp-json/api/v1/token"
+        token_data = {"username": username, "password": user_password}
+        token_response = requests.post(token_url, json=token_data)
+        if token_response.status_code == 200:
+            token_response = token_response.json()
+            if 'jwt_token' in token_response:
+                jwt_token = token_response['jwt_token']
+                check_jwt_authentication = True
+
+        if check_jwt_authentication:
             try:
-                redirect_url = request.POST['redirect_url']
-                return redirect(redirect_url)
-            except:
-                return redirect("/")
-        else:
-            context['login_error'] = 'Username and Password Incorrect'
+                # Get user info
+                user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
+                headers = {"Authorization": f"Bearer {jwt_token}"}
+                user_info_response = requests.get(user_info_url, headers=headers)
+                user_info = user_info_response.json()
+                user_id = user_info['id']
+                print("user_info===============>", user_info)
+
+                # get user plan
+                plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
+                plan_response = requests.get(plan_url).json()['response']
+                user_plan_id = list(plan_response.keys())[0]
+                print("user_plan_id=========>", user_plan_id)
+
+                # Verify User Membership
+                verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
+                verify_user_response = requests.get(verify_user_url)
+                if verify_user_response.status_code == 200:
+                    verify_user_data = verify_user_response.json()
+                    if verify_user_data['response'] == 1:
+                        check_user_membership = True
+            except Exception as e:
+                print("user membership exception===========>", e)
+                check_user_membership = False
+        
+        if not check_user_membership:
+            context['login_error'] = "you don't have membership subscription"
             return render(request, "login_page.html", context=context)
+
+        if check_jwt_authentication and check_user_membership:
+            try:
+                user = User.objects.get(id=user_id)
+                user.set_password(user_password)
+                user.save()
+            except:
+                user = User()
+                user.id = user_id
+                user.username = username
+                user.email = ''
+                user.first_name = user_info['name']
+                user.is_active = True
+                user.set_password(user_password)
+                user.save()
+
+            user = authenticate(username=username, password=user_password)
+            if user:
+                login(request, user)
+                try:
+                    redirect_url = request.POST['redirect_url']
+                    return redirect(redirect_url)
+                except:
+                    return render(request, "home.html", context=context)
+
+        context['login_error'] = 'Username and Password Incorrect'
+        return render(request, "login_page.html", context=context)
 
     else:
         try:
             context['redirect_url'] = request.GET['next']
-        except:
+        except Exception as e:
+            print ("Error: ", e)
             pass
 
-        return render(request, "login_page.html", context=context)
+        return render(request, "login_page.html")
 
 
 @login_required(login_url="/login")
@@ -5651,6 +5727,7 @@ def others_costs_data(other_closing_cost):
 @login_required(login_url="/login")
 def rental_property_add(request):
     if request.method == 'POST':
+        print("method called")
         try:
             property_image = request.FILES['file']
         except:

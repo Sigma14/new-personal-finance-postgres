@@ -1,9 +1,18 @@
-'''
-    context_processor.py made for set configuration for Google Analytics key.
-'''
-from django.conf import settings
+from .models import Category, SuggestiveCategory
+from .views import create_categories, create_category_group
 
-def google_analytics(request):
-    return {
-        'GOOGLE_ANALYTICS_ID': settings.GOOGLE_ANALYTICS.get('google_analytics_id', None)
-    }
+def user_category(request):
+    try:
+        if request.user.is_anonymous:
+            return {}
+        category = Category.objects.filter(user=request.user)
+        print(category)
+        suggest_category = SuggestiveCategory.objects.filter()
+        if not category:
+            create_categories(request.user)
+        if not suggest_category:
+            create_category_group()
+        return {}
+    except Exception as e:
+        print("e as =====>", e)
+        return {}
