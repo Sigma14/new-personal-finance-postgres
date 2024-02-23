@@ -2431,6 +2431,296 @@ $("body").delegate("#down_pay_per", "change", function(event)
         });
     });
 
+// Add Income Budget Walkthrough
+$("body").delegate(".update_income_bgt_walkthrough", "click", function(e)
+{
+    e.preventDefault();
+    income_index = $(this).attr('income_index')
+    income_account_id = $('#income_account_id').val()
+    id = $(this).attr('income_id')
+    name = $("#income_sources"+income_index).val()
+    exp_amount = $("#income_expected_amount"+income_index).val()
+    actual_amount = $("#income_actual_amount"+income_index).val()
+    if(name && exp_amount && actual_amount)
+    {
+        console.log($(".total_income_exp").val())
+        total_exp_amount = 0
+        total_act_amount = 0
+
+        $('.total_income_exp').map(function() {
+          total_exp_amount =  total_exp_amount + parseFloat($(this).val());
+        });
+
+        $('.total_income_act').map(function() {
+          total_act_amount =  total_act_amount + parseFloat($(this).val());
+        });
+
+        $("#total_inc_exp").text(total_exp_amount)
+        $("#total_inc_act").text(total_act_amount)
+
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+            $.ajax(
+            {
+                type: 'POST',
+                url: "/en/budgets/income/walk_through",
+                data: {
+                        'id': id,
+                        'name': name,
+                        'exp_amount': exp_amount,
+                        'actual_amount': actual_amount,
+                        'income_account_id': income_account_id,
+                        'csrfmiddlewaretoken': csrfmiddlewaretoken
+                      },
+                success: function(response)
+                {
+                    if(response.status == 'true')
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+                    else
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saving Failed!',
+                                    icon: 'error',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+
+                }
+            });
+    }
+    else
+    {
+        Swal.fire
+         ({
+            title: 'All fields are required',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+});
+
+// Add Income Budget Walkthrough
+$("body").delegate(".add_other_income", "click", function(e)
+{
+    last_index = parseInt($(this).attr('last_index')) + 1
+    trHTML = "<tr><td><input type='text' value='Other Income' id='income_sources" + last_index +"' name='income_sources' class='form-control income_sources' required/></td><td><input type='number' value='0.0' id='income_expected_amount" + last_index +"' name='income_expected_amount' class='form-control total_income_exp' required/></td><td><input type='number' value='0.0' id='income_actual_amount" + last_index +"' name='income_actual_amount' class='form-control total_income_act' required/></td><td><button class='btn btn-outline-secondary update_income_bgt_walkthrough' income_index='" + last_index +"' income_id='false'>Update</button></td></tr>"
+    $(".total_income_row").before(trHTML)
+    return false
+});
+
+// Add Bill Budget Walkthrough
+$("body").delegate(".update_bill_bgt_walkthrough", "click", function(e)
+{
+    e.preventDefault();
+    bill_index = $(this).attr('bill_index')
+    bill_account_id = $('#bill_account_id').val()
+    id = $(this).attr('bill_id')
+    name = $("#bill_sources"+bill_index).val()
+    exp_amount = $("#bill_expected_amount"+bill_index).val()
+    actual_amount = $("#bill_actual_amount"+bill_index).val()
+    if(name && exp_amount && actual_amount)
+    {
+
+        total_exp_amount = 0
+        total_act_amount = 0
+
+        $('.total_bill_exp').map(function() {
+          total_exp_amount =  total_exp_amount + parseFloat($(this).val());
+        });
+
+        $('.total_bill_act').map(function() {
+          total_act_amount =  total_act_amount + parseFloat($(this).val());
+        });
+
+        $("#total_bill_exp").text(total_exp_amount)
+        $("#total_bill_act").text(total_act_amount)
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+            $.ajax(
+            {
+                type: 'POST',
+                url: "/en/bill_walk_through/",
+                data: {
+                        'id': id,
+                        'name': name,
+                        'exp_amount': exp_amount,
+                        'actual_amount': actual_amount,
+                        'bill_account_id': bill_account_id,
+                        'csrfmiddlewaretoken': csrfmiddlewaretoken
+                      },
+                success: function(response)
+                {
+                    if(response.status == 'true')
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+                    else
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saving Failed!',
+                                    icon: 'error',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+
+                }
+            });
+    }
+    else
+    {
+        Swal.fire
+         ({
+            title: 'All fields are required',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+});
+
+
+// Add Bill Budget Walkthrough
+$("body").delegate(".add_other_bill", "click", function(e)
+{
+    last_index = parseInt($(this).attr('last_index')) + 1
+    trHTML = "<tr><td><input type='text' value='Other Bill' id='bill_sources" + last_index +"' name='bill_sources' class='form-control bill_sources' required/></td><td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/></td><td><input type='number' value='0.0' id='bill_actual_amount" + last_index +"' name='income_bill_amount' class='form-control total_bill_act' required/></td><td><button class='btn btn-outline-secondary update_bill_bgt_walkthrough' bill_index='" + last_index +"' bill_id='false'>Update</button></td></tr>"
+    $(".total_bill_row").before(trHTML)
+    return false
+});
+
+
+// Add Expense Budget Walkthrough
+$("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
+{
+    e.preventDefault();
+    expenses_index = $(this).attr('expenses_index')
+    expenses_account_id = $('#expenses_account_id').val()
+    id = $(this).attr('expenses_id')
+    name = $("#expenses_sources"+expenses_index).val()
+    exp_amount = $("#expenses_expected_amount"+expenses_index).val()
+    actual_amount = $("#expenses_actual_amount"+expenses_index).val()
+    cat_name = $(this).attr('category_name')
+    if(name && cat_name && exp_amount && actual_amount)
+    {
+        console.log($(".total_expenses_exp").val())
+        total_exp_amount = 0
+        total_act_amount = 0
+
+        $('.total_expenses_exp').map(function() {
+          total_exp_amount =  total_exp_amount + parseFloat($(this).val());
+        });
+
+        $('.total_expenses_act').map(function() {
+          total_act_amount =  total_act_amount + parseFloat($(this).val());
+        });
+
+        $("#total_expenses_exp").text(total_exp_amount)
+        $("#total_expenses_act").text(total_act_amount)
+
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+            $.ajax(
+            {
+                type: 'POST',
+                url: "/en/budgets/expenses/walk_through",
+                data: {
+                        'id': id,
+                        'name': name,
+                        'exp_amount': exp_amount,
+                        'actual_amount': actual_amount,
+                        'cat_name': cat_name,
+                        'expenses_account_id': expenses_account_id,
+                        'csrfmiddlewaretoken': csrfmiddlewaretoken
+                      },
+                success: function(response)
+                {
+                    if(response.status == 'true')
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+                    else
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saving Failed!',
+                                    icon: 'error',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+
+                }
+            });
+        }
+    else
+    {
+        Swal.fire
+         ({
+            title: 'All fields are required',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+});
+
+// Add Bill Budget Walkthrough
+$("body").delegate(".add_other_expenses", "click", function(e)
+{
+    last_index = parseInt($(this).attr('last_index')) + 1
+    trHTML = "<tr><th colspan='4'><input type=text class='form-control other_exp_name' btn_id='other_exp_btn" + last_index + "' placeholder='Enter Group Name'</th></tr>"
+    trHTML += "<tr><td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td><td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td><td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td><td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false'>Update</button></td></tr>"
+    $(".total_expenses_row").before(trHTML)
+    return false
+});
+
+$("body").delegate(".other_exp_name", "change", function(e)
+{
+    btn_id = $(this).attr('btn_id')
+    cat_name = $(this).val()
+    $("#" + btn_id).attr('category_name', cat_name)
+});
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

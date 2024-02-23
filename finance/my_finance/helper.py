@@ -105,7 +105,7 @@ def save_fund_obj(request, user_name):
 
 
 def save_transaction(user, payee, amount, remaining_amount, transaction_date, categories, account, tags, out_flow,
-                     cleared, bill=None):
+                     cleared, bill=None, budget=None):
     transaction_obj = Transaction()
     transaction_obj.user = user
     transaction_obj.payee = payee
@@ -119,6 +119,8 @@ def save_transaction(user, payee, amount, remaining_amount, transaction_date, ca
     transaction_obj.cleared = cleared
     if bill:
         transaction_obj.bill = bill
+    if budget:
+        transaction_obj.budgets = budget
     transaction_obj.save()
 
 

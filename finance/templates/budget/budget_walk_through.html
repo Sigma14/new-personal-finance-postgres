@@ -111,27 +111,72 @@
                                 <div id="income-section" class="content">
                                     <section>
                                         <div class="row match-height">
-                                            <div class="col-md-12 col-lg-12">
+                                            <div class="col-md-6 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Income Creation Walkthrough.</h4>
-                                                    </div>
-                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
-                                                    <div class="card-body">
+                                                        <img class="img-fluid" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
                                                         <p class="card-text"><strong>Description: </strong>Consider all your income sources when planning your budget. This includes your main job, any side jobs, and other income like rental income or investments.</p>
                                                         <p class="card-text"><strong>Tips: </strong>Always use your net income (after-tax income) for budgeting. If your income varies, use an average of the last few months to estimate.</p>
-                                                        <br/>
-                                                        <a href="{% url 'budgets_income_walk_through' %}" class="btn btn-success"> Go for income creation walkthrough</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Income Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="income_account_id" name="budget_categories" required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Sources</th>
+                                                                        <th>Expected Amount</th>
+                                                                        <th>Actual Amount</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, value in income_bdgt_dict.items %}
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td><input type="text" value="{{data.0}}" id="income_sources{{forloop.counter}}" name="income_sources" class="form-control income_sources" required/></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="income_expected_amount{{forloop.counter}}" name="income_expected_amount" class="form-control total_income_exp" required/></td>
+                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="income_actual_amount{{forloop.counter}}" name="income_actual_amount" class="form-control total_income_act" required/></td>
+                                                                                <td><button class="btn btn-outline-secondary update_income_bgt_walkthrough" income_index="{{forloop.counter}}" income_id="{{data.4}}">Update</button></td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    <tr class="total_income_row">
+                                                                        <td><strong >Total Income</strong></td>
+                                                                        <td><strong id="total_inc_exp">{{total_income_expected}}</strong></td>
+                                                                        <td><strong id="total_inc_act">{{total_actual_income}}</strong></td>
+                                                                        <td><button class="btn btn-outline-success add_other_income" last_index="{{income_bdgt_dict.Income|length}}" title="Add other income">+ Other Income</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </section>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                        <div class="btn btn-primary btn-prev">
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </button>
+                                        </div>
                                         <div class="btn btn-primary btn-next" btn_id="true">
                                             <span class="align-middle d-sm-inline-block d-none">Next</span>
                                             <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
@@ -141,7 +186,7 @@
                                 <div id="bill-section" class="content">
                                     <section>
                                         <div class="row match-height">
-                                            <div class="col-md-12 col-lg-12">
+                                            <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Bill Creation Walkthrough.</h4>
@@ -152,19 +197,65 @@
                                                         <p class="card-text"><strong>Tips: </strong>Regularly review your subscriptions and bills. Sometimes, you might find services you no longer use and can cancel.</p>
                                                         <p class="card-text"><strong>Autobill Button: </strong>Automatically creates a transaction log for your bill on the selected date and frequency.</p>
                                                         <p class="card-text"><strong>Autopay Button: </strong>Automatically deducts the bill amount from your selected account, ensuring you never miss a payment.</p>
-                                                        <br/>
-                                                        <a href="{% url 'bill_walk_through' %}" class="btn btn-success"> Go for bill creation walkthrough</a>
-
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Bill Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="bill_account_id" name="bill_account" required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+                                                                        <th>Actual Amount</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, value in bills_dict.items %}
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td><input type="text" value="{{data.0}}" id="bill_sources{{forloop.counter}}" name="bill_sources" class="form-control bill_sources" required/></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="bill_expected_amount{{forloop.counter}}" name="bill_expected_amount" class="form-control total_bill_exp" required/></td>
+                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="bill_actual_amount{{forloop.counter}}" name="bill_actual_amount" class="form-control total_bill_act" required/></td>
+                                                                                <td><button class="btn btn-outline-secondary update_bill_bgt_walkthrough" bill_index="{{forloop.counter}}" bill_id="{{data.4}}">Update</button></td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    <tr class="total_bill_row">
+                                                                        <td><strong >Total Bill</strong></td>
+                                                                        <td><strong id="total_bill_exp">{{total_expected_bill}}</strong></td>
+                                                                        <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>
+                                                                        <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill">+ Other Bill</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </section>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                        <div class="btn btn-primary btn-prev">
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </button>
+                                        </div>
                                         <div class="btn btn-primary btn-next" btn_id="true">
                                             <span class="align-middle d-sm-inline-block d-none">Next</span>
                                             <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
@@ -174,7 +265,7 @@
                                 <div id="expense-section" class="content">
                                     <section>
                                         <div class="row match-height">
-                                            <div class="col-md-12 col-lg-12">
+                                            <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Expense Creation Walkthrough.</h4>
@@ -183,22 +274,67 @@
                                                     <div class="card-body">
                                                         <p class="card-text"><strong>Description: </strong>Expenses are what you spend money on regularly, like groceries, dining out, entertainment, and transportation. Understanding your expenses is crucial to managing your money effectively.</p>
                                                         <p class="card-text"><strong>Tips: </strong>Categorize your expenses between 'needs' (essentials) and 'wants' (non-essentials). This helps in prioritizing spending and identifying areas where you can cut back if needed.</p>
-                                                        <br/>
-                                                        <a href="{% url 'budgets_expenses_walk_through' %}" class="btn btn-success"> Go for expense creation walkthrough</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Expenses Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="expenses_account_id" name="expense_account" required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+                                                                        <th>Actual Amount</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, value in expenses_dict.items %}
+                                                                    <tr><th colspan="4">{{key}}</th></tr>
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td><input type="text" value="{{data.0}}" id="expenses_sources{{forloop.parentloop.counter}}" name="expenses_sources" class="form-control expenses_sources" required/></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{forloop.parentloop.counter}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/></td>
+                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{forloop.parentloop.counter}}" name="expenses_actual_amount" class="form-control total_expenses_act" required/></td>
+                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{forloop.parentloop.counter}}" expenses_id="{{data.4}}">Update</button></td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    <tr class="total_expenses_row">
+                                                                        <td><strong >Total Expenses</strong></td>
+                                                                        <td><strong id="total_expenses_exp">{{total_expected_expenses}}</strong></td>
+                                                                        <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>
+                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{expenses_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </section>
                                     <div class="d-flex justify-content-between">
-                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                        <div class="btn btn-primary btn-prev">
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                                        </button>
-                                        <div class="btn btn-primary btn-next" btn_id="true">
-                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
-                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
                                         </div>
+                                        <a href="{% url 'current-budgets' %}" class="btn btn-success"> finished </a>
                                     </div>
                                 </div>
                             </form>
