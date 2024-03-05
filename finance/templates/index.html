@@ -110,6 +110,7 @@
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}"  href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
                 </ul>
                 <ul class="nav navbar-nav align-items-center ml-auto">
+                    <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="sun"></i></a></li>
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown dropdown-user">
                         <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
