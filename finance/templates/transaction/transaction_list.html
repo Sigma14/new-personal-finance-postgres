@@ -57,10 +57,18 @@
                                 </div>
                                 <br/>
                                 <p>{{message}}</p>
-                                <p class="text-danger">*Firstly check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
+                                <p class="text-danger">*First check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
                                 <form id="upload_transaction_form">
                                     {% csrf_token %}
                                     <div>
+                                        <div class="row align-items-center">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#uploadInfo"></i> 
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload Transaction CSV File</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="form-group">
@@ -69,14 +77,6 @@
                                                     or
                                                     <input type="file" id="csv_file" name="csv_file" class="form-control-file mt-1 mb-1" required>
                                                     </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row align-items-center">
-                                            <div class="col-md-2">
-                                                <div class="form-group">
-                                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#uploadInfo"></i> 
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload</button>
                                                 </div>
                                             </div>
                                         </div>

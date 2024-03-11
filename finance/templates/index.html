@@ -550,6 +550,17 @@
                 fileInput.files = e.dataTransfer.files
             })
         </script>
+        <script>
+            $(document).ready(function() {
+                $('#deadlineCheckbox').change(function() {
+                    if($(this).is(':checked')) {
+                        $('#goalDateContainer').show();
+                    } else {
+                        $('#goalDateContainer').hide();
+                    }
+                });
+            });            
+        </script>
     </body>
     <!-- END: Body-->
 </html>

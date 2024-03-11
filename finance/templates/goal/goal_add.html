@@ -116,6 +116,19 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Is there a deadline for the goal?</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="deadlineCheckbox">
+                                            <label class="form-check-label" for="deadlineCheckbox">Yes</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="goalDateContainer" style="display: none;">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Goal Date</label>
                                     </div>
                                     <div class="col-sm-9">
@@ -123,12 +136,12 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="goal_date" name="goal_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="goal_date" name="goal_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-12">
+                            </div>  
+                            {% comment %} <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Allocate Amount</label>
@@ -143,7 +156,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="col-sm-9 offset-sm-3">
                                 <button type="submit" class="btn btn-primary mr-1">Create</button>
                                 <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary">Cancel</a>
