@@ -30,7 +30,7 @@ def create_category_group():
 
 def create_categories(user):
     categories_dict = {"Bills & Subscriptions": ['Electricity', 'Water', 'Cellphone'],
-                       "Goals": ["Phone", "Vacation", "Education"],
+                       "Goals": ["Phone", "Vacation", "Education", "New Car", "New House", "Electronic", "Other"],
                        "Funds": [],
                        "Food": ["Groceries", "Eating Out"],
                        "Personal Care": ["Electronic Items", "Clothes"],
