@@ -1,5 +1,6 @@
 {% extends "index.html" %}
-{% block content i18n %}
+{% load static i18n %}
+{% block content %}
 <!DOCTYPE html>
 <head>
     {% block title %} Budget Update {% endblock title %}
@@ -225,7 +226,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" id="current_budget_date" title={% trans %}"If manual budget or auto budget have been used in any transaction. you can change current and next budget start date." value="{{current_budget_date}}" name="current_budget_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            <input type="text" id="current_budget_date" title={% trans "If manual budget or auto budget have been used in any transaction. you can change current and next budget start date." %} value="{{current_budget_date}}" name="current_budget_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
                                         </div>
                                     </div>
                                 </div>

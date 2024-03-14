@@ -4089,7 +4089,8 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     goal_amount = request.POST['goal_amount']
     goal_date = request.POST['goal_date']
     account_name = request.POST['account_name']
-    allocate_amount = request.POST['allocate_amount']
+    allocate_amount = 0
+    # allocate_amount = request.POST['allocate_amount']
     account_obj = Account.objects.get(name=account_name)
     print("category_name=======>", category_name)
     if fun_name:
