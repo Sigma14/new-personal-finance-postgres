@@ -213,19 +213,12 @@
                                             {% endfor %}
                                         {% endfor %}
                                         <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
-                                            <th>
+                                            <th colspan="8">
                                                 <h5>
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#ExpensesModel"></i>
                                                     <b>{{ _('Expenses')}}</b>
                                                 </h5>
                                             </th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
                                             <th>
                                                 <h5><b>{{budget_graph_currency}}{{total_expense}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down expense_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right expense_drp_sign"></i></h5>
                                                 </td>
@@ -238,154 +231,136 @@
                                             </th>
                                         </tr>
                                         {% for object in ex_value %}
-                                        {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
-                                        <tr class="expenses_budgets_cls" style="display:None;height:100px;display:none;">
-                                            <th colspan="7" style="padding-top:20px;">
-                                                <!--Name-->
-                                                <div class="row">
-                                                    <div class="col-6"> 
-                                                        <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=object.4 %}{% else %}{% url 'budget_detail' pk=object.4 %}{% endif %}">
-                                                        <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=object.4 %}{% else %}{% url 'budget_detail' pk=object.4 %}{% endif %}">{{object.0}}</a></h6>
-                                                    </div> 
-                                                    <div class="col-6 d-flex flex-row-reverse"> 
-                                                        <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
-                                                        {% if ex_key == 'Bills & Subscriptions' %}
-                                                        <span class="font-small-2 text-muted">Due on {{object.6}}.</span>
-                                                        {% else %}
-                                                        <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {% trans 'to'%} {{object.7}}</span>
-                                                        {% endif %}
-                                                    </div> 
-                                                    <div class="progress progress-bar-success" style="height:9px;">
-                                                        called
-                                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!--Name:end-->
-                                                {% comment %} <div class="item-img text-center">
-                                                        <div class="card-body">
-                                                            <h6 style="float: left;">
-                                                    <span class="text-danger">{{object.8}}{{object.3}} left</span>
-                                                    <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
-                                                    </div>
-                                                    <br/>
-                                                    
-                                                    <div class="card-body" style="padding-bottom:40px;">
-                                                        {% if ex_key == 'Bills & Subscriptions' %}
-                                                        <span class="font-small-2 text-muted">Due on {{object.6}}.</span>
-                                                        {% else %}
-                                                        <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {% trans 'to'%} {{object.7}}</span>
-                                                        {% endif %}
-                                                        <span style="float: right;" class="text-success">
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">
-                                                                    <ul class="list-inline m-0">
-                                                                        <li class="list-inline-item">
-                                                                            <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_edits' pk=object.4 %}{% else %}{% url 'budget_update' pk=object.4 %}{% endif %}"
-                                                                                class="btn btn-success btn-sm rounded-0"><i
-                                                                                class="fa fa-edit"></i></a>
-                                                                        </li>
-                                                                        <li class="list-inline-item">
-                                                                            {% if ex_key == 'Bills & Subscriptions' %}
-                                                                            <button type="button" del_method="bill_delete" delete_name="{{ object.0 }} Bill" url="{% url 'bill_delete' pk=object.4 %}"
-                                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                class="fa fa-trash"></i></button>
-                                                                            {% else %}
-                                                                            <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
-                                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                class="fa fa-trash"></i></button>
-                                                                            {% endif %}
-                                                                        </li>
-                                                                    </ul>
-                                                                </span>
+                                            {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
+                                                <tr class="expenses_budgets_cls" style="height:10px;display:none;">
+                                                    <th colspan="7" style="height:2px;padding-top:20px;">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=object.4 %}{% else %}{% url 'budget_detail' pk=object.4 %}{% endif %}">{{object.0}}</a></h6>
                                                             </div>
-                                                        </span>
-                                                    </div>
-                                                    </a>
-                                                </div> {% endcomment %}
-                                            </th>
-                                            <th style="background-color:pink;"> </th>
-                                            <th style="background-color:yellow;"> </th> 
-                                        </tr>
-                                        {% else %}
-                                        {% for daily_data in object.6 %}
-                                        <tr class="{% if forloop.counter != 1 %}daily_week_records daily{{object.6.0.4}}{% else %} expenses_budgets_cls{% endif %}" style="display:None;">
-                                            <th colspan="9">
-                                                {% if forloop.counter == 1 %}
-                                                <div class="item-img text-center daily_bdgt_data" class_name=".daily{{daily_data.4}}">
-                                                    <a>
-                                                        <div class="card-body">
-                                                            <h6 style="float: left;">
-                                                    <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=daily_data.4 %}{% else %}{% url 'budget_detail' pk=daily_data.4 %}{% endif %}">{{daily_data.0}}</a></h6>
-                                                    <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
-                                                    <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
-                                                    <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
-                                                    </div>
-                                                    <br/>
-                                                    <div class="progress progress-bar-success" style="height:9px;">
-                                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}%">
-                                                        </div>
-                                                    </div>
-                                                    <div class="card-body" style="padding-bottom:40px;">
-                                                        <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.9}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
-                                                        <span class="font-small-2 text-muted" style="text-">{{object.5}}</span>
-                                                        <h6 style="float: right;">
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="font-weight-bolder mr-1">
-                                                                    <ul class="list-inline m-0">
-                                                                        <li class="list-inline-item">
-                                                                            <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_edits' pk=daily_data.4 %}{% else %}{% url 'budget_update' pk=daily_data.4 %}{% endif %}"
-                                                                                class="btn btn-success btn-sm rounded-0"><i
-                                                                                class="fa fa-edit"></i></a>
-                                                                        </li>
-                                                                        <li class="list-inline-item">
-                                                                            {% if ex_key == 'Bills & Subscriptions' %}
-                                                                            <button type="button" del_method="bill_delete" delete_name="{{ daily_data.0 }} Bill" url="{% url 'bill_delete' pk=daily_data.4 %}"
-                                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                class="fa fa-trash"></i></button>
-                                                                            {% else %}
-                                                                            <button type="button" del_method="budget_delete" delete_name="{{ daily_data.0 }} Budget" url="{% url 'budget_delete' pk=daily_data.4 %}"
-                                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
-                                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
-                                                                                class="fa fa-trash"></i></button>
-                                                                            {% endif %}
-                                                                        </li>
-                                                                    </ul>
-                                                                </span>
+                                                            <div class="col-6 d-flex flex-row-reverse"> 
+                                                                <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
                                                             </div>
-                                                        </h6>
-                                                    </div>
-                                                    </a>
-                                                </div>
-                                                {% else %}
-                                                <div class="item-img text-center daily_week_records daily{{object.6.0.4}}" style="display:None;">
-                                                    <a>
+                                                        </div>
+                                                        <div class="progress progress-bar-success">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                            </div>
+                                                        </div>
+                                                    </th>
+                                                    <th style="padding-top:20px;padding-left:100px">
+                                                        <h6 style="float: left;">
+                                                        <span class="text-danger">{{object.8}}{{object.3}} left</span>
+                                                        <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
+                                                        <br>
+                                                        {% if ex_key == 'Bills & Subscriptions' %}
+                                                            <span class="font-small-2 text-muted">Due on {{object.6}}.</span>
+                                                        {% else %}
+                                                            <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
+                                                        {% endif %}
+                                                    </th>
+                                                    <th>
+                                                        <ul class="list-inline m-0">
+                                                            <li class="list-inline-item">
+                                                                <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_edits' pk=object.4 %}{% else %}{% url 'budget_update' pk=object.4 %}{% endif %}"
+                                                                class="btn btn-success btn-sm rounded-0"><i
+                                                                        class="fa fa-edit"></i></a>
+
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                {% if ex_key == 'Bills & Subscriptions' %}
+                                                                <button type="button" del_method="bill_delete" delete_name="{{ object.0 }} Bill" url="{% url 'bill_delete' pk=object.4 %}"
+                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                        class="fa fa-trash"></i></button>
+                                                                {% else %}
+                                                                <button type="button" del_method="budget_delete" delete_name="{{ object.0 }} Budget" url="{% url 'budget_delete' pk=object.4 %}"
+                                                                class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                        class="fa fa-trash"></i></button>
+                                                                {% endif %}
+                                                            </li>
+                                                        </ul>
+                                                    </th>
+                                                </tr>
+                                            {% else %}
+                                            {% for daily_data in object.6 %}
+                                            <tr class="{% if forloop.counter != 1 %}daily_week_records daily{{object.6.0.4}}{% else %} expenses_budgets_cls{% endif %}" style="display:None;">
+                                                <th colspan="9">
+                                                    {% if forloop.counter == 1 %}
+                                                    <div class="item-img text-center daily_bdgt_data" class_name=".daily{{daily_data.4}}">
+                                                        <a>
+                                                            <div class="card-body">
+                                                                <h6 style="float: left;">
+                                                        <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=daily_data.4 %}{% else %}{% url 'budget_detail' pk=daily_data.4 %}{% endif %}">{{daily_data.0}}</a></h6>
+                                                        <span class="text-danger">{{daily_data.8}}{{daily_data.3}} left</span>
+                                                        <h6 style="float: right;"><i class="fa fa-chevron-right daily_week_drop daily{{daily_data.4}}"></i><i class="fa fa-chevron-down daily_week_records daily{{daily_data.4}}" style="display:None;"></i></h6>
+                                                        <span style="float: right;" class="text-success">{{daily_data.8}}{{daily_data.2}} Spent &nbsp;&nbsp;</span>
+                                                        </div>
+                                                        <br/>
                                                         <div class="progress progress-bar-success" style="height:9px;">
-                                                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.9|div:daily_data.1|mul:100|floatformat:0 }}%">
                                                             </div>
                                                         </div>
                                                         <div class="card-body" style="padding-bottom:40px;">
-                                                            <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
-                                                            {% if ex_key == 'Bills & Subscriptions' %}
-                                                            <span class="font-small-2 text-muted">{% trans 'Due on' %} {{daily_data.6}}.</span>
-                                                            {% else %}
-                                                            {% if object.5 == 'Daily' %}
-                                                            <span class="font-small-2 text-muted">{{ _('This amount applies at')}} {{daily_data.6}}.</span>
-                                                            {% else %}
-                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{daily_data.6}} {{ _('to')}} {{daily_data.7}}.</span>
-                                                            {% endif %}
-                                                            {% endif %}
-                                                            <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
+                                                            <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.9}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                            <span class="font-small-2 text-muted" style="text-">{{object.5}}</span>
+                                                            <h6 style="float: right;">
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">
+                                                                        <ul class="list-inline m-0">
+                                                                            <li class="list-inline-item">
+                                                                                <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_edits' pk=daily_data.4 %}{% else %}{% url 'budget_update' pk=daily_data.4 %}{% endif %}"
+                                                                                    class="btn btn-success btn-sm rounded-0"><i
+                                                                                    class="fa fa-edit"></i></a>
+                                                                            </li>
+                                                                            <li class="list-inline-item">
+                                                                                {% if ex_key == 'Bills & Subscriptions' %}
+                                                                                <button type="button" del_method="bill_delete" delete_name="{{ daily_data.0 }} Bill" url="{% url 'bill_delete' pk=daily_data.4 %}"
+                                                                                    class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                    data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                    class="fa fa-trash"></i></button>
+                                                                                {% else %}
+                                                                                <button type="button" del_method="budget_delete" delete_name="{{ daily_data.0 }} Budget" url="{% url 'budget_delete' pk=daily_data.4 %}"
+                                                                                    class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                    data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                    class="fa fa-trash"></i></button>
+                                                                                {% endif %}
+                                                                            </li>
+                                                                        </ul>
+                                                                    </span>
+                                                                </div>
+                                                            </h6>
                                                         </div>
-                                                    </a>
-                                                </div>
-                                                {% endif %}
-                                            </th>
-                                        </tr>
-                                        {% endfor %}
+                                                        </a>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="item-img text-center daily_week_records daily{{object.6.0.4}}" style="display:None;">
+                                                        <a>
+                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ daily_data.2|div:daily_data.1|mul:100|floatformat:0 }}%">
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                <h6 style="float: left;"><strong class="text-success">{{daily_data.8}}{{daily_data.2}}</strong> of {{daily_data.8}}{{daily_data.1}}</h6>
+                                                                {% if ex_key == 'Bills & Subscriptions' %}
+                                                                <span class="font-small-2 text-muted">{% trans 'Due on' %} {{daily_data.6}}.</span>
+                                                                {% else %}
+                                                                {% if object.5 == 'Daily' %}
+                                                                <span class="font-small-2 text-muted">{{ _('This amount applies at')}} {{daily_data.6}}.</span>
+                                                                {% else %}
+                                                                <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{daily_data.6}} {{ _('to')}} {{daily_data.7}}.</span>
+                                                                {% endif %}
+                                                                {% endif %}
+                                                                <span class="text-success" style="float: right;">{{daily_data.8}}{{daily_data.2}} Spent</span>
+                                                            </div>
+                                                        </a>
+                                                    </div>
+                                                    {% endif %}
+                                                </th>
+                                                <th> </th>
+                                                <th> </th>
+                                            </tr>
+                                            {% endfor %}
                                         {% endif %}
                                         {% endfor %}
                                         {% endfor %}
