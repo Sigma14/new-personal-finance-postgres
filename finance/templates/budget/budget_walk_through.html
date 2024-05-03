@@ -76,6 +76,19 @@
                                     </span>
                                 </button>
                             </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <!-- New step for non-monthly expenses -->
+                            <div class="step" data-target="#non-monthly-expenses-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">5</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">Non-monthly Expenses Section</span>
+                                        <span class="bs-stepper-subtitle">Go for non-monthly expenses creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                         <div class="bs-stepper-content">
                             <form action="{% url 'budgets_walk_through' %}" id="frm1" method="post" enctype="multipart/form-data">
@@ -334,9 +347,88 @@
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
                                         </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                        
+                                    </div>
+                                
+                                </div>
+                                <div id="non-monthly-expenses-section" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Non Monthly Expense Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Expenses are what you spend money on regularly, like groceries, dining out, entertainment, and transportation. Understanding your expenses is crucial to managing your money effectively.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Categorize your expenses between 'needs' (essentials) and 'wants' (non-essentials). This helps in prioritizing spending and identifying areas where you can cut back if needed.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Non Monthly Expenses Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="non_monthly_expenses_account_id" name="non_monthly_expense_account" required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+                                                                        <th>Actual Amount</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, data in non_monthly_expenses_dict.items %}
+                                                                    
+                                                                       
+                                                                        <tr>
+                                                                            <td><input type="text" value="{{data.0}}" id="non_monthly_expenses_sources{{forloop.parentloop.counter}}" name="non_monthly_expenses_sources" class="form-control non_monthly_expenses_sources" required/></td>
+                                                                            <td><input type="number" value="{{data.1}}" id="non_monthly_expenses_expected_amount{{forloop.parentloop.counter}}" name="non_monthly_expenses_expected_amount" class="form-control total_non_monthly_expenses_exp" required/></td>
+                                                                            <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="non_monthly_expenses_actual_amount{{forloop.parentloop.counter}}" name="non_monthly_expenses_actual_amount" class="form-control total_non_monthly_expenses_act" required/></td>
+                                                                            <td><button class="btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.parentloop.counter}}" non_monthly_expenses_id="{{data.4}}">Update</button></td>
+                                                                        </tr>
+                                                                    
+                                                                    {% endfor %}
+                                                                    <tr class="total_non_monthly_expenses_row">
+                                                                        <td><strong >Total Expenses</strong></td>
+                                                                        <td><strong id="total_non_monthly_expenses_exp">{{total_non_monthly_expected_expenses}}</strong></td>
+                                                                        <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>
+                                                                        <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
                                         <a href="{% url 'current-budgets' %}" class="btn btn-success"> finished </a>
                                     </div>
-                                </div>
                             </form>
                         </div>
                     </div>

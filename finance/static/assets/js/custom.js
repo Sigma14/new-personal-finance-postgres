@@ -2721,6 +2721,113 @@ $("body").delegate(".other_exp_name", "change", function(e)
     $("#" + btn_id).attr('category_name', cat_name)
 });
 
+
+// Add Non monthly Expense Budget Walkthrough
+$("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", function(e)
+{
+    e.preventDefault();
+    non_monthly_expenses_index = $(this).attr('non_monthly_expenses_index')
+    non_monthly_expenses_account_id = $('#non_monthly_expenses_account_id').val()
+    id = $(this).attr('non_monthly_expenses_id')
+    name = $("#non_monthly_expenses_sources"+non_monthly_expenses_index).val()
+    exp_amount = $("#non_monthly_expenses_expected_amount"+non_monthly_expenses_index).val()
+    actual_amount = $("#non_monthly_expenses_actual_amount"+non_monthly_expenses_index).val()
+    // cat_name = $(this).attr('category_name')
+    console.log("expected amount======>",exp_amount)
+    if(name && exp_amount && actual_amount)
+    {
+        console.log($(".total_non_monthly_expenses_exp").val())
+        total_exp_amount = 0
+        total_act_amount = 0
+
+        $('.total_non_monthly_expenses_exp').map(function() {
+          total_exp_amount =  total_exp_amount + parseFloat($(this).val());
+        });
+
+        $('.total_non_monthly_expenses_act').map(function() {
+          total_act_amount =  total_act_amount + parseFloat($(this).val());
+        });
+
+        $("#total_non_monthly_expenses_exp").text(total_exp_amount)
+        $("#total_non_monthly_expenses_act").text(total_act_amount)
+
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+            $.ajax(
+            {
+                type: 'POST',
+                url: "/en/budgets/non_monthly_expenses/walk_through",
+                data: {
+                        'id': id,
+                        'name': name,
+                        'exp_amount': exp_amount,
+                        'actual_amount': actual_amount,
+                        
+                        'non_monthly_expenses_account_id': non_monthly_expenses_account_id,
+                        'csrfmiddlewaretoken': csrfmiddlewaretoken
+                      },
+                success: function(response)
+                {
+                    if(response.status == 'true')
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+                    else
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saving Failed!',
+                                    icon: 'error',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+
+                }
+            });
+        }
+    else
+    {
+        
+        Swal.fire
+         ({
+            title: 'All fields are required',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+});
+
+// Add Other Non-Monthly Expenses
+$("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
+{
+    last_index = parseInt($(this).attr('last_index')) + 1
+    
+    trHTML = "<tr><td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td><td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td><td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td><td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false'>Update</button></td></tr>"
+    
+    $(".total_non_monthly_expenses_row").before(trHTML)
+    return false
+});
+
+// $("body").delegate(".other_non_monthly_exp_name", "change", function(e)
+// {
+//     btn_id = $(this).attr('btn_id')
+//     cat_name = $(this).val()
+//     $("#" + btn_id).attr('category_name', cat_name)
+// });
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
