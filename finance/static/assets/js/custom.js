@@ -2729,11 +2729,16 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
     non_monthly_expenses_index = $(this).attr('non_monthly_expenses_index')
     non_monthly_expenses_account_id = $('#non_monthly_expenses_account_id').val()
     id = $(this).attr('non_monthly_expenses_id')
+    budget_period = $('#budget_period'+non_monthly_expenses_index).val()
+    budget_date = $('#add_budget_date'+non_monthly_expenses_index).val()
     name = $("#non_monthly_expenses_sources"+non_monthly_expenses_index).val()
     exp_amount = $("#non_monthly_expenses_expected_amount"+non_monthly_expenses_index).val()
     actual_amount = $("#non_monthly_expenses_actual_amount"+non_monthly_expenses_index).val()
     // cat_name = $(this).attr('category_name')
+    console.log("name===>",name)
+    console.log("period======>",budget_period)
     console.log("expected amount======>",exp_amount)
+    console.log("budget date======>",budget_date)
     if(name && exp_amount && actual_amount)
     {
         console.log($(".total_non_monthly_expenses_exp").val())
@@ -2761,8 +2766,9 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
                         'name': name,
                         'exp_amount': exp_amount,
                         'actual_amount': actual_amount,
-                        
+                        'budget_period':budget_period,                        
                         'non_monthly_expenses_account_id': non_monthly_expenses_account_id,
+                        'budget_date':budget_date,
                         'csrfmiddlewaretoken': csrfmiddlewaretoken
                       },
                 success: function(response)
@@ -2815,9 +2821,171 @@ $("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
 {
     last_index = parseInt($(this).attr('last_index')) + 1
     
-    trHTML = "<tr><td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td><td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td><td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td><td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false'>Update</button></td></tr>"
+    trHTML = "<tr>"+
+    "<td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td>"+
+    "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td>"+
+    "<td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td>"+
+    
+    "<td>" +
+    "<select id='budget_period" + last_index + "' name='budget_period' class='form-control' required>" +
+    "<option value='Monthly'>Monthly</option>" +
+    "<option value='Yearly'>Yearly</option>" +
+    "</select>" +
+    "</td>" +
+    "<td>" +
+    "<i class='fa fa-calendar fa-1 calender_icon' index='" + last_index + "' id='calender_icon" + last_index + "'></i>" +
+    "<input type='text' id='add_budget_date" + last_index + "' name='add_budget_date' class='form-control flatpickr-basic' hidden required>" +
+    "</td>" +
+    "<td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false'>Update</button></td>"+
+    "</tr>"
     
     $(".total_non_monthly_expenses_row").before(trHTML)
+    return false
+});
+
+// Event binding for calendar icon click
+$("body").delegate(".calender_icon", "click", function(e) {
+    var last_index = parseInt($(this).attr('index'))
+
+    var budgetDateId = "#add_budget_date" + last_index;
+    console.log(budgetDateId)
+        // Show the budget_date input field
+    $(budgetDateId).removeAttr("hidden");
+
+    // Get Flatpickr instance of the budget_date input
+    var flatpickrInstance = $(budgetDateId).flatpickr();
+
+    
+
+    // Open the Flatpickr calendar
+    if (flatpickrInstance) {
+        flatpickrInstance.open();
+    }
+    setTimeout(function() {
+        
+        // Add the 'hidden' attribute back to the #budget_date input (optional)
+        $(budgetDateId).attr("hidden", true);
+    }, 100);
+});
+
+
+// // Date picker
+// $("body").delegate(".calender-icon", "click", function(e)
+// {
+    
+//     $("#add_budget_date").removeAttr("hidden");
+//     // Get Flatpickr instance of the #budget_date input
+//     var flatpickrInstance = $("#add_budget_date")[0]._flatpickr;
+    
+//     // Open the Flatpickr calendar
+//     if (flatpickrInstance) {
+//         flatpickrInstance.open();
+//     }
+//     setTimeout(function() {
+        
+//         // Add the 'hidden' attribute back to the #budget_date input (optional)
+//         $("#add_budget_date").attr("hidden", true);
+//     }, 100);
+    
+// });
+
+// Add Goals Budget Walkthrough
+$("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
+{
+    
+    e.preventDefault();
+    goals_index = $(this).attr('goals_index')
+    goals_account_id = $('#goals_account_id').val()
+    id = $(this).attr('goals_id')
+    name = $("#goals_sources"+goals_index).val()
+    exp_amount = $("#goals_expected_amount"+goals_index).val()
+    actual_amount = $("#goals_actual_amount"+goals_index).val()
+    // cat_name = $(this).attr('category_name')
+    console.log("expected amount======>",exp_amount)
+    if(name && exp_amount && actual_amount)
+    {
+        console.log($(".total_goals_exp").val())
+        total_exp_amount = 0
+        total_act_amount = 0
+
+        $('.total_goals_exp').map(function() {
+          total_exp_amount =  total_exp_amount + parseFloat($(this).val());
+        });
+
+        $('.total_goals_act').map(function() {
+          total_act_amount =  total_act_amount + parseFloat($(this).val());
+        });
+
+        $("#total_goals_exp").text(total_exp_amount)
+        $("#total_goals_act").text(total_act_amount)
+
+        var csrfmiddlewaretoken = getCookie('csrftoken');
+            $.ajax(
+            {
+                type: 'POST',
+                url: "/en/budgets/goals/walk_through",
+                data: {
+                        'id': id,
+                        'name': name,
+                        'exp_amount': exp_amount,
+                        'actual_amount': actual_amount,
+                        
+                        'goals_account_id': goals_account_id,
+                        'csrfmiddlewaretoken': csrfmiddlewaretoken
+                      },
+                success: function(response)
+                {
+                    if(response.status == 'true')
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+                    else
+                    {
+                        Swal.fire
+                                 ({
+                                    title: 'Saving Failed!',
+                                    icon: 'error',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 });
+                    }
+
+                }
+            });
+        }
+    else
+    {
+        
+        Swal.fire
+         ({
+            title: 'All fields are required',
+            icon: 'error',
+            customClass: {
+              confirmButton: 'btn btn-primary'
+            },
+            buttonsStyling: false
+         });
+    }
+});
+
+// Add Other Non-Monthly Expenses
+$("body").delegate(".add_other_goals", "click", function(e)
+{
+    last_index = parseInt($(this).attr('last_index')) + 1
+    
+    trHTML = "<tr><td><input type='text' value='Other' id='goals_sources" + last_index +"' name='goals_sources' class='form-control goals_sources' required/></td><td><input type='number' value='0.0' id='goals_expected_amount" + last_index +"' name='goals_expected_amount' class='form-control total_goals_exp' required/></td><td><input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required/></td><td><button class='btn btn-outline-secondary update_goals_bgt_walkthrough' goals_index='" + last_index +"' goals_id='false'>Update</button></td></tr>"
+    
+    $(".total_goals_row").before(trHTML)
     return false
 });
 
@@ -2827,6 +2995,8 @@ $("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
 //     cat_name = $(this).val()
 //     $("#" + btn_id).attr('category_name', cat_name)
 // });
+
+
 
 function getCookie(name) {
     let cookieValue = null;

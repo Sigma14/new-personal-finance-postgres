@@ -45,6 +45,7 @@ urlpatterns = [
     path('budgets/income/walk_through', budgets_income_walk_through, name='budgets_income_walk_through'),
     path('budgets/expenses/walk_through', budgets_expenses_walk_through, name='budgets_expenses_walk_through'),
     path('budgets/non_monthly_expenses/walk_through', budgets_non_monthly_expenses_walk_through, name='budgets_non_monthly_expenses_walk_through'),
+    path('budgets/goals/walk_through', budgets_goals_walk_through, name='budgets_goals_walk_through'),
 
     # Template Budget urls :-
 
