@@ -2628,6 +2628,10 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
     name = $("#expenses_sources"+expenses_index).val()
     exp_amount = $("#expenses_expected_amount"+expenses_index).val()
     actual_amount = $("#expenses_actual_amount"+expenses_index).val()
+    budget_period = $('#exp_budget_period'+expenses_index).val()
+    budget_date = $('#exp_add_budget_date'+expenses_index).val()
+    console.log("budget period====>",budget_period)
+    console.log("budget date======>",budget_date)
     cat_name = $(this).attr('category_name')
     if(name && cat_name && exp_amount && actual_amount)
     {
@@ -2658,6 +2662,8 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
                         'actual_amount': actual_amount,
                         'cat_name': cat_name,
                         'expenses_account_id': expenses_account_id,
+                        'budget_period': budget_period,
+                        'budget_date': budget_date,
                         'csrfmiddlewaretoken': csrfmiddlewaretoken
                       },
                 success: function(response)
@@ -2709,7 +2715,21 @@ $("body").delegate(".add_other_expenses", "click", function(e)
 {
     last_index = parseInt($(this).attr('last_index')) + 1
     trHTML = "<tr><th colspan='4'><input type=text class='form-control other_exp_name' btn_id='other_exp_btn" + last_index + "' placeholder='Enter Group Name'</th></tr>"
-    trHTML += "<tr><td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td><td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td><td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td><td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false'>Update</button></td></tr>"
+    trHTML += "<tr>"+
+    "<td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td>"+
+    "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td>"+
+    "<td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td>"+
+    "<td>" +
+    "<select id='exp_budget_period" + last_index + "' name='exp_budget_period' class='form-control' required>" +
+    "<option value='Monthly'>Monthly</option>" +
+    "<option value='Yearly'>Yearly</option>" +
+    "</select>" +
+    "</td>" +
+    "<td>" +
+    "<i class='fa fa-calendar fa-1 exp_calender_icon' index='" + last_index + "' id='exp_calender_icon" + last_index + "'></i>" +
+    "<input type='text' id='exp_add_budget_date" + last_index + "' name='exp_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
+    "</td>" +
+    "<td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false'>Update</button></td></tr>"
     $(".total_expenses_row").before(trHTML)
     return false
 });
@@ -2720,6 +2740,31 @@ $("body").delegate(".other_exp_name", "change", function(e)
     cat_name = $(this).val()
     $("#" + btn_id).attr('category_name', cat_name)
 });
+
+// Date picker for Montlhy expenses
+$("body").delegate(".exp_calender_icon", "click", function(e) {
+    var last_index = parseInt($(this).attr('index'))
+
+    var budgetDateId = "#exp_add_budget_date" + last_index;
+    console.log(budgetDateId)
+        // Show the budget_date input field
+    $(budgetDateId).removeAttr("hidden");
+
+    // Get Flatpickr instance of the budget_date input
+    var flatpickrInstance = $(budgetDateId).flatpickr();
+
+    // Open the Flatpickr calendar
+    if (flatpickrInstance) {
+        flatpickrInstance.open();
+    }
+    setTimeout(function() {
+        
+        // Add the 'hidden' attribute back to the #budget_date input (optional)
+        $(budgetDateId).attr("hidden", true);
+    }, 100);
+});
+
+
 
 
 // Add Non monthly Expense Budget Walkthrough

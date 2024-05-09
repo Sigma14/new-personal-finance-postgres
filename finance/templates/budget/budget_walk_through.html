@@ -326,26 +326,41 @@
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
                                                                         <th>Actual Amount</th>
+                                                                        <th>Period</th>
+                                                                        <th>Calender</th>
                                                                         <th>Action</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
+                                                                    
                                                                     {% for key, value in expenses_dict.items %}
                                                                     <tr><th colspan="4">{{key}}</th></tr>
                                                                         {% for data in value %}
                                                                             <tr>
-                                                                                <td><input type="text" value="{{data.0}}" id="expenses_sources{{forloop.parentloop.counter}}" name="expenses_sources" class="form-control expenses_sources" required/></td>
-                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{forloop.parentloop.counter}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/></td>
-                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{forloop.parentloop.counter}}" name="expenses_actual_amount" class="form-control total_expenses_act" required/></td>
-                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{forloop.parentloop.counter}}" expenses_id="{{data.4}}">Update</button></td>
+                                                                                <td><input type="text" value="{{data.0}}" id="expenses_sources{{data|last}}" name="expenses_sources" class="form-control expenses_sources" required/></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{data|last}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/></td>
+                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{data|last}}" name="expenses_actual_amount" class="form-control total_expenses_act" required/></td>
+                                                                                <td>
+                                                                                    <select id="exp_budget_period{{ data|last }}" name="exp_budget_period" class="form-control" required>
+                                                                                        <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
+                                                                                        <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 exp_calender_icon " id="exp_calender_icon" index="{{data|last}}"></i> 
+                                                                                    <input type="text" id="exp_add_budget_date{{data|last}}"  name="exp_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
+                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{data|last}}" expenses_id="{{data.4}}">Update</button></td>
                                                                             </tr>
+                                                                            
                                                                         {% endfor %}
                                                                     {% endfor %}
+                                                                    
                                                                     <tr class="total_expenses_row">
                                                                         <td><strong >Total Expenses</strong></td>
                                                                         <td><strong id="total_expenses_exp">{{total_expected_expenses}}</strong></td>
                                                                         <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>
-                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{expenses_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>

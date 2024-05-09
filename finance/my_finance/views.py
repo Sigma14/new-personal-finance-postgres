@@ -2442,8 +2442,14 @@ def budgets_walk_through(request):
             goals_dict.update({i[0]:i})
             total_goals_expected += float(i[1])
             total_goals_actual += float(i[2])
-
     
+    index_counter = 1
+    for category, expenses in expense_categories.items():
+        for expense_data in expenses:
+            expense_data.append(index_counter)  # Insert index at the beginning
+            index_counter += 1
+    print("inex_counter",index_counter)
+    print("expenses categories=====>",expense_categories)
     context = {"income_bdgt_dict": income_bdgt_dict, "total_actual_income": total_actual_income,
                "total_income_expected": total_income_expected,
                "bills_dict": bills_dict, "total_actual_bill": total_actual_bill,
@@ -2452,7 +2458,7 @@ def budgets_walk_through(request):
                "total_actual_expenses": total_actual_expenses,
                "bank_accounts": bank_accounts_dict,"total_non_monthly_expected_expenses":total_non_monthly_expected_expenses,
                "total_non_monthly_actual_expenses":total_non_monthly_actual_expenses,"goals_dict":goals_dict,"total_goals_expected":total_goals_expected,
-               "total_goals_actual":total_goals_actual,
+               "total_goals_actual":total_goals_actual,'index_counter':index_counter,
                "today_date": str(today_date), "page": "budgets"}
 
     return render(request, 'budget/budget_walk_through.html', context=context)
@@ -2547,6 +2553,8 @@ def budgets_expenses_walk_through(request):
         budget_id = request.POST['id']
         expense_account_id = request.POST['expenses_account_id']
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
+        budget_start_date = request.POST['budget_date']
+        budget_period = request.POST['budget_period']
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
@@ -2564,9 +2572,12 @@ def budgets_expenses_walk_through(request):
             sub_cat_obj.save()
 
         if budget_id == "false":
-            budget_start_date = datetime.datetime.today().date()
+            if budget_start_date:
+                budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
+            else:
+                budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
-            budget_end_date = get_period_date(budget_start_date, "Monthly") - relativedelta(days=1)
+            budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             budget_obj = Budget()
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
@@ -2576,15 +2587,26 @@ def budgets_expenses_walk_through(request):
             budget_obj.currency = '$'
             budget_obj.auto_pay = False
             budget_obj.auto_budget = False
-            budget_obj.budget_period = "Monthly"
+            budget_obj.budget_period = budget_period
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.created_at = budget_start_date
-            budget_obj.ended_at = budget_end_date
+            budget_obj.ended_at = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
+            if budget_period == 'Yearly':
+                budget_amount = budget_exp_amount
+                budget_currency = "$"
+                budget_auto= False
+                subcategory_obj = sub_cat_obj
+                for month_value in range(11):
+                    start_month_date = start_month_date + relativedelta(months=1)
+                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                                budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
+                                budget_start_date, subcategory_obj, None, budget_status=True)
         else:
             budget_obj = Budget.objects.get(id=int(budget_id))
             old_spend_amount = float(budget_obj.budget_spent)
@@ -2593,10 +2615,28 @@ def budgets_expenses_walk_through(request):
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
+            budget_obj.budget_period = budget_period
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
-
+            if budget_period == 'Yearly':
+                budget_amount = budget_exp_amount
+                budget_currency = "$"
+                budget_auto= False
+                subcategory_obj = sub_cat_obj
+                if budget_start_date:
+                    budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
+                else:
+                    budget_start_date = budget_obj.start_date
+                start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+                budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
+                for month_value in range(11):
+                    start_month_date = start_month_date + relativedelta(months=1)
+                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                                budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
+                                budget_start_date, subcategory_obj, None, budget_status=True)
+            
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
@@ -2691,10 +2731,29 @@ def budgets_non_monthly_expenses_walk_through(request):
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
+            budget_obj.budget_period = budget_period
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
+            if budget_period == 'Yearly':
+                budget_amount = budget_exp_amount
+                budget_currency = "$"
+                budget_auto= False
+                subcategory_obj = sub_cat_obj
+                if budget_start_date:
+                    budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
+                else:
+                    budget_start_date = budget_obj.start_date
+                start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+                budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
+                for month_value in range(11):
+                    start_month_date = start_month_date + relativedelta(months=1)
+                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                                budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
+                                budget_start_date, subcategory_obj, None, budget_status=True)
+                    
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
@@ -5150,6 +5209,7 @@ def fund_accounts(request):
 def fund_add(request, name):
     user_name = request.user
     error = False
+    
     if request.method == 'POST':
         fund_data = save_fund_obj(request, user_name)
 
