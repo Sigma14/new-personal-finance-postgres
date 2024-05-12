@@ -31,7 +31,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" action="/fund_add/{{name}}" method="post">
+                    <form class="form form-horizontal" action="{% url 'fund_add' name %}" method="post">
                         {% if error %}
                             <p class="text-danger">{{error}}</p>
                         {% endif %}
