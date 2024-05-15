@@ -249,6 +249,8 @@
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
                                                                         <th>Actual Amount</th>
+                                                                        <th>Period</th>
+                                                                        <th>Calender</th>
                                                                         <th>Action</th>
                                                                     </tr>
                                                                 </thead>
@@ -259,6 +261,16 @@
                                                                                 <td><input type="text" value="{{data.0}}" id="bill_sources{{forloop.counter}}" name="bill_sources" class="form-control bill_sources" required/></td>
                                                                                 <td><input type="number" value="{{data.1}}" id="bill_expected_amount{{forloop.counter}}" name="bill_expected_amount" class="form-control total_bill_exp" required/></td>
                                                                                 <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="bill_actual_amount{{forloop.counter}}" name="bill_actual_amount" class="form-control total_bill_act" required/></td>
+                                                                                <td>
+                                                                                    <select id="bill_budget_period{{ forloop.counter }}" name="bill_budget_period" class="form-control" required>
+                                                                                        <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
+                                                                                        <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 bill_calender_icon " id="bill_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                    <input type="text" id="bill_add_budget_date{{forloop.counter}}"  name="bill_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
                                                                                 <td><button class="btn btn-outline-secondary update_bill_bgt_walkthrough" bill_index="{{forloop.counter}}" bill_id="{{data.4}}">Update</button></td>
                                                                             </tr>
                                                                         {% endfor %}
@@ -514,26 +526,31 @@
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
                                                                         <th>Actual Amount</th>
+                                                                        <th>Budget date</th>
                                                                         <th>Action</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     {% for key, data in goals_dict.items %}
-                                                                    
-                                                                       
-                                                                        <tr>
-                                                                            <td><input type="text" value="{{data.0}}" id="goals_sources{{forloop.parentloop.counter}}" name="goals_sources" class="form-control goals_sources" required/></td>
-                                                                            <td><input type="number" value="{{data.1}}" id="goals_expected_amount{{forloop.parentloop.counter}}" name="goals_expected_amount" class="form-control total_goals_exp" required/></td>
-                                                                            <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.parentloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required/></td>
-                                                                            <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.parentloop.counter}}" non_monthly_expenses_id="{{data.4}}">Update</button></td>
-                                                                        </tr>
+                                                                        
+                                                                        
+                                                                            <tr>
+                                                                                <td><input type="text" value="{{data.0}}" id="goals_sources{{forloop.counter}}" name="goals_sources" class="form-control goals_sources" required/></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="goals_expected_amount{{forloop.counter}}" name="goals_expected_amount" class="form-control total_goals_exp" required/></td>
+                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required/></td>
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 goal_calender_icon " id="goal_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                    <input type="text" id="goal_add_budget_date{{forloop.counter}}"  name="goal_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
+                                                                                <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" goals_index="{{forloop.counter}}" goals_id="{{data.4}}">Update</button></td>
+                                                                            </tr>
                                                                     
                                                                     {% endfor %}
                                                                     <tr class="total_goals_row">
                                                                         <td><strong >Total Goals</strong></td>
                                                                         <td><strong id="total_goals_exp">{{total_goals_expected}}</strong></td>
                                                                         <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>
-                                                                        <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill">+ Other Goals</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>

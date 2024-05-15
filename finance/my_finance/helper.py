@@ -180,7 +180,7 @@ def check_bill_is_due():
     """
     today_date = datetime.today().date()
     bill_data = Bill.objects.filter(date__lte=today_date, status="unpaid")
-    for bill in bill_data:
+    for bill in bill_data:        
         bill_detail_obj = bill.bill_details
         account_obj = bill_detail_obj.account
         account_balance = float(account_obj.available_balance)
@@ -190,6 +190,9 @@ def check_bill_is_due():
         auto_bill = bill_detail_obj.auto_bill
         auto_pay = bill_detail_obj.auto_pay
         bill_date = bill_detail_obj.date
+        if bill_date.month == datetime.today().date().month +1 :
+            # time.sleep(5)
+            continue
         frequency = bill_detail_obj.frequency
         next_bill_date = get_period_date(bill_date, frequency)
         bill_detail_obj.date = next_bill_date
@@ -225,7 +228,8 @@ def request_bill():
     """
     while True:
         check_bill_is_due()
-        time.sleep(60 * 60)
+        time.sleep(5)
+
 
 
 def create_bill_request():

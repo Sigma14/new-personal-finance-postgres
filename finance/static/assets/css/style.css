@@ -104,3 +104,8 @@ input[type=file]::file-selector-button {
 input[type=file]::file-selector-button:hover {
   background: #0d45a5;
 }
+
+.card-datatable {
+  overflow-x: auto; /* Enable horizontal scrolling if necessary */
+  max-width: 100%; /* Limit the maximum width to prevent overflow */
+}

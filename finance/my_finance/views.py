@@ -2345,7 +2345,6 @@ def budgets_walk_through(request):
     bills_dict = {'Bills': []}
     category_qs = SubCategory.objects.filter(category__user=user_name)
     for sub_data in category_qs:
-        print("Sub data",sub_data)
         if sub_data.category.name == "Income":
             income_categories.append(sub_data.name)
         if sub_data.category.name == "Bills & Subscriptions":
@@ -2429,7 +2428,6 @@ def budgets_walk_through(request):
     non_monthly_expenses_dict = {}
     if "Non-Monthly" in budgets_dict:
         for exp in budgets_dict['Non-Monthly']:
-            print("exxpppp",exp)
             non_monthly_expenses_dict.update({exp[0]:exp})
             total_non_monthly_expected_expenses += float(exp[1])
             total_non_monthly_actual_expenses += float(exp[2])
@@ -2448,8 +2446,7 @@ def budgets_walk_through(request):
         for expense_data in expenses:
             expense_data.append(index_counter)  # Insert index at the beginning
             index_counter += 1
-    print("inex_counter",index_counter)
-    print("expenses categories=====>",expense_categories)
+    
     context = {"income_bdgt_dict": income_bdgt_dict, "total_actual_income": total_actual_income,
                "total_income_expected": total_income_expected,
                "bills_dict": bills_dict, "total_actual_bill": total_actual_bill,
@@ -2475,6 +2472,7 @@ def budgets_income_walk_through(request):
         budget_id = request.POST['id']
         income_account_id = request.POST['income_account_id']
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
+        account_obj = Account.objects.get(id=int(income_account_id))
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Income", name=budget_name)
@@ -2500,6 +2498,7 @@ def budgets_income_walk_through(request):
             budget_obj.auto_pay = False
             budget_obj.auto_budget = False
             budget_obj.budget_period = "Monthly"
+            budget_obj.account = account_obj
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
@@ -2516,6 +2515,8 @@ def budgets_income_walk_through(request):
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
+            if income_account_id:
+                budget_obj.account = account_obj
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
@@ -2543,7 +2544,6 @@ def budgets_income_walk_through(request):
 
 @login_required(login_url="/login")
 def budgets_expenses_walk_through(request):
-    print("expensese request data===>",request.POST)
     user_name = request.user
     if request.method == 'POST' and request.is_ajax():
         budget_name = request.POST['name']
@@ -2555,6 +2555,7 @@ def budgets_expenses_walk_through(request):
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         budget_start_date = request.POST['budget_date']
         budget_period = request.POST['budget_period']
+        account_obj = Account.objects.get(id=int(expense_account_id))
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
@@ -2587,6 +2588,7 @@ def budgets_expenses_walk_through(request):
             budget_obj.currency = '$'
             budget_obj.auto_pay = False
             budget_obj.auto_budget = False
+            budget_obj.account = account_obj
             budget_obj.budget_period = budget_period
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.amount = budget_exp_amount
@@ -2616,6 +2618,7 @@ def budgets_expenses_walk_through(request):
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.budget_period = budget_period
+            budget_obj.account = account_obj
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
@@ -2669,7 +2672,7 @@ def budgets_non_monthly_expenses_walk_through(request):
         budget_period = request.POST['budget_period']
         budget_start_date = request.POST['budget_date']
         # print("budget_date",budget_date)
-
+        account_obj = Account.objects.get(id=int(expense_account_id))
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         # check subcategory exist or not
         try:
@@ -2706,6 +2709,7 @@ def budgets_non_monthly_expenses_walk_through(request):
             budget_obj.budget_period = budget_period
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.amount = budget_exp_amount
+            budget_obj.account = account_obj
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.created_at = budget_start_date
@@ -2732,6 +2736,7 @@ def budgets_non_monthly_expenses_walk_through(request):
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.budget_period = budget_period
+            budget_obj.account = account_obj
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
@@ -2780,11 +2785,13 @@ def budgets_goals_walk_through(request):
     if request.method == 'POST' and request.is_ajax():
         budget_name = request.POST['name']
         category_name = 'Goals' #request.POST['cat_name']
-        budget_exp_amount = float(request.POST['exp_amount'])
+        budget_exp_amount = float(request.POST['goal_amount'])
         budget_act_amount = float(request.POST['actual_amount'])
         budget_id = request.POST['id']
-        expense_account_id = request.POST['goals_account_id']
+        goal_account_id = request.POST['goals_account_id']
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
+        account_obj = Account.objects.get(id=int(goal_account_id))
+        goal_obj = Goal()
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
@@ -2816,6 +2823,7 @@ def budgets_goals_walk_through(request):
             budget_obj.auto_budget = False
             budget_obj.budget_period = "Monthly"
             budget_obj.initial_amount = budget_exp_amount
+            budget_obj.account = account_obj
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
@@ -2823,6 +2831,7 @@ def budgets_goals_walk_through(request):
             budget_obj.ended_at = budget_end_date
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
+            goal_obj_save(request,goal_obj,user_name)
         else:
             budget_obj = Budget.objects.get(id=int(budget_id))
             old_spend_amount = float(budget_obj.budget_spent)
@@ -2831,12 +2840,13 @@ def budgets_goals_walk_through(request):
             budget_obj.amount = budget_exp_amount
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
+            budget_obj.account = account_obj
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
         if budget_act_amount > 0:
-            account_obj = Account.objects.get(id=int(expense_account_id))
+            account_obj = Account.objects.get(id=int(goal_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
             tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name=category_name)
             transaction_date = datetime.datetime.today().date()
@@ -4358,9 +4368,14 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     user = request.user
     category_name = request.POST['category']
     sub_category_name = request.POST['sub_category_name']
-    goal_amount = request.POST['goal_amount']
+    goal_amount = request.POST['goal_amount'] 
+    # if goal_amount == None : goal_amount = request.POST['exp_amount']
     goal_date = request.POST['goal_date']
-    account_name = request.POST['account_name']
+    if goal_date == '': goal_date = None
+    try:
+        account_name = request.POST['account_name']
+    except:
+        account_name = Account.objects.get(id=int(request.POST['goals_account_id'])).name
     allocate_amount = 0
     # allocate_amount = request.POST['allocate_amount']
     account_obj = Account.objects.get(name=account_name)
@@ -4494,6 +4509,7 @@ class GoalDetail(LoginRequiredMixin, DetailView):
 def goal_add(request):
     user_name = request.user
     error = False
+    print(request.POST)
     if request.method == 'POST':
         goal_obj = Goal()
         goal_data = goal_obj_save(request, goal_obj, user_name)
@@ -5533,6 +5549,8 @@ def bill_walk_through(request):
         bill_account_id = request.POST['bill_account_id']
         bill_left_amount = round(bill_exp_amount - bill_act_amount, 2)
         account_obj = Account.objects.get(id=int(bill_account_id))
+        budget_period = request.POST['budget_period']
+        bill_date = request.POST['budget_date']
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Bills & Subscriptions",
@@ -5546,7 +5564,10 @@ def bill_walk_through(request):
             sub_cat_obj.save()
 
         if bill_id == "false":
-            bill_date = datetime.datetime.today().date()
+            if bill_date:
+                bill_date = datetime.datetime.strptime(bill_date, '%Y-%m-%d')
+            else:
+                bill_date = datetime.datetime.today().date()
             bill_date, end_month_date = start_end_date(bill_date, "Monthly")
             bill_obj = Bill()
             bill_obj.user = request.user
@@ -5556,8 +5577,8 @@ def bill_walk_through(request):
             bill_obj.date = bill_date
             bill_obj.currency = '$'
             bill_obj.remaining_amount = bill_left_amount
-            bill_obj.frequency = "Monthly"
-            bill_obj.auto_bill = False
+            bill_obj.frequency = budget_period
+            bill_obj.auto_bill = False 
             bill_obj.auto_pay = False
             bill_details_obj = BillDetail.objects.create(user=user_name, label=bill_name, account=account_obj,
                                                          amount=bill_exp_amount,
