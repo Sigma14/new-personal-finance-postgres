@@ -2710,12 +2710,16 @@ def compare_different_budget_box(request):
     earned_amount_bgt2 = 0
     if budgets:
         earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
-        start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
-        list_of_months = list(OrderedDict(
-            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
-        split_budgets_count = int(total_budget_count / 2)
-        budget1_names = budgets[0:split_budgets_count]
-        budget2_names = budgets[split_budgets_count:total_budget_count]
+        no_budgets = not bool(earliest)
+        if no_budgets == False:
+            start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+            list_of_months = list(OrderedDict(
+                ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
+            split_budgets_count = int(total_budget_count / 2)
+            budget1_names = budgets[0:split_budgets_count]
+            budget2_names = budgets[split_budgets_count:total_budget_count]
+        else:
+            list_of_months=[]
     if request.method == 'POST':
         month_name = "01-" + request.POST['select_period']
         budget1_names = request.POST.getlist('budget1_name')
@@ -2784,7 +2788,8 @@ def compare_different_budget_box(request):
                "budget_income_graph_id2": "#total_income_budget2",
                "budget_income_bar_id2": "#income-budgets-bar2",
                "budget_type": budget_type,
-               "page": "budgets"
+               "page": "budgets",
+               'no_budgets':no_budgets
                }
     return render(request, 'budget/compare_diff_bgt_box.html', context=context)
 
@@ -4089,9 +4094,12 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     goal_amount = request.POST['goal_amount']
     goal_date = request.POST['goal_date']
     account_name = request.POST['account_name']
-    allocate_amount = 0
-    if(goal_date==""): goal_date = None
-    # allocate_amount = request.POST['allocate_amount']
+    # allocate_amount = 0
+    if(goal_date=="") : goal_date = None
+    try:
+        allocate_amount = request.POST['allocate_amount']
+    except:
+        allocate_amount  = 0
     account_obj = Account.objects.get(name=account_name)
     print("category_name=======>", category_name)
     if fun_name:

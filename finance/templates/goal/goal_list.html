@@ -87,8 +87,12 @@
                                     {% endif %}
 
                                     <div class="card-body" style="padding-bottom:40px;">
-                                        <h4 style="float: left;">Goal Date :- {{ object.goal_date }}</h4>
-                                        <h4>Account :- {{object.account}}</h4>
+                                        {% if object.goal_date == None %}
+                                            <h4 style="float: left;">Goal Date :- No deadline</h4>
+                                        {% else %}
+                                        <h4 style="float: left;">Goal Date :- {{object.goal_date}}</h4>
+                                        {% endif %}
+                                            <h4>Account :- {{object.account}}</h4>
                                         <h4 style="float: right;">
                                             <div class="col-sm-40 offset-sm-20">
                                                 <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
