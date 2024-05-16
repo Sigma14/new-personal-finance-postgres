@@ -1491,7 +1491,7 @@ class CategoryList(LoginRequiredMixin, ListView):
                     categories_value.append(total_cat_spend)
 
         print(sub_category_dict)
-        sub_category_key = ['Category', 'Total Expenses', 'Total Income', 'Actions']
+        sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions','Remaining Balance', 'Actions']
         data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
