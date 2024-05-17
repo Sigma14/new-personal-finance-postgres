@@ -35,7 +35,7 @@
                         {% if error %}
                         <div class="col-sm-40 offset-sm-20">
                             <p class="text-danger">{{error}}</p>
-                            <a href="{% url 'fund_add' %}" class="btn btn-primary"><i
+                            <a href="{% url 'fund_accounts' %}" class="btn btn-primary"><i
                                 class="fa fa-plus"></i> Add Fund</a>
                         </div>
                         {% endif %}
@@ -127,7 +127,11 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input type="text" value="{{goal_data.goal_date}}" id="goal_date" name="goal_date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                            {% if goal_data.goaldate == None %}
+                                                <input type="text" value="" id="goal_date" name="goal_date" class="form-control flatpickr-basic" placeholder="No deadline"  required>
+                                            {% else %}
+                                                <input type="text" value="{{goal_data.goal_date}}" id="goal_date" name="goal_date" class="form-control flatpickr-basic"   required>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
