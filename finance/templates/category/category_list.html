@@ -85,6 +85,72 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                <tr><td colspan="4">
+                                                    <div class="input-group input-group-merge">
+                                                            <input type="text" id="add_category_group" class="form-control" name="category_name" placeholder="Enter Category Name"/>
+                                                    </div>
+                                                </td></tr>
+                                                    {% for key, value in sub_category_data.items %}
+                                                        <tr class="category" class_name="subcategory{{forloop.counter}}">
+                                                            <td>
+                                                                <a class="lead add_category" href="{% url 'subcategory_add' category_pk=value.2 %}" title="add category"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</a><strong>{{key}}&nbsp;</strong>
+                                                                <i class="fa fa-chevron-down subcategory{{forloop.counter}}_dropdown"></i><i class="fa fa-chevron-right subcategory{{forloop.counter}}_dropdown" style="display:None;"></i></td>
+                                                            <td><strong>{{value.0}}</strong></td>
+                                                            <td><strong>{{value.1}}</strong></td>
+                                                            <td>
+                                                                {% if key == 'Bills & Subscriptions' or key == 'Goals' or key == 'Funds' or key == 'Income' %}
+                                                                    <strong>&nbsp;</strong>
+                                                                {% else %}
+                                                                    <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">
+                                                                        <ul class="list-inline m-0">
+                                                                            <li class="list-inline-item">
+                                                                                <a href="{% url 'category_update' pk=value.2 %}"
+                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                        class="fa fa-edit"></i></a>
+                                                                            </li>
+                                                                            <li class="list-inline-item">
+                                                                                <button type="button" del_method="category_delete" delete_name="{{ key }} Category Group" url="{% url 'category_delete' pk=value.2 %}"
+                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                        class="fa fa-trash"></i></button>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </span>
+                                                                </div>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                        {% for data in value.3 %}
+                                                            <tr class="subcategory{{forloop.parentloop.counter}}">
+                                                                <td>{{data.0}}</td>
+                                                                <td>{{data.1}}</td>
+                                                                <td>{{data.2}}</td>
+                                                                <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="font-weight-bolder mr-1">
+                                                                        <ul class="list-inline m-0">
+                                                                            <li class="list-inline-item">
+                                                                                <a href="{% url 'subcategory_update' pk=data.3 %}"
+                                                                                   class="btn btn-success btn-sm rounded-0"><i
+                                                                                        class="fa fa-edit"></i></a>
+                                                                            </li>
+                                                                            <li class="list-inline-item">
+                                                                                <button type="button" del_method="category_delete" delete_name="{{data.0}} Category" url="{% url 'subcategory_delete' pk=data.3 %}"
+                                                                                   class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                                   data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                                        class="fa fa-trash"></i></button>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </tbody>
+                                            {% comment %}
+                                            <tbody>
                                             <tr><td colspan="5">
                                                 <div class="input-group input-group-merge">
                                                         <input type="text" id="add_category_group" class="form-control" name="category_name" placeholder="Enter Category Name"/>
@@ -164,6 +230,7 @@
                                                     {% endfor %}
                                                 {% endfor %}
                                             </tbody>
+                                            {% endcomment %}
                                         </table>
                                     </div>
                                 </div>

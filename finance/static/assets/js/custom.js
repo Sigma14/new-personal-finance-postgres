@@ -3030,7 +3030,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
 
         $("#total_goals_exp").text(total_exp_amount)
         $("#total_goals_act").text(total_act_amount)
-        var scrollPosition = window.scrollY || window.pageYOffset;
+        
         var csrfmiddlewaretoken = getCookie('csrftoken');
             $.ajax(
             {
@@ -3061,7 +3061,6 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
-                                    window.scrollTo(0, scrollPosition); 
                                     location.reload();
                                 });
                     }
@@ -3071,11 +3070,15 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text: response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }

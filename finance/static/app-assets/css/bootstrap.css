@@ -2264,7 +2264,7 @@ pre code {
 
 .form-control {
   display : block;
-  width : 100%;
+  width : 8rem;
   height : 2.714rem;
   padding : 0.438rem 1rem;
   font-size : 1rem;

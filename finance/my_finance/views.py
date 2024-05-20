@@ -1491,7 +1491,8 @@ class CategoryList(LoginRequiredMixin, ListView):
                     categories_value.append(total_cat_spend)
 
         print(sub_category_dict)
-        sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions','Remaining Balance', 'Actions']
+        # sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions','Remaining Balance', 'Actions']
+        sub_category_key = ['Category', 'Total Expenses','Total Income', 'Actions']
         data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
@@ -2835,7 +2836,7 @@ def budgets_goals_walk_through(request):
             goal_data = goal_obj_save(request,goal_obj,user_name)
             if 'error' in goal_data:
                 error = goal_data['error']
-                print('error',goal_data['error'])
+                return JsonResponse({'status': 'false', 'message': error})
             else:
                 budget_obj.save()
             
@@ -2852,7 +2853,7 @@ def budgets_goals_walk_through(request):
             goal_data =  goal_obj_save(request,goal_obj,user_name,account_name)
             if 'error' in goal_data:
                 error = goal_data['error']
-                print('error',goal_data['error'])
+                return JsonResponse({'status': 'false', 'message': error})
                 
             else:
                 budget_obj.save()
@@ -2875,7 +2876,7 @@ def budgets_goals_walk_through(request):
         return JsonResponse({'status': 'true'})
     goals_category = SubCategory.objects.filter(category__user=user_name, category__name='Goals')
     context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date),"error":error}
-    context.update({"page": "budgets",'error':error})
+    context.update({"page": "budgets"})
     return render(request, 'goal/goals_walk_through.html')
 
 @login_required(login_url="/login")
@@ -4397,20 +4398,26 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
         account_name = Account.objects.get(id=int(request.POST['goals_account_id'])).name
     # allocate_amount = 0
     
-    try:
+    if 'allocate_amount' in request.POST :
         allocate_amount = request.POST['allocate_amount']
-    except:
+    else:
         allocate_amount  = 0
-    actual_amount = request.POST['actual_amount']
-    try:
+    
+    try:    
         current_amount = goal_obj.allocate_amount
     except:
-        pass
+        current_amount = 0    
+    
+    if 'actual_amount' in request.POST:
+        actual_amount = request.POST['actual_amount']
+        if request.POST['id'] != 'false':
+            allocate_amount = float(actual_amount) + current_amount
+        else:
+            allocate_amount = actual_amount
     
     account_obj = Account.objects.get(name=account_name)
     print("category_name=======>", category_name)
     if fun_name:
-        allocate_amount = float(actual_amount) + current_amount
         try:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
             if float(fund_obj.total_fund) < float(allocate_amount):
