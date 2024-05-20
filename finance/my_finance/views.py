@@ -2791,6 +2791,8 @@ def budgets_goals_walk_through(request):
         goal_account_id = request.POST['goals_account_id']
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         account_obj = Account.objects.get(id=int(goal_account_id))
+        account_name = account_obj.name
+        
         goal_obj = Goal()
         # check subcategory exist or not
         try:
@@ -2830,10 +2832,16 @@ def budgets_goals_walk_through(request):
             budget_obj.created_at = budget_start_date
             budget_obj.ended_at = budget_end_date
             budget_obj.budget_start_date = budget_start_date
-            budget_obj.save()
-            goal_obj_save(request,goal_obj,user_name)
+            goal_data = goal_obj_save(request,goal_obj,user_name)
+            if 'error' in goal_data:
+                error = goal_data['error']
+                print('error',goal_data['error'])
+            else:
+                budget_obj.save()
+            
         else:
             budget_obj = Budget.objects.get(id=int(budget_id))
+            goal_obj = Goal.objects.get(user=user_name,label=budget_obj.category)
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -2841,7 +2849,13 @@ def budgets_goals_walk_through(request):
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.account = account_obj
-            budget_obj.save()
+            goal_data =  goal_obj_save(request,goal_obj,user_name,account_name)
+            if 'error' in goal_data:
+                error = goal_data['error']
+                print('error',goal_data['error'])
+                
+            else:
+                budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
@@ -2860,8 +2874,8 @@ def budgets_goals_walk_through(request):
 
         return JsonResponse({'status': 'true'})
     goals_category = SubCategory.objects.filter(category__user=user_name, category__name='Goals')
-    context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date)}
-    context.update({"page": "budgets"})
+    context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date),"error":error}
+    context.update({"page": "budgets",'error':error})
     return render(request, 'goal/goals_walk_through.html')
 
 @login_required(login_url="/login")
@@ -4387,9 +4401,16 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
         allocate_amount = request.POST['allocate_amount']
     except:
         allocate_amount  = 0
+    actual_amount = request.POST['actual_amount']
+    try:
+        current_amount = goal_obj.allocate_amount
+    except:
+        pass
+    
     account_obj = Account.objects.get(name=account_name)
     print("category_name=======>", category_name)
     if fun_name:
+        allocate_amount = float(actual_amount) + current_amount
         try:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
             if float(fund_obj.total_fund) < float(allocate_amount):
