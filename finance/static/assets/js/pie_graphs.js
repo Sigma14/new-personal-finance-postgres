@@ -80,7 +80,8 @@ function BudgetChart(graph_label, graph_data, graph_currency, graph_id)
                 show: true,
                 fontSize: '1.5rem',
                 formatter: function (w) {
-                  return graph_currency + parseInt(graph_data[0]);
+                  var total = graph_data.reduce((acc, curr) => acc + curr, 0);
+                  return graph_currency + total;
                 }
               }
             }
