@@ -196,7 +196,7 @@ class TransactionForm(forms.ModelForm):
         self.request = kwargs.pop('request')
         user_name = self.request.user
         super(TransactionForm, self).__init__(*args, **kwargs)
-        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Goals"]),
+        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name),#.exclude(name__in=["Goals"]),
                                                            empty_label="Select Category Group",
                                                            widget=forms.Select(
                                                                attrs={'class': 'form-control pick_category'}))

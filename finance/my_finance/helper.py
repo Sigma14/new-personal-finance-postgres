@@ -17,7 +17,8 @@ sub_category_suggested_list = {
               "Spotify Subscription", "Netflix Spotify Subscription",
               "Amazon Prime Spotify Subscription"],
     "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
-    "Income": ["Job", "Business", "Bonus"]
+    "Income": ["Job", "Business", "Bonus"],
+    "Non-Monthly":["Taxes","Car Maintenance","Medical Expenses","Insurance","Gifts","Holidays","Insurance"]
 }
 
 

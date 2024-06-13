@@ -248,7 +248,14 @@ $('#expense_table').DataTable( {
     $("body").delegate(".sub_cat_popup", "click", function(e)
     {
         var csrftoken = getCookie('csrftoken');
-        group_id = $("#id_categories").val()
+        
+        // Take the value from either id_category or id_categories, Both are different in Transaction add and Budget add.
+        let group_id;
+        if ($("#id_category").val()) {
+            group_id = $("#id_category").val();
+        } else if ($("#id_categories").val()) {
+            group_id = $("#id_categories").val();
+        }
         $.ajax({
             type: 'POST',
             url: "/en/subcategory_suggestion",
@@ -2027,6 +2034,9 @@ $("body").delegate(".pick_category", "change", function(event)
             optionHtml += "</select>"
             $("#trans_sub_cat").append(optionHtml);
             $(".transaction_cat_list").show();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error occurred during AJAX request:", status, error);
         }
     });
 });
@@ -2035,7 +2045,7 @@ $("body").delegate(".pick_category", "change", function(event)
 //  Show and hide due bills
 $("body").delegate(".show_due_bills", "change", function(event)
 {
-    category_id = $("#id_category").val()
+    category_id = $(" #id_category").val()
     var category_name = $('#id_category option:selected').text();
     sub_category = $(this).val()
     var csrftoken = getCookie('csrftoken');
@@ -2072,49 +2082,51 @@ $("body").delegate(".show_due_bills", "change", function(event)
 //            }
 //        });
 //    }
-    if (category_name == "Bills")
+    if (category_name == "Bills & Subscriptions" || category_name == "Bills")
     {
         $.ajax({
             type: 'POST',
             url: "/en/bill/due_list",
             data: {
-            'sub_category': sub_category,
-            'category_id': category_id,
-            'csrfmiddlewaretoken': csrftoken
+                'sub_category': sub_category,
+                'category_id': category_id,
+                'csrfmiddlewaretoken': csrftoken
             },
-            success: function(response)
-            {
-                if(response.status == 'error')
-                {
+            success: function(response) {
+                if(response.status === 'error') {
                     $(".transaction_due_bill_list").hide();
                     $("#trans_bills").empty();
-                }
-                else
-                {
-                    var unpaid_bill_dict = response.unpaid_bill_dict
-                    var optionHtml = "<select class='form-control' amount_dict='" + response.amount_dict + "' id='due_bill' name='due_bill' required><option value='' selected=''>Select due bills</option>"
+                } else {
+                    let unpaid_bill_dict = response.unpaid_bill_dict;
+                    let optionHtml = "<select class='form-control' amount_dict='" + JSON.stringify(response.amount_dict) + "' id='due_bill' name='due_bill' required><option value='' selected=''>Select due bills</option>";
                     $("#trans_bills").empty();
-                    $.each(unpaid_bill_dict, function(key, value)
-                    {
-                        optionHtml += "<option value='" + key + "'>" + value  + "</option>"
+                    $.each(unpaid_bill_dict, function(key, value) {
+                        optionHtml += "<option value='" + key + "'>" + value + "</option>";
                     });
-                    optionHtml += "</select>"
+                    optionHtml += "</select>";
                     $("#trans_bills").append(optionHtml);
                     $(".transaction_due_bill_list").show();
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error occurred during AJAX request:", status, error);
+                $(".transaction_due_bill_list").hide();
+                $("#trans_bills").empty();
             }
         });
     }
 });
 
-
-// add auto amount when select due bill
-$("body").delegate("#due_bill", "change", function(event)
-{
-    amount_dict = JSON.parse($(this).attr('amount_dict'))
-    bill_id = $(this).val()
-    $("#id_amount").val(amount_dict[bill_id])
-    $("#id_amount").attr('max_amount', amount_dict[bill_id])
+$("body").delegate("#due_bill", "change", function(event) {
+    let amount_dict = JSON.parse($(this).attr('amount_dict'));
+    let bill_id = $(this).val();
+    if (amount_dict[bill_id]) {
+        $("#id_amount").val(amount_dict[bill_id]);
+        $("#id_amount").attr('max_amount', amount_dict[bill_id]);
+    } else {
+        $("#id_amount").val('');
+        $("#id_amount").removeAttr('max_amount');
+    }
 });
 
 // add uncredited amount when select uncredited income
@@ -2147,8 +2159,8 @@ $("body").delegate("#id_amount", "change paste keypress", function(event)
 //  check Budget Category
 $("body").delegate(".check_budget_category", "change", function(event)
 {
-    category_name = $("#id_category").val()
-    cat_name =$('#id_category option:selected').text();
+    category_name = $("#id_categories, #id_category").val()
+    cat_name =$('#id_categories option:selected').text();
     if(cat_name == 'Income')
     {
         $('#customRadio2').prop('checked', true);
@@ -2681,10 +2693,8 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
     name = $("#expenses_sources"+expenses_index).val()
     exp_amount = $("#expenses_expected_amount"+expenses_index).val()
     actual_amount = $("#expenses_actual_amount"+expenses_index).val()
-    budget_period = $('#exp_budget_period'+expenses_index).val()
-    budget_date = $('#exp_add_budget_date'+expenses_index).val()
-    console.log("budget period====>",budget_period)
-    console.log("budget date======>",budget_date)
+    budget_period = $('#expenses_budget_period'+expenses_index).val()
+    budget_date = $('#expenses_add_budget_date'+expenses_index).val()
     cat_name = $(this).attr('category_name')
     if(name && cat_name && exp_amount && actual_amount)
     {
@@ -2776,14 +2786,14 @@ $("body").delegate(".add_other_expenses", "click", function(e)
     "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td>"+
     "<td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td>"+
     "<td>" +
-    "<select id='exp_budget_period" + last_index + "' name='exp_budget_period' class='form-control' required>" +
+    "<select id='expenses_budget_period" + last_index + "' name='expenses_budget_period' class='form-control' required>" +
     "<option value='Monthly'>Monthly</option>" +
     "<option value='Yearly'>Yearly</option>" +
     "</select>" +
     "</td>" +
     "<td>" +
-    "<i class='fa fa-calendar fa-1 exp_calender_icon' index='" + last_index + "' id='exp_calender_icon" + last_index + "'></i>" +
-    "<input type='text' id='exp_add_budget_date" + last_index + "' name='exp_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
+    "<i class='fa fa-calendar fa-1 expenses_calender_icon' index='" + last_index + "' id='expenses_calender_icon" + last_index + "'></i>" +
+    "<input type='text' id='expenses_add_budget_date" + last_index + "' name='expenses_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
     "</td>" +
     "<td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false'>Update</button></td></tr>"
     $(".total_expenses_row").before(trHTML)
@@ -2798,10 +2808,10 @@ $("body").delegate(".other_exp_name", "change", function(e)
 });
 
 // Date picker for Montlhy expenses
-$("body").delegate(".exp_calender_icon", "click", function(e) {
+$("body").delegate(".expenses_calender_icon", "click", function(e) {
     var last_index = parseInt($(this).attr('index'))
 
-    var budgetDateId = "#exp_add_budget_date" + last_index;
+    var budgetDateId = "#expenses_add_budget_date" + last_index;
     console.log(budgetDateId)
         // Show the budget_date input field
     $(budgetDateId).removeAttr("hidden");
@@ -2830,8 +2840,8 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
     non_monthly_expenses_index = $(this).attr('non_monthly_expenses_index')
     non_monthly_expenses_account_id = $('#non_monthly_expenses_account_id').val()
     id = $(this).attr('non_monthly_expenses_id')
-    budget_period = $('#budget_period'+non_monthly_expenses_index).val()
-    budget_date = $('#add_budget_date'+non_monthly_expenses_index).val()
+    budget_period = $('#non_monthly_expenses_budget_period'+non_monthly_expenses_index).val()
+    budget_date = $('#non_monthly_expenses_add_budget_date'+non_monthly_expenses_index).val()
     name = $("#non_monthly_expenses_sources"+non_monthly_expenses_index).val()
     exp_amount = $("#non_monthly_expenses_expected_amount"+non_monthly_expenses_index).val()
     actual_amount = $("#non_monthly_expenses_actual_amount"+non_monthly_expenses_index).val()
@@ -2931,14 +2941,14 @@ $("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
     "<td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td>"+
     
     "<td>" +
-    "<select id='budget_period" + last_index + "' name='budget_period' class='form-control' required>" +
+    "<select id='non_monthly_expenses_budget_period" + last_index + "' name='non_monthly_expenses_budget_period' class='form-control' required>" +
     "<option value='Monthly'>Monthly</option>" +
     "<option value='Yearly'>Yearly</option>" +
     "</select>" +
     "</td>" +
     "<td>" +
-    "<i class='fa fa-calendar fa-1 calender_icon' index='" + last_index + "' id='calender_icon" + last_index + "'></i>" +
-    "<input type='text' id='add_budget_date" + last_index + "' name='add_budget_date' class='form-control flatpickr-basic' hidden required>" +
+    "<i class='fa fa-calendar fa-1 non_monthly_expenses_calender_icon' index='" + last_index + "' id='non_monthly_expenses_calender_icon" + last_index + "'></i>" +
+    "<input type='text' id='non_monthly_expenses_add_budget_date" + last_index + "' name='non_monthly_expenses_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
     "</td>" +
     "<td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false'>Update</button></td>"+
     "</tr>"
@@ -2948,10 +2958,10 @@ $("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
 });
 
 // Event binding for calendar icon click
-$("body").delegate(".calender_icon", "click", function(e) {
+$("body").delegate(".non_monthly_expenses_calender_icon", "click", function(e) {
     var last_index = parseInt($(this).attr('index'))
 
-    var budgetDateId = "#add_budget_date" + last_index;
+    var budgetDateId = "#non_monthly_expenses_add_budget_date" + last_index;
     console.log(budgetDateId)
         // Show the budget_date input field
     $(budgetDateId).removeAttr("hidden");
@@ -2973,26 +2983,6 @@ $("body").delegate(".calender_icon", "click", function(e) {
 });
 
 
-// // Date picker
-// $("body").delegate(".calender-icon", "click", function(e)
-// {
-    
-//     $("#add_budget_date").removeAttr("hidden");
-//     // Get Flatpickr instance of the #budget_date input
-//     var flatpickrInstance = $("#add_budget_date")[0]._flatpickr;
-    
-//     // Open the Flatpickr calendar
-//     if (flatpickrInstance) {
-//         flatpickrInstance.open();
-//     }
-//     setTimeout(function() {
-        
-//         // Add the 'hidden' attribute back to the #budget_date input (optional)
-//         $("#add_budget_date").attr("hidden", true);
-//     }, 100);
-    
-// });
-
 // Add Goals Budget Walkthrough
 $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
 {
@@ -3002,7 +2992,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
     console.log("goals_index",goals_index)
     goals_account_id = $('#goals_account_id').val()
     id = $(this).attr('goals_id')
-    goal_date = $('#goal_add_budget_date'+goals_index).val()
+    goal_date = $('#goals_add_budget_date'+goals_index).val()
     if ($("#goals_sources"+goals_index).val()) {
         name = $("#goals_sources"+goals_index).val();
     }
@@ -3117,7 +3107,7 @@ $("body").delegate(".add_other_goals", "click", function(e)
     "<td><input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required/></td>"+
     "<td>" +
     "<i class='fa fa-calendar fa-1 goal_calender_icon' index='" + last_index + "' id='goal_calender_icon" + last_index + "'></i>" +
-    "<input type='text' id='goal_add_budget_date" + last_index + "' name='goal_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
+    "<input type='text' id='goals_add_budget_date" + last_index + "' name='goals_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
     "</td>" +
     "<td><button class='btn btn-outline-secondary update_goals_bgt_walkthrough' goals_index='" + last_index +"' goals_id='false'>Update</button></td></tr>"
     
@@ -3129,7 +3119,7 @@ $("body").delegate(".add_other_goals", "click", function(e)
 $("body").delegate(".goal_calender_icon", "click", function(e) {
     var last_index = parseInt($(this).attr('index'))
 
-    var budgetDateId = "#goal_add_budget_date" + last_index;
+    var budgetDateId = "#goals_add_budget_date" + last_index;
     console.log(budgetDateId)
         // Show the budget_date input field
     $(budgetDateId).removeAttr("hidden");
@@ -3149,12 +3139,6 @@ $("body").delegate(".goal_calender_icon", "click", function(e) {
 });
 
 
-// $("body").delegate(".other_non_monthly_exp_name", "change", function(e)
-// {
-//     btn_id = $(this).attr('btn_id')
-//     cat_name = $(this).val()
-//     $("#" + btn_id).attr('category_name', cat_name)
-// });
 
 
 
@@ -3173,4 +3157,122 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+});
+
+// Function for Budget Add Form modal
+$("body").delegate(".add-budget-btn", "click", function(e) {
+    e.preventDefault();
+
+    // Fetch category and subcategory from the button attributes
+    var category = $(this).data("category");
+    var subcategory = $(this).data("subcategory");
+    var buttonId = $(this).data("button-id");
+
+    // Log the values for debugging
+    console.log("Category: ", category);
+    console.log("Subcategory: ", subcategory);
+
+    // Set category and subcategory value
+    $('#budgetForm [name="categories"]').val(category)
+    $('#budgetForm [name="subcategory"]').val(subcategory);
+
+    var budget_cat = ""
+    if(category == "Bills & Subscriptions"){
+        budget_cat = "bill"
+        
+    } else if (category == "Non-Monthly") {
+        budget_cat = "non_monthly_expenses"
+    } else if(category == "Income"){
+        budget_cat = "income"
+    } else if(category == "Goals"){
+        budget_cat = "goals"
+    } else{
+        budget_cat = "expenses"
+    }
+    
+    // Set the budget category ids and required params.
+    $('#budgetForm [name="subcategory"]').attr('id', budget_cat + '_sources' + buttonId);
+    $('#budgetForm [name="budget-add-button"]').attr({
+        [budget_cat + '_index']:buttonId,
+        'category_name':category,
+        [budget_cat + '_id']:'false'
+    }).addClass('update_'+budget_cat+"_bgt_walkthrough");
+    $('#budgetForm [name="budget_period"]').attr('id', budget_cat +'_budget_period'+buttonId)
+    $('#budgetForm [name="budget_date"]').attr('id', budget_cat +'_add_budget_date'+buttonId)
+    $('#budgetForm [name="expected_amount"]').attr('id', budget_cat + '_expected_amount'+buttonId)
+    $('#budgetForm [name="actual_amount"]').attr('id', budget_cat +'_actual_amount'+buttonId)
+    $('#budgetForm [name="account"]').attr('id', budget_cat +'_account_id')
+
+    // Show the modal
+    $('#budgetFormModal').modal('show');
+});
+
+// Function for Transaction Add form Modal
+$("body").delegate(".add-transaction-btn", "click", function(e) {
+    e.preventDefault();
+
+    var category = $(this).data("category");
+    var subcategory = $(this).data("subcategory");
+    var buttonId = $(this).data("button-id");
+
+    // Log the values for debugging
+    console.log("Category: ", category);
+    console.log("Subcategory: ", subcategory);
+
+    // Set the value of the category select element
+    $('#transactionForm [name="category"] option').filter(function() {
+        return $(this).text() === category;
+    }).prop('selected', true).trigger('change');
+    
+    setTimeout(function() {
+        $('#transactionForm #subcategory option').filter(function() {
+            return $(this).text() === subcategory;
+        }).prop('selected', true).trigger('change');
+    }, 500); 
+   
+    $('#transactionFormModal').modal('show');
+});
+
+// Transaction form response function
+$('#transactionForm').submit(function(event){
+    event.preventDefault(); // Prevent the default form submission
+
+    $.ajax({
+        type: 'POST',
+        url: '/en/transaction_add/',
+        data: $(this).serialize(),
+        success: function(response) {
+            if(response.status === 'false') {
+                Swal.fire({
+                    title: 'Saving Failed!',
+                    icon: 'error',
+                    text: response.message,
+                    customClass: {
+                      confirmButton: 'btn btn-primary'
+                    },
+                    buttonsStyling: false
+                }).then(function () {
+                    // Reload the page
+                    location.reload();
+                });
+            } else{
+                Swal.fire
+                                 ({
+                                    title: 'Saved Successfully',
+                                    icon: 'success',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary'
+                                    },
+                                    buttonsStyling: false
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
+            }
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX error
+            console.error(error);
+        }
+    });
 });

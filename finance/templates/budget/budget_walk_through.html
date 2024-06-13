@@ -353,14 +353,14 @@
                                                                                 <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{data|last}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/></td>
                                                                                 <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{data|last}}" name="expenses_actual_amount" class="form-control total_expenses_act" required/></td>
                                                                                 <td>
-                                                                                    <select id="exp_budget_period{{ data|last }}" name="exp_budget_period" class="form-control" required>
+                                                                                    <select id="expenses_budget_period{{ data|last }}" name="expenses_budget_period" class="form-control" required>
                                                                                         <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
                                                                                         <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
                                                                                     </select>
                                                                                 </td>
                                                                                 <td>
-                                                                                    <i class="fa fa-calendar fa-1 exp_calender_icon " id="exp_calender_icon" index="{{data|last}}"></i> 
-                                                                                    <input type="text" id="exp_add_budget_date{{data|last}}"  name="exp_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                    <i class="fa fa-calendar fa-1 expenses_calender_icon " id="expenses_calender_icon" index="{{data|last}}"></i> 
+                                                                                    <input type="text" id="expenses_add_budget_date{{data|last}}"  name="expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                                 </td>
                                                                                 <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{data|last}}" expenses_id="{{data.4}}">Update</button></td>
                                                                             </tr>
@@ -447,14 +447,14 @@
                                                                             <td><input type="number" value="{{data.1}}" id="non_monthly_expenses_expected_amount{{forloop.counter}}" name="non_monthly_expenses_expected_amount" class="form-control total_non_monthly_expenses_exp" required/></td>
                                                                             <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="non_monthly_expenses_actual_amount{{forloop.counter}}" name="non_monthly_expenses_actual_amount" class="form-control total_non_monthly_expenses_act" required/></td>
                                                                             <td>
-                                                                                <select id="budget_period{{ forloop.counter }}" name="budget_period" class="form-control" required>
+                                                                                <select id="non_monthly_expenses_budget_period{{ forloop.counter }}" name="non_monthly_expenses_budget_period" class="form-control" required>
                                                                                     <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
                                                                                     <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
                                                                                 </select>
                                                                             </td>
                                                                             <td>
-                                                                                <i class="fa fa-calendar fa-1 calender_icon " id="calender_icon" index="{{forloop.counter}}"></i> 
-                                                                                <input type="text" id="add_budget_date{{forloop.counter}}"  name="add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                <i class="fa fa-calendar fa-1 non_monthly_expenses_calender_icon " id="non_monthly_expenses_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                <input type="text" id="non_monthly_expenses_add_budget_date{{forloop.counter}}"  name="non_monthly_expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                             </td>
                                                                             <td><button class="btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.counter}}" non_monthly_expenses_id="{{data.4}}">Update</button></td>
                                                                         </tr>
@@ -540,7 +540,7 @@
                                                                                 <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required/></td>
                                                                                 <td>
                                                                                     <i class="fa fa-calendar fa-1 goal_calender_icon " id="goal_calender_icon" index="{{forloop.counter}}"></i> 
-                                                                                    <input type="text" id="goal_add_budget_date{{forloop.counter}}"  name="goal_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                    <input type="text" id="goals_add_budget_date{{forloop.counter}}"  name="goals_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                                 </td>
                                                                                 <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" goals_index="{{forloop.counter}}" goals_id="{{data.4}}">Update</button></td>
                                                                             </tr>
