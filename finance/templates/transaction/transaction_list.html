@@ -47,17 +47,20 @@
                         <div class="card card-congratulation-medal">
                             <div class="card-body">
                                 <div class="col-sm-40 offset-sm-20">
+                                    <h4>Manual Transaction Entry</h4>
                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#add_transaction_account"></i> 
                                     <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
-                                        class="fa fa-plus"></i> Add Transaction</a>
-                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#transaction_account"></i> 
-                                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#plaid_accounts">
-                                            Add Account Transactions
-                                        </button>
+                                        class="fa fa-plus"></i> Add Transaction in App</a> <br/><br/>
+                                    <h4>Automatic Transaction Entry</h4>
+                                    <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#transaction_account"></i> 
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#plaid_accounts">
+                                        Link App to Bank account via Plaid Secure Api
+                                    </button>
                                 </div>
                                 <br/>
+                                <h4>File Transaction Entry</h4>
                                 <p>{{message}}</p>
-                                <p class="text-danger">*First check <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">file format</a> before uploading</p>
+                                <p class="text-danger">*File Upload Transaction Method, Please <a href="{% static 'sample_file/transaction_sample.csv' %}" download="transaction_file_format">click here</a>  to access our file format needed before uploading</p>
                                 <form id="upload_transaction_form">
                                     {% csrf_token %}
                                     <div>
