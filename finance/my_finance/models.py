@@ -369,6 +369,8 @@ class Goal(models.Model):
     label = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
     goal_amount = models.FloatField()
     allocate_amount = models.FloatField()
+    fund_amount = models.FloatField(default=0)
+    budget_amount = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

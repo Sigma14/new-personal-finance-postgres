@@ -1,4 +1,6 @@
 {% extends "index.html" %}
+{% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <head>
     {% block title %} Goal Add {% endblock title %}
@@ -31,7 +33,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" action="{% url 'goal_add' %}" method="post">
+                    <form id="goalAddForm" class="form form-horizontal" action="{% url 'goal_add' %}" method="post">
                         {% if error %}
                         <div class="col-sm-40 offset-sm-20">
                             <p class="text-danger">{{error}}</p>
@@ -68,12 +70,20 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <input list="browsers" type="text" class="form-control data_list_drop_down" id="sub_category_name" name="sub_category_name" placeholder="Goal Name" required data-validation-required-message="This field is required"/>
-                                                <datalist id="browsers" name="">
-                                                    {% for data in goal_category %}
-                                                        <option value="{{data.name}}" data-id="{{forloop.counter}}">{{data.name}}</option>
-                                                    {% endfor %}
-                                                </datalist>
+                                            <input type="text" class="form-control" name="sub_category_name" id="sub_category_name" placeholder="Goal Name">
+                                            
+                                            
+                                        </div><br>
+                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                            <h5 style="margin:5px;">Suggested Goals :-</h5>
+                                            {% for category in goal_category %}
+                                            <a style="margin:5px; font-size: 12px;"  data-goal="{{category.name}}" class="btn btn-outline-secondary goal-add-btn">
+                                                {% if category_icons|get_item:category.name %}
+                                                                    <img src="{% static category_icons|get_item:category.name %}" alt="{{ category.name }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                {% endif %}
+                                                {{category.name}}&nbsp;
+                                            </a>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>

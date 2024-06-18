@@ -3276,3 +3276,14 @@ $('#transactionForm').submit(function(event){
         }
     });
 });
+
+// Goal suggestions
+$("body").delegate(".goal-add-btn", "click", function(e) {
+    e.preventDefault();
+
+    var goal_name = $(this).data("goal");
+    // Set the selected value to Goal name
+    $('#goalAddForm [name="sub_category_name"]').val(goal_name).trigger('change');
+    
+});
+

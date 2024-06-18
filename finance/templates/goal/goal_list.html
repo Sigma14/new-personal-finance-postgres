@@ -65,26 +65,30 @@
                         <div class="card-header">
                             <h2 style="float: left;">
                                 <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#GoalDescription"></i> 
-                                {{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%)
+                                {{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:1 }}%)
                             </h2>
                             <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
                         </div>
                         <div class="card-body">
                             <div class="item-img text-center">
                                 <a href="{% url 'goal_update' pk=object.id %}">
-                                    {% if object.allocate_amount >= object.goal_amount %}
-                                    <div class="progress progress-bar-success" style="height:30px;">
-                                        <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
-                                            {{ 100 }}%
-                                        </div>
-                                    </div>
-                                    {% else %}
                                     <div class="progress progress-bar-warning" style="height:30px;">
-                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%">
-                                            {{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:0 }}%
+                                        <!-- Budget amount progress -->
+                                        {% if object.budget_amount != 0 %}
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:0 }}%; background-color:red;"
+                                        data-toggle="tooltip" data-placement="top" title="Budget - $ {{ object.budget_amount }}">
+                                            {{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:1 }}%
                                         </div>
+                                        {% endif %}
+                                        <!-- Fund amount progress -->
+                                        {% if object.fund_amount %}
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:0 }}%"
+                                        data-toggle="tooltip" data-placement="top" title="Fund - $ {{ object.fund_amount }}">
+                                             {{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:1 }}%
+                                        </div>
+                                        {% endif %}
                                     </div>
-                                    {% endif %}
+                                    
 
                                     <div class="card-body" style="padding-bottom:40px;">
                                         {% if object.goal_date == None %}
@@ -93,6 +97,14 @@
                                         <h4 style="float: left;">Goal Date :- {{object.goal_date}}</h4>
                                         {% endif %}
                                             <h4>Account :- {{object.account}}</h4>
+                                            <!-- Budget and fund allocated amount details -->
+                                            <div style="float: left;">
+                                                <div class='goal-box red'></div>
+                                                <div class="goal-box-label"><h6>Budget - $ {{object.budget_amount}} &ensp;</h6></div>
+                                                <div class='goal-box orange'></div>
+                                                <div class="goal-box-label"><h6>Fund - $ {{object.fund_amount}} </h6></div>
+                                            </div>
+                                              
                                         <h4 style="float: right;">
                                             <div class="col-sm-40 offset-sm-20">
                                                 <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i

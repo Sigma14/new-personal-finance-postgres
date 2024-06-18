@@ -2967,8 +2967,9 @@ def budgets_goals_walk_through(request):
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         account_obj = Account.objects.get(id=int(goal_account_id))
         account_name = account_obj.name
+        goal_date = request.POST['goal_date']
+        if goal_date == '': goal_date = None
         
-        goal_obj = Goal()
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
@@ -3007,17 +3008,29 @@ def budgets_goals_walk_through(request):
             budget_obj.created_at = budget_start_date
             budget_obj.ended_at = budget_end_date
             budget_obj.budget_start_date = budget_start_date
-            goal_data = goal_obj_save(request,goal_obj,user_name)
-            if 'error' in goal_data:
-                error = goal_data['error']
-                if error != "Name is already exist":
-                    return JsonResponse({'status': 'false', 'message': error})
-                else:
-                    budget_obj.save()
-                
-            else:
+            try:
+                goal_obj = Goal.objects.get(user=user_name, label=sub_cat_obj)
+                # If goal already exists, it'll allocate the budget actual amount to goals
+                if goal_obj:
+                        budget_obj.save()
+                        goal_obj.allocate_amount += budget_act_amount
+                        goal_obj.budget_amount += budget_act_amount
+                        goal_obj.save()
+                        return JsonResponse({'status':'true',"message":"Goal already exists, Budget Created!!"})
+            except:
+                # If goal doesn't exists, creates a new one
+                goal_obj = Goal()
+                goal_obj.user = user_name
+                goal_obj.account = account_obj
+                goal_obj.goal_amount = budget_exp_amount
+                goal_obj.currency = account_obj.currency
+                goal_obj.goal_date = goal_date
+                goal_obj.label = sub_cat_obj
+                goal_obj.allocate_amount = budget_act_amount
+                goal_obj.budget_amount += budget_act_amount
+                goal_obj.save()
                 budget_obj.save()
-            
+
         else:
             budget_obj = Budget.objects.get(id=int(budget_id))
             goal_obj = Goal.objects.get(user=user_name,label=budget_obj.category)
@@ -3028,13 +3041,13 @@ def budgets_goals_walk_through(request):
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.account = account_obj
-            goal_data =  goal_obj_save(request,goal_obj,user_name,account_name)
-            if 'error' in goal_data:
-                error = goal_data['error']
-                return JsonResponse({'status': 'false', 'message': error})
-                
-            else:
-                budget_obj.save()
+            if goal_date != None:
+                goal_obj.goal_date = goal_date
+            goal_obj.allocate_amount += round(budget_act_amount - old_spend_amount, 2)
+            goal_obj.budget_amount += round(budget_act_amount - old_spend_amount, 2)
+            goal_obj.save()
+            budget_obj.save()
+ 
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
@@ -3229,8 +3242,9 @@ def compare_different_budget_box(request):
 
     budget2_bar_value, budget2_graph_value, budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names, transaction_data_dict2, spending_amount_bgt2, earned_amount_bgt2 = get_cmp_diff_data(
         budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2,
-        budget2_income_graph_value, budget1_income_bar_value, expense_bgt2_names, income_bgt2_names,
-        spending_amount_bgt2, earned_amount_bgt1)
+        budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names,
+        spending_amount_bgt2, earned_amount_bgt2)
+    print("income budget 2",earned_amount_bgt2)
     context = {"budgets": budgets, "list_of_months": list_of_months,
                "budget1_names": budget1_names,
                "budget2_names": budget2_names,
@@ -4133,10 +4147,11 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         # For Goals , Add transaction and add the amount to goal allocated amount
         if category_name.name == "Goals":
             goal_obj = Goal.objects.get(user=user_name,label=budget_obj.category)
-            goal_data = goal_obj_save(self.request,goal_obj,user_name,"transaction_add")
-            if 'error' in goal_data:
-                error = goal_data['error']
-                return JsonResponse({'status': 'false', 'message': error})
+            if goal_obj:
+                goal_obj.allocate_amount += transaction_amount
+                goal_obj.budget_amount += transaction_amount
+                goal_obj.save()
+            
         obj.remaining_amount = account_obj.available_balance
         if budget_obj:
             obj.budgets = budget_obj
@@ -4576,45 +4591,29 @@ def calculate_available_lock_amount(user_name, account_obj):
 def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     return_data = {}
     user = request.user
-    if not fun_name or fun_name != 'transaction_add':
-        category_name = request.POST['category']
-        sub_category_name = request.POST['sub_category_name']
-        goal_amount = request.POST['goal_amount'] 
-        goal_date = request.POST['goal_date']
-        if goal_date == '': goal_date = None
-        try:
-            account_name = request.POST['account_name']
-        except:
-            account_name = Account.objects.get(user=user,id=int(request.POST['goals_account_id'])).name
-        
-        if 'allocate_amount' in request.POST :
-            allocate_amount = request.POST['allocate_amount']
-        else:
-            allocate_amount  = 0
-        
-        try:    
-            current_amount = goal_obj.allocate_amount
-        except:
-            current_amount = 0    
-        
-        if 'actual_amount' in request.POST:
-            actual_amount = request.POST['actual_amount']
-            if request.POST['id'] != 'false':
-                allocate_amount = float(actual_amount) + current_amount
-            else:
-                allocate_amount = actual_amount
-        
-        account_obj = Account.objects.get(user=user,name=account_name)
-        
+    category_name = request.POST['category']
+    sub_category_name = request.POST['sub_category_name']
+    goal_amount = request.POST['goal_amount'] 
+    goal_date = request.POST['goal_date']
+    if goal_date == '': goal_date = None
+    account_name = request.POST['account_name']
+    
+    if 'allocate_amount' in request.POST :
+        allocate_amount = float(request.POST['allocate_amount'])
     else:
-        category_name =  Category.objects.get(user=user, pk= request.POST['category'] )
-        sub_category_name = request.POST['subcategory']
-        goal_amount = goal_obj.goal_amount
-        account_obj = Account.objects.get(user=user,id=int(request.POST['account']))
-        amount = float(request.POST['amount'])
-        goal_date = goal_obj.goal_date
-        allocate_amount = goal_obj.allocate_amount + amount
+        allocate_amount  = 0
+    
+    account_obj = Account.objects.get(user=user,name=account_name)
+    fund_amount = 0
     if fun_name:
+        # Fetches old goal amount and add the transaction amount to fund amount 
+        old_goal_amount = goal_obj.allocate_amount
+        if old_goal_amount <= allocate_amount:
+            fund_amount = allocate_amount - old_goal_amount  
+        
+        goal_obj.fund_amount += fund_amount
+
+        # Checks continues for fund
         try:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
             if float(fund_obj.total_fund) < float(allocate_amount):
@@ -4625,11 +4624,13 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
             return_data[
                 'error'] = f"Please add lock fund to {account_obj.name} account first then allocate amount to goal"
             return return_data
-
         if account_obj != goal_obj.account:
+            goal_obj.account = account_obj
+            goal_obj.save()
             old_fund_obj = AvailableFunds.objects.get(user=user_name, account=goal_obj.account)
             old_fund_obj.lock_fund = round(float(old_fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
             old_fund_obj.save()
+            
 
             if float(allocate_amount) > float(fund_obj.total_fund):
                 return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account lock fund." \
@@ -4642,7 +4643,6 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
                 lock_funds = round(float(fund_obj.lock_fund) + float(allocate_amount), 2)
                 fund_obj.lock_fund = lock_funds
                 fund_obj.lock_fund = round(float(fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
-
         category_obj = Category.objects.get(user=user, name=category_name)
         if sub_category_name != goal_obj.label.name:
             sub_category = SubCategory.objects.filter(category__user=user, name=sub_category_name)
@@ -4656,6 +4656,7 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
                 sub_category = sub_category[0]
         else:
             sub_category = goal_obj.label
+        
     else:
         try:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
@@ -4665,6 +4666,9 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
             return return_data
         lock_funds = round(float(fund_obj.lock_fund) + float(allocate_amount), 2)
         fund_obj.lock_fund = lock_funds
+        fund_amount = allocate_amount
+        
+        goal_obj.fund_amount = fund_amount
         if float(allocate_amount) > float(fund_obj.total_fund):
             return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account lock fund." \
                                    f" please add more lock fund."
@@ -4756,8 +4760,9 @@ def goal_add(request):
                                           account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
                                                             'Line of Credit'])
     category_obj = Category.objects.get(name="Goals", user=user_name)
-    context = {'account_data': account_data, 'goal_category': SubCategory.objects.filter(category=category_obj),
-               "page": "goal_add"}
+    sub_obj = SubCategory.objects.filter(category__user=user_name,category__name="Goals")
+    context = {'account_data': account_data, 'goal_category': sub_obj,
+               "page": "goal_add", "category_icons":category_icons}
 
     if error:
         context['error'] = error

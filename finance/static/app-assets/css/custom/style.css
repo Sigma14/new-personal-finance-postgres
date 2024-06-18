@@ -25,3 +25,25 @@
         background-color: rgba(24, 31, 48, 0.9); 
     }
 }
+
+.goal-box {
+    height: 20px;
+    width: 20px;
+    margin-bottom: 15px;
+    border: 1px solid black;
+    float: left;
+
+}
+.red {
+    background-color: red; 
+}
+
+.orange {
+    background-color: orange;
+}
+
+.goal-box-label {
+    float: left;
+    margin-left: 5px;
+    line-height: 20px;
+}
