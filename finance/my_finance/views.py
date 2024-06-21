@@ -2663,7 +2663,15 @@ def budgets_income_walk_through(request):
             budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
             budget_end_date = get_period_date(budget_start_date, "Monthly") - relativedelta(days=1)
-            budget_obj = Budget()
+            try:
+                budget_obj = Budget.objects.filter(user=user_name,name=budget_name, budget_start_date__range=(start_month_date,end_month_date))
+                if budget_obj:
+                    print("Budget already exists")
+                    return JsonResponse({'status': 'false','message':"Budget Already Exists"})
+                else:
+                    budget_obj = Budget()
+            except:
+                budget_obj = Budget()
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
             budget_obj.end_date = end_month_date
@@ -2754,7 +2762,15 @@ def budgets_expenses_walk_through(request):
                 budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
             budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
-            budget_obj = Budget()
+            try:
+                budget_obj = Budget.objects.filter(user=user_name,name=budget_name, budget_start_date__range=(start_month_date,end_month_date))
+                if budget_obj:
+                    print("Budget already exists")
+                    return JsonResponse({'status': 'false','message':"Budget Already Exists"})
+                else:
+                    budget_obj = Budget()
+            except:
+                budget_obj = Budget()
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
             budget_obj.end_date = end_month_date
@@ -2872,7 +2888,15 @@ def budgets_non_monthly_expenses_walk_through(request):
                 budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
             budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
-            budget_obj = Budget()
+            try:
+                budget_obj = Budget.objects.filter(user=user_name,name=budget_name, budget_start_date__range=(start_month_date,end_month_date))
+                if budget_obj:
+                    print("Budget already exists")
+                    return JsonResponse({'status': 'false','message':"Budget Already Exists"})
+                else:
+                    budget_obj = Budget()    
+            except:
+                budget_obj = Budget()
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
             budget_obj.end_date = end_month_date
@@ -2990,7 +3014,15 @@ def budgets_goals_walk_through(request):
             budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
             budget_end_date = get_period_date(budget_start_date, "Monthly") - relativedelta(days=1)
-            budget_obj = Budget()
+            try:
+                budget_obj = Budget.objects.filter(user=user_name,name=budget_name, budget_start_date__range=(start_month_date,end_month_date))
+                if budget_obj:
+                    print("Budget already exists")
+                    return JsonResponse({'status': 'false','message':"Budget Already Exists"})
+                else:
+                    budget_obj = Budget()    
+            except:
+                budget_obj = Budget()
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
             budget_obj.end_date = end_month_date
@@ -3016,7 +3048,7 @@ def budgets_goals_walk_through(request):
                         goal_obj.allocate_amount += budget_act_amount
                         goal_obj.budget_amount += budget_act_amount
                         goal_obj.save()
-                        return JsonResponse({'status':'true',"message":"Goal already exists, Budget Created!!"})
+                        message = "Goal already exists, Budget created!!"
             except:
                 # If goal doesn't exists, creates a new one
                 goal_obj = Goal()
@@ -3030,10 +3062,11 @@ def budgets_goals_walk_through(request):
                 goal_obj.budget_amount += budget_act_amount
                 goal_obj.save()
                 budget_obj.save()
-
+                message =''
         else:
             budget_obj = Budget.objects.get(id=int(budget_id))
-            goal_obj = Goal.objects.get(user=user_name,label=budget_obj.category)
+            
+
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -3041,11 +3074,27 @@ def budgets_goals_walk_through(request):
             budget_obj.budget_spent = budget_act_amount
             budget_obj.budget_left = budget_left_amount
             budget_obj.account = account_obj
-            if goal_date != None:
+            try:
+                goal_obj = Goal.objects.get(user=user_name,label=budget_obj.category)
+                if goal_date != None:
+                    goal_obj.goal_date = goal_date
+                goal_obj.allocate_amount += round(budget_act_amount - old_spend_amount, 2)
+                goal_obj.budget_amount += round(budget_act_amount - old_spend_amount, 2)
+                goal_obj.save()
+                message ='' 
+            except:
+                # If budget exists, but the Goal doesn't , It will create a goal with Expected amount as goal amount and transacation amount as budget_amount and allocate amount
+                goal_obj = Goal()
+                goal_obj.user = user_name
+                goal_obj.account = account_obj
+                goal_obj.goal_amount = budget_exp_amount
+                goal_obj.currency = account_obj.currency
                 goal_obj.goal_date = goal_date
-            goal_obj.allocate_amount += round(budget_act_amount - old_spend_amount, 2)
-            goal_obj.budget_amount += round(budget_act_amount - old_spend_amount, 2)
-            goal_obj.save()
+                goal_obj.label = sub_cat_obj
+                goal_obj.allocate_amount = round(budget_act_amount - old_spend_amount, 2)
+                goal_obj.budget_amount += round(budget_act_amount - old_spend_amount, 2)
+                goal_obj.save()
+                message = "Goal created successfully!!"
             budget_obj.save()
  
             if budget_act_amount > old_spend_amount:
@@ -3064,7 +3113,7 @@ def budgets_goals_walk_through(request):
             account_obj.transaction_count += 1
             account_obj.save()
 
-        return JsonResponse({'status': 'true'})
+        return JsonResponse({'status': 'true','message':message})
     goals_category = SubCategory.objects.filter(category__user=user_name, category__name='Goals')
     context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date),"error":error}
     context.update({"page": "budgets"})
@@ -4798,7 +4847,7 @@ class GoalDelete(LoginRequiredMixin, DeleteView):
         user = request.user
         goal_obj = Goal.objects.get(pk=self.kwargs['pk'])
         fund_obj = AvailableFunds.objects.get(user=user, account=goal_obj.account)
-        fund_obj.lock_fund = round(float(fund_obj.lock_fund) - float(goal_obj.allocate_amount), 2)
+        fund_obj.lock_fund = round(float(fund_obj.lock_fund) - float(goal_obj.fund_amount), 2)
         fund_obj.save()
         goal_obj.delete()
         return JsonResponse({"status": "Successfully", "path": "None"})

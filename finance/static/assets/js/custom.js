@@ -2506,11 +2506,15 @@ $("body").delegate(".update_income_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text: response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -2752,11 +2756,15 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text:response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -2905,11 +2913,15 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text: response.message, 
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -3045,6 +3057,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saved Successfully',
                                     icon: 'success',
+                                    text: response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
