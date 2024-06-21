@@ -157,6 +157,7 @@ def start_end_date(date_value, period):
 
 
 def get_period_date(start_date, period):
+    period_date = ''
     if period == "Daily":
         period_date = start_date + relativedelta(days=1)
 
