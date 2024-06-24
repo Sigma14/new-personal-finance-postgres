@@ -8,3 +8,12 @@ logger = logging.getLogger(__name__)
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+# Fetch list values
+@register.filter
+def get_list_item(list, index):
+    try:
+        value = list[index]
+    except:
+        value = '0.0'
+    return value

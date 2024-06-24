@@ -3300,3 +3300,53 @@ $("body").delegate(".goal-add-btn", "click", function(e) {
     
 });
 
+// Compare different budget tables dropdown 
+// Dropdown function for Budget 1 Table
+$("body").delegate("#spentAmountDropdown", "change", function() {
+    var select = $(this);
+    var selectedValue = select.val();
+
+    $(".spent-amount").each(function(index) {
+        var element = $(this);
+        
+        console.log("budget amount",element.attr("data-bgt"),"spent",element.attr("data-spent"),"monthly",element.attr("data-monthly"))
+        var spentAmount;
+
+        if (selectedValue === "monthly") {
+            spentAmount = parseFloat(element.attr("data-monthly"));
+        } else {
+            spentAmount = parseFloat(element.attr("data-spent"));
+        }
+
+        element.text(spentAmount.toFixed(2));
+
+        // Update the remaining balance
+        var remainingBalance = element.attr("data-bgt") - spentAmount;
+        $(".remaining-balance").eq(index).text(remainingBalance.toFixed(2));
+    });
+});
+
+// Dropdown function for Budget 2 Table
+$("body").delegate("#spentAmountDropdown2", "change", function() {
+    var select = $(this);
+    var selectedValue = select.val();
+
+    $(".spent-amount2").each(function(index) {
+        var element = $(this);
+        
+        console.log("budget amount",element.attr("data-bgt2"),"spent",element.attr("data-spent"),"monthly",element.attr("data-monthly"))
+        var spentAmount;
+
+        if (selectedValue === "monthly2") {
+            spentAmount = parseFloat(element.attr("data-monthly2"));
+        } else {
+            spentAmount = parseFloat(element.attr("data-spent2"));
+        }
+
+        element.text(spentAmount.toFixed(2));
+
+        // Update the remaining balance
+        var remainingBalance = element.attr("data-bgt2") - spentAmount;
+        $(".remaining-balance2").eq(index).text(remainingBalance.toFixed(2));
+    });
+});

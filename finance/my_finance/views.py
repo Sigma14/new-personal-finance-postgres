@@ -3293,10 +3293,29 @@ def compare_different_budget_box(request):
         budget2_names, user_name, start_date, end_date, budget2_bar_value, budget2_graph_value, transaction_data_dict2,
         budget2_income_graph_value, budget2_income_bar_value, expense_bgt2_names, income_bgt2_names,
         spending_amount_bgt2, earned_amount_bgt2)
-    print("income budget 2",earned_amount_bgt2)
+    
+    # Fetch all bills and budgets
+    budget_details = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
+    bill_details = Bill.objects.filter(user=user_name,date__range=(start_date, end_date))
+    budget_dict = {}
+
+    # Update Bill and Budget Budgetted amount and Spent amount to budget_dict
+    for i in bill_details:
+        if i.label in budget1_names:
+            budget_dict.update({i.label:[float(i.amount), float(i.amount)- float(i.remaining_amount),i.remaining_amount]})
+        if i.label in budget2_names:
+            budget_dict.update({i.label:[float(i.amount), float(i.amount)- float(i.remaining_amount),i.remaining_amount]})
+    
+    for i in budget_details:
+        if i.name in budget1_names:
+            budget_dict.update({i.name:[float(i.initial_amount),i.budget_spent, float(i.initial_amount) - float(i.budget_spent)]})
+        if i.name in budget2_names:
+            budget_dict.update({i.name:[float(i.initial_amount),i.budget_spent, float(i.initial_amount) - float(i.budget_spent)]})
+    
     context = {"budgets": budgets, "list_of_months": list_of_months,
                "budget1_names": budget1_names,
                "budget2_names": budget2_names,
+               'budget_dict': budget_dict,
                "current_month": current_month,
                "total_spent_amount_bgt1": spending_amount_bgt1,
                "total_spent_amount_bgt2": spending_amount_bgt2,
@@ -3330,6 +3349,7 @@ def compare_different_budget_box(request):
                'no_budgets':no_budgets
                }
     return render(request, 'budget/compare_diff_bgt_box.html', context=context)
+
 
 
 @login_required(login_url="/login")

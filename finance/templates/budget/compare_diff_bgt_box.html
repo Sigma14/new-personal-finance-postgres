@@ -1,5 +1,6 @@
 {% extends "index.html" %}
 {% load mathfilters %}
+{% load custom_filters %}
 <head>
     {% block title %} Compare Different Budgets {% endblock title %}
 </head>
@@ -115,10 +116,23 @@
                                         <div class="card-datatable table-responsive">
                                             <table class="table">
                                                 <thead>
-                                                    
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th colspan="2">Budgetted Amount</th>
+                                                        <!-- Dropdown for spent amonunt -->
+                                                        <th colspan="2">
+                                                            <div class="dropdown">
+                                                                <select class="form-control" id="spentAmountDropdown" style="width: 11rem; margin-left: -1rem;" >
+                                                                    <option value="spent">Spent Amount</option>
+                                                                    <option value="monthly">Monthly Transaction Total</option>
+                                                                </select>
+                                                            </div>
+                                                        </th>
+                                                        <th colspan="2">Remaining <br>Balance</th>
+                                                    </tr>
                                                     <tr>
                                                         <th><h5><b>Total Income</b></h5></th>
-                                                        <th>&nbsp;</th>
                                                         <th>&nbsp;</th>
                                                         <th>&nbsp;</th>
                                                         <th>&nbsp;</th>
@@ -132,19 +146,15 @@
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
-                                                    <th>&nbsp;</th>
                                                     <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_spent_amount_bgt1}}&nbsp;&nbsp;</b></h5></td></th>
                                                     {% for key,value in transaction_data1.items %}
                                                         
                                                         <tr class="show_bdgt_trans" method_name="trans_data1{{forloop.counter0}}">
                                                             <th><h5><b>{{key}}</b></h5></th>
                                                             <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down trans_data1{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right trans_data1{{forloop.counter0}}"></i></h5></td></th>
+                                                            <th colspan="2">{{budget_dict|get_item:key|get_list_item:0}}</th>
+                                                            <th colspan="2" class="spent-amount" data-bgt="{{budget_dict|get_item:key|get_list_item:0}}" data-spent="{{budget_dict|get_item:key|get_list_item:1}}" data-monthly="{{value.0.1}}">{{budget_dict|get_item:key|get_list_item:1}}</th>
+                                                            <th colspan="2" class="remaining-balance">{{budget_graph_currency}}{{budget_dict|get_item:key|get_list_item:2}}&nbsp;&nbsp;</b></td></th>
                                                         </tr>
                                                         {% if value.1 %}
                                                             <tr class="trans_data1{{forloop.counter0}}" style="display:None;">
@@ -185,9 +195,23 @@
                                         <div class="card-datatable table-responsive">
                                             <table class="table">
                                                 <thead>
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th colspan="2">Budgetted Amount</th>
+                                                        <th colspan="2">
+                                                            <!-- Dropdown for spent amount -->
+                                                            <div class="dropdown">
+                                                                <select class="form-control" id="spentAmountDropdown2" style="width: 11rem; margin-left: -1rem;" >
+                                                                    <option value="spent2">Spent Amount</option>
+                                                                    <option value="monthly2">Monthly Transaction Total</option>
+                                                                </select>
+                                                            </div>
+                                                        </th>
+                                                        <th colspan="2">Remaining <br>Balance</th>
+                                                    </tr>   
                                                 <tr>
                                                     <th><h5><b>Total Income</b></h5></th>
-                                                    <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
@@ -202,19 +226,15 @@
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
                                                     <th>&nbsp;</th>
-                                                    <th>&nbsp;</th>
                                                     <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_spent_amount_bgt2}}&nbsp;&nbsp;</b></h5></td></th>
                                                 </tr>
                                                     {% for key,value in transaction_data2.items %}
                                                         <tr class="show_bdgt_trans" method_name="trans_data2{{forloop.counter0}}">
                                                             <th><h5><b>{{key}}</b></h5></th>
                                                             <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down trans_data2{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right trans_data2{{forloop.counter0}}"></i></h5></td></th>
+                                                            <th colspan="2">{{budget_dict|get_item:key|get_list_item:0}}</th>
+                                                            <th colspan="2" class="spent-amount2" data-bgt2="{{budget_dict|get_item:key|get_list_item:0}}" data-spent2="{{budget_dict|get_item:key|get_list_item:1}}" data-monthly2="{{value.0.1}}">{{budget_dict|get_item:key|get_list_item:1}}</th>
+                                                            <th colspan="2" class="remaining-balance2">{{budget_graph_currency}}{{budget_dict|get_item:key|get_list_item:2}}&nbsp;&nbsp;</b></td></th>
                                                         </tr>
                                                         {% if value.1 %}
                                                             <tr class="trans_data2{{forloop.counter0}}" style="display:None;">
