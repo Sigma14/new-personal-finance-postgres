@@ -192,8 +192,12 @@ def check_bill_is_due():
         auto_bill = bill_detail_obj.auto_bill
         auto_pay = bill_detail_obj.auto_pay
         bill_date = bill_detail_obj.date
-        if bill_date.month == datetime.today().date().month +1 :
-            # time.sleep(5)
+         # Calculate the next month and year
+        next_month = (today_date.month % 12) + 1
+        next_year = today_date.year if next_month != 1 else today_date.year + 1
+
+        # Check if the bill's month and year are the next month and year
+        if bill_date.month == next_month and bill_date.year == next_year:
             continue
         frequency = bill_detail_obj.frequency
         next_bill_date = get_period_date(bill_date, frequency)

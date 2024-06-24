@@ -5754,7 +5754,19 @@ def bill_pay(request, pk):
 @login_required(login_url="/login")
 def bill_list(request):
     bill_list_data = BillDetail.objects.filter(user=request.user).order_by('date')
+    bill_list = bill_list_data
     bill_data = Bill.objects.filter(user=request.user)
+    # If specific dataa requried from dropdown, it will update the bill list
+    if 'selected_bill' in request.POST:
+        bill_label = request.POST['selected_bill']
+        if bill_label != 'all':
+            bill_list_data = BillDetail.objects.filter(user=request.user,label=bill_label).order_by('date')
+            bill_data = Bill.objects.filter(user=request.user,label=bill_label)
+            
+    else:
+        bill_label = None
+
+    
 
     calendar_bill_data = []
 
@@ -5769,9 +5781,8 @@ def bill_list(request):
             data_dict['calendar_type'] = 'Holiday'
 
         calendar_bill_data.append(data_dict)
-
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_data': bill_list_data, 'today_date': today_date,
-               'page': 'bill_list'}
+    context = {"calendar_bill_data": calendar_bill_data, 'bill_list': bill_list ,'bill_data': bill_list_data, 'today_date': today_date,
+               'bill_label': bill_label, 'page': 'bill_list'}
     return render(request, "bill/bill_list.html", context=context)
 
 

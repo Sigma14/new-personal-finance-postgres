@@ -3170,7 +3170,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-});
+
 
 // Function for Budget Add Form modal
 $("body").delegate(".add-budget-btn", "click", function(e) {
@@ -3349,4 +3349,12 @@ $("body").delegate("#spentAmountDropdown2", "change", function() {
         var remainingBalance = element.attr("data-bgt2") - spentAmount;
         $(".remaining-balance2").eq(index).text(remainingBalance.toFixed(2));
     });
+});
+
+// Bill dropdown filter
+$('#bill_select').on("change", function(e)
+{
+    $("#bill_filter_form").submit();
+});
+
 });

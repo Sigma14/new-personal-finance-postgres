@@ -85,6 +85,22 @@
                                                         <div class="custom-control custom-control-danger custom-checkbox mb-1"> <input type="checkbox" class="custom-control-input input-filter" id="personal" data-value="personal" checked /> <label class="custom-control-label" for="personal">Unpaid</label> </div>
                                                     </div>
                                                 </div>
+                                                <!-- Bill budget dropdown -->
+                                                <div class="dropdown" style="margin-left:1rem;">
+                                                    <form method="post" action="{% url 'bill_list' %}" id="bill_filter_form" >
+                                                        {% csrf_token %}
+                                                        <select class="form-control " name="selected_bill" id="bill_select" style="width:200px">
+                                                            <option value="all" {% if bill_label == "all" or not bill_label %}selected{% endif %}>All</option>
+        
+                                                            {% for name in bill_list  %}
+                                                            
+                                                            <option value="{{name.label}}" {% if name.label == bill_label %}selected{% endif %}>{{name.label}} </option>
+                                                            
+                                                            {% endfor %}
+                                                        </select>
+                                                    </form>
+                                                    
+                                                </div>
                                             </div>
                                             <div class="mt-auto"> <img src="{% static 'app-assets/images/pages/calendar-illustration.png' %}" alt="Calendar illustration" class="img-fluid" /> </div>
                                         </div>
