@@ -157,20 +157,20 @@ def start_end_date(date_value, period):
 
 
 def get_period_date(start_date, period):
-    period_date = ''
+    period_date = None
     if period == "Daily":
         period_date = start_date + relativedelta(days=1)
 
-    if period == "Weekly":
+    elif period == "Weekly":
         period_date = start_date + relativedelta(weeks=1)
 
-    if period == "Monthly":
+    elif period == "Monthly":
         period_date = start_date + relativedelta(months=1)
 
-    if period == "Quarterly":
+    elif period == "Quarterly":
         period_date = start_date + relativedelta(months=3)
 
-    if period == "Yearly":
+    elif period == "Yearly":
         period_date = start_date + relativedelta(years=1)
 
     return period_date
