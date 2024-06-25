@@ -2506,11 +2506,15 @@ $("body").delegate(".update_income_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text: response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -2752,11 +2756,15 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text:response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -2905,11 +2913,15 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
                                  ({
                                     title: 'Saving Failed!',
                                     icon: 'error',
+                                    text: response.message, 
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
-                                 });
+                                 }).then(function () {
+                                    // Reload the page
+                                    location.reload();
+                                });
                     }
 
                 }
@@ -3045,6 +3057,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                  ({
                                     title: 'Saved Successfully',
                                     icon: 'success',
+                                    text: response.message,
                                     customClass: {
                                       confirmButton: 'btn btn-primary'
                                     },
@@ -3157,7 +3170,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-});
+
 
 // Function for Budget Add Form modal
 $("body").delegate(".add-budget-btn", "click", function(e) {
@@ -3287,3 +3300,61 @@ $("body").delegate(".goal-add-btn", "click", function(e) {
     
 });
 
+// Compare different budget tables dropdown 
+// Dropdown function for Budget 1 Table
+$("body").delegate("#spentAmountDropdown", "change", function() {
+    var select = $(this);
+    var selectedValue = select.val();
+
+    $(".spent-amount").each(function(index) {
+        var element = $(this);
+        
+        console.log("budget amount",element.attr("data-bgt"),"spent",element.attr("data-spent"),"monthly",element.attr("data-monthly"))
+        var spentAmount;
+
+        if (selectedValue === "monthly") {
+            spentAmount = parseFloat(element.attr("data-monthly"));
+        } else {
+            spentAmount = parseFloat(element.attr("data-spent"));
+        }
+
+        element.text(spentAmount.toFixed(2));
+
+        // Update the remaining balance
+        var remainingBalance = element.attr("data-bgt") - spentAmount;
+        $(".remaining-balance").eq(index).text(remainingBalance.toFixed(2));
+    });
+});
+
+// Dropdown function for Budget 2 Table
+$("body").delegate("#spentAmountDropdown2", "change", function() {
+    var select = $(this);
+    var selectedValue = select.val();
+
+    $(".spent-amount2").each(function(index) {
+        var element = $(this);
+        
+        console.log("budget amount",element.attr("data-bgt2"),"spent",element.attr("data-spent"),"monthly",element.attr("data-monthly"))
+        var spentAmount;
+
+        if (selectedValue === "monthly2") {
+            spentAmount = parseFloat(element.attr("data-monthly2"));
+        } else {
+            spentAmount = parseFloat(element.attr("data-spent2"));
+        }
+
+        element.text(spentAmount.toFixed(2));
+
+        // Update the remaining balance
+        var remainingBalance = element.attr("data-bgt2") - spentAmount;
+        $(".remaining-balance2").eq(index).text(remainingBalance.toFixed(2));
+    });
+});
+
+// Bill dropdown filter
+$('#bill_select').on("change", function(e)
+{
+    $("#bill_filter_form").submit();
+});
+
+});

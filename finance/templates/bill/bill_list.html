@@ -9,16 +9,26 @@
         <div class="header-navbar-shadow"></div>
         <div class="content-wrapper">
             <div class="content-header row">
-                <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="content-header-left col-md-12 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
                             <h2 class="content-header-title float-left mb-0">{% trans 'Bills & Subscriptions' %}</h2>
+                            <a href="{% url 'budgets_walk_through' %}#bill-section" class="btn btn-primary float-right bill-and-subscription-btn"><i
+                                class="fa fa-edit "></i> Edit Bills & Subscriptions</a>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a> </li>
                                     <li class="breadcrumb-item">Bills & Subscriptions </li>
+                                    <li></li>
+                                    
                                 </ol>
+                                
+                                
+                                    
+                                   
                             </div>
+                            
+                            
                         </div>
                     </div>
                 </div>
@@ -51,7 +61,7 @@
                             <div class="col-8">
                                 <div class="card shadow-sm">
                                     <div class="card-header" data-toggle="collapse" href="#calendarCollapse">
-                                        <a><i class="bg-light-info" data-feather="info"></i> Tab to Description </a>
+                                        <a><i class="bg-light-info" data-feather="info"></i> Calendar Description </a>
                                         <div class="card-toolbar">
                                             <i class="fa fa-chevron-down pull-right"></i>
                                         </div>
@@ -74,6 +84,22 @@
                                                         <div class="custom-control custom-control-success custom-checkbox mb-1"> <input type="checkbox" class="custom-control-input input-filter" id="holiday" data-value="holiday" checked /> <label class="custom-control-label" for="holiday">Paid</label> </div>
                                                         <div class="custom-control custom-control-danger custom-checkbox mb-1"> <input type="checkbox" class="custom-control-input input-filter" id="personal" data-value="personal" checked /> <label class="custom-control-label" for="personal">Unpaid</label> </div>
                                                     </div>
+                                                </div>
+                                                <!-- Bill budget dropdown -->
+                                                <div class="dropdown" style="margin-left:1rem;">
+                                                    <form method="post" action="{% url 'bill_list' %}" id="bill_filter_form" >
+                                                        {% csrf_token %}
+                                                        <select class="form-control " name="selected_bill" id="bill_select" style="width:200px">
+                                                            <option value="all" {% if bill_label == "all" or not bill_label %}selected{% endif %}>All</option>
+        
+                                                            {% for name in bill_list  %}
+                                                            
+                                                            <option value="{{name.label}}" {% if name.label == bill_label %}selected{% endif %}>{{name.label}} </option>
+                                                            
+                                                            {% endfor %}
+                                                        </select>
+                                                    </form>
+                                                    
                                                 </div>
                                             </div>
                                             <div class="mt-auto"> <img src="{% static 'app-assets/images/pages/calendar-illustration.png' %}" alt="Calendar illustration" class="img-fluid" /> </div>

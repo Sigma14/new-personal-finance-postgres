@@ -279,6 +279,8 @@
                                                                         <td><strong >Total Bill</strong></td>
                                                                         <td><strong id="total_bill_exp">{{total_expected_bill}}</strong></td>
                                                                         <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>
+                                                                        <td></td>
+                                                                        <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill">+ Other Bill</button></td>
                                                                     </tr>
                                                                 </tbody>
@@ -372,6 +374,8 @@
                                                                         <td><strong >Total Expenses</strong></td>
                                                                         <td><strong id="total_expenses_exp">{{total_expected_expenses}}</strong></td>
                                                                         <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>
+                                                                        <td></td>
+                                                                        <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
@@ -464,6 +468,8 @@
                                                                         <td><strong >Total Expenses</strong></td>
                                                                         <td><strong id="total_non_monthly_expenses_exp">{{total_non_monthly_expected_expenses}}</strong></td>
                                                                         <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>
+                                                                        <td></td>
+                                                                        <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
@@ -550,6 +556,7 @@
                                                                         <td><strong >Total Goals</strong></td>
                                                                         <td><strong id="total_goals_exp">{{total_goals_expected}}</strong></td>
                                                                         <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>
+                                                                        <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill">+ Other Goals</button></td>
                                                                     </tr>
                                                                 </tbody>
@@ -579,4 +586,19 @@
             </div>
         </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+        // When the budgets_walk_through page is loaded
+    $(document).ready(function() {
+        // Check if the current URL contains '#bill-section'
+        setTimeout(function() {
+        // Check if the current URL contains '#bill-section'
+        if (window.location.hash === '#bill-section') {
+            // Simulate a click on the button inside the step with data-target="#bill-section"
+            $('[data-target="#bill-section"] .step-trigger').click();
+        }
+    }, 500); 
+    });
+    </script>
 {% endblock content %}
