@@ -3198,6 +3198,11 @@ def current_budget_box(request):
     transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False,
                                                   transaction_date__range=(start_date, end_date)).order_by(
         'transaction_date')
+    translated_data = {
+        'earned': _('Earned'),
+        'spending': _('Spending')
+    }
+
     context = {"list_of_months": list_of_months, "current_month": current_month,
                "budget_graph_currency": budget_currency, 'total_income': total_bgt_income,
                'income_bdgt_dict': income_bdgt_dict, 'left_over_cash': left_over_cash,
@@ -3211,9 +3216,9 @@ def current_budget_box(request):
                "budget_graph_id": "#total_budget",
                "transaction_key": transaction_key,
                "transaction_data": transaction_data,
+               'translated_data': json.dumps(translated_data),
                "page": "budgets"
                }
-    print("context===>",context)
     return render(request, 'budget/current_budget_box.html', context=context)
 
 
