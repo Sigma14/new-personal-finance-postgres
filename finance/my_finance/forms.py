@@ -209,7 +209,8 @@ class TransactionForm(forms.ModelForm):
                                                                                                           'Savings',
                                                                                                           'Cash',
                                                                                                           'Credit Card',
-                                                                                                          'Line of Credit']),
+                                                                                                          'Line of Credit',
+                                                                                                          'Emergency Fund']),
                                                         empty_label="Select Account",
                                                         widget=forms.Select(attrs={'class': 'form-control'}))
 

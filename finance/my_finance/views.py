@@ -1120,7 +1120,7 @@ def dash_board(request):
         current_date = datetime.datetime.today().date()
         month_start, month_end = start_end_date(current_date, "Monthly")
         accounts_data = Account.objects.filter(user=user_name, account_type__in=['Checking', 'Savings', 'Cash',
-                                                                                 'Credit Card', 'Line of Credit'])
+                                                                                 'Credit Card', 'Line of Credit','Emergency Fund'])
         property_data = Property.objects.filter(user=user_name)
         stock_portfolio_data = StockHoldings.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name)
@@ -1531,7 +1531,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         
         accounts_qs = Account.objects.filter(user=user_name,
                                          account_type__in=['Savings', 'Checking', 'Cash', 'Credit Card',
-                                                           'Line of Credit'])
+                                                           'Line of Credit','Emergency Fund'])
         bank_accounts_dict = {}
         for account_data in accounts_qs:
             bank_accounts_dict[account_data.id] = account_data.name
@@ -2584,7 +2584,7 @@ def budgets_walk_through(request):
 
     accounts_qs = Account.objects.filter(user=request.user,
                                          account_type__in=['Savings', 'Checking', 'Cash', 'Credit Card',
-                                                           'Line of Credit'])
+                                                           'Line of Credit','Emergency Fund'])
     bank_accounts_dict = {}
     for account_data in accounts_qs:
         bank_accounts_dict[account_data.id] = account_data.name
@@ -4827,7 +4827,7 @@ def goal_add(request):
 
     account_data = Account.objects.filter(user=user_name,
                                           account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                            'Line of Credit'])
+                                                            'Line of Credit','Emergency Fund'])
     category_obj = Category.objects.get(name="Goals", user=user_name)
     sub_obj = SubCategory.objects.filter(category__user=user_name,category__name="Goals")
     context = {'account_data': account_data, 'goal_category': sub_obj,
@@ -4852,7 +4852,7 @@ def goal_update(request, pk):
 
     account_data = Account.objects.filter(user=user_name,
                                           account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                            'Line of Credit'])
+                                                            'Line of Credit','Emergency Fund'])
 
     category_obj = Category.objects.get(name="Goals", user=user_name)
     context = {'account_data': account_data, 'goal_data': goal_data,
@@ -5713,7 +5713,7 @@ def bill_edit(request, pk):
 
     bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
     account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit'])
+                                                                     'Line of Credit','Emergency Fund'])
     bill_frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
     context = {
         'form': form,
@@ -5849,7 +5849,7 @@ def bill_adding_fun(request, method_name=None):
     bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
     bill_obj = Category.objects.get(user=user, name="Bills & Subscriptions")
     account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit'])
+                                                                     'Line of Credit','Emergency Fund'])
     context = {
         'form': form,
         'error': error,
@@ -6004,7 +6004,7 @@ def bill_update(request, pk):
 
     bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
     account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit'])
+                                                                     'Line of Credit','Emergency Fund'])
     bill_frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
     context = {
         'form': form,
@@ -7473,7 +7473,7 @@ def income_add(request):
             return redirect('/income_list/')
     income_category = SubCategory.objects.filter(category__name="Income", category__user=user)
     account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit'])
+                                                                     'Line of Credit','Emergency Fund'])
     frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
     context = {
         'error': error,
@@ -7532,7 +7532,7 @@ def income_update(request, pk):
 
     income_category = SubCategory.objects.filter(category__name="Income", category__user=user)
     account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit'])
+                                                                     'Line of Credit','Emergency Fund'])
     frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
     context = {
         'error': error,

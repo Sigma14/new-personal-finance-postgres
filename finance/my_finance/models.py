@@ -17,6 +17,7 @@ BUDGET_ACCOUNT_TYPES = (
     ("Cash", 'Cash'),
     ("Credit Card", 'Credit Card'),
     ("Line of Credit", 'Line of Credit'),
+    ("Emergency Fund", 'Emergency Fund'),
     ("Mortgage", 'Mortgage'),
     ("Loan", 'Loan'),
     ("Student Loan", 'Student Loan'),
