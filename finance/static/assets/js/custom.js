@@ -272,7 +272,7 @@ $('#expense_table').DataTable( {
                 {
                     sugg_html += "<a style='margin:5px; font-size: 12px;' url='/subcategory_add/" + response.category_pk + "' class='btn btn-outline-secondary new_subcategory'>" + val + "&nbsp;<i class='fa fa-plus'></i></a>"
                 });
-                $("#sub_cat_add_btn").attr('url', '/subcategory_add/' + response.category_pk )
+                $("#sub_cat_add_btn").attr('url', '/en/subcategory_add/' + response.category_pk )
                 $(".sub_cat_sugg").append(sugg_html)
             }
         })

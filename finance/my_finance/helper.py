@@ -12,7 +12,7 @@ sub_category_suggested_list = {
     "Healthcare": ["Doctor", "Fitness", "Dentist", "Pharmacy", "Health"],
     "Housing": ["Mortgage", "Rent", "Hoa Fees", "Home Improvement"],
     "Personal Care": ["Hair", "Shopping", "Electronic Items", "Beauty", "Spa", "Clothes"],
-    "Transportation": ["Ride Share", "Parking", "Public Transportation"],
+    "Transportation": ["Ride Share", "Parking", "Public Transportation", "Fuel"],
     "Bills & Subscriptions": ["Electricity", "Water", "Cellphone", "Internet",
               "Spotify Subscription", "Netflix Spotify Subscription",
               "Amazon Prime Spotify Subscription"],
