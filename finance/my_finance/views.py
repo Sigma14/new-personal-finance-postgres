@@ -57,7 +57,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 
 wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
-currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)'}
+currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)', 'CAD': 'Canadian Dollar ($)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
 property_type_list = ['Apartment', 'Commercial', 'Condo', 'Duplex', 'House', 'Mixed-Use', 'Other']

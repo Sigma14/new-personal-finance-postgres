@@ -11,6 +11,7 @@ CURRENCIES = (
     ("€", 'Euro (€)'),
     ("₹", 'Indian rupee (₹)'),
     ("£", 'British Pound (£)'),
+    ("CAD", 'Canadian Dollar ($)'),
 )
 
 BUDGET_PERIODS = (
