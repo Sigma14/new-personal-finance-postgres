@@ -6707,7 +6707,8 @@ def rental_property_add(request):
         context = {
             'currency_dict': currency_dict,
             'scenario_dict': scenario_dict,
-            'action_url': "/rental_property_add/",
+            # Fetch the url from the request
+            'action_url': request.path,
             'heading_name': "Add Rental Property",
             'heading_url': "Add Property",
             'property_url': "/rental_property_list/",

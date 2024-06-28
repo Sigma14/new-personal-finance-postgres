@@ -598,7 +598,7 @@ function inputHTML(formHtml, name, value)
 
     $('.download_rental_pdf').on("click", function(e)
     {
-       var download_url = $(this).attr('url');
+       var download_url = '/en'+$(this).attr('url');
        var invest_summary_data = $(this).attr('invest_summary_data');
        var yearly_projection_data = $(this).attr('yearly_projection_data');
        var roi_with_appreciation_dict_investors_data = $(this).attr('roi_with_appreciation_dict_investors_data');
