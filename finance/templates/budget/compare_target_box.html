@@ -56,7 +56,7 @@
                         <div class="col-xl-12 col-md-12 col-12">
                             <div class="card card-congratulation-medal">
                                 <div class="card-body">
-                                    <form id="compare_bgt_form" action="/budgets/compare/target" method="post">
+                                    <form id="compare_bgt_form" action="{% url 'compare-target-budgets' %}" method="post">
                                         {% csrf_token %}
                                         <div class="">
                                         <div class="row">
