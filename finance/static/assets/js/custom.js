@@ -2497,6 +2497,7 @@ $("body").delegate(".update_income_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#income-section' ;
                                     location.reload();
                                 });
                     }
@@ -2513,6 +2514,7 @@ $("body").delegate(".update_income_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#income-section';
                                     location.reload();
                                 });
                     }
@@ -2602,6 +2604,7 @@ $("body").delegate(".update_bill_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#bill-section';
                                     location.reload();
                                 });
                     }
@@ -2615,6 +2618,9 @@ $("body").delegate(".update_bill_bgt_walkthrough", "click", function(e)
                                       confirmButton: 'btn btn-primary'
                                     },
                                     buttonsStyling: false
+                                 }).then(function(){
+                                 location.href = '/en/budgets/walk_through#bill-section';
+                                 location.reload();
                                  });
                     }
 
@@ -2747,6 +2753,7 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#expense-section';
                                     location.reload();
                                 });
                     }
@@ -2763,6 +2770,7 @@ $("body").delegate(".update_expenses_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#expense-section';
                                     location.reload();
                                 });
                     }
@@ -2904,6 +2912,7 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#non-monthly-expenses-section';
                                     location.reload();
                                 });
                     }
@@ -2920,6 +2929,7 @@ $("body").delegate(".update_non_monthly_expenses_bgt_walkthrough", "click", func
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#non-monthly-expenses-section';
                                     location.reload();
                                 });
                     }
@@ -3064,6 +3074,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#goals-section';
                                     location.reload();
                                 });
                     }
@@ -3080,6 +3091,7 @@ $("body").delegate(".update_goals_bgt_walkthrough", "click", function(e)
                                     buttonsStyling: false
                                  }).then(function () {
                                     // Reload the page
+                                    location.href = '/en/budgets/walk_through#goals-section';
                                     location.reload();
                                 });
                     }

@@ -108,17 +108,23 @@
                                 {% csrf_token %}
                                 <div id="account-details" class="content">
                                     <section>
-                                        <div class="row match-height">
-                                            <div class="col-md-12 col-lg-12">
+                                        <div class="row ">
+                                            <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Welcome to the Budget Creation Page.</h4>
                                                     </div>
-                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
-                                                    <div class="card-body">
+                                                    <img class="img-fluid"  src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body" style="margin-top:4rem;">
                                                         <p class="card-text"><strong>Description: </strong>A budget is a plan for how you'll spend your money over a certain period, this is a monthly budget planner. Creating a budget is useful because it helps you understand your financial situation, control your spending, and save for future goals.</p>
                                                         <p class="card-text"><strong>Tips: </strong>Be realistic about your income and expenses. Remember, a budget is a tool to help you, not restrict you. Regularly review and adjust it as your financial situation changes.</p>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -590,15 +596,27 @@
 
     <script>
         // When the budgets_walk_through page is loaded
-    $(document).ready(function() {
-        // Check if the current URL contains '#bill-section'
-        setTimeout(function() {
-        // Check if the current URL contains '#bill-section'
-        if (window.location.hash === '#bill-section') {
-            // Simulate a click on the button inside the step with data-target="#bill-section"
-            $('[data-target="#bill-section"] .step-trigger').click();
-        }
-    }, 500); 
-    });
+        $(document).ready(function() {
+
+            // Check the section in current URL
+            setTimeout(function() {
+            // It will take to the section for which the hash is available in the url
+            if (window.location.hash === '#bill-section') {
+                $('[data-target="#bill-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#expense-section') {
+                $('[data-target="#expense-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#non-monthly-expenses-section') {
+                $('[data-target="#non-monthly-expenses-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#goals-section') {
+                $('[data-target="#goals-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#income-section') {
+                $('[data-target="#income-section"] .step-trigger').click();
+            }
+        }, 500);
+        });
     </script>
 {% endblock content %}
