@@ -7,7 +7,10 @@ logger = logging.getLogger(__name__)
 # Filter to fetch values from dictionaries
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    if key not in dictionary:
+        return 0
+    else:
+        return dictionary.get(key)
 
 # Fetch list values
 @register.filter

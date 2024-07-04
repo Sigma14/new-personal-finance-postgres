@@ -3234,7 +3234,7 @@ def compare_different_budget_box(request):
     budget_graph_currency = "$"
     budget_type = "Expenses"
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
-        category__category__name__in=["Bills", "Goals", "Funds"])
+        category__category__name__in=["Bills", "Funds"])
     bill_qs = Bill.objects.filter(user=user_name)
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
@@ -3363,7 +3363,7 @@ def compare_target_budget_box(request):
     budget_graph_currency = "$"
     budget_type = "Expenses"
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
-        category__category__name__in=["Bills", "Goals", "Funds"])
+        category__category__name__in=["Bills", "Funds"])
     bill_qs = Bill.objects.filter(user=user_name)
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
@@ -3406,6 +3406,21 @@ def compare_target_budget_box(request):
         budget1_names, user_name, start_date, end_date, budget1_bar_value, budget1_graph_value, transaction_data_dict1,
         budget1_income_graph_value, budget1_income_bar_value, expense_bgt1_names, income_bgt1_names,
         spending_amount_bgt1, earned_amount_bgt1)
+    # Fetch all bills and budgets
+    budget_details = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date)
+    bill_details = Bill.objects.filter(user=user_name, date__range=(start_date, end_date))
+    budget_dict = {}
+
+    # Update Bill and Budget Budgetted amount to budget_dict
+    for i in bill_details:
+        if i.label in budget1_names:
+            budget_dict.update(
+                {i.label: i.amount})
+
+    for i in budget_details:
+        if i.name in budget1_names:
+            budget_dict.update(
+                {i.name: i.initial_amount})
 
     context = {"budgets": budgets, "list_of_months": list_of_months,
                "budget1_names": budget1_names,
@@ -3425,7 +3440,8 @@ def compare_target_budget_box(request):
                "budget_income_graph_id": "#total_income_budget",
                "budget_income_bar_id": "#income-budgets-bar",
                "budget_type": budget_type,
-               "page": "budgets"
+               "page": "budgets",
+               "budget_dict": budget_dict
                }
     return render(request, 'budget/compare_target_box.html', context=context)
 

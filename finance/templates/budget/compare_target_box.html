@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% load mathfilters %}
 {% block content %}
+{% load custom_filters%}
     <!-- BEGIN: Content-->
     <div class="app-content content ">
         <div class="content-overlay"></div>
@@ -121,6 +122,17 @@
                                         <div class="card-datatable table-responsive">
                                             <table class="table">
                                                 <thead>
+
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+
+                                                        <th colspan="2"><h5><b>Budgetted Amount</b></h5></td></th>
+                                                        <th colspan="2"><h5><b>Spent Amount</b></h5></td></th>
+                                                    </tr>
                                                     <tr>
                                                         <th><h5><b>Total Income</b></h5></th>
                                                         <th>&nbsp;</th>
@@ -146,8 +158,8 @@
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
                                                             <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
-                                                            <th>&nbsp;</th>
+
+                                                            <th colspan="2"><h5><b>{{budget_dict|get_item:key}}</b></h5></td></th>
                                                             <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down trans_data{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right trans_data{{forloop.counter0}}"></i></h5></td></th>
                                                         </tr>
                                                         {% if value.1 %}
