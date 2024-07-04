@@ -132,7 +132,7 @@
                                 <div class="card-header border-bottom">
                                     <h4 class="card-title">Transactions</h4>
                                     <div float="right">
-                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_account_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    <button class="btn btn-primary download_csv" file_name="{{object.name}}_account_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="{% url 'download_csv' %}">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     <button class="btn btn-primary download_csv" pdf_title="{{object.name}} Transaction" file_name="{{object.name}}_account_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
                                     <input type="hidden" id="download_graph_data" data_label="{{transaction_date_dumbs}}" graph_type="line" data_value="{{transaction_graph_value}}">
                                     </div>

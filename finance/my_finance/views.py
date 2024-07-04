@@ -4995,6 +4995,17 @@ class AccountAdd(LoginRequiredMixin, CreateView):
     form_class = AccountForm
     template_name = 'account/account_add.html'
 
+    def get_success_url(self):
+        """Detect the submit button used and act accordingly
+            Redirect the user to the selected account list page.
+        """
+
+        if 'account_type' in self.request.POST:
+            name = self.request.POST.get('account_type')
+            return reverse_lazy('account_list',kwargs={'name': name})
+        else:
+            return reverse_lazy('account_add')
+
     def form_valid(self, form):
         account_name = form.cleaned_data.get('name').title()
         account_type = form.cleaned_data.get('account_type')

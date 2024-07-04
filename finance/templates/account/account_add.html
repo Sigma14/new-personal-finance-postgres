@@ -31,7 +31,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" method="post" id="account-add-form">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
@@ -59,7 +59,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <select class="form-control" name="account_type">
+                                            <select class="form-control" name="account_type" id="account-type">
                                                 <option>Checking</option>
                                                 <option>Savings</option>
                                                 <option>Cash</option>
@@ -122,6 +122,26 @@
             </div>
         </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // When the account add page is loaded
+        $(document).ready(function() {
+
+            // Fetch the account name from hash and remove '#' sign.
+            let account_name =  window.location.hash.replace(/^#/, '');
+
+            // Removes any URL encoded special characters
+            account_name = decodeURIComponent(account_name);
+
+            // Automatically selects the account option from select dropdown
+            setTimeout(function() {
+                $('#account-add-form #account-type option').filter(function() {
+                    return $(this).text() === account_name;
+                }).prop('selected', true).trigger('change');
+
+            }, 500);
+            });
+    </script>
 
 <!--<form method="post">-->
 <!--    {% csrf_token %}-->
