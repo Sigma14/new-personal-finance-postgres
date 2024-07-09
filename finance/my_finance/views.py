@@ -1601,7 +1601,7 @@ class CategoryList(LoginRequiredMixin, ListView):
                     if total_cat_spend != 0:
                         categories_name.append(cat_data.name)
                         categories_value.append(total_cat_spend)
-
+        sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions', 'Remaining Balance']
         transaction_key =  ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget'] 
         data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
@@ -1616,7 +1616,9 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['tags'] = tags
         data['list_of_months'] = list_of_months
         data['current_month'] = current_month
-        
+        data['category_key_dumbs'] = json.dumps(sub_category_key)
+        data['categories_name_dumbs'] = json.dumps(categories_name)
+        data['categories_value'] = categories_value
         return data
 
     # def get_context_data(self, **kwargs):
@@ -7259,14 +7261,10 @@ def download_csv(request):
     :param request: Request to Access this Function
     :return: Csv Download response
     """
-    print("innnnnnn")
 
     if request.method == 'POST':
         csv_data_key = request.POST['csv_data_key']
-        print("csv_data_key", csv_data_key)
-        print("csv_data_key", type(csv_data_key))
         csv_data_value = request.POST['csv_data_value']
-        print("csv_data_value", csv_data_value)
         file_name = request.POST['file_name']
         csv_data_key = json.loads(csv_data_key)
         csv_data_value = json.loads(csv_data_value)

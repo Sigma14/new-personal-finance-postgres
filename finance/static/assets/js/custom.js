@@ -725,6 +725,84 @@ function inputHTML(formHtml, name, value)
         form.submit();
 
     });
+
+    // Download function for Category list page
+    $("body").delegate(".cat-download-csv", "click", function(event) {
+    var table_id = $(this).attr('table_id');
+    var file_name = $(this).attr('file_name');
+    var table_length = 4; // Set the length to 4 to process only the first 4 columns
+    var csv_data_key = $(this).attr('table_heading');
+    var download_url = $(this).attr('url');
+    var pdf_title = $(this).attr('pdf_title');
+    var fun_name = $(this).attr('fun_name');
+    var graph_type = $('#download_graph_data').attr('graph_type');
+    var csv_data_value = [];
+    var value_index = 1;
+
+    // Read the data from the rows
+    $(table_id + " tr").each(function(i, el) {
+        // Exclude rows that contain a "table" element or a "div" element with the class "progress"
+        if ($(this).find("table").length > 0 || $(this).find("div.progress").length > 0) {
+            return true; // Skip to the next iteration
+        }
+
+        var $tds = $(this).find('td');
+        var data_value = [];
+        for (var j = 0; j < table_length; j++) { // Change i to j and limit to 4 columns
+            var value = $tds.eq(j).text().trim();
+            if (value === "") {
+                var cleared_class = ".cleared" + value_index;
+                var cleared = $(cleared_class).val();
+                data_value.push(cleared);
+            } else {
+                data_value.push(value);
+            }
+        }
+        value_index += 1;
+        csv_data_value.push(data_value);
+    });
+
+    $(".download_csv_form").empty();
+    $(".download_pdf_form").empty();
+
+    var formHtml = "<form action='" + download_url + "' method='post'>" +
+        "<input type='hidden' name='file_name' value='" + file_name + "' >" +
+        "<input type='hidden' name='csv_data_key' value='" + csv_data_key + "' >" +
+        "<input type='hidden' name='csv_data_value' value='" + JSON.stringify(csv_data_value) + "' >";
+
+    if (pdf_title) {
+        formHtml += "<input type='hidden' name='pdf_title' value='" + pdf_title + "' >";
+    }
+
+    if (graph_type == 'transaction-bar') {
+        var data_label = $('#download_graph_data').attr('data_label');
+        var debit_value = $('#download_graph_data').attr('data_value');
+        var credit_value = $('#download_graph_data').attr('credit_value');
+        formHtml += "<input type='hidden' name='graph_type' value='" + graph_type + "' >" +
+                    "<input type='hidden' name='data_label' value='" + data_label + "' >" +
+                    "<input type='hidden' name='data_value' value='" + debit_value + "' >" +
+                    "<input type='hidden' name='credit_value' value='" + credit_value + "' >";
+    } else if (graph_type == 'bar' || graph_type == 'line' || graph_type == 'pie') {
+        var data_label = $('#download_graph_data').attr('data_label');
+        var data_value = $('#download_graph_data').attr('data_value');
+        formHtml += "<input type='hidden' name='graph_type' value='" + graph_type + "' >" +
+                    "<input type='hidden' name='data_label' value='" + data_label + "' >" +
+                    "<input type='hidden' name='data_value' value='" + data_value + "' >";
+    }
+
+    formHtml += "</form>";
+    var form = $(formHtml);
+
+    if (fun_name == "download_csv") {
+        $('.download_csv_form').append(form);
+    } else {
+        $('.download_pdf_form').append(form);
+    }
+
+    form.submit();
+    });
+
+
     $("body").delegate(".delete_button", "click", function(event)
     {
         name = $(this).attr('delete_name');

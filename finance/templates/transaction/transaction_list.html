@@ -150,8 +150,8 @@
                                 </div>
                                 </div>
                                 <div class="col-md-2" >
-                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
-                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="{% url 'download_csv' %}">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="{% url 'download_pdf' %}">PdF<i data-feather="download" class="avatar-icon"></i></button>
                                 <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data_dumbs}}" credit_value="{{credit_graph_data_dumbs}}">
                                 </div>  
                                 </div>

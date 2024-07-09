@@ -98,13 +98,13 @@
                                     <div class="card-header border-bottom">
                                         <h4 class="card-title mb-25">CATEGORIES</h4>
                                         <div float="right">
-                                        <button class="btn btn-primary download_csv" file_name="my_category.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
-                                        <button class="btn btn-primary download_csv" pdf_title="Categories" file_name="my_categories.pdf" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_pdf" url="/download/pdf">PdF<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary cat-download-csv" file_name="my_category.csv" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_csv" url="{% url 'download_csv' %}">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary cat-download-csv" pdf_title="Categories" file_name="my_categories.pdf" table_heading="{{category_key_dumbs}}" table_length="{{category_key | length}}" table_id="#categories" fun_name="download_pdf" url="{% url 'download_pdf' %}">PdF<i data-feather="download" class="avatar-icon"></i></button>
                                         <input type="hidden" id="download_graph_data" data_label="{{categories_name_dumbs}}" graph_type="bar" data_value="{{categories_value}}">
                                         </div>
                                     </div>
                                     <div class="card-datatable">
-                                        <table class="dt-row-grouping table category_table">
+                                        <table class="dt-row-grouping table category_table" id="categories">
                                             <thead>
                                                 <tr>
                                                     <!-- {% for name in category_key %}
@@ -127,7 +127,7 @@
                                                 {% for key, value in sub_category_data.items %}
                                                     <tr class="category" class_name="subcategory{{forloop.counter}}">
                                                         <td>
-                                                            <a class="lead add_category" href="{% url 'subcategory_add' category_pk=value.2 %}" title="add category"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</a><strong>{{key}}&nbsp;</strong>
+                                                            <a class="lead add_category" href="{% url 'subcategory_add' category_pk=value.2 %}" title="add category"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</a><strong style="font-size:16px;">  <b>{{key}}</b>&nbsp;</strong>
                                                             <i class="fa fa-chevron-down subcategory{{forloop.counter}}_dropdown"></i><i class="fa fa-chevron-right subcategory{{forloop.counter}}_dropdown" style="display:None;"></i></td>
                                                         <td><strong>{{value.0}}</strong></td>
                                                         <td><strong>{{value.1}}</strong></td>
