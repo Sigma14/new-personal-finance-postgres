@@ -1766,16 +1766,19 @@ def subcategory_suggestion(request):
 
 def subcategory_add(request, category_pk):
     category_obj = Category.objects.get(pk=category_pk)
-    suggestion_list = sub_category_suggested_list[category_obj.name]
-    for name in suggestion_list:
-        sub_obj = SubCategory.objects.filter(name=name, category=category_obj)
-        if sub_obj:
-            suggestion_list.remove(name)
-    context = {'subcategory_suggestions': suggestion_list, 'category_pk': category_pk}
+    try:
+        suggestion_list = sub_category_suggested_list[category_obj.name]
+        for name in suggestion_list:
+            sub_obj = SubCategory.objects.filter(name=name, category=category_obj)
+            if sub_obj:
+                suggestion_list.remove(name)
+        context = {'subcategory_suggestions': suggestion_list, 'category_pk': category_pk}
+    except:
+        context = {'category_pk':category_pk}
     if request.method == 'POST':
         name = request.POST.get('name').title()
         try:
-            SubCategory.objects.get(category__user=request.user, name=name)
+            SubCategory.objects.get(category__user=request.user, name=name,category__name=category_obj.name)
             context['error'] = 'Subcategory already exists'
             return render(request, "subcategory/add.html", context=context)
         except:
