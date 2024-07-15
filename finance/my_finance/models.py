@@ -74,6 +74,14 @@ MAINTENANCE_STATUS = (
     ("Unresolved", 'Unresolved'),
     ("Resolved", 'Resolved'),)
 
+class UserBudgets(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.user.username + '-' + self.name)
 
 class Property(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
@@ -302,6 +310,7 @@ class BillDetail(models.Model):
 
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE,null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_account', blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
@@ -326,6 +335,7 @@ class Bill(models.Model):
 
 class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
