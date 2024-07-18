@@ -5,27 +5,25 @@ import calendar
 import time
 import pandas as pd
 import datetime
-
 import pytz
 from dateutil import relativedelta
 from io import BytesIO
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
-from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Image
 from reportlab.graphics.charts.piecharts import Pie
@@ -36,22 +34,21 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.units import inch
 from reportlab.platypus.flowables import Spacer
-from reportlab.lib.validators import Auto
 from reportlab.lib.enums import TA_CENTER
 from finance.settings import stock_app_url
-from .forms import CategoryForm, LoginForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
-    MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm
-from .helper import create_categories, check_subcategory_exists, save_fund_obj, create_category_group, \
+from .forms import CategoryForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
+    MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm, UserBudgetsForm
+from .helper import check_subcategory_exists, save_fund_obj, \
     sub_category_suggested_list, create_bill_request, check_bill_is_due, save_transaction, save_income, \
     save_income_details, create_income_request, get_period_date, start_end_date, save_budgets, create_budget_request, \
-    dict_value_to_list, get_template_budget, get_cmp_data, get_cmp_diff_data
-from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, Revenues, \
+    dict_value_to_list, get_template_budget, get_cmp_diff_data
+from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
     PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings, Tag
 from .mortgage import calculator, calculate_tenure
 from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.contrib import messages
 
 wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)', 'CAD': 'Canadian Dollar ($)'}
@@ -910,7 +907,7 @@ def net_worth_cal(account_data, property_data, date_range_list, stock_portfolio_
             balance_graph_dict = {}
             balance_graph_data = []
             date_list = []
-            if data.account_type != "Mortgage" and data.account_type != "Loan" and data.account_type != "Student Loan" and data.account_type != "Personal Loan" and data.account_type != "Medical Debt" and data.account_type != "Other Loan" and data.account_type != "Other Debt":
+            if data.account_type not in ("Mortgage", "Loan", "Student Loan", "Personal Loan", "Medical Debt", "Other Loan", "Other Debt"):
                 if fun_name != "dash_board":
                     overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,
                                           balance_graph_data,
@@ -1305,8 +1302,8 @@ def net_worth(request):
         account_date_list = []
 
     net_worth_dict, assets_data, liability_data, total_asset_amount_dict, total_liability_dict, \
-        total_property_dict, asset_currency_balance, liability_currency_balance, property_currency_balance, \
-        total_currency_list, date_range_list, portfolio_currency_balance, total_portfolio_dict = net_worth_cal(
+        total_property_dict, asset_currency_balance, liability_currency_balance, _, \
+        total_currency_list, date_range_list, _, total_portfolio_dict = net_worth_cal(
         account_data, property_data, account_date_list, stock_portfolio_data)
 
     asset_total_dict = {}
@@ -1463,13 +1460,11 @@ category_icons = {
         "Holidays": "app-assets/images/categories/holiday.png",
         "Emergency Fund": "app-assets/images/categories/emergency-fund.png",
         "Phone": "app-assets/images/categories/Phone.png",
-        "Retirement": "app-assets/images/categories/retirement.png",
-        "Eating Out": "app-assets/images/categories/dinner.png",
         "New House": "app-assets/images/categories/Rent.png",
         "New Phone": "app-assets/images/categories/new-phone.png",
         "Education": "app-assets/images/categories/college-fee.png",
-        "Netflix Spotify Subscription":"app-assets/images/categories/Netflix.png",
-        "Amazon Prime Spotify Subscription":"app-assets/images/categories/Amazon.png",
+        "Netflix Spotify Subscription": "app-assets/images/categories/Netflix.png",
+        "Amazon Prime Spotify Subscription" :"app-assets/images/categories/Amazon.png",
         "Hair": "app-assets/images/categories/salon.png",
         "Job": "app-assets/images/categories/job.png",
         "Business": "app-assets/images/categories/business.png",
@@ -1842,7 +1837,10 @@ def subcategory_budget(request):
     user_name = request.user
     category = int(request.POST.get('category'))
     sub_category_name = request.POST.get('name')
-    subcategory_obj = SubCategory.objects.get(category__pk=category, name=sub_category_name)
+    subcategory_obj = SubCategory.objects.get(
+        category__pk=category,
+        name=sub_category_name
+    )
     try:
         budget = Budget.objects.filter(user=user_name, category=subcategory_obj)
         budget_name = budget[0].name
@@ -2101,7 +2099,6 @@ def user_logout(request):
 
 
 def make_budgets_values(user_name, budget_data, page_method):
-    print("budget data==",budget_data)
     total_budget = 0
     total_spent = 0
     total_left = 0
@@ -2309,8 +2306,8 @@ def budgets_page_data(request, budget_page, template_page):
     budget_label = ['Total Spent', 'Total Left']
     all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list, \
         budgets_dict, income_bdgt_dict, total_bgt_income = make_budgets_values(user_name, budget_data, "budget_page")
-    template_all_budgets, template_budget_graph_data, template_budget_values, template_budget_currency, \
-        template_list_of_months, template_budget_names_list, tem_budgets_dict, template_income_bdgt_dict, template_total_bgt_income = make_budgets_values(
+    template_all_budgets, _, _, _, \
+        template_list_of_months, _, _, template_income_bdgt_dict, template_total_bgt_income = make_budgets_values(
         user_name,
         template_budget_data,
         "template_page")
@@ -2493,14 +2490,16 @@ def budgets_walk_through(request):
         budget_obj.budget_start_date = budget_start_date
         budget_obj.save()
         if budget_period == 'Quarterly':
-            for month_value in range(2):
+            for _ in range(2):
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
-                save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
+                start_month_date, end_month_date = start_end_date(
+                    start_month_date, "Monthly")
+                save_budgets(user_name, start_month_date, end_month_date,
+                             budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
         if budget_period == 'Yearly':
-            for month_value in range(11):
+            for _ in range(11):
                 start_month_date = start_month_date + relativedelta(months=1)
                 start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
@@ -2509,7 +2508,6 @@ def budgets_walk_through(request):
         create_budget_request()
         return redirect("/budgets/current")
     date_value = datetime.datetime.today().date()
-    current_month = datetime.datetime.strftime(date_value, "%b-%Y")
     start_date, end_date = start_end_date(date_value, "Monthly")
     budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
@@ -2530,7 +2528,9 @@ def budgets_walk_through(request):
             non_monthly_expense_categories.append(sub_data.name)
         if sub_data.category.name == "Goals":
             goals_categories.append(sub_data.name)
-        if sub_data.category.name != "Income" and sub_data.category.name != "Bills & Subscriptions" and sub_data.category.name != "Goals" and sub_data.category.name != "Funds" and sub_data.category.name != "Non-Monthly":
+        if sub_data.category.name not in ("Income",
+                                           "Bills & Subscriptions",
+                                           "Goals", "Funds", "Non-Monthly"):
             if sub_data.category.name in expense_categories:
                 expense_categories[sub_data.category.name].append(
                     [sub_data.name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0])
@@ -2538,8 +2538,8 @@ def budgets_walk_through(request):
                 expense_categories[sub_data.category.name] = [
                     [sub_data.name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0]]
 
-    all_budgets, budget_graph_data, budget_values, budget_currency, list_of_months, current_budget_names_list, \
-        budgets_dict, income_bdgt_dict, total_bgt_income = make_budgets_values(user_name, budget_data, "budget_page")
+    _, _, _, budget_currency, _, _, \
+        budgets_dict, income_bdgt_dict, _ = make_budgets_values(user_name, budget_data, "budget_page")
 
     bills_qs = Bill.objects.filter(user=user_name, date__range=(start_date, end_date)).order_by('-created_at')
     total_expected_bill = 0
@@ -2619,7 +2619,7 @@ def budgets_walk_through(request):
             total_goals_actual += float(i[2])
     
     index_counter = 1
-    for category, expenses in expense_categories.items():
+    for _, expenses in expense_categories.items():
         for expense_data in expenses:
             expense_data.append(index_counter)  # Insert index at the beginning
             index_counter += 1
@@ -2709,7 +2709,7 @@ def budgets_income_walk_through(request):
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(income_account_id))
             remaining_amount = round(float(account_obj.available_balance) + budget_act_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name="Incomes")
+            tag_obj, _ = Tag.objects.get_or_create(user=user_name, name="Incomes")
             transaction_date = datetime.datetime.today().date()
             save_transaction(user_name, sub_cat_obj.name, budget_act_amount, remaining_amount, transaction_date,
                              sub_cat_obj,
@@ -2836,7 +2836,7 @@ def budgets_expenses_walk_through(request):
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name=category_name)
+            tag_obj, _ = Tag.objects.get_or_create(user=user_name, name=category_name)
             transaction_date = datetime.datetime.today().date()
             save_transaction(user_name, sub_cat_obj.name, budget_act_amount, remaining_amount, transaction_date,
                              sub_cat_obj,
@@ -2963,7 +2963,7 @@ def budgets_non_monthly_expenses_walk_through(request):
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name=category_name)
+            tag_obj, _ = Tag.objects.get_or_create(user=user_name, name=category_name)
             transaction_date = datetime.datetime.today().date()
             save_transaction(user_name, sub_cat_obj.name, budget_act_amount, remaining_amount, transaction_date,
                              sub_cat_obj,
@@ -3105,7 +3105,7 @@ def budgets_goals_walk_through(request):
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(goal_account_id))
             remaining_amount = round(float(account_obj.available_balance) - budget_act_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name=category_name)
+            tag_obj, _ = Tag.objects.get_or_create(user=user_name, name=category_name)
             transaction_date = datetime.datetime.today().date()
             save_transaction(user_name, sub_cat_obj.name, budget_act_amount, remaining_amount, transaction_date,
                              sub_cat_obj,
@@ -3117,7 +3117,7 @@ def budgets_goals_walk_through(request):
 
         return JsonResponse({'status': 'true','message':message})
     goals_category = SubCategory.objects.filter(category__user=user_name, category__name='Goals')
-    context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date),"error":error}
+    context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date)}
     context.update({"page": "budgets"})
     return render(request, 'goal/goals_walk_through.html')
 
@@ -3806,10 +3806,7 @@ class TemplateAdd(LoginRequiredMixin, CreateView):
         obj.user = user_name
         budget_period = form.cleaned_data['budget_period']
         date_value = datetime.datetime.today().date()
-        budget_name = form.cleaned_data['name']
         budget_amount = form.cleaned_data['amount']
-        budget_currency = form.cleaned_data['currency']
-        budget_auto = form.cleaned_data['auto_budget']
         start_month_date, end_month_date = start_end_date(date_value, "Monthly")
 
         obj.start_date = start_month_date
@@ -4107,7 +4104,6 @@ def transaction_list(request):
     user_name = request.user
     if request.method == "POST":
         tag_name = request.POST['tag_name']
-        tags_data = request.POST['tags_data']
         if tag_name != 'All':
             transaction_data = Transaction.objects.filter(user=user_name, tags__name=tag_name).order_by(
                 '-transaction_date')
@@ -4227,7 +4223,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         #     income_obj.credited = True
         #     income_obj.save()
 
-        if category_name.name == 'Bills & Subscriptions' or category_name.name == 'Bills':
+        if category_name.name in ('Bills & Subscriptions', 'Bills'):
             due_bill_id = int(self.request.POST['due_bill'])
             bill_name = Bill.objects.get(pk=due_bill_id)
             obj.bill = bill_name
@@ -5773,7 +5769,7 @@ def bill_pay(request, pk):
     label = bill_obj.label
     user = bill_obj.user
     categories = SubCategory.objects.get(name=label, category__name='Bills & Subscriptions', category__user=user)
-    tag_obj, tag_created = Tag.objects.get_or_create(user=user, name="Bills")
+    tag_obj, _ = Tag.objects.get_or_create(user=user, name="Bills")
     save_transaction(user, label, bill_amount, remaining_amount, today_date, categories, account_obj,
                      tag_obj, True, True, bill_obj)
     account_obj.available_balance = remaining_amount
@@ -5788,19 +5784,17 @@ def bill_pay(request, pk):
 @login_required(login_url="/login")
 def bill_list(request):
     bill_list_data = BillDetail.objects.filter(user=request.user).order_by('date')
-    bill_list = bill_list_data
+    bills_list = bill_list_data
     bill_data = Bill.objects.filter(user=request.user)
     # If specific dataa requried from dropdown, it will update the bill list
     if 'selected_bill' in request.POST:
         bill_label = request.POST['selected_bill']
         if bill_label != 'all':
-            bill_list_data = BillDetail.objects.filter(user=request.user,label=bill_label).order_by('date')
-            bill_data = Bill.objects.filter(user=request.user,label=bill_label)
-            
+            bill_list_data = BillDetail.objects.filter(user=request.user,
+                label=bill_label).order_by('date')
+            bill_data = Bill.objects.filter(user=request.user, label=bill_label)
     else:
         bill_label = None
-
-    
 
     calendar_bill_data = []
 
@@ -5815,7 +5809,7 @@ def bill_list(request):
             data_dict['calendar_type'] = 'Holiday'
 
         calendar_bill_data.append(data_dict)
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_list': bill_list ,'bill_data': bill_list_data, 'today_date': today_date,
+    context = {"calendar_bill_data": calendar_bill_data, 'bill_list': bills_list ,'bill_data': bill_list_data, 'today_date': today_date,
                'bill_label': bill_label, 'page': 'bill_list'}
     return render(request, "bill/bill_list.html", context=context)
 
@@ -5960,7 +5954,7 @@ def bill_walk_through(request):
         if bill_act_amount > 0:
             account_obj = Account.objects.get(id=int(bill_account_id))
             remaining_amount = round(float(account_obj.available_balance) - bill_act_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name="Incomes")
+            tag_obj, _ = Tag.objects.get_or_create(user=user_name, name="Incomes")
             transaction_date = datetime.datetime.today().date()
             save_transaction(user_name, sub_cat_obj.name, bill_act_amount, remaining_amount, transaction_date,
                              sub_cat_obj,
@@ -6241,7 +6235,6 @@ def future_net_worth_calculator(request):
         'other_loan_owing': other_loan_owing,
         'other_asset': other_cost,
         'other_liability': other_liab,
-        'age': age,
         'taxable_income': income,
         'asset_rate': asset_rate,
         'categories_name': categories_name,
@@ -7490,7 +7483,7 @@ def income_add(request):
                 if auto_credit:
                     account_balance = float(account.available_balance)
                     remaining_amount = round(account_balance + income_amount, 2)
-                    tag_obj, tag_created = Tag.objects.get_or_create(user=income.user, name="Incomes")
+                    tag_obj, _ = Tag.objects.get_or_create(user=income.user, name="Incomes")
                     save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date,
                                      sub_category,
                                      account,
@@ -7635,7 +7628,7 @@ def income_edit(request, pk):
 
         if income_obj.credited is False and credited is True:
             account.available_balance = round(float(account.available_balance) + new_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=income_obj.income.user, name="Incomes")
+            tag_obj, _ = Tag.objects.get_or_create(user=income_obj.income.user, name="Incomes")
             save_transaction(income_obj.income.user, income_obj.income.sub_category.name, new_amount,
                              account.available_balance,
                              income_date, income_obj.income.sub_category, account, tag_obj, False, True)
@@ -8448,7 +8441,7 @@ def delete_expense(request, pk):
 def property_income_list(request):
     user_name = request.user
     unit_obj = PropertyRentalInfo.objects.filter(user=user_name)
-    income_list = []
+    incomes_list = []
     income_label = ['Total Open Invoices', 'Overdue', 'Partially Paid', 'Fully Paid']
     total_open_invoice = 0
     total_overdue = 0
@@ -8482,12 +8475,13 @@ def property_income_list(request):
 
         total_balance = total_amount - total_paid
         data_list += [total_amount, total_paid, total_balance]
-        income_list.append(data_list)
+        incomes_list.append(data_list)
 
-    income_values = [total_open_invoice, total_overdue, total_partially_paid, total_fully_paid]
+    income_values = [total_open_invoice, total_overdue,
+                      total_partially_paid, total_fully_paid]
     income_key = ['Property', 'Unit', 'Amount', 'Paid', 'Balance']
 
-    context = {'income_obj': income_list,
+    context = {'income_obj': incomes_list,
                "graph_label": income_label,
                "graph_value": income_values,
                "graph_currency": graph_currency,
