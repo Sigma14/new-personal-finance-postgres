@@ -9,12 +9,9 @@ import datetime
 import pytz
 from dateutil import relativedelta
 from io import BytesIO
-import base64
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
-from django.db.models import Sum
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
