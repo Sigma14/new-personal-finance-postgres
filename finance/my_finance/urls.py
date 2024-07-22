@@ -32,7 +32,7 @@ urlpatterns = [
 
     path('budgets/', budgets_box, name='budgets'),
     path('budgets/sample', sample_budget_box, name='sample-budgets'),
-    path('budgets/current', current_budget_box, name='current-budgets'),
+    path('budgets/current/<int:pk>', current_budget_box, name='current-budgets'),
     path('budgets/compare', compare_boxes, name='compare_boxes'),
     path('budgets/compare/target', compare_target_budget_box, name='compare-target-budgets'),
     path('budgets/compare/different', compare_different_budget_box, name='compare-different-budgets'),
@@ -41,12 +41,12 @@ urlpatterns = [
     path('budget_add/', BudgetAdd.as_view(), name='budget_add'),
     path('budget_update/<int:pk>', budget_update, name='budget_update'),
     path('budget_delete/<int:pk>', BudgetDelete.as_view(), name='budget_delete'),
-    path('budgets/walk_through', budgets_walk_through, name='budgets_walk_through'),
+    path('budgets/walk_through/<int:pk>', budgets_walk_through, name='budgets_walk_through'),
     path('budgets/income/walk_through', budgets_income_walk_through, name='budgets_income_walk_through'),
     path('budgets/expenses/walk_through', budgets_expenses_walk_through, name='budgets_expenses_walk_through'),
     path('budgets/non_monthly_expenses/walk_through', budgets_non_monthly_expenses_walk_through, name='budgets_non_monthly_expenses_walk_through'),
     path('budgets/goals/walk_through', budgets_goals_walk_through, name='budgets_goals_walk_through'),
-
+    path('create_user_budget/', UserBudgetAdd.as_view(), name='create_user_budget'),
     # Template Budget urls :-
 
     path('template_budget_list/', template_budget_list, name='template_budget_list'),

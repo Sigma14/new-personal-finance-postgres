@@ -36,6 +36,7 @@ def create_categories(user):
                        "Food": ["Groceries", "Eating Out"],
                        "Personal Care": ["Electronic Items", "Clothes"],
                        "Income": ["Job", "Business", "Bonus"],
+                       "Non-Monthly": ["Taxes", "Insurance"]
                        }
     for category, sub_category in categories_dict.items():
         category = Category.objects.create(user=user, name=category)

@@ -39,7 +39,7 @@
                                     class="fa fa-plus"></i> Add-Transaction</a>
                             </h5>
                             <div class="dropdown">
-                                <form method="post" action="{% url 'current-budgets' %}" id="period_filter_form">
+                                <form method="post" action="{% url 'current-budgets' pk=pk %}" id="period_filter_form">
                                     {% csrf_token %}
                                     <select class="form-control budget_period_filter" name="select_period" style="width:200px">
                                         {% for month in list_of_months %}

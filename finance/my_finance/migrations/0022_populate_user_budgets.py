@@ -7,7 +7,7 @@ def create_user_budgets(apps, schema_editor):
     UserBudgets = apps.get_model('my_finance', 'UserBudgets')
 
     for user in User.objects.all():
-        UserBudgets.objects.create(user=user, name=f"Default Budget")
+        UserBudgets.objects.create(user=user, name=f"{user.username}'s Default Budget")
 
 def delete_user_budgets(apps, schema_editor):
     UserBudgets = apps.get_model('my_finance', 'UserBudgets')

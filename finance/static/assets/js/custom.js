@@ -2527,6 +2527,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         e.preventDefault();
         income_index = $(this).attr('income_index')
         income_account_id = $('#income_account_id').val()
+        user_budget_name = $('#user_budget_name').val()
+        user_budget_id = $(this).attr('user_budget')
         id = $(this).attr('income_id')
         name = $("#income_sources"+income_index).val()
         exp_amount = $("#income_expected_amount"+income_index).val()
@@ -2559,6 +2561,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                             'exp_amount': exp_amount,
                             'actual_amount': actual_amount,
                             'income_account_id': income_account_id,
+                            'user_budget_id': user_budget_id,
                             'csrfmiddlewaretoken': csrfmiddlewaretoken
                           },
                     success: function(response)
@@ -2575,7 +2578,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page & takes to income section
-                                        location.href = '/en/budgets/walk_through#income-section' ;
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#income-section' ;
                                         location.reload();
                                     });
                         }
@@ -2592,7 +2595,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page
-                                        location.href = '/en/budgets/walk_through#income-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#income-section';
                                         location.reload();
                                     });
                         }
@@ -2628,6 +2631,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         e.preventDefault();
         bill_index = $(this).attr('bill_index')
         bill_account_id = $('#bill_account_id').val()
+        user_budget_name = $('#user_budget_name').val()
+        user_budget_id = $(this).attr('user_budget')
         id = $(this).attr('bill_id')
         name = $("#bill_sources"+bill_index).val()
         exp_amount = $("#bill_expected_amount"+bill_index).val()
@@ -2664,6 +2669,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                             'bill_account_id': bill_account_id,
                             'budget_period': budget_period,
                             'budget_date': budget_date,
+                             'user_budget_id': user_budget_id,
                             'csrfmiddlewaretoken': csrfmiddlewaretoken
                           },
                     success: function(response)
@@ -2680,7 +2686,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page & takes to bills section
-                                        location.href = '/en/budgets/walk_through#bill-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#bill-section';
                                         location.reload();
                                     });
                         }
@@ -2695,7 +2701,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         },
                                         buttonsStyling: false
                                      }).then(function(){
-                                     location.href = '/en/budgets/walk_through#bill-section';
+                                     location.href = '/en/budgets/walk_through/' + user_budget_id + '#bill-section';
                                      location.reload();
                                      });
                         }
@@ -2768,6 +2774,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         expenses_account_id = $('#expenses_account_id').val()
         id = $(this).attr('expenses_id')
         name = $("#expenses_sources"+expenses_index).val()
+        user_budget_id = $(this).attr('user_budget')
         exp_amount = $("#expenses_expected_amount"+expenses_index).val()
         actual_amount = $("#expenses_actual_amount"+expenses_index).val()
         budget_period = $('#expenses_budget_period'+expenses_index).val()
@@ -2804,6 +2811,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                             'expenses_account_id': expenses_account_id,
                             'budget_period': budget_period,
                             'budget_date': budget_date,
+                            'user_budget_id': user_budget_id,
                             'csrfmiddlewaretoken': csrfmiddlewaretoken
                           },
                     success: function(response)
@@ -2820,7 +2828,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page & takes to expenses section
-                                        location.href = '/en/budgets/walk_through#expense-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#expense-section';
                                         location.reload();
                                     });
                         }
@@ -2836,7 +2844,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         },
                                         buttonsStyling: false
                                      }).then(function () {
-                                        location.href = '/en/budgets/walk_through#expense-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#expense-section';
                                         location.reload();
                                     });
                         }
@@ -2919,6 +2927,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         id = $(this).attr('non_monthly_expenses_id')
         budget_period = $('#non_monthly_expenses_budget_period'+non_monthly_expenses_index).val()
         budget_date = $('#non_monthly_expenses_add_budget_date'+non_monthly_expenses_index).val()
+        user_budget_id = $(this).attr('user_budget')
         name = $("#non_monthly_expenses_sources"+non_monthly_expenses_index).val()
         exp_amount = $("#non_monthly_expenses_expected_amount"+non_monthly_expenses_index).val()
         actual_amount = $("#non_monthly_expenses_actual_amount"+non_monthly_expenses_index).val()
@@ -2957,6 +2966,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                             'budget_period':budget_period,
                             'non_monthly_expenses_account_id': non_monthly_expenses_account_id,
                             'budget_date':budget_date,
+                            'user_budget_id': user_budget_id,
                             'csrfmiddlewaretoken': csrfmiddlewaretoken
                           },
                     success: function(response)
@@ -2973,7 +2983,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page & takes to non-monthly expenses section
-                                        location.href = '/en/budgets/walk_through#non-monthly-expenses-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#non-monthly-expenses-section';
                                         location.reload();
                                     });
                         }
@@ -2990,7 +3000,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page
-                                        location.href = '/en/budgets/walk_through#non-monthly-expenses-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#non-monthly-expenses-section';
                                         location.reload();
                                     });
                         }
@@ -3066,6 +3076,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         goals_index = $(this).attr('goals_index')
         console.log("goals_index",goals_index)
         goals_account_id = $('#goals_account_id').val()
+        user_budget_id = $(this).attr('user_budget')
         id = $(this).attr('goals_id')
         goal_date = $('#goals_add_budget_date'+goals_index).val()
         if ($("#goals_sources"+goals_index).val()) {
@@ -3110,6 +3121,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                             'goals_account_id': goals_account_id,
                             'goal_date':goal_date,
                             'sub_category_name':name,
+                            'user_budget_id': user_budget_id,
                             'csrfmiddlewaretoken': csrfmiddlewaretoken
                           },
                     success: function(response)
@@ -3127,7 +3139,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page & takes to goals section
-                                        location.href = '/en/budgets/walk_through#goals-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#goals-section';
                                         location.reload();
                                     });
                         }
@@ -3144,7 +3156,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                         buttonsStyling: false
                                      }).then(function () {
                                         // Reload the page
-                                        location.href = '/en/budgets/walk_through#goals-section';
+                                        location.href = '/en/budgets/walk_through/' + user_budget_id + '#goals-section';
                                         location.reload();
                                     });
                         }

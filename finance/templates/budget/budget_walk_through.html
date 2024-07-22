@@ -104,7 +104,7 @@
                             </div>
                         </div>
                         <div class="bs-stepper-content">
-                            <form action="{% url 'budgets_walk_through' %}" id="frm1" method="post" enctype="multipart/form-data">
+                            <form action="#" id="frm1" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div id="account-details" class="content">
                                     <section>
@@ -125,6 +125,24 @@
                                                         <p class="card-text"><strong>Tips: </strong>Be realistic about your income and expenses. Remember, a budget is a tool to help you, not restrict you. Regularly review and adjust it as your financial situation changes.</p>
                                                     </div>
 
+                                                </div>
+                                                
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="form-group row">
+                                                            <div class="col-sm-2 col-form-label">
+                                                                <label for="fname-icon">Budget Name</label>
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <div class="input-group input-group-merge">
+                                                                    
+                                                                    <input type="text" id="user_budget_name" class="form-control" value="{{user_budget_name}}" required
+                                                                           />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -186,7 +204,7 @@
                                                                                 <td><input type="text" value="{{data.0}}" id="income_sources{{forloop.counter}}" name="income_sources" class="form-control income_sources" required/></td>
                                                                                 <td><input type="number" value="{{data.1}}" id="income_expected_amount{{forloop.counter}}" name="income_expected_amount" class="form-control total_income_exp" required/></td>
                                                                                 <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="income_actual_amount{{forloop.counter}}" name="income_actual_amount" class="form-control total_income_act" required/></td>
-                                                                                <td><button class="btn btn-outline-secondary update_income_bgt_walkthrough" income_index="{{forloop.counter}}" income_id="{{data.4}}">Update</button></td>
+                                                                                <td><button class="btn btn-outline-secondary update_income_bgt_walkthrough" income_index="{{forloop.counter}}" income_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                             </tr>
                                                                         {% endfor %}
                                                                     {% endfor %}
@@ -277,7 +295,7 @@
                                                                                     <i class="fa fa-calendar fa-1 bill_calender_icon " id="bill_calender_icon" index="{{forloop.counter}}"></i> 
                                                                                     <input type="text" id="bill_add_budget_date{{forloop.counter}}"  name="bill_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                                 </td>
-                                                                                <td><button class="btn btn-outline-secondary update_bill_bgt_walkthrough" bill_index="{{forloop.counter}}" bill_id="{{data.4}}">Update</button></td>
+                                                                                <td><button class="btn btn-outline-secondary update_bill_bgt_walkthrough" bill_index="{{forloop.counter}}" bill_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                             </tr>
                                                                         {% endfor %}
                                                                     {% endfor %}
@@ -370,7 +388,7 @@
                                                                                     <i class="fa fa-calendar fa-1 expenses_calender_icon " id="expenses_calender_icon" index="{{data|last}}"></i> 
                                                                                     <input type="text" id="expenses_add_budget_date{{data|last}}"  name="expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                                 </td>
-                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{data|last}}" expenses_id="{{data.4}}">Update</button></td>
+                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{data|last}}" expenses_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                             </tr>
                                                                             
                                                                         {% endfor %}
@@ -466,7 +484,7 @@
                                                                                 <i class="fa fa-calendar fa-1 non_monthly_expenses_calender_icon " id="non_monthly_expenses_calender_icon" index="{{forloop.counter}}"></i> 
                                                                                 <input type="text" id="non_monthly_expenses_add_budget_date{{forloop.counter}}"  name="non_monthly_expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                             </td>
-                                                                            <td><button class="btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.counter}}" non_monthly_expenses_id="{{data.4}}">Update</button></td>
+                                                                            <td><button class="btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.counter}}" non_monthly_expenses_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                         </tr>
                                                                     
                                                                     {% endfor %}
@@ -554,7 +572,7 @@
                                                                                     <i class="fa fa-calendar fa-1 goal_calender_icon " id="goal_calender_icon" index="{{forloop.counter}}"></i> 
                                                                                     <input type="text" id="goals_add_budget_date{{forloop.counter}}"  name="goals_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
                                                                                 </td>
-                                                                                <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" goals_index="{{forloop.counter}}" goals_id="{{data.4}}">Update</button></td>
+                                                                                <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" goals_index="{{forloop.counter}}" goals_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                             </tr>
                                                                     
                                                                     {% endfor %}
@@ -580,7 +598,7 @@
                                             <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
                                             <span class="align-middle d-sm-inline-block d-none">Previous</span>
                                         </div>
-                                        <a href="{% url 'current-budgets' %}" class="btn btn-success"> finished </a>
+                                        <a href="{% url 'current-budgets' pk=pk %}" class="btn btn-success"> finished </a>
                                     </div>
                                 </div>
                                     

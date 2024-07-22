@@ -55,20 +55,60 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row" style="padding-top:20px;" >
+                    <!-- <div class="row" style="padding-top:20px;" >
                         <div class="col">
                             <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
                                                 class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
                         </div>
+                    </div> -->
+                    <div class="row" style="padding-top:20px;" >
+                        <div class="col">
+                            <a href="#" class="btn btn-primary add-user-bgt"  data-placement="top"  data-toggle="modal" data-target="#userBudgetFormModal"><i
+                                                class="fa fa-plus"></i> {% trans "Create User Budget" %}</a>
+                        </div>
                     </div>
                 <!--END: Info card-->
+                
+                <section id="ecommerce-products" class="list-view col-md-6">
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }} text-danger"{% endif %}><b>{{ message }}</b></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% for object in user_budgets %}
+                    
+                            <div class="card ecommerce-card">
+                                
+                                <div class="card-body" style="width:400%;">
+                                    <div>
+                                    <a href="{% url 'budgets_walk_through' pk=object.id %}" >
+                                    <h4 class="item-name" style="float:left;">{{ object.name }}</h4>
+                                    
+                                    </a>
+                                    <a href="{% url 'current-budgets' pk=object.id %}" >
+                                        <h5 style="float:right;">Budget Analysis</h5>
+                                        
+                                        </a>
+                                </div>
+                                </div>
+                                
+                                <!-- <div class="card-body">
+                                    
+                                </div>                                 -->
+                            </div>
+                    
+                    {% endfor %}
+                </section>
+
                 <section style="padding-top:20px;">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="text-align:center;">
-                                        <a href="{% url 'budgets_walk_through' %}">{% trans 'Create Budget Walkthrough' %}</a>
+                                        <a href="#">{% trans 'Create Budget Walkthrough' %}</a>
                                     </div>
                                     <div class="item-name">
                                         <p class="card-text">{% blocktrans %} In this budget walkthrough, we provide a professional guide on the essential steps to help users create a well-structured budget by defining categories and allocating amounts. {% endblocktrans %}</p>
@@ -106,7 +146,7 @@
                             <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="text-align:center;">
-                                        <a href="{% url 'current-budgets' %}">{% trans "Current Budget" %} </a>
+                                        <a href="#">{% trans "Current Budget" %} </a>
                                     </div>
                                     <div class="item-name">
                                         <p class="card-text"> {% blocktrans %} Your 'Current Budget' is where you track your current budget goals and financial activity. This interactive dashboard displays your income, expenses, and savings for the current month, giving you a clear view of your financial health. It's designed to help you stay on top of your spending and make adjustments as needed to align with your financial goals. {% endblocktrans %}</p>
@@ -131,6 +171,42 @@
                         </div>
                     </div>
                 </section>
+                <div class="modal fade" id="userBudgetFormModal" tabindex="-1" role="dialog" aria-labelledby="userBudgetFormModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userBudgetFormModal">Add User Budget</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form class="form form-horizontal" method="POST" action="{% url 'create_user_budget' %}" id="userBudgetForm">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label>Name</label>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="input-group input-group-merge">
+                                                        {{user_budget_form.name}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-sm-9 offset-sm-3">
+                                            <input type="submit" name="category_page" class="btn btn-primary mr-1" value="Save">
+                                            <a href="#" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

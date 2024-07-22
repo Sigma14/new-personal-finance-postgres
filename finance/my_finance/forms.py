@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds, \
-    TemplateBudget, PropertyMaintenance, PropertyExpense, SubCategory
+    TemplateBudget, PropertyMaintenance, PropertyExpense, SubCategory, UserBudgets
 
 CURRENCIES = (
     ("$", 'US Dollar ($)'),
@@ -36,6 +36,14 @@ MAINTENANCE_STATUS = (
     ("Unresolved", 'Unresolved'),
     ("Resolved", 'Resolved'),)
 
+class UserBudgetsForm(forms.ModelForm):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
+
+    class Meta:
+        model = UserBudgets
+        exclude = ('user', 'created_at', 'updated_at')
+
+    
 
 class CategoryForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
@@ -149,11 +157,13 @@ class BudgetForm(forms.ModelForm):
             self.request = kwargs.pop('request')
             user_name = self.request.user
             super(BudgetForm, self).__init__(*args, **kwargs)
-            self.fields['categories'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name).exclude(name__in=["Goals", "Funds"]),
-                                                             empty_label="Select Category Group",
-                                                             widget=forms.Select(
-                                                                 attrs={'class': 'form-control pick_category',
-                                                                        'method_name': 'add_budget'}))
+            self.fields['categories'] = forms.ModelChoiceField(
+                queryset=Category.objects.filter(user=user_name)
+                .exclude(name__in=["Goals", "Funds"]),
+                empty_label="Select Category Group",
+                widget=forms.Select(
+                attrs={'class': 'form-control pick_category',
+                'method_name': 'add_budget'}))
         except Exception as msg:
             print(msg)
 

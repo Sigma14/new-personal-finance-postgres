@@ -2,6 +2,8 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 from djongo import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -81,7 +83,14 @@ class UserBudgets(models.Model):
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
-        return str(self.user.username + '-' + self.name)
+        return str(self.name)
+
+# Create a default budget for new user
+@receiver(post_save, sender=User)
+def add_user_budget(sender, instance, created, **kwargs):
+    if created:
+        UserBudgets.objects.create(
+                name="Default Budget", user=instance)
 
 class Property(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
@@ -622,3 +631,4 @@ class StockHoldings(models.Model):
 
     def __str__(self):
         return str(self.name)
+    
