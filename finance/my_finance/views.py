@@ -35,13 +35,14 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.units import inch
 from reportlab.platypus.flowables import Spacer
 from reportlab.lib.enums import TA_CENTER
+from itertools import chain
 from finance.settings import stock_app_url
 from .forms import CategoryForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm, UserBudgetsForm
 from .helper import check_subcategory_exists, save_fund_obj, \
     sub_category_suggested_list, create_bill_request, check_bill_is_due, save_transaction, save_income, \
     save_income_details, create_income_request, get_period_date, start_end_date, save_budgets, create_budget_request, \
-    dict_value_to_list, get_template_budget, get_cmp_diff_data
+    dict_value_to_list, get_template_budget, get_cmp_diff_data, get_list_of_months
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
@@ -3180,29 +3181,33 @@ def current_budget_box(request, pk):
 
     left_over_cash = round(total_bgt_income - sum(total_expense_list), 2)
     transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget']
-    transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False, budgets__user_budget=user_budget, 
+    
+    #Fetch and combine Bills and Budgets related transaction from a user budget
+    bgt_transaction_data = Transaction.objects.filter(user=user_name, budgets__isnull=False, budgets__user_budget=user_budget, 
                                                   transaction_date__range=(start_date, end_date)).order_by(
         'transaction_date')
+    bill_transaction_data = Transaction.objects.filter(user=user_name, bill__isnull=False, bill__user_budget=user_budget, 
+                                                  transaction_date__range=(start_date, end_date)).order_by(
+        'transaction_date')
+    transaction_data = list(chain(bgt_transaction_data, bill_transaction_data))            
     translated_data = {
         'earned': _('Earned'),
         'spending': _('Spending')
     }
+    list_of_months = get_list_of_months(user_name, pk)
 
     context = {"pk": pk, "list_of_months": list_of_months, "current_month": current_month,
                "budget_graph_currency": budget_currency, 'total_income': total_bgt_income,
                'income_bdgt_dict': income_bdgt_dict, 'left_over_cash': left_over_cash,
                'total_expense': sum(total_expense_list), 'expenses_dict': budgets_dict,
                'all_budgets': all_budgets, 'budget_graph_data': budget_graph_data,
-               'cash_flow_names': ['Earned', 'Spent'],
+               'cash_flow_names': ['Earned', 'Spent'], "budget_bar_id": "#budgets-bar",
                'cash_flow_data': [{'name': 'Amount', 'data': [total_bgt_income, sum(total_expense_list)]}],
-               "budget_bar_id": "#budgets-bar",
-               'budget_names': current_budget_names_list,
-               "budget_graph_value": total_expense_list,
-               "budget_graph_id": "#total_budget",
-               "transaction_key": transaction_key,
-               "transaction_data": transaction_data,
-               'translated_data': json.dumps(translated_data),
-               "page": "budgets"
+               'budget_names': current_budget_names_list, "budget_graph_value": total_expense_list,
+               "budget_graph_id": "#total_budget", "transaction_key": transaction_key,
+               "transaction_data": transaction_data, 'translated_data': json.dumps(translated_data),
+               "page": "budgets", 'category_icons': category_icons,
+               "budget_name": user_budget.name
                }
     return render(request, 'budget/current_budget_box.html', context=context)
 

@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% load mathfilters i18n %}
+{% load mathfilters i18n custom_filters static %}
 <!DOCTYPE html>
 <head>
     {% block title %} Current Budget Box {% endblock title %}
@@ -38,6 +38,9 @@
                                 <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
                                     class="fa fa-plus"></i> Add-Transaction</a>
                             </h5>
+                            <h4>
+                                {{budget_name}}
+                            </h4>
                             <div class="dropdown">
                                 <form method="post" action="{% url 'current-budgets' pk=pk %}" id="period_filter_form">
                                     {% csrf_token %}
@@ -60,20 +63,31 @@
                             <div class="card-datatable table-responsive">
                                 <table class="table">
                                     <thead>
+                                        <tr>
+                                            
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th style="text-align: center;">Budgetted Amount</th>
+                                            <th style="text-align: center;">Spent Amount</th>
+                                            <th style="text-align: center;">Available Amount</th>
+                                            <th>&nbsp;</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                         <tr class="show_bdgt_exp" method_name="expenses_income_cls">
-                                            <th>
+                                            <th colspan="10">
                                                 <h5>
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#incomeModel"></i>
                                                     <b>{{ _('Income')}}</b>
                                                 </h5>
                                             </th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
+                                            
                                             <th>
                                                 <h5><b class="text-success">{{budget_graph_currency}}{{total_income}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down income_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right income_drp_sign"></i></h5>
                                                 </td>
@@ -81,17 +95,24 @@
                                         </tr>
                                         {% for ex_key, ex_value in income_bdgt_dict.items %}
                                             <tr class="expenses_income_cls" style="display:None;">
-                                                <th colspan="9">
+                                                <th colspan="11">
                                                     <div class="badge badge-pill d-block badge-secondary"><span><b>{{ex_key}}</b></span></div>
                                                 </th>
                                             </tr>
                                             {% for object in ex_value %}
                                                 {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
                                                     <tr class="expenses_income_cls" style="height:10px;display:none;">
-                                                        <th colspan="7" style="height:2px;padding-top:20px;" >
+                                                        
+                                                        <th colspan="7" style="height:2px;padding-top:20px;width: 50%;" >
                                                             <!--Name-->
                                                             <div class="row">
-                                                                <div class="col-6"> 
+                                                                
+                                                                <div class="col-6">
+                                                                    {% if category_icons|get_item:object.0 %}
+                                                                        <img src="{% static category_icons|get_item:object.0 %}" alt="{{ object.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% else %}
+                                                                        <img src="{{ default_icon }}" alt="{{ category }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %} &ensp;
                                                                     <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=object.4 %}{% else %}{% url 'budget_detail' pk=object.4 %}{% endif %}">{{object.0}}</a></h6>
                                                                 </div> 
                                                                 <div class="col-6 d-flex flex-row-reverse"> 
@@ -100,25 +121,41 @@
                                                             </div>
                                                             <!--Name:end-->
                                                             <!--p_bar:-->
-                                                            <div class="progress progress-bar-success">
+                                                            {% if object.9|div:object.1|mul:100 < 100 %}
+                                                            <div class="progress progress-bar-warning">
                                                                 <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
                                                                 </div>
                                                             </div> 
+                                                            {% else %}
+                                                                <div class="progress progress-bar-success">
+                                                                    <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
                                                             <!--p_bar:end-->    
                                                             <br>
                                                             <!-- Amount info-->
                                                             <!-- Amount info-->
                                                         </th>
-                                                        <th style="padding-top:20px;padding-left:100px">
+                                                        <th style="padding-top:20px;text-align: center;">
                                                             <!--Left-Spend-amount-->
-                                                            <h6 style="float: left;">
-                                                            <span class="text-danger">{{object.8}}{{object.3}} left</span>
-                                                            <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
-                                                            <br/>   
+                                                            <h6>
+                                                            <span >{{object.8}}{{object.1}}</span>
+                                                            </h6>
+                                                        </th>
+                                                        <th style="padding-top:20px;text-align: center;">
+                                                            <h6>
+                                                            <span  class="text-success">{{object.8}}{{object.2}}</span>
+                                                            </h6>
                                                             <!--Left-Spend-amount-->
                                                             <!--Date-tag-->
-                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {{ _('to')}} {{object.7}}</span>
+                                                            <!-- <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{object.6}} {{ _('to')}} {{object.7}}</span> -->
                                                             <!--Date-tagline-->
+                                                        </th>
+                                                        <th style="padding-top:20px; text-align: center;">
+                                                            <h6>
+                                                            <span >{{object.8}}{{object.1|sub:object.2}} </span>
+                                                        </h6>
                                                         </th>
                                                         <th style="padding-top:20px;">
                                                             <ul class="list-inline m-0">
@@ -213,7 +250,7 @@
                                             {% endfor %}
                                         {% endfor %}
                                         <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
-                                            <th colspan="8">
+                                            <th colspan="10">
                                                 <h5>
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#ExpensesModel"></i>
                                                     <b>{{ _('Expenses')}}</b>
@@ -226,37 +263,54 @@
                                         </tr>
                                         {% for ex_key, ex_value in expenses_dict.items %}
                                             <tr class="expenses_budgets_cls" style="display:None;">
-                                                <th colspan="9">
+                                                <th colspan="11">
                                                 <div class="badge badge-pill d-block badge-secondary"><span><b>{{ex_key}}</b></span></div>
                                             </th>
                                         </tr>
                                         {% for object in ex_value %}
                                             {% if object.5 != 'Daily' and object.5 != 'Weekly' %}
                                                 <tr class="expenses_budgets_cls" style="height:10px;display:none;">
-                                                    <th colspan="7" style="height:2px;padding-top:20px;">
+                                                    <th colspan="7" style="height:2px;padding-top:20px;width: 50%;">
                                                         <div class="row">
                                                             <div class="col-6">
+                                                                {% if category_icons|get_item:object.0 %}
+                                                                        <img src="{% static category_icons|get_item:object.0 %}" alt="{{ object.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                {% else %}
+                                                                    <img src="{{ default_icon }}" alt="{{ category }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                {% endif %} &ensp;
                                                                 <a href="{% if ex_key == 'Bills & Subscriptions' %}{% url 'bill_details' pk=object.4 %}{% else %}{% url 'budget_detail' pk=object.4 %}{% endif %}">{{object.0}}</a></h6>
                                                             </div>
                                                             <div class="col-6 d-flex flex-row-reverse"> 
                                                                 <h6 style="float: left;"><strong class="text-success">{{object.8}}{{object.9}}</strong> of {{object.8}}{{object.1}}</h6>
                                                             </div>
                                                         </div>
-                                                        <div class="progress progress-bar-success">
-                                                            <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                        {% if object.9|div:object.1|mul:100 < 100 %}
+                                                            <div class="progress progress-bar-warning">
+                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                                </div>
+                                                            </div> 
+                                                        {% else %}
+                                                            <div class="progress progress-bar-success">
+                                                                <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.9|div:object.1|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.9|div:object.1|mul:100|floatformat:0 }}%">
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        {% endif %}
                                                     </th>
-                                                    <th style="padding-top:20px;padding-left:100px">
-                                                        <h6 style="float: left;">
-                                                        <span class="text-danger">{{object.8}}{{object.3}} left</span>
-                                                        <span style="float: right;" class="text-success">{{object.8}}{{object.2}} Spent</span>
-                                                        <br>
-                                                        {% if ex_key == 'Bills & Subscriptions' %}
+                                                    <th style="padding-top:20px; text-align: center;">
+                                                        <!-- <h6 style="float: left;"> -->
+                                                        <span>{{object.8}}{{object.1}}</span>
+                                                    </th>
+                                                    <th style="padding-top:20px; text-align: center;">
+                                                        <span class="text-danger">{{object.8}}{{object.2}}</span>
+                                                        
+                                                        <!-- {% if ex_key == 'Bills & Subscriptions' %}
                                                             <span class="font-small-2 text-muted">Due on {{object.6}}.</span>
                                                         {% else %}
                                                             <span class="font-small-2 text-muted">This amount applies from {{object.6}} to {{object.7}}</span>
-                                                        {% endif %}
+                                                        {% endif %} -->
+                                                    </th>
+                                                    <th style="padding-top:20px; text-align: center;">
+                                                        <span>{{object.8}}{{object.1|sub:object.2}}</span>
                                                     </th>
                                                     <th>
                                                         <ul class="list-inline m-0">
@@ -365,19 +419,13 @@
                                         {% endfor %}
                                         {% endfor %}
                                         <tr>
-                                            <th>
+                                            <th colspan="10">
                                                 <h5>
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#LeftoverModel"></i>
                                                     <b>Leftover cash</b>
                                                 </h5>
                                             </th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
+                                            
                                             <th>
                                                 <h5>
                                                     {% if left_over_cash < 0 %}
@@ -390,19 +438,13 @@
                                             </th>
                                         </tr>
                                         <tr class="show_transaction" method_name="transactions_cls">
-                                            <th>
+                                            <th colspan="10">
                                                 <h5>
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionsModel"></i>
                                                     <b>Transactions</b>
                                                 </h5>
                                             </th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
-                                            <th>&nbsp;</th>
+                                            
                                             <th>
                                                 <h5><i class="fa fa-chevron-down transactions_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right transactions_drp_sign"></i></h5>
                                                 </td>

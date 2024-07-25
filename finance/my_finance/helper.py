@@ -3,6 +3,8 @@ import time
 import calendar
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from itertools import chain
+from collections import OrderedDict
 from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
     Income, IncomeDetail, Budget, Tag
 
@@ -576,3 +578,33 @@ def get_cmp_data(budget_names, user_name, month_start, month_end, budget_bar_val
         budget_bar_value[0]['data'].append(total_spent_amount)
 
     return budget_bar_value, budget_graph_value, budget_transaction_data_dict
+
+def get_list_of_months(user_name, user_budget):
+    '''
+    Generates a list of months in which Bills and Budgets exists'''
+    
+    earliest_budget = Budget.objects.filter(
+        user=user_name,
+        user_budget=user_budget,
+        start_date__isnull=False
+    ).order_by('start_date')
+    
+    earliest_bill = Bill.objects.filter(
+        user=user_name,
+        user_budget=user_budget,
+        date__isnull=False
+    ).order_by('date')
+    earliest_dates = list(chain(earliest_budget, earliest_bill))
+    # Sort by date, handling different field names
+    earliest_dates.sort(key=lambda x: x.start_date if hasattr(x, 'start_date') else x.date)
+
+    # Get the overall start and end dates
+    start = earliest_dates[0].start_date if hasattr(earliest_dates[0], 'start_date') else earliest_dates[0].date
+    end = earliest_dates[-1].start_date if hasattr(earliest_dates[-1], 'start_date') else earliest_dates[-1].date
+
+    # Generate the list of unique months
+    list_of_months = list(OrderedDict(
+        ((start + timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)
+    ).keys())
+    
+    return list_of_months

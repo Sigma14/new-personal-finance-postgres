@@ -70,6 +70,7 @@
                 <!--END: Info card-->
                 
                 <section id="ecommerce-products" class="list-view col-md-6">
+                    <h4>Created Budgets</h4>
                     {% if messages %}
                         <ul class="messages">
                             {% for message in messages %}
@@ -87,10 +88,11 @@
                                     <h4 class="item-name" style="float:left;">{{ object.name }}</h4>
                                     
                                     </a>
-                                    <a href="{% url 'current-budgets' pk=object.id %}" >
-                                        <h5 style="float:right;">Budget Analysis</h5>
-                                        
+                                    <h5>
+                                    <a href="{% url 'current-budgets' pk=object.id %}" style="float:right;" >
+                                        Budget Analysis
                                         </a>
+                                    </h5>
                                 </div>
                                 </div>
                                 
@@ -104,7 +106,7 @@
 
                 <section style="padding-top:20px;">
                     <div class="row">
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                             <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="text-align:center;">
@@ -115,7 +117,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-md-6">
                             <div class="card ecommerce-card">
                                 <div class="card-body">
@@ -128,34 +130,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card ecommerce-card">
-                                <div class="card-body">
-                                    <div class="item-name" style="text-align:center;">
-                                        <a href="{% url 'sample-budgets' %}">{{_('Sample Budget')}}</a>
-                                    </div>
-                                    <div class="item-name">
-                                        <p class="card-text">{% blocktrans %}Discover a sample of an already created budget, with our 'Sample Budget.' This feature provides you with a template showcasing a balanced budget, helping you understand how to allocate your income effectively across various categories like housing, food, savings, and more. It's a great starting point for beginners exploring sample budgets. {% endblocktrans %}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card ecommerce-card">
-                                <div class="card-body">
-                                    <div class="item-name" style="text-align:center;">
-                                        <a href="#">{% trans "Current Budget" %} </a>
-                                    </div>
-                                    <div class="item-name">
-                                        <p class="card-text"> {% blocktrans %} Your 'Current Budget' is where you track your current budget goals and financial activity. This interactive dashboard displays your income, expenses, and savings for the current month, giving you a clear view of your financial health. It's designed to help you stay on top of your spending and make adjustments as needed to align with your financial goals. {% endblocktrans %}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="card ecommerce-card">
                                 <div class="card-body">
@@ -169,6 +143,37 @@
                                 </div>
                             </div>
                         </div>
+                        
+                    </div>
+                        <!-- <div class="row">
+                        
+                        <div class="col-md-6">
+                            <div class="card ecommerce-card">
+                                <div class="card-body">
+                                    <div class="item-name" style="text-align:center;">
+                                        <a href="#">{% trans "Current Budget" %} </a>
+                                    </div>
+                                    <div class="item-name">
+                                        <p class="card-text"> {% blocktrans %} Your 'Current Budget' is where you track your current budget goals and financial activity. This interactive dashboard displays your income, expenses, and savings for the current month, giving you a clear view of your financial health. It's designed to help you stay on top of your spending and make adjustments as needed to align with your financial goals. {% endblocktrans %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card ecommerce-card">
+                                <div class="card-body">
+                                    <div class="item-name" style="text-align:center;">
+                                        <a href="{% url 'sample-budgets' %}">{{_('Sample Budget')}}</a>
+                                    </div>
+                                    <div class="item-name">
+                                        <p class="card-text">{% blocktrans %}Discover a sample of an already created budget, with our 'Sample Budget.' This feature provides you with a template showcasing a balanced budget, helping you understand how to allocate your income effectively across various categories like housing, food, savings, and more. It's a great starting point for beginners exploring sample budgets. {% endblocktrans %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                 </section>
                 <div class="modal fade" id="userBudgetFormModal" tabindex="-1" role="dialog" aria-labelledby="userBudgetFormModalLabel" aria-hidden="true">

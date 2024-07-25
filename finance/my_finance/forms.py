@@ -164,6 +164,21 @@ class BudgetForm(forms.ModelForm):
                 widget=forms.Select(
                 attrs={'class': 'form-control pick_category',
                 'method_name': 'add_budget'}))
+            self.fields['user_budget'] = forms.ModelChoiceField(
+                queryset=UserBudgets.objects.filter(user=user_name),
+                empty_label="Select User Budget",
+                widget=forms.Select(
+                attrs={'class': 'form-control user_budget',
+                'method_name': 'add_budget'}))
+            self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name,
+                                                                                        account_type__in=['Checking',
+                                                                                                          'Savings',
+                                                                                                          'Cash',
+                                                                                                          'Credit Card',
+                                                                                                          'Line of Credit',
+                                                                                                          'Emergency Fund']),
+                                                        empty_label="Select Account",
+                                                        widget=forms.Select(attrs={'class': 'form-control'}))
         except Exception as msg:
             print(msg)
 
