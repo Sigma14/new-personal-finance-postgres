@@ -5695,7 +5695,7 @@ def bill_details(request, pk):
 @login_required(login_url="/login")
 def bill_edit(request, pk):
     bill_obj = BillDetail.objects.get(pk=pk)
-    form = BillForm(request.POST or None)
+    form = BillForm(request.POST or None, request=request)
     error = ''
     user = request.user
     if form.is_valid():
@@ -5777,7 +5777,8 @@ def bill_edit(request, pk):
 @login_required(login_url="/login")
 def bill_pay(request, pk):
     bill_obj = Bill.objects.get(pk=pk)
-    bill_amount = float(bill_obj.amount)
+    # Pay the remaining amount from the bill
+    bill_amount =  float(bill_obj.remaining_amount)
     account_obj = bill_obj.account
     account_balance = float(account_obj.available_balance)
     if account_balance < bill_amount:
@@ -5800,18 +5801,27 @@ def bill_pay(request, pk):
 
 @login_required(login_url="/login")
 def bill_list(request):
-    bill_list_data = BillDetail.objects.filter(user=request.user).order_by('date')
-    bills_list = bill_list_data
-    bill_data = Bill.objects.filter(user=request.user)
-    # If specific dataa requried from dropdown, it will update the bill list
-    if 'selected_bill' in request.POST:
-        bill_label = request.POST['selected_bill']
-        if bill_label != 'all':
-            bill_list_data = BillDetail.objects.filter(user=request.user,
-                label=bill_label).order_by('date')
-            bill_data = Bill.objects.filter(user=request.user, label=bill_label)
+    user_name = request.user
+    user_budget_qs = UserBudgets.objects.filter(user=request.user)
+    if 'user_budget' in request.POST:
+        user_budget_id = request.POST.get('user_budget')
+        user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
     else:
-        bill_label = None
+        user_budget = UserBudgets.objects.filter(user=user_name).first()
+    
+    bill_list_data = BillDetail.objects.filter(user=request.user, user_budget=user_budget).order_by('date')
+    bills_list = bill_list_data
+    bill_data = Bill.objects.filter(user=user_name, user_budget=user_budget)
+    
+    # If specific dataa requried from dropdown, it will update the bill list
+    # if 'selected_bill' in request.POST:
+    #     bill_label = request.POST['selected_bill']
+    #     if bill_label != 'all':
+    #         bill_list_data = BillDetail.objects.filter(user=request.user, user_budget=user_budget,
+    #             label=bill_label).order_by('date')
+    #         bill_data = Bill.objects.filter(user=user_name, user_budget=user_budget, label=bill_label)
+    # else:
+    #     bill_label = None
 
     calendar_bill_data = []
 
@@ -5826,8 +5836,8 @@ def bill_list(request):
             data_dict['calendar_type'] = 'Holiday'
 
         calendar_bill_data.append(data_dict)
-    context = {"calendar_bill_data": calendar_bill_data, 'bill_list': bills_list , 'bill_data': bill_list_data, 'today_date': today_date,
-               'bill_label': bill_label, 'page': 'bill_list'}
+    context = {"calendar_bill_data": calendar_bill_data, "user_budget_qs": user_budget_qs, 'bill_list': bills_list , 'bill_data': bill_list_data, 'today_date': today_date,
+                'page': 'bill_list', 'selected_budget': user_budget}
     return render(request, "bill/bill_list.html", context=context)
 
 
@@ -5840,7 +5850,7 @@ def bill_detail(request, pk):
 
 
 def bill_adding_fun(request, method_name=None):
-    form = BillForm(request.POST or None)
+    form = BillForm(request.POST or None, request=request)
     error = ''
     user = request.user
     if form.is_valid():
@@ -5850,8 +5860,10 @@ def bill_adding_fun(request, method_name=None):
         frequency = form.cleaned_data.get('frequency')
         account_name = request.POST['account_name']
         account_obj = Account.objects.get(user=user, name=account_name)
+        user_budget = form.cleaned_data.get("user_budget")
         currency = account_obj.currency
-        check_bill_obj = Bill.objects.filter(user=request.user, label=label, account=account_obj)
+        user_budget = UserBudgets.objects.get(user=request.user, name=user_budget)
+        check_bill_obj = Bill.objects.filter(user=request.user, user_budget=user_budget, label=label, account=account_obj)
         if check_bill_obj:
             if method_name:
                 return "Bill_list"
@@ -5866,6 +5878,7 @@ def bill_adding_fun(request, method_name=None):
             bill_obj.date = bill_date
             bill_obj.currency = currency
             bill_obj.remaining_amount = amount
+            bill_obj.user_budget = user_budget
 
             try:
                 auto_bill = request.POST['auto_bill']
@@ -5880,15 +5893,15 @@ def bill_adding_fun(request, method_name=None):
             except:
                 bill_obj.auto_pay = False
 
-            bill_details_obj = BillDetail.objects.create(user=user, label=label, account=account_obj, amount=amount,
+            bill_details_obj = BillDetail.objects.create(user=user, label=label, user_budget=user_budget, account=account_obj, amount=amount,
                                                          date=bill_date, frequency=bill_obj.frequency,
                                                          auto_bill=bill_obj.auto_bill, auto_pay=bill_obj.auto_pay)
             bill_obj.bill_details = bill_details_obj
             bill_obj.save()
-            if bill_date <= today_date:
-                check_bill_is_due()
-            else:
-                create_bill_request()
+            # if bill_date <= today_date:
+            #     check_bill_is_due()
+            # else:
+            create_bill_request()
             return "Bill_list"
 
     bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
@@ -5919,7 +5932,7 @@ def bill_walk_through(request):
         account_obj = Account.objects.get(id=int(bill_account_id))
         budget_period = request.POST['budget_period']
         bill_date = request.POST['budget_date']
-        user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
+        user_budget = UserBudgets.objects.get(user=user_name,pk=int(user_budget_id))
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Bills & Subscriptions",
@@ -5938,7 +5951,16 @@ def bill_walk_through(request):
             else:
                 bill_date = datetime.datetime.today().date()
             bill_date, end_month_date = start_end_date(bill_date, "Monthly")
-            bill_obj = Bill()
+            try:
+                bill_obj = Bill.objects.filter(user=user_name, user_budget=user_budget, label=bill_name, date__range=(bill_date, end_month_date))
+                if bill_obj:
+                    return JsonResponse({'status': 'false', 'message': "Bill Already Exists"})
+                else:
+                    bill_obj = Bill()
+            # To-Do  Remove bare except
+            except:
+                bill_obj = Bill()
+                
             bill_obj.user = request.user
             bill_obj.user_budget = user_budget
             bill_obj.label = bill_name
@@ -5950,14 +5972,19 @@ def bill_walk_through(request):
             bill_obj.frequency = budget_period
             bill_obj.auto_bill = False 
             bill_obj.auto_pay = False
-            bill_details_obj = BillDetail.objects.create(user=user_name, label=bill_name, account=account_obj,
+            # If full amount paid, change the status to 'paid'
+            if bill_exp_amount == bill_act_amount:
+                bill_obj.status = "paid"
+            else:
+                bill_obj.status = "unpaid"
+            bill_details_obj = BillDetail.objects.create(user=user_name, user_budget=user_budget, label=bill_name, account=account_obj,
                                                          amount=bill_exp_amount,
                                                          date=bill_date, frequency=bill_obj.frequency,
                                                          auto_bill=bill_obj.auto_bill, auto_pay=bill_obj.auto_pay)
             bill_obj.bill_details = bill_details_obj
             bill_obj.save()
         else:
-            bill_obj = Bill.objects.get(id=int(bill_id))
+            bill_obj = Bill.objects.get(id=int(bill_id), user_budget=user_budget)
             old_spend_amount = round(float(bill_obj.amount) - float(bill_obj.remaining_amount), 2)
             bill_obj.name = bill_name
             bill_obj.amount = bill_exp_amount
@@ -5966,9 +5993,12 @@ def bill_walk_through(request):
             bill_details_obj.name = bill_name
             bill_details_obj.amount = bill_exp_amount
             bill_details_obj.save()
+            # Change status to 'paid', if remaining amount becomes zero
+            if bill_left_amount == 0.0:
+                bill_obj.status = "paid"
             bill_obj.save()
 
-            if bill_act_amount > old_spend_amount:
+            if bill_act_amount >= old_spend_amount:
                 bill_act_amount = round(bill_act_amount - old_spend_amount, 2)
 
         if bill_act_amount > 0:

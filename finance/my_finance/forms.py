@@ -184,7 +184,18 @@ class TemplateBudgetForm(forms.ModelForm):
 
 class BillForm(forms.ModelForm):
     frequency = forms.CharField(widget=forms.Select(choices=BUDGET_PERIODS, attrs={'class': 'form-control'}))
-
+    user_budget = forms.ModelChoiceField(queryset=None)
+    
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        user_name = self.request.user
+        super(BillForm, self).__init__(*args, **kwargs)
+    
+        self.fields['user_budget'] = forms.ModelChoiceField(queryset=UserBudgets.objects.filter(user=user_name),
+                                                           empty_label="Select User Budget",
+                                                           widget=forms.Select(
+                                                               attrs={'class': 'form-control user_budget'}))
+    
     class Meta:
         model = Bill
         exclude = ('user', 'currency', 'status', 'created_at', 'remaining_amount', 'updated_at')

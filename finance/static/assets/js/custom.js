@@ -982,6 +982,13 @@ $('.check_primary').on("click", function(e)
         $("#period_filter_form").submit();
     });
 
+//  User Budget Filter
+
+    $('.user_budget_filter').on("change", function(e)
+    {
+        $("#user_budget_form").submit();
+    });
+
 // Budget type selection
 
     $("body").delegate(".select_cmp_type", "change", function(e)

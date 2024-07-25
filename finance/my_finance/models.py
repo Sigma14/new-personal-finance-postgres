@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 # Create your models here.
-
+# To-do - Move to constants
 TYPES = (
     ("Debt", 'Debt'),
     ("Loan", 'Loan'),
@@ -302,6 +302,7 @@ class Account(models.Model):
 
 class BillDetail(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE,null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True,
                                 null=True)
@@ -314,7 +315,7 @@ class BillDetail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.label + self.user.username)
+        return str(self.label + self.user.username + "-" + self.user_budget.name)
 
 
 class Bill(models.Model):
