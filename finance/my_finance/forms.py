@@ -228,15 +228,20 @@ class TransactionForm(forms.ModelForm):
     notes = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     tag_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     category = forms.ModelChoiceField(queryset=None)
+    user_budget =  forms.ModelChoiceField(queryset=None)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request')
         user_name = self.request.user
         super(TransactionForm, self).__init__(*args, **kwargs)
-        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name),#.exclude(name__in=["Goals"]),
+        self.fields['category'] = forms.ModelChoiceField(queryset=Category.objects.filter(user=user_name),  #.exclude(name__in=["Goals"]),
                                                            empty_label="Select Category Group",
                                                            widget=forms.Select(
                                                                attrs={'class': 'form-control pick_category'}))
+        self.fields['user_budget'] = forms.ModelChoiceField(queryset=UserBudgets.objects.filter(user=user_name),
+                                                           empty_label="Select User Budget",
+                                                           widget=forms.Select(
+                                                               attrs={'class': 'form-control user_budget'}))
         self.fields['bill'] = forms.ModelChoiceField(queryset=Bill.objects.filter(user=user_name),
                                                      empty_label="Select Bill",
                                                      widget=forms.Select(attrs={'class': 'form-control'}),

@@ -32,12 +32,24 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal" method="post" action="{% url 'budget_add' %}">
                         {% csrf_token %}
                         {% if form.errors %}
                             <p class="text-danger">{% trans 'Budget already exist!' %}</p>
                         {% endif %}
                         <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                           {{ form.user_budget }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">

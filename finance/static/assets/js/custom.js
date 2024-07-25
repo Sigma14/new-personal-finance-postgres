@@ -2246,6 +2246,8 @@ $("body").delegate(".check_budget_category", "change", function(event)
 {
     category_name = $("#id_categories, #id_category").val()
     cat_name =$('#id_categories option:selected').text();
+    
+    var user_budget_id = $('[name="user_budget"] option:selected').val();
     if(cat_name == 'Income')
     {
         $('#customRadio2').prop('checked', true);
@@ -2262,6 +2264,7 @@ $("body").delegate(".check_budget_category", "change", function(event)
         data: {
         'category': category_name,
         'name': sub_category_name,
+        'user_budget_id': user_budget_id,
         'csrfmiddlewaretoken': csrftoken
         },
         success: function(response)
@@ -2579,6 +2582,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                      ({
                                         title: 'Saved Successfully',
                                         icon: 'success',
+                                        text: response.message,
                                         customClass: {
                                           confirmButton: 'btn btn-primary'
                                         },
@@ -2687,6 +2691,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                      ({
                                         title: 'Saved Successfully',
                                         icon: 'success',
+                                        text: response.message,
                                         customClass: {
                                           confirmButton: 'btn btn-primary'
                                         },
@@ -2703,6 +2708,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                      ({
                                         title: 'Saving Failed!',
                                         icon: 'error',
+                                        text:response.message,
                                         customClass: {
                                           confirmButton: 'btn btn-primary'
                                         },
@@ -2732,7 +2738,9 @@ $("body").delegate("#down_pay_per", "change", function(event)
     // Add New Bills
     $("body").delegate(".add_other_bill", "click", function(e)
     {
-        last_index = parseInt($(this).attr('last_index')) + 1
+        var last_index = parseInt($(this).attr('last_index')) + 1
+        var user_budget = $(this).attr('user_budget')
+
         trHTML = "<tr>"+
         "<td><input type='text' value='Other Bill' id='bill_sources" + last_index +"' name='bill_sources' class='form-control bill_sources' required/></td>"+
         "<td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/></td>"+
@@ -2747,7 +2755,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         "<i class='fa fa-calendar fa-1 bill_calender_icon' index='" + last_index + "' id='bill_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='bill_add_budget_date" + last_index + "' name='bill_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
         "</td>" +
-        "<td><button class='btn btn-outline-secondary update_bill_bgt_walkthrough' bill_index='" + last_index +"' bill_id='false'>Update</button></td></tr>"
+        "<td><button class='btn btn-outline-secondary update_bill_bgt_walkthrough' bill_index='" + last_index +"' user_budget='" + user_budget + "' bill_id='false'>Update</button></td></tr>"
         $(".total_bill_row").before(trHTML)
         return false
     });
@@ -2829,6 +2837,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                      ({
                                         title: 'Saved Successfully',
                                         icon: 'success',
+                                        text: response.message,
                                         customClass: {
                                           confirmButton: 'btn btn-primary'
                                         },
@@ -2877,6 +2886,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $("body").delegate(".add_other_expenses", "click", function(e)
     {
         last_index = parseInt($(this).attr('last_index')) + 1
+        var user_budget = $(this).attr('user_budget')
         trHTML = "<tr><th colspan='4'><input type=text class='form-control other_exp_name' btn_id='other_exp_btn" + last_index + "' placeholder='Enter Group Name'</th></tr>"
         trHTML += "<tr>"+
         "<td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td>"+
@@ -2892,7 +2902,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         "<i class='fa fa-calendar fa-1 expenses_calender_icon' index='" + last_index + "' id='expenses_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='expenses_add_budget_date" + last_index + "' name='expenses_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
         "</td>" +
-        "<td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false'>Update</button></td></tr>"
+        "<td><button class='btn btn-outline-secondary update_expenses_bgt_walkthrough' id='other_exp_btn" + last_index + "' expenses_index='" + last_index +"' expenses_id='false' user_budget='" + user_budget + "'>Update</button></td></tr>"
         $(".total_expenses_row").before(trHTML)
         return false
     });
@@ -2984,6 +2994,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
                                      ({
                                         title: 'Saved Successfully',
                                         icon: 'success',
+                                        text: response.message,
                                         customClass: {
                                           confirmButton: 'btn btn-primary'
                                         },
@@ -3032,6 +3043,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $("body").delegate(".add_other_non_monthly_expenses", "click", function(e)
     {
         last_index = parseInt($(this).attr('last_index')) + 1
+        var user_budget = $(this).attr('user_budget')
         trHTML = "<tr>"+
         "<td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td>"+
         "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td>"+
@@ -3047,7 +3059,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         "<i class='fa fa-calendar fa-1 non_monthly_expenses_calender_icon' index='" + last_index + "' id='non_monthly_expenses_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='non_monthly_expenses_add_budget_date" + last_index + "' name='non_monthly_expenses_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
         "</td>" +
-        "<td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false'>Update</button></td>"+
+        "<td><button class='btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough' non_monthly_expenses_index='" + last_index +"' non_monthly_expenses_id='false' user_budget='" + user_budget + "'>Update</button></td>"+
         "</tr>"
 
         $(".total_non_monthly_expenses_row").before(trHTML)
@@ -3188,6 +3200,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $("body").delegate(".add_other_goals", "click", function(e)
     {
         last_index = parseInt($(this).attr('last_index')) + 1
+        var user_budget = $(this).attr('user_budget')
         trHTML = "<tr>"+
         "<td>" +
             "<input list='browsers' type='text' class='form-control data_list_drop_down' id='sub_category_name" + last_index + "' name='sub_category_name' placeholder='Goal Name' required data-validation-required-message='This field is required'/>" +
@@ -3203,7 +3216,7 @@ $("body").delegate("#down_pay_per", "change", function(event)
         "<i class='fa fa-calendar fa-1 goal_calender_icon' index='" + last_index + "' id='goal_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='goals_add_budget_date" + last_index + "' name='goals_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
         "</td>" +
-        "<td><button class='btn btn-outline-secondary update_goals_bgt_walkthrough' goals_index='" + last_index +"' goals_id='false'>Update</button></td></tr>"
+        "<td><button class='btn btn-outline-secondary update_goals_bgt_walkthrough' goals_index='" + last_index +"' goals_id='false' user_budget='" + user_budget + "'>Update</button></td></tr>"
 
         $(".total_goals_row").before(trHTML)
         return false
@@ -3296,6 +3309,9 @@ $("body").delegate("#down_pay_per", "change", function(event)
         var category = $(this).data("category");
         var subcategory = $(this).data("subcategory");
         var buttonId = $(this).data("button-id");
+        var selected_budget = $(this).data("selected-bgt");
+
+        $('#transactionForm [name="user_budget"]').val(selected_budget);
 
         // Set the value of the category select element
         $('#transactionForm [name="category"] option').filter(function() {

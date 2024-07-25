@@ -31,7 +31,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="POST">
+                    <form class="form form-horizontal" method="POST" id="transactionForm">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
@@ -67,6 +67,18 @@
                                     <div class="col-sm-9">
                                         <div class="input-group input-group-merge">
                                            {{ form.account }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.user_budget }}
                                         </div>
                                     </div>
                                 </div>

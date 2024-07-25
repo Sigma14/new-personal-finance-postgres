@@ -212,7 +212,7 @@
                                                                         <td><strong >Total Income</strong></td>
                                                                         <td><strong id="total_inc_exp">{{total_income_expected}}</strong></td>
                                                                         <td><strong id="total_inc_act">{{total_actual_income}}</strong></td>
-                                                                        <td><button class="btn btn-outline-success add_other_income" last_index="{{income_bdgt_dict.Income|length}}" title="Add other income">+ Other Income</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_income" last_index="{{income_bdgt_dict.Income|length}}" title="Add other income" user_budget="{{pk}}">+ Other Income</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -305,7 +305,7 @@
                                                                         <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>
                                                                         <td></td>
                                                                         <td></td>
-                                                                        <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill">+ Other Bill</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Bill</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -400,7 +400,7 @@
                                                                         <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>
                                                                         <td></td>
                                                                         <td></td>
-                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -494,7 +494,7 @@
                                                                         <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>
                                                                         <td></td>
                                                                         <td></td>
-                                                                        <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill">+ Other Expenses</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -581,7 +581,7 @@
                                                                         <td><strong id="total_goals_exp">{{total_goals_expected}}</strong></td>
                                                                         <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>
                                                                         <td></td>
-                                                                        <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill">+ Other Goals</button></td>
+                                                                        <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Goals</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>

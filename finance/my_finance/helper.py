@@ -8,6 +8,7 @@ from collections import OrderedDict
 from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
     Income, IncomeDetail, Budget, Tag
 
+# To-do -  move to constants 
 sub_category_suggested_list = {
     "Entertainment": ["Concerts", "Movies", "Music", "Games", "Hobbies"],
     "Food": ["Groceries", "Eating Out"],
@@ -203,13 +204,14 @@ def check_bill_is_due():
         if bill_date.month == next_month and bill_date.year == next_year:
             continue
         frequency = bill_detail_obj.frequency
-        next_bill_date = get_period_date(bill_date, frequency)
-        bill_detail_obj.date = next_bill_date
-        bill_detail_obj.save()
+        if frequency is not None:
+            next_bill_date = get_period_date(bill_date, frequency)
+            bill_detail_obj.date = next_bill_date
+            bill_detail_obj.save()
 
         if auto_bill:
             next_bill_date = get_period_date(bill_date, frequency)
-            Bill.objects.create(user=bill.user, account=account_obj, currency=currency, label=label,
+            Bill.objects.create(user=bill.user, user_budget=bill.user_budget, account=account_obj, currency=currency, label=label,
                                 amount=bill_amount, remaining_amount=bill_amount, date=next_bill_date,
                                 frequency=frequency, bill_details=bill_detail_obj, auto_bill=auto_bill,
                                 auto_pay=auto_pay)

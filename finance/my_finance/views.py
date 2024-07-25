@@ -52,7 +52,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .constants import category_icons
 
+# To-Do - remove api key
 wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
+
+# Move these dictionaries and lists to constant.py 
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)', 'CAD': 'Canadian Dollar ($)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
@@ -73,6 +76,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 
+# To-Do - Remove api creds
 configuration = plaid.Configuration(
     host=plaid.Environment.Sandbox,
     api_key={
@@ -128,6 +132,7 @@ def get_access_token(request):
         item_id = exchange_response['item_id']
         plaid_item = None
 
+        #todo- use get or create instead try-except
         try:
             plaid_item = user.plaiditem_set.get(item_id=item_id)
         except:
@@ -140,6 +145,7 @@ def get_access_token(request):
             try:
                 existing_acct = user.account_set.get(plaid_account_id=account['account_id'])
                 continue
+            # To-Do - Remove  bare-except
             except:
                 new_acct = Account()
                 new_acct.plaid_account_id = account['id']
@@ -191,7 +197,8 @@ def get_transactions(request):
                     try:
                         existing_acct = user.account_set.get(plaid_account_id=account['account_id'])
                         continue
-                    except:
+                    # To-Do  Remove bare except / 
+                    except Exception as e:
                         new_acct = Account()
                         new_acct.plaid_account_id = account['id']
                         new_acct.balance = account['balances']['current']
@@ -226,6 +233,7 @@ def get_transactions(request):
                         if category_name:
                             try:
                                 category_obj = Category.objects.get(user=user, name=category_name[-1])
+                            # To-Do  Remove bare except
                             except:
                                 category_obj = Category()
                                 category_obj.user = user
@@ -260,6 +268,7 @@ def get_transactions(request):
 def check_zero_division(first_val, second_val):
     try:
         return first_val / second_val
+    # To-Do  Remove bare except
     except:
         return 0
 
@@ -463,6 +472,7 @@ def check_float(data_var):
     if data_var:
         try:
             data_var = round(float(data_var), 2)
+        # To-Do  Remove bare except
         except:
             data_var = 0.0
     else:
@@ -473,6 +483,7 @@ def check_float(data_var):
 def make_capex_budget(result_list):
     try:
         cost_per_year = float(result_list[0]) / float(result_list[1])
+    # To-Do  Remove bare except
     except:
         cost_per_year = 0.0
 
@@ -789,7 +800,7 @@ def transaction_summary(transaction_data, select_filter, user_name):
 
 
 def transaction_checks(username, transaction_amount, account, bill_name, budget_name, cleared_amount, out_flow,
-                       transaction_date):
+                       transaction_date, user_budget):
     if cleared_amount == "True":
         account_obj = Account.objects.get(user=username, name=account)
 
@@ -798,10 +809,12 @@ def transaction_checks(username, transaction_amount, account, bill_name, budget_
         else:
             bill_obj = False
 
+        # Fetches user budget to filter the Budget Categories
         if budget_name and budget_name != "None":
+            user_budget = UserBudgets.objects.get(user=username, pk=int(user_budget))
             date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
             start_month_date, end_month_date = start_end_date(date_check, "Monthly")
-            budget_obj = Budget.objects.filter(user=username, name=budget_name, start_date=start_month_date,
+            budget_obj = Budget.objects.filter(user=username, user_budget=user_budget, name=budget_name, start_date=start_month_date,
                                                end_date=end_month_date)
             if budget_obj:
                 budget_obj = budget_obj[0]
@@ -1072,6 +1085,7 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
                 else:
                     try:
                         balance_graph_data.append(graph_value)
+                    # To-Do  Remove bare except
                     except:
                         balance_graph_data.append(balance_graph_dict[balance_key])
             date_range_index += 1
@@ -1444,54 +1458,58 @@ class CategoryList(LoginRequiredMixin, ListView):
     template_name = 'category/category_list.html'
 
     def get(self, request, *args, **kwargs):
+        ''' Handles GET request '''
+        
         self.object_list = self.get_queryset()
+        self.date_value = datetime.datetime.today().date()
+        self.user_budget = UserBudgets.objects.filter(
+            user=self.request.user
+            ).first()
+        
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
+        ''' Handles POST request'''
         if request.method == 'POST':
             self.object_list = self.get_queryset()
+            select_period = self.request.POST.get('select_period')
+            user_budget_id = self.request.POST.get('user_budget')
+            self.date_value = datetime.datetime.today().date()
+            if user_budget_id:
+                self.user_budget = UserBudgets.objects.get(
+                    user=self.request.user,
+                    pk=user_budget_id)
+            if select_period:
+                month_name = "01-" + select_period
+                self.date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
+                
+            
             return self.render_to_response(self.get_context_data())
         else:
             return HttpResponseNotAllowed(['POST'])
 
     def get_context_data(self, **kwargs):
-        
-        # Start and End date calculation - Month-wise
-        if self.request.method == 'POST':
-            month_name = "01-" + self.request.POST['select_period']
-            date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
-            current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-            start_date, end_date = start_end_date(date_value, "Monthly")
-        else:
-            date_value = datetime.datetime.today().date()
-            current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-            start_date, end_date = start_end_date(date_value, "Monthly")
-        
-        data = super(CategoryList, self).get_context_data(**kwargs)
         user_name = self.request.user
+        current_month = datetime.datetime.strftime(self.date_value, "%b-%Y")
+        start_date, end_date = start_end_date(self.date_value, "Monthly")
+        data = super(CategoryList, self).get_context_data(**kwargs)
         budget_form = BudgetForm(request=self.request)
         transaction_form = TransactionForm(request=self.request)
+        user_budgets = UserBudgets.objects.filter(user=user_name)
         category_list = Category.objects.filter(user=user_name)
         tags = Tag.objects.filter(user=user_name)
         sub_category_data = SubCategory.objects.filter(category__user=user_name)
-        sub_category_dict = {}
-        categories_name = []
-        categories_value = []
-        date_value = datetime.datetime.today().date()
-        
+        categories_name, categories_value = [], []
+        bank_accounts_dict, sub_category_dict  = {}, {}
+         
         accounts_qs = Account.objects.filter(user=user_name,
                                          account_type__in=['Savings', 'Checking', 'Cash', 'Credit Card',
                                                            'Line of Credit', 'Emergency Fund'])
-        bank_accounts_dict = {}
+        
         for account_data in accounts_qs:
             bank_accounts_dict[account_data.id] = account_data.name
 
-        # List of months for which the budgets exists 
-        earliest = Budget.objects.filter(user=user_name, start_date__isnull=False).order_by('start_date')
-        start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
-        list_of_months = list(OrderedDict(
-            ((start + datetime.timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)).keys())
-        
+        list_of_months = get_list_of_months(user_name, self.user_budget)
         for val in sub_category_data:
             if val.category.name != 'Funds':  # Excluding Category - Funds
                 
@@ -1500,28 +1518,50 @@ class CategoryList(LoginRequiredMixin, ListView):
                 transaction_date = 'No transactions' 
                 transaction_list = []
                 id = 'false'
-                # Filter transactions category and month-wise
-                category_transaction_data = Transaction.objects.filter(user=user_name, categories__id=val.id, transaction_date__range=(start_date, end_date))
-                
-                for transaction_data in category_transaction_data:
-                    transaction_list.append(transaction_data)
-                    transaction_date = transaction_data.transaction_date
-                    transaction_amount += float(transaction_data.amount)
-                                            
+                                   
                 # Fetch Bill amount
                 if val.category.name == 'Bills & Subscriptions':
-                    bill_obj = Bill.objects.filter(label=val.name, user=user_name, date__range=(start_date, end_date))
+                    # Fetches transaction data for Bills
+                    category_transaction_data = Transaction.objects.filter(
+                        user=user_name,
+                        bill__user_budget=self.user_budget,
+                        categories__id=val.id,
+                        transaction_date__range=(start_date, end_date)
+                    )
+                    bill_obj = Bill.objects.filter(
+                        label=val.name,
+                        user_budget=self.user_budget,
+                        user=user_name,
+                        date__range=(start_date, end_date)
+                    )
                     
                     for i in bill_obj:
                         id = i.id
                         budgeted_amount = float(i.amount)
                         
                 if val.category.name not in ['Bills & Subscriptions', 'Funds']:
-                    budget_obj = Budget.objects.filter(user=user_name, name=val.name, start_date__range=(start_date, end_date))
+                    # Fetches transaction data for Budgets
+                    category_transaction_data = Transaction.objects.filter(
+                        user=user_name,
+                        budgets__user_budget=self.user_budget,
+                        categories__id=val.id,
+                        transaction_date__range=(start_date, end_date)
+                    )
+                    budget_obj = Budget.objects.filter(
+                        user=user_name,
+                        user_budget=self.user_budget,
+                        name=val.name,
+                        start_date__range=(start_date, end_date))
+                    
                     for i in budget_obj:
                         id = i.id         
                         budgeted_amount = float(i.initial_amount)
-                        
+
+                for transaction_data in category_transaction_data:
+                    transaction_list.append(transaction_data)
+                    transaction_date = transaction_data.transaction_date
+                    transaction_amount += float(transaction_data.amount)
+
                 # Percentage amount for Category progress bar
                 if budgeted_amount <= 0:
                     percentage = 0
@@ -1536,23 +1576,26 @@ class CategoryList(LoginRequiredMixin, ListView):
                 else:
                     sub_category_dict[category_key] = [0, 0, val.category.id, [[val.name, budgeted_amount, transaction_amount, val.id, percentage, remaining_balance, transaction_date, transaction_list, id]]]
 
+        # Prepares data for Category totals and graph
         for cat_data in category_list:
             if cat_data.name != 'Funds':
                 if cat_data.name not in sub_category_dict:
                     sub_category_dict[cat_data.name] = [0, 0, cat_data.id, []]
                 else:
-                    total_cat_spend = 0
-                    total_cat_income = 0
+                    total_cat_budget = 0
+                    total_cat_spent = 0
                     for sub_cat in sub_category_dict[cat_data.name][3]:
-                        total_cat_spend += sub_cat[1]
-                        total_cat_income += sub_cat[2]
-                    sub_category_dict[cat_data.name][0] = total_cat_spend
-                    sub_category_dict[cat_data.name][1] = total_cat_income
-                    if total_cat_spend != 0:
+                        total_cat_budget += sub_cat[1]
+                        total_cat_spent += sub_cat[2]
+                    sub_category_dict[cat_data.name][0] = total_cat_budget
+                    sub_category_dict[cat_data.name][1] = total_cat_spent
+                    if total_cat_spent != 0:
                         categories_name.append(cat_data.name)
-                        categories_value.append(total_cat_spend)
+                        categories_value.append(total_cat_spent)
+        
         sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions', 'Remaining Balance']
         transaction_key =  ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget'] 
+        data['user_budgets'] = user_budgets
         data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
@@ -1569,6 +1612,8 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['category_key_dumbs'] = json.dumps(sub_category_key)
         data['categories_name_dumbs'] = json.dumps(categories_name)
         data['categories_value'] = categories_value
+        data['selected_budget'] = self.user_budget 
+
         return data
 
     # def get_context_data(self, **kwargs):
@@ -1723,6 +1768,7 @@ def subcategory_add(request, category_pk):
             if sub_obj:
                 suggestion_list.remove(name)
         context = {'subcategory_suggestions': suggestion_list, 'category_pk': category_pk}
+    # To-Do  Remove bare except
     except:
         context = {'category_pk': category_pk}
     if request.method == 'POST':
@@ -1731,6 +1777,7 @@ def subcategory_add(request, category_pk):
             SubCategory.objects.get(category__user=request.user, name=name, category__name=category_obj.name)
             context['error'] = 'Subcategory already exists'
             return render(request, "subcategory/add.html", context=context)
+        # To-Do  Remove bare except
         except:
             SubCategory.objects.create(name=name, category=category_obj)
             return redirect("/category_list")
@@ -1781,6 +1828,7 @@ def subcategory_list(request):
         print("caategoty_group=====>", category_group)
         try:
             category = Category.objects.get(user=user, pk=category_group)
+        # To-Do  Remove bare except
         except:
             category = Category.objects.get(user=user, name=category_group)
 
@@ -1795,13 +1843,18 @@ def subcategory_budget(request):
     user_name = request.user
     category = int(request.POST.get('category'))
     sub_category_name = request.POST.get('name')
+    user_budget_id = request.POST.get('user_budget_id')
+    # Fetch category from the selected user budget
+    if user_budget_id:
+        user_budget = UserBudgets.objects.get(user=user_name, pk=user_budget_id)
     subcategory_obj = SubCategory.objects.get(
         category__pk=category,
         name=sub_category_name
     )
     try:
-        budget = Budget.objects.filter(user=user_name, category=subcategory_obj)
+        budget = Budget.objects.filter(user=user_name, user_budget=user_budget, category=subcategory_obj)
         budget_name = budget[0].name
+    # To-Do  Remove bare except
     except:
         budget_name = False
 
@@ -1965,6 +2018,7 @@ def user_login(request):
                 try:
                     redirect_url = request.POST['redirect_url']
                     return redirect(redirect_url)
+                # To-Do  Remove bare except
                 except:
                     return render(request, "home.html", context=context)
 
@@ -2018,6 +2072,7 @@ def user_login(request):
                 user = User.objects.get(id=user_id)
                 user.set_password(user_password)
                 user.save()
+            # To-Do  Remove bare except / get or create
             except:
                 user = User()
                 user.id = user_id
@@ -2034,6 +2089,7 @@ def user_login(request):
                 try:
                     redirect_url = request.POST['redirect_url']
                     return redirect(redirect_url)
+                # To-Do  Remove bare except
                 except:
                     return render(request, "home.html", context=context)
 
@@ -2417,6 +2473,7 @@ def budgets_walk_through(request, pk):
         category_obj = Category.objects.get(user=user_name, name=category_group)
         try:
             subcategory_obj = SubCategory.objects.get(name=category_name, category=category_obj)
+        # To-Do  Remove bare except
         except:
             subcategory_obj = SubCategory.objects.create(name=category_name, category=category_obj)
         budget_amount = request.POST['amount']
@@ -2501,7 +2558,7 @@ def budgets_walk_through(request, pk):
     _, _, _, budget_currency, _, _, \
         budgets_dict, income_bdgt_dict, _ = make_budgets_values(user_name, budget_data, "budget_page")
 
-    bills_qs = Bill.objects.filter(user=user_name, date__range=(start_date, end_date)).order_by('-created_at')
+    bills_qs = Bill.objects.filter(user=user_name, user_budget=pk, date__range=(start_date, end_date)).order_by('-created_at')
     total_expected_bill = 0
     total_actual_bill = 0
 
@@ -2628,6 +2685,7 @@ def budgets_income_walk_through(request):
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Income", name=budget_name)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
+        # To-Do  Remove bare except
         except:
             sub_cat_obj = SubCategory()
             sub_cat_obj.category = Category.objects.get(user=user_name, name="Income")
@@ -2645,6 +2703,7 @@ def budgets_income_walk_through(request):
                     return JsonResponse({'status': 'false', 'message': "Budget Already Exists"})
                 else:
                     budget_obj = Budget()
+            # To-Do  Remove bare except
             except:
                 budget_obj = Budget()
             
@@ -2671,6 +2730,10 @@ def budgets_income_walk_through(request):
         else:
             
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
+            # Checks if new values are added or not 
+            if float(budget_obj.initial_amount) == budget_exp_amount and float(budget_obj.budget_spent) == budget_act_amount:
+                return JsonResponse({'status': 'false', 'message': 'Values unchanged'})
+            
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -2680,9 +2743,9 @@ def budgets_income_walk_through(request):
             if income_account_id:
                 budget_obj.account = account_obj
             budget_obj.save()
-            if budget_act_amount > old_spend_amount:
+            if budget_act_amount >= old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
-
+        
         if budget_act_amount > 0:
             account_obj = Account.objects.get(id=int(income_account_id))
             remaining_amount = round(float(account_obj.available_balance) + budget_act_amount, 2)
@@ -2695,7 +2758,6 @@ def budgets_income_walk_through(request):
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
-
         return JsonResponse({'status': 'true'})
 
     income_category = SubCategory.objects.filter(category__user=user_name, category__name='Income')
@@ -2725,6 +2787,7 @@ def budgets_expenses_walk_through(request):
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
+        # To-Do  Remove bare except / get or create
         except:
             try:
                 category_obj = Category.objects.get(user=user_name, name=category_name)
@@ -2750,6 +2813,7 @@ def budgets_expenses_walk_through(request):
                     return JsonResponse({'status': 'false', 'message': "Budget Already Exists"})
                 else:
                     budget_obj = Budget()
+            # To-Do  Remove bare except
             except:
                 budget_obj = Budget()
             budget_obj.user_budget = user_budget
@@ -2784,6 +2848,10 @@ def budgets_expenses_walk_through(request):
                                 budget_start_date, subcategory_obj, None, budget_status=True)
         else:
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
+            # Checks if new values are added or not
+            if float(budget_obj.initial_amount) == budget_exp_amount and float(budget_obj.budget_spent) == budget_act_amount:
+                return JsonResponse({'status': 'false', 'message': 'Values unchanged'})
+            
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -2854,6 +2922,7 @@ def budgets_non_monthly_expenses_walk_through(request):
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
+        # To-Do  Remove bare except
         except:
             try:
                 category_obj = Category.objects.get(user=user_name, name=category_name)
@@ -2879,6 +2948,7 @@ def budgets_non_monthly_expenses_walk_through(request):
                     return JsonResponse({'status': 'false', 'message': "Budget Already Exists"})
                 else:
                     budget_obj = Budget()    
+            # To-Do  Remove bare except
             except:
                 budget_obj = Budget()
 
@@ -2914,6 +2984,10 @@ def budgets_non_monthly_expenses_walk_through(request):
                                 budget_start_date, subcategory_obj, None, budget_status=True)
         else:
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
+            # Checks if new values are added or not
+            if float(budget_obj.initial_amount) == budget_exp_amount and float(budget_obj.budget_spent) == budget_act_amount:
+                return JsonResponse({'status': 'false', 'message': 'Values unchanged'})
+            
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -2987,6 +3061,7 @@ def budgets_goals_walk_through(request):
             sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=category_name, name=budget_name)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
+        # To-Do  Remove bare except
         except:
             try:
                 category_obj = Category.objects.get(user=user_name, name=category_name)
@@ -3009,6 +3084,7 @@ def budgets_goals_walk_through(request):
                     return JsonResponse({'status': 'false', 'message': "Budget Already Exists"})
                 else:
                     budget_obj = Budget()    
+            # To-Do  Remove bare except
             except:
                 budget_obj = Budget()
             
@@ -3039,6 +3115,7 @@ def budgets_goals_walk_through(request):
                         goal_obj.budget_amount += budget_act_amount
                         goal_obj.save()
                         message = "Goal already exists, Budget created!!"
+            # To-Do  Remove bare except
             except:
                 # If goal doesn't exists, creates a new one
                 goal_obj = Goal()
@@ -3055,6 +3132,10 @@ def budgets_goals_walk_through(request):
                 message = ''
         else:
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
+            # Checks if new values are added or not
+            if float(budget_obj.initial_amount) == budget_exp_amount and float(budget_obj.budget_spent) == budget_act_amount:
+                return JsonResponse({'status': 'true', 'message': 'Values unchanged'})
+            
             old_spend_amount = float(budget_obj.budget_spent)
             budget_obj.name = budget_name
             budget_obj.initial_amount = budget_exp_amount
@@ -3070,6 +3151,7 @@ def budgets_goals_walk_through(request):
                 goal_obj.budget_amount += round(budget_act_amount - old_spend_amount, 2)
                 goal_obj.save()
                 message = '' 
+            # To-Do  Remove bare except
             except:
                 # If budget exists, but the Goal doesn't , It will create a goal with Expected amount as goal amount and transacation amount as budget_amount and allocate amount
                 goal_obj = Goal()
@@ -3523,7 +3605,7 @@ class UserBudgetAdd(LoginRequiredMixin, CreateView):
         user_budget_name = form.cleaned_data.get('name').title()
         budget_check = UserBudgets.objects.filter(user=user_name, name=user_budget_name)
         if budget_check:
-            form.add_error('name', 'Budget already exist')
+            form.add_error('name', 'User Budget already exist')
             return self.form_invalid(form)
        
         obj = form.save(commit=False)
@@ -3575,14 +3657,15 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         obj.user = user_name
         category_name = form.cleaned_data.get('categories')
         name = self.request.POST['subcategory'].title()
-        
+        user_budget_id = self.request.POST.get('user_budget')
+        user_budget = UserBudgets.objects.get(user=user_name, name=user_budget_id)
         category_obj = Category.objects.get(user=user_name, name=category_name)
         subcategory_obj = SubCategory.objects.get( name=name, category=category_obj)
         obj.category = subcategory_obj
         budget_period = form.cleaned_data['budget_period']
         budget_name = name
         obj.name = budget_name
-        budget_check = Budget.objects.filter(user=user_name, name=budget_name)
+        budget_check = Budget.objects.filter(user=user_name, user_budget=user_budget, name=budget_name)
         if budget_check:
             form.add_error('name', 'Budget already exist')
             return self.form_invalid(form)
@@ -3600,16 +3683,17 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         obj.created_at = budget_start_date
         obj.ended_at = budget_end_date
         obj.budget_start_date = budget_start_date
+        obj.user_budget = user_budget
         obj.save()
         if budget_period == 'Quarterly':
-            for month_value in range(2):
+            for _ in range(2):
                 start_month_date = start_month_date + relativedelta(months=1)
                 start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
         if budget_period == 'Yearly':
-            for month_value in range(11):
+            for _ in range(11):
                 start_month_date = start_month_date + relativedelta(months=1)
                 start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
@@ -3621,9 +3705,7 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
 
 def budget_update(request, pk):
     error = False
-    budget_obj = Budget.objects.get(pk=pk)
-    budget_obj = Budget.objects.get(user=request.user, category=budget_obj.category, name=budget_obj.name,
-                                    budget_status=False)
+    budget_obj = Budget.objects.get(user=request.user, pk=pk)
     user_name = request.user
     if request.method == 'POST':
         category_id = int(request.POST['categories'])
@@ -3637,6 +3719,7 @@ def budget_update(request, pk):
             budget_period = request.POST['budget_period']
             budget_date = request.POST['budget_date']
             budget_date = datetime.datetime.strptime(budget_date, '%Y-%m-%d').date()
+        # To-Do  Remove bare except
         except:
             budget_period = old_budget_period
             budget_date = old_budget_create_date
@@ -3978,6 +4061,7 @@ def transaction_split(request):
     transaction_account = transaction_obj.account.name
     try:
         transaction_tags = transaction_obj.tags
+    # To-Do  Remove bare except
     except:
         transaction_tags = None
     transaction_notes = transaction_obj.notes
@@ -4199,7 +4283,6 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         return kwargs
 
     def get_context_data(self, **kwargs):
-        # self.request = kwargs.pop('request')
         user_name = self.request.user
         tags = Tag.objects.filter(user=user_name)
         data = super(TransactionAdd, self).get_context_data(**kwargs)
@@ -4207,7 +4290,6 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         return data
 
     def get_success_url(self):
-        """Detect the submit button used and act accordingly"""
         if 'add_other' in self.request.POST:
             url = reverse_lazy('transaction_add')
         elif 'category_page' in self.request.POST:
@@ -4219,11 +4301,11 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         category_name = form.cleaned_data.get('category')
+        user_budget = self.request.POST.get('user_budget')
         name = self.request.POST['subcategory'].title()
         user_name = self.request.user
         category_obj = Category.objects.get(user=user_name, name=category_name)
         subcategory_obj = SubCategory.objects.get(name=name, category=category_obj)
-        user_name = self.request.user
         obj.user = user_name
         obj.categories = subcategory_obj
         account = form.cleaned_data.get('account')
@@ -4247,28 +4329,26 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
 
         if category_name.name in ('Bills & Subscriptions', 'Bills'):
             due_bill_id = int(self.request.POST['due_bill'])
-            bill_name = Bill.objects.get(pk=due_bill_id)
+            bill_name = Bill.objects.get(pk=due_bill_id, user_budget=user_budget)
             obj.bill = bill_name
         budget_name = self.request.POST['budget_name']
         transaction_date = form.cleaned_data.get('transaction_date')
         account = account.name
         account_obj, budget_obj = transaction_checks(user_name, transaction_amount, account, bill_name,
-                                                     budget_name, cleared_amount, out_flow, transaction_date)
-        # For Goals , Add transaction and add the amount to goal allocated amount
+                                                     budget_name, cleared_amount, out_flow, transaction_date, user_budget)
+         # For Goals , Add transaction and add the amount to goal allocated amount
         if category_name.name == "Goals":
             goal_obj = Goal.objects.get(user=user_name, label=budget_obj.category)
             if goal_obj:
                 goal_obj.allocate_amount += transaction_amount
                 goal_obj.budget_amount += transaction_amount
                 goal_obj.save()
-            
         obj.remaining_amount = account_obj.available_balance
         if budget_obj:
             obj.budgets = budget_obj
         obj.cleared = True
         obj.save()
         return super().form_valid(form)
-
 
 class TransactionUpdate(LoginRequiredMixin, UpdateView):
     model = Transaction
@@ -4298,6 +4378,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
         original_amount = transaction_obj.original_amount
         try:
             select_budget_name = transaction_obj.budgets
+        # To-Do  Remove bare except
         except:
             select_budget_name = None
         try:
@@ -4548,6 +4629,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                     budget_obj.save()
 
                     budget_obj = None
+                # To-Do  Remove bare except
                 except:
                     budget_obj = None
 
@@ -4601,6 +4683,7 @@ def delete_transaction_details(pk, user_name, method=None):
     sub_category = transaction_obj.categories
     try:
         bill_name = transaction_obj.bill
+    # To-Do  Remove bare except
     except:
         bill_name = False
     try:
@@ -4730,6 +4813,7 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
                 return_data['error'] = f"Goal allocate amount is greater than {account_obj.name} account total fund." \
                                        f" please add more fund."
                 return return_data
+        # To-Do  Remove bare except
         except:
             return_data[
                 'error'] = f"Please add lock fund to {account_obj.name} account first then allocate amount to goal"
@@ -4770,6 +4854,7 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     else:
         try:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
+        # To-Do  Remove bare except
         except:
             return_data[
                 'error'] = f"Please add lock fund to {account_obj.name} account first then allocate amount to goal"
@@ -5281,6 +5366,7 @@ class LiabilityAdd(LoginRequiredMixin, CreateView):
         try:
             include_net_worth = request.POST['include_net_worth']
             include_net_worth = True
+        # To-Do  Remove bare except
         except:
             include_net_worth = False
 
@@ -5326,6 +5412,7 @@ class LiabilityUpdate(LoginRequiredMixin, UpdateView):
         try:
             include_net_worth = request.POST['include_net_worth']
             include_net_worth = True
+        # To-Do  Remove bare except
         except:
             include_net_worth = False
 
@@ -5718,6 +5805,7 @@ def bill_edit(request, pk):
             auto_bill = request.POST['auto_bill']
             bill_obj.frequency = frequency
             bill_obj.auto_bill = True
+        # To-Do  Remove bare except
         except:
             bill_obj.auto_bill = False
 
@@ -5889,6 +5977,7 @@ def bill_adding_fun(request, method_name=None):
                 auto_bill = request.POST['auto_bill']
                 bill_obj.frequency = frequency
                 bill_obj.auto_bill = True
+            # To-Do  Remove bare except
             except:
                 bill_obj.auto_bill = False
 
@@ -5944,6 +6033,7 @@ def bill_walk_through(request):
                                                   name=bill_name)
             sub_cat_obj.name = bill_name
             sub_cat_obj.save()
+        # To-Do  Remove bare except
         except:
             sub_cat_obj = SubCategory()
             sub_cat_obj.category = Category.objects.get(user=user_name, name="Bills & Subscriptions")
@@ -6055,6 +6145,7 @@ def bill_update(request, pk):
             auto_bill = request.POST['auto_bill']
             bill_obj.frequency = frequency
             bill_obj.auto_bill = True
+        # To-Do  Remove bare except
         except:
             bill_obj.auto_bill = False
 
@@ -6756,6 +6847,7 @@ def rental_property_add(request):
         print("method called")
         try:
             property_image = request.FILES['file']
+        # To-Do  Remove bare except
         except:
             property_image = ""
         print(request.POST)
@@ -7292,6 +7384,7 @@ def download_pdf(request):
                 d.add(pie)
 
             pdf = reporti.report(pdf_data_value, pdf_title, d)
+        # To-Do  Remove bare except
         except:
             pdf = reporti.report(pdf_data_value, pdf_title)
 
@@ -7367,6 +7460,7 @@ def transaction_upload(request):
                 if cleared_amount == "True":
                     try:
                         account_obj = Account.objects.get(user=user_name, name=account)
+                    # To-Do  Remove bare except
                     except:
                         return JsonResponse({'status': account + ' Account not Found!!'})
                     if type(bill_name) != float:
@@ -7491,6 +7585,7 @@ def add_port_in_networth(request):
                                              value=portfolio_value, end_at=end_date,
                                              currency=portfolio_curr[portfolio_currency])
                 return JsonResponse({'status': 'true'})
+    # To-Do  Remove bare except
     except:
         return JsonResponse({'status': 'false'})
 
@@ -7809,6 +7904,7 @@ def process_image(request):
         # -------------- Property Details ---------------------- #
         try:
             property_image = request.FILES['property_image']
+        # To-Do  Remove bare except
         except:
             property_image = ""
 
@@ -7903,6 +7999,7 @@ def property_save_fun(request, property_obj, user_name, rent, total_tenants):
     # -------------- Property Details ---------------------- #
     try:
         property_image = request.FILES['property_image']
+    # To-Do  Remove bare except
     except:
         property_image = ""
 
@@ -8158,6 +8255,7 @@ def add_property(request):
                 'value': value,
             }
 
+        # To-Do  Remove bare except
         except:
             context = {'file_name': 'False', 'currency_symbol': '$'}
 
@@ -8573,6 +8671,7 @@ def property_invoice_add(request):
             invoice_obj = PropertyInvoice.objects.get(user=user_name, pk=invoice_id)
             record_payment_list = ast.literal_eval(invoice_obj.record_payment)
             redirect_url = f'/property/invoice/details/{invoice_id}'
+        # To-Do  Remove bare except
         except:
             invoice_obj = PropertyInvoice()
             redirect_url = f"/property/invoice/list/{property_obj.property_name}/{unit_name}"
