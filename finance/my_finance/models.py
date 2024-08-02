@@ -315,7 +315,7 @@ class BillDetail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.label + self.user.username + "-" + self.user_budget.name)
+        return str(self.label + self.user.username)
 
 
 class Bill(models.Model):
