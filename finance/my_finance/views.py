@@ -47,22 +47,16 @@ from .helper import check_subcategory_exists, save_fund_obj, \
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, \
     Expenses, AvailableFunds, TemplateBudget, RentalPropertyModel, PropertyPurchaseDetails, MortgageDetails, \
     ClosingCostDetails, RevenuesDetails, ExpensesDetails, CapexBudgetDetails, PropertyRentalInfo, PropertyInvoice, \
-    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings, Tag, UserBudgets
+    PropertyMaintenance, PropertyExpense, PlaidItem, SubCategory, BillDetail, Income, IncomeDetail, StockHoldings, \
+    Tag, UserBudgets
 from .mortgage import calculator, calculate_tenure
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .constants import category_icons
+from .sample_constants import *
+from .constants import *
+from .enums import *
 
 # Move these dictionaries and lists to constant.py
-currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)', 'CAD': 'Canadian Dollar ($)'}
-scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
-                 'worst_case': 'Worst Case Scenario Purchase Price'}
-property_type_list = ['Apartment', 'Commercial', 'Condo', 'Duplex', 'House', 'Mixed-Use', 'Other']
-month_date_dict = {'1': '1st ', '2': '2nd ', '3': '3rd ', '4': '4th ', '5': '5th ', '6': '6th ', '7': '7th ',
-                   '8': '8th ', '9': '9th ', '10': '10th', '11': '11th', '12': '12th', '13': '13th', '14': '14th',
-                   '15': '15th', '16': '16th', '17': '17th', '18': '18th', '19': '19th', '20': '20th', '21': '21st',
-                   '22': '22nd', '23': '23rd', '24': '24th', '25': '25th', '26': '26th', '27': '27th', '28': '28th',
-                   '29': '29th', '30': '30th'}
 today_date = datetime.date.today()
 
 # plaid Intergration
@@ -78,7 +72,7 @@ from plaid.model.country_code import CountryCode
 PLAID_API_KEY = json.loads(config('PLAID_API_KEY'))
 configuration = plaid.Configuration(
     host=plaid.Environment.Sandbox,
-    api_key= PLAID_API_KEY
+    api_key=PLAID_API_KEY
 )
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
@@ -128,7 +122,6 @@ def get_access_token(request):
         item_id = exchange_response['item_id']
         plaid_item = None
 
-        #todo- use get or create instead try-except
         try:
             plaid_item = user.plaiditem_set.get(item_id=item_id)
         except:
@@ -512,11 +505,11 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
     if update_transaction_amount:
         spent_budget += update_transaction_amount
     period_budget = budget_obj.budget_period
-    if budget_obj.category.category.name == "Income":
+    if budget_obj.category.category.name == CategoryTypes.INCOME.value:
         transaction_out_flow = True
     if transaction_out_flow:
         budget_obj.budget_spent = spent_budget
-        if period_budget == 'Yearly' or period_budget == 'Quarterly':
+        if period_budget == BudgetPeriods.YEARLY.value or period_budget == BudgetPeriods.QUARTERLY.value:
             budget_left = float(budget_obj.budget_left) + transaction_amount
             budget_obj.budget_left = budget_left - update_transaction_amount
             print("budget_obj.budget_left", budget_obj.budget_left)
@@ -527,7 +520,7 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
                 if budget_value.start_date != budget_obj.start_date:
                     budget_value.budget_left = budget_obj.budget_left
                     budget_value.save()
-        if period_budget == 'Daily' or period_budget == 'Weekly':
+        if period_budget == BudgetPeriods.DAILY.value or period_budget == BudgetPeriods.WEEKLY.value:
             try:
                 budget_obj = Budget.objects.get(user=user_name, name=budget_obj.name, created_at__lte=transaction_date,
                                                 ended_at__gte=transaction_date)
@@ -538,13 +531,13 @@ def update_budget_items(user_name, budget_obj, transaction_amount, transaction_o
                 budget_obj.budget_spent = spent_budget
             except Exception as e:
                 print("Exception=========>", e)
-        if period_budget != 'Yearly' and period_budget != 'Quarterly':
+        if period_budget != BudgetPeriods.YEARLY.value and period_budget != BudgetPeriods.QUARTERLY.value:
             budget_obj.budget_left = round(amount_budget - spent_budget, 2)
     else:
         budget_obj.amount = round(amount_budget - transaction_amount, 2)
         budget_obj.budget_left = round(float(budget_obj.budget_left) - transaction_amount, 2)
 
-        if period_budget == 'Yearly' or period_budget == 'Quarterly':
+        if period_budget == BudgetPeriods.YEARLY.value or period_budget == BudgetPeriods.QUARTERLY.value:
             data_budget = Budget.objects.filter(user=user_name, name=budget_obj.name,
                                                 created_at=budget_obj.created_at, ended_at=budget_obj.ended_at)
             for budget_value in data_budget:
@@ -560,12 +553,12 @@ def add_new_budget_items(user_name, budget_obj, transaction_amount, out_flow, tr
     amount_budget = float(budget_obj.amount)
     spent_budget = round(float(budget_obj.budget_spent) + transaction_amount, 2)
     period_budget = budget_obj.budget_period
-    if budget_obj.category.category.name == "Income":
+    if budget_obj.category.category.name == CategoryTypes.INCOME.value:
         out_flow = "True"
 
     if out_flow == "True":
         budget_obj.budget_spent = spent_budget
-        if period_budget == 'Yearly' or period_budget == 'Quarterly':
+        if period_budget == BudgetPeriods.YEARLY.value or period_budget == BudgetPeriods.QUARTERLY.value:
             data_budget = Budget.objects.filter(user=user_name, name=budget_obj.name,
                                                 created_at=budget_obj.created_at, ended_at=budget_obj.ended_at)
             for budget_value in data_budget:
@@ -576,7 +569,7 @@ def add_new_budget_items(user_name, budget_obj, transaction_amount, out_flow, tr
                 if budget_value.start_date != budget_obj.start_date:
                     budget_value.budget_left = round(amount_budget - spent_budget, 2)
                     budget_value.save()
-        if period_budget == 'Daily' or period_budget == 'Weekly':
+        if period_budget == BudgetPeriods.DAILY.value or period_budget == BudgetPeriods.WEEKLY.value:
             try:
                 budget_obj = Budget.objects.get(user=user_name, name=budget_obj.name, created_at__lte=transaction_date,
                                                 ended_at__gte=transaction_date)
@@ -590,7 +583,7 @@ def add_new_budget_items(user_name, budget_obj, transaction_amount, out_flow, tr
         budget_obj.amount = round(amount_budget + transaction_amount, 2)
         budget_obj.budget_left = round(float(budget_obj.budget_left) + transaction_amount, 2)
 
-        if period_budget == 'Yearly' or period_budget == 'Quarterly':
+        if period_budget == BudgetPeriods.YEARLY.value or period_budget == BudgetPeriods.QUARTERLY.value:
             data_budget = Budget.objects.filter(user=user_name, name=budget_obj.name,
                                                 created_at=budget_obj.created_at, ended_at=budget_obj.ended_at)
             for budget_value in data_budget:
@@ -638,8 +631,8 @@ def get_budgets(user_name):
 def compare_budgets(user_name, start, end, budget_names_list):
     total_budget_amount = 0
     total_budget_spent = 0
-    month_cmp_start, month_end = start_end_date(start, "Monthly")
-    month_cmp_end, month_end = start_end_date(end, "Monthly")
+    month_cmp_start, month_end = start_end_date(start, BudgetPeriods.MONTHLY.value)
+    month_cmp_end, month_end = start_end_date(end, BudgetPeriods.MONTHLY.value)
     list_of_cmp_months = []
     yearly_check_list = []
     quarterly_check_list = []
@@ -671,7 +664,7 @@ def compare_budgets(user_name, start, end, budget_names_list):
             amount_budget = round(float(data.amount), 2)
             amount_budget_left = round(float(data.budget_left), 2)
             amount_budget_spent = round(float(data.budget_spent), 2)
-            if data.budget_period != "Quarterly" and data.budget_period != "Yearly":
+            if data.budget_period != BudgetPeriods.QUARTERLY.value and data.budget_period != BudgetPeriods.YEARLY.value:
                 if data.budget_status:
                     if amount_budget_spent != 0.0:
                         total_budget_amount += amount_budget_spent
@@ -682,7 +675,7 @@ def compare_budgets(user_name, start, end, budget_names_list):
 
             else:
                 check_end_date = data.ended_at
-                if data.budget_period == "Quarterly":
+                if data.budget_period == BudgetPeriods.QUARTERLY.value:
                     if check_end_date not in quarterly_check_list:
                         if data.budget_status:
                             if amount_budget_spent != 0.0:
@@ -809,7 +802,7 @@ def transaction_checks(username, transaction_amount, account, bill_name, budget_
         if budget_name and budget_name != "None":
             user_budget = UserBudgets.objects.get(user=username, pk=int(user_budget))
             date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
-            start_month_date, end_month_date = start_end_date(date_check, "Monthly")
+            start_month_date, end_month_date = start_end_date(date_check, BudgetPeriods.MONTHLY.value)
             budget_obj = Budget.objects.filter(user=username, user_budget=user_budget, name=budget_name, start_date=start_month_date,
                                                end_date=end_month_date)
             if budget_obj:
@@ -1124,9 +1117,8 @@ def dash_board(request):
         categories = Category.objects.filter(user=user_name)
         all_transaction_data = Transaction.objects.filter(user=user_name).order_by('transaction_date')
         current_date = datetime.datetime.today().date()
-        month_start, month_end = start_end_date(current_date, "Monthly")
-        accounts_data = Account.objects.filter(user=user_name, account_type__in=['Checking', 'Savings', 'Cash',
-                                                                                 'Credit Card', 'Line of Credit', 'Emergency Fund'])
+        month_start, month_end = start_end_date(current_date, BudgetPeriods.MONTHLY.value)
+        accounts_data = Account.objects.filter(user=user_name, account_type__in=[type.value for type in AccountTypes])
         property_data = Property.objects.filter(user=user_name)
         stock_portfolio_data = StockHoldings.objects.filter(user=user_name)
         budget_data = Budget.objects.filter(user=user_name)
@@ -1157,7 +1149,7 @@ def dash_board(request):
             bill_name = bill.bill_details.label
             if bill_name not in bill_graph_dict:
                 bill_graph_dict[bill_name] = 0
-                bill_transactions = all_transaction_data.filter(categories__category__name='Bills & Subscriptions',
+                bill_transactions = all_transaction_data.filter(categories__category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,
                                                                 categories__name=bill_name, out_flow=True)
                 if bill_transactions:
                     bills_amount = 0
@@ -1233,7 +1225,7 @@ def dash_board(request):
         for data in budget_data:
             budget_currency = data.currency
             category_group_name = data.category.category.name
-            if category_group_name == 'Income':
+            if category_group_name == CategoryTypes.INCOME.value:
                 if data.name in income_spent_dict:
                     income_spent_dict[data.name] += float(data.budget_spent)
                 else:
@@ -1381,7 +1373,7 @@ def net_worth(request):
         "total_property_dict": total_property_dict,
         "total_portfolio_dict": total_portfolio_dict,
         "net_worth_dict": net_worth_dict,
-        "currency_dict": currency_dict,
+        "currency_dict": CURRENCY_DICT,
         "account_graph_data": net_worth_graph_list,
         "date_range_list": date_range_list[::-1],
         "max_value": max_value,
@@ -1447,8 +1439,6 @@ def net_worth(request):
 #         property_obj.delete()
 #         return JsonResponse({"status": "Successfully", "path": "None"})
 
-
-
 class CategoryList(LoginRequiredMixin, ListView):
     model = SubCategory
     template_name = 'category/category_list.html'
@@ -1487,7 +1477,7 @@ class CategoryList(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         user_name = self.request.user
         current_month = datetime.datetime.strftime(self.date_value, "%b-%Y")
-        start_date, end_date = start_end_date(self.date_value, "Monthly")
+        start_date, end_date = start_end_date(self.date_value, BudgetPeriods.MONTHLY.value)
         data = super(CategoryList, self).get_context_data(**kwargs)
         budget_form = BudgetForm(request=self.request)
         transaction_form = TransactionForm(request=self.request)
@@ -1499,15 +1489,14 @@ class CategoryList(LoginRequiredMixin, ListView):
         bank_accounts_dict, sub_category_dict  = {}, {}
          
         accounts_qs = Account.objects.filter(user=user_name,
-                                         account_type__in=['Savings', 'Checking', 'Cash', 'Credit Card',
-                                                           'Line of Credit', 'Emergency Fund'])
+                                         account_type__in=[type.value for type in AccountTypes])
         
         for account_data in accounts_qs:
             bank_accounts_dict[account_data.id] = account_data.name
 
         list_of_months = get_list_of_months(user_name, self.user_budget)
         for val in sub_category_data:
-            if val.category.name != 'Funds':  # Excluding Category - Funds
+            if val.category.name != CategoryTypes.FUNDS.value:  # Excluding Category - Funds
                 
                 transaction_amount = 0
                 budgeted_amount = 0
@@ -1516,7 +1505,7 @@ class CategoryList(LoginRequiredMixin, ListView):
                 id = 'false'
                                    
                 # Fetch Bill amount
-                if val.category.name == 'Bills & Subscriptions':
+                if val.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
                     # Fetches transaction data for Bills
                     category_transaction_data = Transaction.objects.filter(
                         user=user_name,
@@ -1535,7 +1524,7 @@ class CategoryList(LoginRequiredMixin, ListView):
                         id = i.id
                         budgeted_amount = float(i.amount)
                         
-                if val.category.name not in ['Bills & Subscriptions', 'Funds']:
+                if val.category.name not in [CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, CategoryTypes.FUNDS.value]:
                     # Fetches transaction data for Budgets
                     category_transaction_data = Transaction.objects.filter(
                         user=user_name,
@@ -1574,7 +1563,7 @@ class CategoryList(LoginRequiredMixin, ListView):
 
         # Prepares data for Category totals and graph
         for cat_data in category_list:
-            if cat_data.name != 'Funds':
+            if cat_data.name != CategoryTypes.FUNDS.value:
                 if cat_data.name not in sub_category_dict:
                     sub_category_dict[cat_data.name] = [0, 0, cat_data.id, []]
                 else:
@@ -1589,15 +1578,13 @@ class CategoryList(LoginRequiredMixin, ListView):
                         categories_name.append(cat_data.name)
                         categories_value.append(total_cat_spent)
         
-        sub_category_key = ['Category', 'Budgetted Amount', 'Monthly Transactions', 'Remaining Balance']
-        transaction_key =  ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget'] 
         data['user_budgets'] = user_budgets
         data['sub_category_data'] = sub_category_dict
         data['categories_name'] = categories_name
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
-        data['category_icons'] = category_icons
+        data['category_icons'] = CATEGORY_ICONS
         data['page'] = "category_list"
-        data['transaction_key'] = transaction_key
+        data['transaction_key'] = TRANSACTION_KEY
         data['transaction_data'] = category_transaction_data
         data['budget_form'] = budget_form
         data["bank_accounts"] = bank_accounts_dict
@@ -1605,8 +1592,8 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['tags'] = tags
         data['list_of_months'] = list_of_months
         data['current_month'] = current_month
-        data['category_key_dumbs'] = json.dumps(sub_category_key)
-        data['categories_name_dumbs'] = json.dumps(categories_name)
+        data['category_key_dumbs'] = json.dumps(SUB_CATEGORY_KEY)
+        data['categories_name_dumbs'] = json.dumps(TRANSACTION_KEY)
         data['categories_value'] = categories_value
         data['selected_budget'] = self.user_budget 
 
@@ -1798,7 +1785,7 @@ def subcategory_update(request, pk):
         subcategory_obj.name = name
         subcategory_obj.category = category_obj
         subcategory_obj.save()
-        if subcategory_obj.category.name == "Bills & Subscriptions":
+        if subcategory_obj.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
             bill_obj = BillDetail.objects.get(user=user, label=old_name)
             bill_obj.label = name
             bill_obj.save()
@@ -2141,7 +2128,7 @@ def make_budgets_values(user_name, budget_data, page_method):
                 budget_start_date = False
                 budget_end_date = False
 
-            if budget_pre == 'Quarterly' or budget_pre == 'Yearly':
+            if budget_pre == BudgetPeriods.QUARTERLY.value or budget_pre == BudgetPeriods.YEARLY.value:
                 all_bdgt_spent = Budget.objects.filter(user=user_name, name=data.name, created_at=budget_create_date,
                                                        ended_at=data.ended_at)
                 total_spent_amount = sum(float(obj.budget_spent) for obj in all_bdgt_spent)
@@ -2151,8 +2138,8 @@ def make_budgets_values(user_name, budget_data, page_method):
             budget_value = [data.name, budget_amount, spent_amount, left_amount, data.id, budget_pre,
                             budget_start_date, budget_end_date, budget_currency, total_spent_amount]
 
-            if category_group_name == "Income":
-                if budget_pre != "Daily" and budget_pre != "Weekly":
+            if category_group_name == CategoryTypes.INCOME.value:
+                if budget_pre != BudgetPeriods.DAILY.value and budget_pre != BudgetPeriods.WEEKLY.value:
                     if category_group_name in income_bdgt_dict:
                         income_bdgt_dict[category_group_name].append(budget_value)
                         total_bgt_income += spent_amount
@@ -2212,7 +2199,7 @@ def make_budgets_values(user_name, budget_data, page_method):
 
                 all_budgets.append(budget_value)
 
-                if budget_pre != "Daily" and budget_pre != "Weekly":
+                if budget_pre != BudgetPeriods.DAILY.value and budget_pre != BudgetPeriods.WEEKLY.value:
                     if category_group_name in budgets_dict:
                         budgets_dict[category_group_name].append(budget_value)
                     else:
@@ -2301,11 +2288,11 @@ def budgets_page_data(request, budget_page, template_page):
         month_name = "01-" + request.POST['select_period']
         date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     else:
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
     budget_data = Budget.objects.filter(user=user_name, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
@@ -2324,10 +2311,10 @@ def budgets_page_data(request, budget_page, template_page):
     # COMPARE BUDGETS :-
 
     current_date = datetime.datetime.today().date()
-    week_start, week_end = start_end_date(current_date, "Weekly")
-    month_start, month_end = start_end_date(current_date, "Monthly")
-    quart_end, quart_start = start_end_date(current_date, "Quarterly")
-    yearly_start, yearly_end = start_end_date(current_date, "Yearly")
+    week_start, week_end = start_end_date(current_date, BudgetPeriods.WEEKLY.value)
+    month_start, month_end = start_end_date(current_date, BudgetPeriods.MONTHLY.value)
+    quart_end, quart_start = start_end_date(current_date, BudgetPeriods.QUARTERLY.value)
+    yearly_start, yearly_end = start_end_date(current_date, BudgetPeriods.YEARLY.value)
     monthly_budget_transaction_data, cmp_month_list, monthly_cmp_budgets_dict, monthly_cmp_transaction_budgets = compare_budgets(
         user_name, month_start, month_end, current_budget_names_list)
     week_budget_transaction_data, cmp_week_list, week_cmp_budgets_dict, week_cmp_transaction_budgets = compare_budgets(
@@ -2347,7 +2334,7 @@ def budgets_page_data(request, budget_page, template_page):
     total_left = {'weekly': {}, 'daily': {}}
 
     for bdgt_list in all_budgets:
-        if bdgt_list[5] == 'Daily':
+        if bdgt_list[5] == BudgetPeriods.DAILY.value:
             if bdgt_list[0] not in weekly_daily_budget['daily']:
                 weekly_daily_budget['daily'][bdgt_list[0]] = [bdgt_list]
             else:
@@ -2365,7 +2352,7 @@ def budgets_page_data(request, budget_page, template_page):
             else:
                 total_left['daily'][bdgt_list[0]] += bdgt_list[3]
 
-        if bdgt_list[5] == 'Weekly':
+        if bdgt_list[5] == BudgetPeriods.WEEKLY.value:
             if bdgt_list[0] not in weekly_daily_budget['weekly']:
                 weekly_daily_budget['weekly'][bdgt_list[0]] = [bdgt_list]
             else:
@@ -2485,7 +2472,7 @@ def budgets_walk_through(request, pk):
             return redirect("/budgets/current")
 
         budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
-        start_month_date, end_month_date = start_end_date(budget_start_date.date(), "Monthly")
+        start_month_date, end_month_date = start_end_date(budget_start_date.date(), BudgetPeriods.MONTHLY.value)
         budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
         budget_obj = Budget()
         budget_obj.user = user_name
@@ -2502,26 +2489,26 @@ def budgets_walk_through(request, pk):
         budget_obj.ended_at = budget_end_date
         budget_obj.budget_start_date = budget_start_date
         budget_obj.save()
-        if budget_period == 'Quarterly':
+        if budget_period == BudgetPeriods.QUARTERLY.value:
             for _ in range(2):
                 start_month_date = start_month_date + relativedelta(months=1)
                 start_month_date, end_month_date = start_end_date(
-                    start_month_date, "Monthly")
+                    start_month_date, BudgetPeriods.MONTHLY.value)
                 save_budgets(user_name, start_month_date, end_month_date,
                              budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
-        if budget_period == 'Yearly':
+        if budget_period == BudgetPeriods.YEARLY.value:
             for _ in range(11):
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
         create_budget_request()
         return redirect("/budgets/current")
     date_value = datetime.datetime.today().date()
-    start_date, end_date = start_end_date(date_value, "Monthly")
+    start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     budget_data = Budget.objects.filter(user_budget=pk, user=user_name, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
     user_budget_name = UserBudgets.objects.get(user=user_name, pk=pk).name
@@ -2533,17 +2520,15 @@ def budgets_walk_through(request, pk):
     bills_dict = {'Bills': []}
     category_qs = SubCategory.objects.filter(category__user=user_name)
     for sub_data in category_qs:
-        if sub_data.category.name == "Income":
+        if sub_data.category.name == CategoryTypes.INCOME.value:
             income_categories.append(sub_data.name)
-        if sub_data.category.name == "Bills & Subscriptions":
+        if sub_data.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
             bill_categories.append(sub_data.name)
-        if sub_data.category.name == "Non-Monthly":
+        if sub_data.category.name == CategoryTypes.NON_MONTHLY.value:
             non_monthly_expense_categories.append(sub_data.name)
-        if sub_data.category.name == "Goals":
+        if sub_data.category.name == CategoryTypes.GOALS.value:
             goals_categories.append(sub_data.name)
-        if sub_data.category.name not in ("Income",
-                                           "Bills & Subscriptions",
-                                           "Goals", "Funds", "Non-Monthly"):
+        if sub_data.category.name not in (type.value for type in CategoryTypes):
             if sub_data.category.name in expense_categories:
                 expense_categories[sub_data.category.name].append(
                     [sub_data.name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0])
@@ -2583,23 +2568,22 @@ def budgets_walk_through(request, pk):
     total_income_expected = 0
     total_actual_income = 0
 
-    if 'Income' in income_bdgt_dict:
-        for inc_data in income_bdgt_dict['Income']:
+    if CategoryTypes.INCOME.value in income_bdgt_dict:
+        for inc_data in income_bdgt_dict[CategoryTypes.INCOME.value]:
             total_income_expected += float(inc_data[1])
             total_actual_income += float(inc_data[2])
             if inc_data[0] in income_categories:
                 income_categories.remove(inc_data[0])
     else:
-        income_bdgt_dict['Income'] = []
+        income_bdgt_dict[CategoryTypes.INCOME.value] = []
     for name in income_categories:
-        income_bdgt_dict['Income'].insert(0, [name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0])
+        income_bdgt_dict[CategoryTypes.INCOME.value].insert(0, [name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0])
 
     for name in bill_categories:
         bills_dict['Bills'].insert(0, [name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), '$', 0.0])
 
     accounts_qs = Account.objects.filter(user=request.user,
-                                         account_type__in=['Savings', 'Checking', 'Cash', 'Credit Card',
-                                                           'Line of Credit', 'Emergency Fund'])
+                                         account_type__in=[type.value for type in AccountTypes])
     bank_accounts_dict = {}
     for account_data in accounts_qs:
         bank_accounts_dict[account_data.id] = account_data.name
@@ -2616,8 +2600,8 @@ def budgets_walk_through(request, pk):
     total_non_monthly_expected_expenses = 0
     total_non_monthly_actual_expenses = 0
     non_monthly_expenses_dict = {}
-    if "Non-Monthly" in budgets_dict:
-        for exp in budgets_dict['Non-Monthly']:
+    if CategoryTypes.NON_MONTHLY.value in budgets_dict:
+        for exp in budgets_dict[CategoryTypes.NON_MONTHLY.value]:
             non_monthly_expenses_dict.update({exp[0]: exp})
             total_non_monthly_expected_expenses += float(exp[1])
             total_non_monthly_actual_expenses += float(exp[2])
@@ -2625,8 +2609,8 @@ def budgets_walk_through(request, pk):
     total_goals_expected = 0
     total_goals_actual = 0
     goals_dict = {}
-    if "Goals" in budgets_dict:
-        for i in budgets_dict['Goals']:
+    if CategoryTypes.GOALS.value in budgets_dict:
+        for i in budgets_dict[CategoryTypes.GOALS.value]:
             goals_dict.update({i[0]: i})
             total_goals_expected += float(i[1])
             total_goals_actual += float(i[2])
@@ -2678,20 +2662,20 @@ def budgets_income_walk_through(request):
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
         # check subcategory exist or not
         try:
-            sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Income", name=budget_name)
+            sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=CategoryTypes.INCOME.value, name=budget_name)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
         # To-Do  Remove bare except
         except:
             sub_cat_obj = SubCategory()
-            sub_cat_obj.category = Category.objects.get(user=user_name, name="Income")
+            sub_cat_obj.category = Category.objects.get(user=user_name, name=CategoryTypes.INCOME.value)
             sub_cat_obj.name = budget_name
             sub_cat_obj.save()
 
         if budget_id == "false":
             budget_start_date = datetime.datetime.today().date()
-            start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
-            budget_end_date = get_period_date(budget_start_date, "Monthly") - relativedelta(days=1)
+            start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
+            budget_end_date = get_period_date(budget_start_date, BudgetPeriods.MONTHLY.value) - relativedelta(days=1)
             try:
                 budget_obj = Budget.objects.filter(user=user_name, user_budget=user_budget, name=budget_name, budget_start_date__range=(start_month_date, end_month_date))
                 if budget_obj:
@@ -2713,7 +2697,7 @@ def budgets_income_walk_through(request):
             budget_obj.currency = '$'
             budget_obj.auto_pay = False
             budget_obj.auto_budget = False
-            budget_obj.budget_period = "Monthly"
+            budget_obj.budget_period = BudgetPeriods.MONTHLY.value
             budget_obj.account = account_obj
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.amount = budget_exp_amount
@@ -2756,8 +2740,8 @@ def budgets_income_walk_through(request):
             account_obj.save()
         return JsonResponse({'status': 'true'})
 
-    income_category = SubCategory.objects.filter(category__user=user_name, category__name='Income')
-    context = {"category_groups": "Income", "income_category": income_category, "today_date": str(today_date)}
+    income_category = SubCategory.objects.filter(category__user=user_name, category__name=CategoryTypes.INCOME.value)
+    context = {"category_groups": CategoryTypes.INCOME.value, "income_category": income_category, "today_date": str(today_date)}
     context.update({"page": "budgets"})
     return render(request, 'income/income_walk_through.html', context=context)
 
@@ -2800,7 +2784,7 @@ def budgets_expenses_walk_through(request):
                 budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
             else:
                 budget_start_date = datetime.datetime.today().date()
-            start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+            start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
             budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             try:
                 budget_obj = Budget.objects.filter(user=user_name, user_budget=user_budget, name=budget_name, budget_start_date__range=(start_month_date, end_month_date))
@@ -2831,14 +2815,14 @@ def budgets_expenses_walk_through(request):
             budget_obj.ended_at = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
-            if budget_period == 'Yearly':
+            if budget_period == BudgetPeriods.YEARLY.value:
                 budget_amount = budget_exp_amount
                 budget_currency = "$"
                 budget_auto = False
                 subcategory_obj = sub_cat_obj
                 for month_value in range(11):
                     start_month_date = start_month_date + relativedelta(months=1)
-                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                     save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                                 budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                                 budget_start_date, subcategory_obj, None, budget_status=True)
@@ -2859,7 +2843,7 @@ def budgets_expenses_walk_through(request):
             budget_obj.save()
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
-            if budget_period == 'Yearly':
+            if budget_period == BudgetPeriods.YEARLY.value:
                 budget_amount = budget_exp_amount
                 budget_currency = "$"
                 budget_auto = False
@@ -2868,11 +2852,11 @@ def budgets_expenses_walk_through(request):
                     budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
                 else:
                     budget_start_date = budget_obj.start_date
-                start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
                 budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
                 for month_value in range(11):
                     start_month_date = start_month_date + relativedelta(months=1)
-                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                     save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                                 budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                                 budget_start_date, subcategory_obj, None, budget_status=True)
@@ -2902,7 +2886,7 @@ def budgets_non_monthly_expenses_walk_through(request):
     if request.method == 'POST' and request.is_ajax():
         user_budget_id = request.POST.get('user_budget_id')
         budget_name = request.POST['name']
-        category_name = 'Non-Monthly'  #request.POST['cat_name']
+        category_name = CategoryTypes.NON_MONTHLY.value  #request.POST['cat_name']
         budget_exp_amount = float(request.POST['exp_amount'])
         budget_act_amount = float(request.POST['actual_amount'])
         budget_id = request.POST['id']
@@ -2935,7 +2919,7 @@ def budgets_non_monthly_expenses_walk_through(request):
                 budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
             else:
                 budget_start_date = datetime.datetime.today().date()
-            start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+            start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
             budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             try:
                 budget_obj = Budget.objects.filter(user=user_name, user_budget=user_budget, name=budget_name, budget_start_date__range=(start_month_date, end_month_date))
@@ -2967,14 +2951,14 @@ def budgets_non_monthly_expenses_walk_through(request):
             budget_obj.ended_at = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
-            if budget_period == 'Yearly':
+            if budget_period == BudgetPeriods.YEARLY.value:
                 budget_amount = budget_exp_amount
                 budget_currency = "$"
                 budget_auto = False
                 subcategory_obj = sub_cat_obj
                 for month_value in range(11):
                     start_month_date = start_month_date + relativedelta(months=1)
-                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                     save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                                 budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                                 budget_start_date, subcategory_obj, None, budget_status=True)
@@ -2996,7 +2980,7 @@ def budgets_non_monthly_expenses_walk_through(request):
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
-            if budget_period == 'Yearly':
+            if budget_period == BudgetPeriods.YEARLY.value:
                 budget_amount = budget_exp_amount
                 budget_currency = "$"
                 budget_auto = False
@@ -3005,11 +2989,11 @@ def budgets_non_monthly_expenses_walk_through(request):
                     budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
                 else:
                     budget_start_date = budget_obj.start_date
-                start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
                 budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
                 for month_value in range(11):
                     start_month_date = start_month_date + relativedelta(months=1)
-                    start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                    start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                     save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                                 budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                                 budget_start_date, subcategory_obj, None, budget_status=True)
@@ -3028,8 +3012,8 @@ def budgets_non_monthly_expenses_walk_through(request):
             account_obj.save()
 
         return JsonResponse({'status': 'true'})
-    non_monthly_expenses_category = SubCategory.objects.filter(category__user=user_name, category__name='Non-Monthly')
-    context = {"category_groups": "Non-Monthly", "non_monthly_expenses_category": non_monthly_expenses_category, "today_date": str(today_date)}
+    non_monthly_expenses_category = SubCategory.objects.filter(category__user=user_name, category__name=CategoryTypes.NON_MONTHLY.value)
+    context = {"category_groups": CategoryTypes.NON_MONTHLY.value, "non_monthly_expenses_category": non_monthly_expenses_category, "today_date": str(today_date)}
     context.update({"page": "budgets"})
     return render(request, 'non_monthly_expenses/non_monthly_expense_walk_through.html', context=context)
 
@@ -3040,7 +3024,7 @@ def budgets_goals_walk_through(request):
     if request.method == 'POST' and request.is_ajax():
         user_budget_id = request.POST.get('user_budget_id')
         budget_name = request.POST['name']
-        category_name = 'Goals'  # request.POST['cat_name']
+        category_name = CategoryTypes.GOALS.value  # request.POST['cat_name']
         budget_exp_amount = float(request.POST['goal_amount'])
         budget_act_amount = float(request.POST['actual_amount'])
         budget_id = request.POST['id']
@@ -3071,8 +3055,8 @@ def budgets_goals_walk_through(request):
 
         if budget_id == "false":
             budget_start_date = datetime.datetime.today().date()
-            start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
-            budget_end_date = get_period_date(budget_start_date, "Monthly") - relativedelta(days=1)
+            start_month_date, end_month_date = start_end_date(budget_start_date, BudgetPeriods.MONTHLY.value)
+            budget_end_date = get_period_date(budget_start_date, BudgetPeriods.MONTHLY.value) - relativedelta(days=1)
             try:
                 budget_obj = Budget.objects.filter(user=user_name, user_budget=user_budget, name=budget_name, budget_start_date__range=(start_month_date, end_month_date))
                 if budget_obj:
@@ -3093,7 +3077,7 @@ def budgets_goals_walk_through(request):
             budget_obj.currency = '$'
             budget_obj.auto_pay = False
             budget_obj.auto_budget = False
-            budget_obj.budget_period = "Monthly"
+            budget_obj.budget_period = BudgetPeriods.MONTHLY.value
             budget_obj.initial_amount = budget_exp_amount
             budget_obj.account = account_obj
             budget_obj.amount = budget_exp_amount
@@ -3179,8 +3163,8 @@ def budgets_goals_walk_through(request):
             account_obj.save()
 
         return JsonResponse({'status': 'true', 'message': message})
-    goals_category = SubCategory.objects.filter(category__user=user_name, category__name='Goals')
-    context = {"category_groups": "Goals", "goals_category": goals_category, "today_date": str(today_date)}
+    goals_category = SubCategory.objects.filter(category__user=user_name, category__name=CategoryTypes.GOALS.value)
+    context = {"category_groups": CategoryTypes.GOALS.value, "goals_category": goals_category, "today_date": str(today_date)}
     context.update({"page": "budgets"})
     return render(request, 'goal/goals_walk_through.html')
 
@@ -3192,11 +3176,11 @@ def current_budget_box(request, pk):
         month_name = "01-" + request.POST['select_period']
         date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     else:
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
     budget_data = Budget.objects.filter(user=user_name, user_budget=user_budget, start_date=start_date, end_date=end_date).order_by(
         '-created_at')
@@ -3228,11 +3212,11 @@ def current_budget_box(request, pk):
         bill_bgt_list = [bill_name, bill_amount, current_spent_amount, bill_left_amount, bill.id, bill.frequency,
                          bill_start_date, bill_start_date, bill_data.currency, bill_spent_amount]
 
-        if bill.frequency != "Daily" and bill.frequency != "Weekly":
-            if 'Bills & Subscriptions' in budgets_dict:
-                budgets_dict['Bills & Subscriptions'].append(bill_bgt_list)
+        if bill.frequency != BudgetPeriods.DAILY.value and bill.frequency != BudgetPeriods.WEEKLY.value:
+            if CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value in budgets_dict:
+                budgets_dict[CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value].append(bill_bgt_list)
             else:
-                budgets_dict['Bills & Subscriptions'] = [bill_bgt_list]
+                budgets_dict[CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value] = [bill_bgt_list]
         else:
             if bill_name in week_daily_dict:
                 week_daily_dict[bill_name][0] += bill_amount
@@ -3243,11 +3227,11 @@ def current_budget_box(request, pk):
                 week_daily_dict[bill_name] = [bill_amount, current_spent_amount, bill_left_amount, [bill_bgt_list]]
 
     total_expense_list = budget_graph_data[0]['data']
-    if 'Bills & Subscriptions' in budgets_dict:
+    if CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value in budgets_dict:
         for key, value in week_daily_dict.items():
             value[3].insert(0, [key, value[0], value[1], value[2], value[3][0][4], value[3][0][5], value[3][0][6],
                                 value[3][0][6], value[3][0][8], value[1]])
-            budgets_dict['Bills & Subscriptions'].append([key, 0, 0, 0, 0, value[3][0][5], value[3]])
+            budgets_dict[CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value].append([key, 0, 0, 0, 0, value[3][0][5], value[3]])
             week_bgt_len = len(value[3]) - 1
             for week_index in range(week_bgt_len):
                 current_index = current_budget_names_list.index(key)
@@ -3284,7 +3268,7 @@ def current_budget_box(request, pk):
                'budget_names': current_budget_names_list, "budget_graph_value": total_expense_list,
                "budget_graph_id": "#total_budget", "transaction_key": transaction_key,
                "transaction_data": transaction_data, 'translated_data': json.dumps(translated_data),
-               "page": "budgets", 'category_icons': category_icons,
+               "page": "budgets", 'category_icons': CATEGORY_ICONS,
                "budget_name": user_budget.name
                }
     return render(request, 'budget/current_budget_box.html', context=context)
@@ -3302,7 +3286,7 @@ def compare_different_budget_box(request):
     budget_graph_currency = "$"
     budget_type = "Expenses"
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
-        category__category__name__in=["Bills", "Funds"])
+        category__category__name__in=["Bills", CategoryTypes.FUNDS.value])
     bill_qs = Bill.objects.filter(user=user_name)
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
@@ -3336,11 +3320,11 @@ def compare_different_budget_box(request):
         budget2_names = request.POST.getlist('budget2_name')
         date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     else:
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
     transaction_data_dict1 = {}
     transaction_data_dict2 = {}
@@ -3431,7 +3415,7 @@ def compare_target_budget_box(request):
     budget_graph_currency = "$"
     budget_type = "Expenses"
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
-        category__category__name__in=["Bills", "Funds"])
+        category__category__name__in=["Bills", CategoryTypes.FUNDS.value])
     bill_qs = Bill.objects.filter(user=user_name)
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
@@ -3456,11 +3440,11 @@ def compare_target_budget_box(request):
         budget1_names = request.POST.getlist('budget1_name')
         date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     else:
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(date_value, "%b-%Y")
-        start_date, end_date = start_end_date(date_value, "Monthly")
+        start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
     transaction_data_dict1 = {}
     budget1_graph_value = []
@@ -3517,23 +3501,16 @@ def compare_target_budget_box(request):
 @login_required(login_url="/login")
 def sample_budget_box(request):
     date_value = datetime.datetime.today().date()
-    start_date, end_date = start_end_date(date_value, "Monthly")
+    start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
     print(start_date, end_date)
-    cash_flow_names = ['Earned', 'Spent']
-    cash_flow_data = [{'name': 'Amount', 'data': [1000, 300]}]
-    budget_names = ['Hobbies', 'Clothes', 'Gas&Fuel', 'Restaurants', 'Groceries']
-    budget_graph_value = [50.0, 70.0, 40.0, 100.0, 40.0]
-    budget_graph_data = [{'name': 'Spent', 'data': budget_graph_value},
-                         {'name': 'Left', 'data': [50.0, 30.0, 160.0, 50.0, 160.0]},
-                         {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
     translated_data = {
         'earned': _('Earned'),
         'spending': _('Spending')
     }
-    context = {"month_start": start_date, "month_end": end_date, "cash_flow_names": cash_flow_names,
-               "cash_flow_data": cash_flow_data, "budget_bar_id": "#budgets-bar",
-               "budget_graph_data": budget_graph_data, "budget_names": budget_names, "budget_graph_id": "#total_budget",
-               "budget_graph_value": budget_graph_value, "budget_graph_currency": "$",
+    context = {"month_start": start_date, "month_end": end_date, "cash_flow_names": CASH_FLOW_NAMES,
+               "cash_flow_data": CASH_FLOW_DATA, "budget_bar_id": "#budgets-bar",
+               "budget_graph_data": BUDGET_GRAPH_DATA, "budget_names": BUDGET_NAMES, "budget_graph_id": "#total_budget",
+               "budget_graph_value": BUDGET_GRAPH_VALUE, "budget_graph_currency": "$",
                'translated_data': json.dumps(translated_data),
                "page": "budgets"
                }
@@ -3670,7 +3647,7 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         budget_auto = form.cleaned_data['auto_budget']
         budget_start_date = self.request.POST['budget_date']
         budget_start_date = datetime.datetime.strptime(budget_start_date, '%Y-%m-%d')
-        start_month_date, end_month_date = start_end_date(budget_start_date.date(), "Monthly")
+        start_month_date, end_month_date = start_end_date(budget_start_date.date(), BudgetPeriods.MONTHLY.value)
         budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
         obj.start_date = start_month_date
         obj.end_date = end_month_date
@@ -3681,17 +3658,17 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         obj.budget_start_date = budget_start_date
         obj.user_budget = user_budget
         obj.save()
-        if budget_period == 'Quarterly':
+        if budget_period == BudgetPeriods.QUARTERLY.value:
             for _ in range(2):
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
-        if budget_period == 'Yearly':
+        if budget_period == BudgetPeriods.YEARLY.value:
             for _ in range(11):
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
                 save_budgets(user_name, start_month_date, end_month_date, budget_name, budget_period, budget_currency,
                              budget_amount, budget_auto, budget_start_date, budget_end_date, budget_amount,
                              budget_start_date, subcategory_obj, None, budget_status=True)
@@ -3733,7 +3710,7 @@ def budget_update(request, pk):
             if auto_budget:
                 auto_budget = True
             old_budget_end_date = budget_obj.ended_at
-            start_month_date, end_month_date = start_end_date(budget_date, "Monthly")
+            start_month_date, end_month_date = start_end_date(budget_date, BudgetPeriods.MONTHLY.value)
             budget_end_date = get_period_date(budget_date, budget_period) - relativedelta(days=1)
             if budget_period == old_budget_period:
                 if old_budget_create_date == budget_date:
@@ -3758,7 +3735,7 @@ def budget_update(request, pk):
                     except Exception as e:
                         print("Exception_==========>", e)
                         budget_qs = Budget.objects.filter(user=user_name, name=subcategory).delete()
-                        if budget_period == 'Quarterly':
+                        if budget_period == BudgetPeriods.QUARTERLY.value:
                             for month_value in range(3):
                                 if month_value == 2:
                                     budget_status = False
@@ -3768,9 +3745,9 @@ def budget_update(request, pk):
                                              currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                              budget_date, subcategory_obj, None, budget_status)
                                 start_month_date = start_month_date + relativedelta(months=1)
-                                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                        if budget_period == 'Yearly':
+                        if budget_period == BudgetPeriods.YEARLY.value:
                             for month_value in range(12):
                                 if month_value == 11:
                                     budget_status = False
@@ -3780,9 +3757,9 @@ def budget_update(request, pk):
                                              currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                              budget_date, subcategory_obj, None, budget_status)
                                 start_month_date = start_month_date + relativedelta(months=1)
-                                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                        if budget_period == 'Daily' or budget_period == 'Weekly' or budget_period == 'Monthly':
+                        if budget_period == BudgetPeriods.DAILY.value or budget_period == BudgetPeriods.WEEKLY.value or budget_period == BudgetPeriods.MONTHLY.value:
                             save_budgets(user_name, start_month_date, end_month_date, subcategory, budget_period,
                                          currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                          budget_date, subcategory_obj)
@@ -3790,7 +3767,7 @@ def budget_update(request, pk):
                     transaction_qs = Transaction.objects.filter(user=user_name, categories=budget_obj.category)
                     if not transaction_qs:
                         budget_qs = Budget.objects.filter(user=user_name, name=subcategory).delete()
-                        if budget_period == 'Quarterly':
+                        if budget_period == BudgetPeriods.QUARTERLY.value:
                             for month_value in range(3):
                                 if month_value == 2:
                                     budget_status = False
@@ -3800,9 +3777,9 @@ def budget_update(request, pk):
                                              currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                              budget_date, subcategory_obj, None, budget_status)
                                 start_month_date = start_month_date + relativedelta(months=1)
-                                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                        if budget_period == 'Yearly':
+                        if budget_period == BudgetPeriods.YEARLY.value:
                             for month_value in range(12):
                                 if month_value == 11:
                                     budget_status = False
@@ -3812,9 +3789,9 @@ def budget_update(request, pk):
                                              currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                              budget_date, subcategory_obj, None, budget_status)
                                 start_month_date = start_month_date + relativedelta(months=1)
-                                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                                start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                        if budget_period == 'Daily' or budget_period == 'Weekly' or budget_period == 'Monthly':
+                        if budget_period == BudgetPeriods.DAILY.value or budget_period == BudgetPeriods.WEEKLY.value or budget_period == BudgetPeriods.MONTHLY.value:
                             save_budgets(user_name, start_month_date, end_month_date, subcategory, budget_period,
                                          currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                          budget_date, subcategory_obj)
@@ -3826,7 +3803,7 @@ def budget_update(request, pk):
                 #     error = 'Budget already exists for this period!'
                 # else:
                 budget_qs = Budget.objects.filter(user=user_name, name=subcategory).delete()
-                if budget_period == 'Quarterly':
+                if budget_period == BudgetPeriods.QUARTERLY.value:
                     for month_value in range(3):
                         if month_value == 2:
                             budget_status = False
@@ -3836,9 +3813,9 @@ def budget_update(request, pk):
                                      currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                      budget_date, subcategory_obj, None, budget_status)
                         start_month_date = start_month_date + relativedelta(months=1)
-                        start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                        start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                if budget_period == 'Yearly':
+                if budget_period == BudgetPeriods.YEARLY.value:
                     for month_value in range(12):
                         if month_value == 11:
                             budget_status = False
@@ -3848,9 +3825,9 @@ def budget_update(request, pk):
                                      currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                      budget_date, subcategory_obj, None, budget_status)
                         start_month_date = start_month_date + relativedelta(months=1)
-                        start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                        start_month_date, end_month_date = start_end_date(start_month_date, BudgetPeriods.MONTHLY.value)
 
-                if budget_period == 'Daily' or budget_period == 'Weekly' or budget_period == 'Monthly':
+                if budget_period == BudgetPeriods.DAILY.value or budget_period == BudgetPeriods.WEEKLY.value or budget_period == BudgetPeriods.MONTHLY.value:
                     save_budgets(user_name, start_month_date, end_month_date, subcategory, budget_period,
                                  currency, amount, auto_budget, budget_date, budget_end_date, amount,
                                  budget_date, subcategory_obj)
@@ -3860,7 +3837,7 @@ def budget_update(request, pk):
 
     categories = Category.objects.filter(user=request.user)
     sub_categories = SubCategory.objects.filter(category__pk=budget_obj.category.category.id)
-    budget_periods = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
+    budget_periods = [period.value for period in BudgetPeriods]
     transaction_qs = Transaction.objects.filter(user=user_name, categories=budget_obj.category)
     if transaction_qs:
         budget_update_period = True
@@ -3868,7 +3845,7 @@ def budget_update(request, pk):
         budget_update_period = False
 
     context = {'budget_data': budget_obj, 'categories': categories, 'sub_categories': sub_categories,
-               'currency_dict': currency_dict, 'budget_period': budget_periods,
+               'currency_dict': CURRENCY_DICT, 'budget_period': budget_periods,
                'current_budget_date': str(budget_obj.created_at),
                'budget_date': str(budget_obj.budget_start_date), 'errors': error,
                'budget_update_period': budget_update_period,
@@ -3908,31 +3885,31 @@ class TemplateAdd(LoginRequiredMixin, CreateView):
         budget_period = form.cleaned_data['budget_period']
         date_value = datetime.datetime.today().date()
         budget_amount = form.cleaned_data['amount']
-        start_month_date, end_month_date = start_end_date(date_value, "Monthly")
+        start_month_date, end_month_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
         obj.start_date = start_month_date
         obj.end_date = end_month_date
         obj.initial_amount = budget_amount
         obj.budget_left = budget_amount
 
-        if budget_period == 'Weekly':
+        if budget_period == BudgetPeriods.WEEKLY.value:
             start_week_date, end_week_date = start_end_date(date_value, budget_period)
             obj.created_at = start_week_date
             obj.ended_at = end_week_date
             obj.save()
 
-        if budget_period == 'Daily':
+        if budget_period == BudgetPeriods.DAILY.value:
             obj.created_at = date_value
             obj.ended_at = date_value
             obj.save()
 
-        if budget_period == 'Yearly':
+        if budget_period == BudgetPeriods.YEARLY.value:
             start_year_date, end_year_date = start_end_date(date_value, budget_period)
             obj.created_at = start_year_date
             obj.ended_at = end_year_date
             obj.save()
 
-        if budget_period == 'Quarterly':
+        if budget_period == BudgetPeriods.QUARTERLY.value:
             upcoming_quarter_date, quarter_value = start_end_date(date_value, budget_period)
             obj.created_at = quarter_value
             obj.ended_at = upcoming_quarter_date
@@ -4113,7 +4090,7 @@ def transaction_split(request):
                     bill_name = ""
                     budget_name = ""
                     out_flow = "False"
-                    if subcategory_obj.category.name == "Bills & Subscriptions":
+                    if subcategory_obj.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
                         bill_name = subcategory_obj.name
                     budget_qs = Budget.objects.filter(user=user_name, category=subcategory_obj)
                     if budget_qs:
@@ -4158,7 +4135,7 @@ def transaction_split(request):
                 bill_name = ""
                 budget_name = ""
                 out_flow = "False"
-                if subcategory_obj.category.name == "Bills & Subscriptions":
+                if subcategory_obj.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
                     bill_name = subcategory_obj.name
                 budget_qs = Budget.objects.filter(user=user_name, category=subcategory_obj)
                 if budget_qs:
@@ -4323,7 +4300,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         #     income_obj.credited = True
         #     income_obj.save()
 
-        if category_name.name in ('Bills & Subscriptions', 'Bills'):
+        if category_name.name in (CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, 'Bills'):
             due_bill_id = int(self.request.POST['due_bill'])
             bill_name = Bill.objects.get(pk=due_bill_id, user_budget=user_budget)
             obj.bill = bill_name
@@ -4333,7 +4310,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         account_obj, budget_obj = transaction_checks(user_name, transaction_amount, account, bill_name,
                                                      budget_name, cleared_amount, out_flow, transaction_date, user_budget)
          # For Goals , Add transaction and add the amount to goal allocated amount
-        if category_name.name == "Goals":
+        if category_name.name == CategoryTypes.GOALS.value:
             goal_obj = Goal.objects.get(user=user_name, label=budget_obj.category)
             if goal_obj:
                 goal_obj.allocate_amount += transaction_amount
@@ -4429,20 +4406,20 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             out_flow = False
 
         cleared_amount = "True"
-        if category_name.name == 'Income':
+        if category_name.name == CategoryTypes.INCOME.value:
             due_income_id = int(self.request.POST['due_income'])
             income_obj = IncomeDetail.objects.get(pk=due_income_id)
             income_obj.credited = True
             income_obj.save()
 
-        if transaction_obj.categories.category.name == 'Income' != category_name.name:
+        if transaction_obj.categories.category.name == CategoryTypes.INCOME.value != category_name.name:
             income_obj = IncomeDetail.objects.get(income__user=user_name, income__account=transaction_obj.account,
                                                   income__sub_category__id=transaction_obj.categories.id,
                                                   income_date=transaction_obj.transaction_date)
             income_obj.credited = False
             income_obj.save()
 
-        if transaction_obj.categories.category.name == 'Bills & Subscriptions' == category_name.name:
+        if transaction_obj.categories.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value == category_name.name:
             bill_obj = transaction_obj.bill
             bill_amount = float(bill_obj.remaining_amount)
             if transaction_amount != update_transaction_amount:
@@ -4457,14 +4434,14 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 bill_obj.remaining_amount = bill_amount
             bill_obj.save()
 
-        if transaction_obj.categories.category.name == 'Bills & Subscriptions' != category_name.name:
+        if transaction_obj.categories.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value != category_name.name:
             bill_obj = transaction_obj.bill
             bill_amount = float(bill_obj.remaining_amount)
             bill_obj.status = "unpaid"
             bill_obj.remaining_amount = bill_amount + transaction_amount
             bill_obj.save()
             obj.bill = None
-        if transaction_obj.categories.category.name != 'Bills & Subscriptions' == category_name.name:
+        if transaction_obj.categories.category.name != CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value == category_name.name:
             due_bill_id = int(self.request.POST['due_bill'])
             bill_obj = Bill.objects.get(pk=due_bill_id)
             bill_amount = float(bill_obj.remaining_amount) - update_transaction_amount
@@ -4485,7 +4462,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             if account == update_account:
                 account_obj = Account.objects.get(user=user_name, name=account)
                 if transaction_amount != update_transaction_amount:
-                    if category_name.name == "Funds":
+                    if category_name.name == CategoryTypes.FUNDS.value:
                         new_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
                         if transaction_out_flow:
                             fund_total = round(float(new_fund_obj.total_fund) - transaction_amount, 2)
@@ -4499,7 +4476,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                         new_fund_obj.total_fund = fund_total
                         new_fund_obj.save()
                     else:
-                        if transaction_obj.categories.category.name == "Funds":
+                        if transaction_obj.categories.category.name == CategoryTypes.FUNDS.value:
                             old_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
                             if transaction_out_flow:
                                 fund_total = round(float(old_fund_obj.total_fund) - transaction_amount, 2)
@@ -4544,10 +4521,10 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
 
             else:
                 account_obj = Account.objects.get(user=user_name, name=update_account)
-                if category_name.name == "Funds" or transaction_obj.categories.category.name == "Funds":
+                if category_name.name == CategoryTypes.FUNDS.value or transaction_obj.categories.category.name == CategoryTypes.FUNDS.value:
                     old_fund_obj = AvailableFunds.objects.get(user=user_name, account=old_account_obj)
                     new_fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
-                    if transaction_obj.categories.category.name == "Funds":
+                    if transaction_obj.categories.category.name == CategoryTypes.FUNDS.value:
                         if transaction_out_flow:
                             old_fund_obj.total_fund = float(old_fund_obj.total_fund) - transaction_amount
                             total_fund = old_fund_obj.total_fund
@@ -4573,7 +4550,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                             old_fund_obj.total_fund = float(old_fund_obj.total_fund) + transaction_amount
                             old_fund_obj.save()
 
-                    if category_name.name == "Funds":
+                    if category_name.name == CategoryTypes.FUNDS.value:
                         if transaction_out_flow:
                             new_fund_obj.total_fund = float(new_fund_obj.total_fund) + transaction_amount
                             new_fund_obj.save()
@@ -4606,7 +4583,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             if budget_name:
                 print("yes budget name")
                 date_check = datetime.datetime.strptime(transaction_date, "%Y-%m-%d").date()
-                start_month_date, end_month_date = start_end_date(date_check, "Monthly")
+                start_month_date, end_month_date = start_end_date(date_check, BudgetPeriods.MONTHLY.value)
                 budget_obj = Budget.objects.filter(user=user_name, name=budget_name, start_date=start_month_date,
                                                    end_date=end_month_date)[0]
             else:
@@ -4614,7 +4591,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 try:
                     transaction_budget_name = transaction_obj.budgets.name
                     transaction_start_date, transaction_end_date = start_end_date(transaction_obj.transaction_date,
-                                                                                  "Monthly")
+                                                                                  BudgetPeriods.MONTHLY.value)
 
                     budget_obj = Budget.objects.filter(user=user_name, name=transaction_budget_name,
                                                        start_date=transaction_start_date,
@@ -4634,7 +4611,7 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
                 try:
                     transaction_budget_name = transaction_obj.budgets.name
                     transaction_start_date, transaction_end_date = start_end_date(transaction_obj.transaction_date,
-                                                                                  "Monthly")
+                                                                                  BudgetPeriods.MONTHLY.value)
                     if transaction_budget_name == budget_name:
                         print("transaction_out_flow", transaction_out_flow)
                         print("out_flow", out_flow)
@@ -4692,7 +4669,7 @@ def delete_transaction_details(pk, user_name, method=None):
         account_obj = Account.objects.get(user=user_name, name=account.name)
 
         # check category name is funds
-        if sub_category.category.name == "Funds":
+        if sub_category.category.name == CategoryTypes.FUNDS.value:
             fund_obj = AvailableFunds.objects.get(user=user_name, account=account_obj)
             if out_flow:
                 fund_obj.total_fund = float(fund_obj.total_fund) - transaction_amount
@@ -4719,7 +4696,7 @@ def delete_transaction_details(pk, user_name, method=None):
                 fund_obj.total_fund = float(fund_obj.total_fund) + transaction_amount
                 fund_obj.save()
 
-        # if sub_category.category.name == "Income":
+        # if sub_category.category.name == CategoryTypes.INCOME.value:
         #     income_obj = IncomeDetail.objects.get(income__user=user_name, income__account=account_obj,
         #                                           income__sub_category__id=sub_category.id,
         #                                           income_date=transaction_obj.transaction_date)
@@ -4948,12 +4925,11 @@ def goal_add(request):
             return redirect('/goal_list')
 
     account_data = Account.objects.filter(user=user_name,
-                                          account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                            'Line of Credit', 'Emergency Fund'])
-    category_obj = Category.objects.get(name="Goals", user=user_name)
-    sub_obj = SubCategory.objects.filter(category__user=user_name, category__name="Goals")
+                                          account_type__in=[type.value for type in AccountTypes])
+    category_obj = Category.objects.get(name=CategoryTypes.GOALS.value, user=user_name)
+    sub_obj = SubCategory.objects.filter(category__user=user_name, category__name=CategoryTypes.GOALS.value)
     context = {'account_data': account_data, 'goal_category': sub_obj,
-               "page": "goal_add", "category_icons": category_icons}
+               "page": "goal_add", "category_icons": CATEGORY_ICONS}
 
     if error:
         context['error'] = error
@@ -4973,10 +4949,9 @@ def goal_update(request, pk):
             return redirect('/goal_list')
 
     account_data = Account.objects.filter(user=user_name,
-                                          account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                            'Line of Credit', 'Emergency Fund'])
+                                          account_type__in=[type.value for type in AccountTypes])
 
-    category_obj = Category.objects.get(name="Goals", user=user_name)
+    category_obj = Category.objects.get(name=CategoryTypes.GOALS.value, user=user_name)
     context = {'account_data': account_data, 'goal_data': goal_data,
                'goal_category': SubCategory.objects.filter(category=category_obj)}
     if error:
@@ -5208,7 +5183,7 @@ def loan_add(request):
             category_list.append(data.name)
 
     loan_type = ['Mortgage', 'Loan', 'Student Loan', 'Personal Loan', 'Medical Debt', 'Other Debt']
-    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': currency_dict,
+    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': CURRENCY_DICT,
                'loan_type': loan_type}
     if loan_error:
         context['loan_error'] = loan_error
@@ -5284,7 +5259,7 @@ def loan_update(request, pk):
             category_list.append(data.name)
 
     loan_type = ['Mortgage', 'Loan', 'Student Loan', 'Personal Loan', 'Medical Debt', 'Other Debt']
-    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': currency_dict,
+    context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': CURRENCY_DICT,
                'loan_type': loan_type, 'account': account}
     if loan_error:
         context['loan_error'] = loan_error
@@ -5568,7 +5543,7 @@ def fund_overtime(request):
         user_name = request.user
         account_name = request.POST['account_name']
         transaction_qs = Transaction.objects.filter(user=user_name, account__name=account_name,
-                                                    categories__category__name='Funds').order_by('transaction_date')
+                                                    categories__category__name=CategoryTypes.FUNDS.value).order_by('transaction_date')
         if transaction_qs:
             min_date = transaction_qs[0].transaction_date
             max_date = datetime.datetime.today().date()
@@ -5847,15 +5822,14 @@ def bill_edit(request, pk):
             bill_obj.save()
             return redirect(f"/bill_details/{pk}")
 
-    bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit', 'Emergency Fund'])
-    bill_frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
+    bill_category = SubCategory.objects.filter(category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, category__user=user)
+    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
+    bill_frequency = [period.value for period in BudgetPeriods]
     context = {
         'form': form,
         'error': error,
         'bill_data': bill_obj,
-        'currency_dict': currency_dict,
+        'currency_dict': CURRENCY_DICT,
         'bill_category': bill_category,
         'account_qs': account_qs,
         'bill_frequency': bill_frequency
@@ -5875,7 +5849,7 @@ def bill_pay(request, pk):
     remaining_amount = round(account_balance - bill_amount, 2)
     label = bill_obj.label
     user = bill_obj.user
-    categories = SubCategory.objects.get(name=label, category__name='Bills & Subscriptions', category__user=user)
+    categories = SubCategory.objects.get(name=label, category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, category__user=user)
     tag_obj, _ = Tag.objects.get_or_create(user=user, name="Bills")
     save_transaction(user, label, bill_amount, remaining_amount, today_date, categories, account_obj,
                      tag_obj, True, True, bill_obj)
@@ -5994,10 +5968,9 @@ def bill_adding_fun(request, method_name=None):
             create_bill_request()
             return "Bill_list"
 
-    bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
-    bill_obj = Category.objects.get(user=user, name="Bills & Subscriptions")
-    account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit', 'Emergency Fund'])
+    bill_category = SubCategory.objects.filter(category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, category__user=user)
+    bill_obj = Category.objects.get(user=user, name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value)
+    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
     context = {
         'form': form,
         'error': error,
@@ -6025,14 +5998,14 @@ def bill_walk_through(request):
         user_budget = UserBudgets.objects.get(user=user_name,pk=int(user_budget_id))
         # check subcategory exist or not
         try:
-            sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name="Bills & Subscriptions",
+            sub_cat_obj = SubCategory.objects.get(category__user=user_name, category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,
                                                   name=bill_name)
             sub_cat_obj.name = bill_name
             sub_cat_obj.save()
         # To-Do  Remove bare except
         except:
             sub_cat_obj = SubCategory()
-            sub_cat_obj.category = Category.objects.get(user=user_name, name="Bills & Subscriptions")
+            sub_cat_obj.category = Category.objects.get(user=user_name, name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value)
             sub_cat_obj.name = bill_name
             sub_cat_obj.save()
 
@@ -6041,7 +6014,7 @@ def bill_walk_through(request):
                 bill_date = datetime.datetime.strptime(bill_date, '%Y-%m-%d')
             else:
                 bill_date = datetime.datetime.today().date()
-            bill_date, end_month_date = start_end_date(bill_date, "Monthly")
+            bill_date, end_month_date = start_end_date(bill_date, BudgetPeriods.MONTHLY.value)
             try:
                 bill_obj = Bill.objects.filter(user=user_name, user_budget=user_budget, label=bill_name, date__range=(bill_date, end_month_date))
                 if bill_obj:
@@ -6172,15 +6145,14 @@ def bill_update(request, pk):
                 bill_obj.save()
                 return redirect(f"/bill_detail/{pk}")
 
-    bill_category = SubCategory.objects.filter(category__name="Bills & Subscriptions", category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit', 'Emergency Fund'])
-    bill_frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
+    bill_category = SubCategory.objects.filter(category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, category__user=user)
+    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
+    bill_frequency = [period.value for period in BudgetPeriods]
     context = {
         'form': form,
         'error': error,
         'bill_data': bill_obj,
-        'currency_dict': currency_dict,
+        'currency_dict': CURRENCY_DICT,
         'bill_category': bill_category,
         'account_qs': account_qs,
         'bill_frequency': bill_frequency
@@ -6212,7 +6184,7 @@ def unpaid_bills(request):
     user = request.user
     category_id = int(request.POST['category_id'])
     category_obj = Category.objects.get(user=user, pk=category_id)
-    if category_obj.name != "Bills & Subscriptions":
+    if category_obj.name != CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value:
         return JsonResponse({"status": "error"}) 
     subcategory_name = request.POST['sub_category'].strip()
     bill_qs = Bill.objects.filter(user=user, label=subcategory_name, status="unpaid")
@@ -6360,7 +6332,7 @@ def future_net_worth_calculator(request):
         'age': age,
         'income': income,
         'total_worth': total_worth,
-        'currency_dict': currency_dict,
+        'currency_dict': CURRENCY_DICT,
         'currency': currency,
         'home_value': home_value,
         'vehicle_value': vehicle_value,
@@ -6852,7 +6824,7 @@ def rental_property_add(request):
         user_name = request.user
         property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
         if property_obj:
-            context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
+            context = {'currency_dict': CURRENCY_DICT, 'error': 'Property Already Exits'}
             return render(request, "properties/add_property.html", context=context)
 
         rental_obj = RentalPropertyModel()
@@ -6870,8 +6842,8 @@ def rental_property_add(request):
         upcoming_date = today_date + relativedelta(months=1, day=1)
         property_obj = {'mortgage_detail': {'start_date': str(upcoming_date), 'amortization_year': 25}}
         context = {
-            'currency_dict': currency_dict,
-            'scenario_dict': scenario_dict,
+            'currency_dict': CURRENCY_DICT,
+            'scenario_dict': SCENARIO_DICT,
             # Fetch the url from the request
             'action_url': request.path,
             'heading_name': "Add Rental Property",
@@ -6901,7 +6873,7 @@ def rental_property_update(request, pk):
         if rental_obj.name != property_name:
             property_obj = RentalPropertyModel.objects.filter(user=user_name, name=property_name)
             if property_obj:
-                context = {'currency_dict': currency_dict, 'error': 'Property Already Exits'}
+                context = {'currency_dict': CURRENCY_DICT, 'error': 'Property Already Exits'}
                 return render(request, "properties/add_property.html", context=context)
 
         save_rental_property(request, rental_obj, property_purchase_obj, mortgage_obj, closing_cost_obj, revenue_obj,
@@ -6932,7 +6904,7 @@ def rental_property_update(request, pk):
         other_expenses = ast.literal_eval(property_obj.monthly_expenses.other_expenses)[0]
         investor_details = ast.literal_eval(property_obj.investor_details)[0]
 
-        context = {'currency_dict': currency_dict, 'scenario_dict': scenario_dict, 'property_obj': property_obj,
+        context = {'currency_dict': CURRENCY_DICT, 'scenario_dict': SCENARIO_DICT, 'property_obj': property_obj,
                    'roof_obj': roof_obj, 'water_heater': water_heater, 'all_appliances': all_appliances,
                    'bathroom_fixtures': bathroom_fixtures, 'drive_way': drive_way, 'furnance': furnance,
                    'air_conditioner': air_conditioner, 'flooring': flooring, 'plumbing': plumbing,
@@ -7604,10 +7576,10 @@ def income_add(request):
         if auto_credit:
             auto_credit = True
 
-        subcategory_qs = SubCategory.objects.filter(category__user=user, category__name='Income',
+        subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
                                                     name=sub_category_name)
         if not subcategory_qs:
-            sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name='Income'),
+            sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
                                                       name=sub_category_name)
         else:
             sub_category = subcategory_qs[0]
@@ -7641,10 +7613,9 @@ def income_add(request):
                     income_detail_obj.save()
             create_income_request()
             return redirect('/income_list/')
-    income_category = SubCategory.objects.filter(category__name="Income", category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit', 'Emergency Fund'])
-    frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
+    income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
+    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
+    frequency = [period.value for period in BudgetPeriods]
     context = {
         'error': error,
         'account_qs': account_qs,
@@ -7680,10 +7651,10 @@ def income_update(request, pk):
         income_obj.auto_credit = auto_credit
 
         if income_obj.sub_category.name != sub_category_name:
-            subcategory_qs = SubCategory.objects.filter(category__user=user, category__name='Income',
+            subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
                                                         name=sub_category_name)
             if not subcategory_qs:
-                sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name='Income'),
+                sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
                                                           name=sub_category_name)
             else:
                 sub_category = subcategory_qs[0]
@@ -7700,10 +7671,9 @@ def income_update(request, pk):
             income_obj.save()
             return redirect(f"/income_details/{pk}")
 
-    income_category = SubCategory.objects.filter(category__name="Income", category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=['Checking', 'Savings', 'Cash', 'Credit Card',
-                                                                     'Line of Credit', 'Emergency Fund'])
-    frequency = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly']
+    income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
+    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
+    frequency = [period.value for period in BudgetPeriods]
     context = {
         'error': error,
         'account_qs': account_qs,
@@ -7873,7 +7843,7 @@ def expenses_update(request, pk):
         category_data = Category.objects.filter(user=user_name)
         current_month = datetime.datetime.strftime(expense_obj.month, '%Y-%m')
         context = {'expense_obj': expense_obj, 'category_data': category_data, 'current_month': current_month,
-                   'currency_data': currency_dict}
+                   'currency_data': CURRENCY_DICT}
         return render(request, "expenses/expenses_update.html", context=context)
 
 
@@ -8133,7 +8103,7 @@ def rental_info_save(request, user_name, rental_obj, property_obj, invoice_data,
             invoice_obj.balance_due = 0
             invoice_obj.invoice_paid_date = today_date
             deposit_date = datetime.datetime.strftime(today_date, "%B %d, %Y")
-            invoice_obj.record_payment = [[0, invoice_obj.tenant_name, deposit_date, 'Cash', deposit]]
+            invoice_obj.record_payment = [[0, invoice_obj.tenant_name, deposit_date, AccountTypes.CASH.value, deposit]]
         invoice_obj.save()
 
     rental_summary = []
@@ -8264,8 +8234,8 @@ def add_property(request):
     context.update({'today_date': today_date, 'one_year_date': one_year_date,
                     'today_date_str': str(today_date),
                     'one_year_date_str': str(one_year_date),
-                    'month_date_dict': month_date_dict,
-                    'currency_dict': currency_dict
+                    'month_date_dict': MONTH_DATE_DICT,
+                    'currency_dict': CURRENCY_DICT
                     })
     return render(request, "property/property_add.html", context=context)
 
@@ -8273,8 +8243,8 @@ def add_property(request):
 def update_property(request, pk, method_name):
     user_name = request.user
     context = {'method_type': method_name,
-               'currency_dict': currency_dict, 'property_type_list': property_type_list,
-               'month_date_dict': month_date_dict, 'url_type': "Update"
+               'currency_dict': CURRENCY_DICT, 'property_type_list': PROPERTY_TYPE_LIST,
+               'month_date_dict': MONTH_DATE_DICT, 'url_type': "Update"
                }
     if method_name == "property":
         result_obj = Property.objects.get(user=user_name, pk=pk)
@@ -8419,9 +8389,9 @@ def add_lease(request, pk, unit_name):
                    'method_type': 'Rental Lease',
                    'url_type': "Add",
                    'result_obj': result_obj,
-                   'currency_dict': currency_dict,
-                   'property_type_list': property_type_list,
-                   'month_date_dict': month_date_dict,
+                   'currency_dict': CURRENCY_DICT,
+                   'property_type_list': PROPERTY_TYPE_LIST,
+                   'month_date_dict': MONTH_DATE_DICT,
                    'unit_name': unit_name
                    }
         unit_details = ast.literal_eval(result_obj.unit_details)
@@ -8693,7 +8663,7 @@ def property_invoice_add(request):
             if record_payment_list:
                 pass
             else:
-                record_payment_list.append([0, tenant_name, deposit_date, 'Cash', already_paid])
+                record_payment_list.append([0, tenant_name, deposit_date, AccountTypes.CASH.value, already_paid])
             invoice_obj.record_payment = record_payment_list
 
         elif already_paid == total_paid:
@@ -8866,406 +8836,16 @@ def property_sample_page(request):
 
 
 def rental_property_sample_page(request):
-    projection_key = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9',
-                      'Year 10', 'Year 11', 'Year 12', 'Year 13', 'Year 14', 'Year 15', 'Year 16', 'Year 17', 'Year 18',
-                      'Year 19', 'Year 20', 'Year 21', 'Year 22', 'Year 23', 'Year 24', 'Year 25', 'Year 26', 'Year 27',
-                      'Year 28', 'Year 29', 'Year 30']
 
-    cash_on_cash_return_data = [{'name': 'Cash on Cash Return(%)',
-                                 'data': ['9.21%', '9.76%', '10.33%', '10.91%', '11.5%', '12.11%', '12.72%', '13.35%',
-                                          '13.99%', '14.65%', '15.31%', '15.99%', '16.69%', '17.39%', '18.12%',
-                                          '18.85%', '19.6%', '20.37%', '21.15%', '21.95%', '22.76%', '23.59%', '24.43%',
-                                          '25.3%', '26.18%', '27.07%', '27.99%', '28.92%', '29.87%', '30.85%']}]
-
-    return_on_investment_data = [{'name': 'Return On Investment % (ROI) (Assuming No Appreciation)',
-                                  'data': ['16.92%', '17.71%', '18.52%', '19.35%', '20.2%', '21.07%', '21.95%',
-                                           '22.86%', '23.79%', '24.74%', '25.72%', '26.72%', '27.73%', '28.78%',
-                                           '29.85%', '30.94%', '32.06%', '33.2%', '34.37%', '35.57%', '36.8%',
-                                           '38.06%', '39.34%', '40.66%', '42.0%', '43.38%', '44.79%', '46.24%',
-                                           '47.72%', '49.23%']},
-                                 {'name': 'Return On Investment % (ROI) (With Appreciation Assumption)',
-                                  'data': ['30.77%', '31.98%', '33.21%', '34.48%', '35.79%', '37.12%', '38.49%',
-                                           '39.9%', '41.34%', '42.82%', '44.33%', '45.89%', '47.48%', '49.12%',
-                                           '50.8%', '52.52%', '54.28%', '56.09%', '57.95%', '59.86%', '61.81%',
-                                           '63.82%', '65.88%', '67.99%', '70.16%', '72.38%', '74.66%', '77.0%',
-                                           '79.41%', '81.87%']}]
-    debt_cov_ratio_data = [{'name': 'Debt Service Coverage Ratio (%)', 'data': [1.49, 1.52, 1.55, 1.58, 1.62, 1.65,
-                                                                                1.68, 1.71, 1.75, 1.78, 1.82, 1.86,
-                                                                                1.89, 1.93, 1.97, 2.01, 2.05, 2.09,
-                                                                                2.13, 2.17, 2.22, 2.26, 2.31, 2.35, 2.4,
-                                                                                2.45, 2.5, 2.55, 2.6, 2.65]}]
-    return_investment_data = [{'name': 'Annual Cashflow', 'data': [9969.6, 10573.73, 11189.95, 11818.49, 12459.6,
-                                                                   13113.53, 13780.54, 14460.89, 15154.85, 15862.69,
-                                                                   16584.69, 17321.12, 18072.28, 18838.47, 19619.98,
-                                                                   20417.12, 21230.2, 22059.55, 22905.48, 23768.33,
-                                                                   24648.44, 25546.15, 26461.81, 27395.79, 28348.44,
-                                                                   29320.15, 30311.3, 31322.27, 32353.45, 33405.26]},
-                              {'name': 'Net Operating Income(NOI)', 'data': ['30206.64', '30810.77', '31426.99',
-                                                                             '32055.53', '32696.64', '33350.57',
-                                                                             '34017.58', '34697.93', '35391.89',
-                                                                             '36099.73', '36821.73', '37558.16',
-                                                                             '38309.32', '39075.51', '39857.02',
-                                                                             '40654.16', '41467.24', '42296.59',
-                                                                             '43142.52', '44005.37', '44885.48',
-                                                                             '45783.19', '46698.85', '47632.83',
-                                                                             '48585.48', '49557.19', '50548.34',
-                                                                             '51559.31', '52590.49', '53642.3']},
-                              {'name': 'Return On Investment (ROI) (Assuming No Appreciation)',
-                               'data': ['18320.82', '19178.94', '20056.9', '20955.13', '21874.14', '22814.43',
-                                        '23776.5', '24760.87', '25768.12', '26798.8', '27853.42', '28932.62',
-                                        '30036.92', '31167.03', '32323.52', '33507.06', '34718.29', '35957.89',
-                                        '37226.54', '38524.99', '39853.93', '41214.15', '42606.36', '44031.4',
-                                        '45490.01', '46983.1', '48511.49', '50076.03', '51677.63', '53317.21']},
-                              {'name': 'Return On Investment (ROI) (With Appreciation Assumption)',
-                               'data': ['33320.82', '34628.94', '35970.4', '37346.04', '38756.77', '40203.54',
-                                        '41687.28', '43208.98', '44769.67', '46370.4', '48012.17', '49696.13',
-                                        '51423.33', '53195.04', '55012.37', '56876.57', '58788.89', '60750.6',
-                                        '62763.04', '64827.58', '66945.6', '69118.57', '71347.91', '73635.2',
-                                        '75981.92', '78389.77', '80860.36', '83395.37', '85996.55', '88665.69']}]
-
-    property_expense_data = [{'name': 'Operating Expenses', 'data': ['11793.36', '12029.23', '12269.81', '12515.21',
-                                                                     '12765.51', '13020.82', '13281.24', '13546.86',
-                                                                     '13817.8', '14094.16', '14376.04', '14663.56',
-                                                                     '14956.83', '15255.97', '15561.09', '15872.31',
-                                                                     '16189.76', '16513.55', '16843.82', '17180.7',
-                                                                     '17524.31', '17874.8', '18232.29', '18596.94',
-                                                                     '18968.88', '19348.26', '19735.22', '20129.93',
-                                                                     '20532.53', '20943.18']}]
-    mortgage_graph_data = [{'name': 'Balance',
-                            'data': [400000.0, 399313.58, 398625.45, 397935.6, 397244.02, 396550.72, 395855.68,
-                                     395158.9, 394460.38,
-                                     393760.12, 393058.1, 392354.33, 391648.8, 390941.5, 390232.44, 389521.61,
-                                     388808.99, 388094.6, 387378.42,
-                                     386660.45, 385940.69, 385219.12, 384495.75, 383770.58, 383043.59, 382314.78,
-                                     381584.15, 380851.7,
-                                     380117.41, 379381.29, 378643.32, 377903.51, 377161.86, 376418.35, 375672.98,
-                                     374925.74, 374176.64,
-                                     373425.67, 372672.81, 371918.08, 371161.46, 370402.95, 369642.54, 368880.23,
-                                     368116.01, 367349.89,
-                                     366581.84, 365811.88, 365040.0, 364266.18, 363490.43, 362712.74, 361933.11,
-                                     361151.52, 360367.98,
-                                     359582.49, 358795.03, 358005.6, 357214.2, 356420.82, 355625.45, 354828.1,
-                                     354028.76, 353227.41,
-                                     352424.06, 351618.71, 350811.34, 350001.95, 349190.54, 348377.1, 347561.63,
-                                     346744.11, 345924.56,
-                                     345102.95, 344279.29, 343453.58, 342625.79, 341795.94, 340964.02, 340130.01,
-                                     339293.92, 338455.74,
-                                     337615.46, 336773.08, 335928.6, 335082.01, 334233.29, 333382.46, 332529.5,
-                                     331674.41, 330817.18,
-                                     329957.81, 329096.28, 328232.61, 327366.77, 326498.77, 325628.61, 324756.26,
-                                     323881.74, 323005.02,
-                                     322126.12, 321245.02, 320361.72, 319476.2, 318588.48, 317698.53, 316806.36,
-                                     315911.96, 315015.33,
-                                     314116.45, 313215.32, 312311.95, 311406.31, 310498.41, 309588.24, 308675.79,
-                                     307761.07, 306844.05,
-                                     305924.75, 305003.14, 304079.24, 303153.02, 302224.48, 301293.63, 300360.45,
-                                     299424.93, 298487.08,
-                                     297546.88, 296604.33, 295659.43, 294712.16, 293762.52, 292810.51, 291856.12,
-                                     290899.35, 289940.18,
-                                     288978.61, 288014.64, 287048.26, 286079.47, 285108.25, 284134.61, 283158.53,
-                                     282180.01, 281199.04,
-                                     280215.62, 279229.74, 278241.4, 277250.59, 276257.3, 275261.53, 274263.26,
-                                     273262.51, 272259.25,
-                                     271253.48, 270245.2, 269234.39, 268221.06, 267205.2, 266186.8, 265165.85,
-                                     264142.35, 263116.29,
-                                     262087.66, 261056.46, 260022.69, 258986.33, 257947.38, 256905.83, 255861.68,
-                                     254814.92, 253765.54,
-                                     252713.54, 251658.9, 250601.64, 249541.72, 248479.16, 247413.94, 246346.06,
-                                     245275.51, 244202.28,
-                                     243126.37, 242047.77, 240966.48, 239882.48, 238795.77, 237706.34, 236614.19,
-                                     235519.31, 234421.69,
-                                     233321.33, 232218.22, 231112.35, 230003.71, 228892.3, 227778.12, 226661.15,
-                                     225541.38, 224418.82,
-                                     223293.45, 222165.27, 221034.27, 219900.44, 218763.77, 217624.26, 216481.91,
-                                     215336.7, 214188.62,
-                                     213037.68, 211883.86, 210727.15, 209567.55, 208405.05, 207239.65, 206071.33,
-                                     204900.1, 203725.93,
-                                     202548.83, 201368.79, 200185.79, 198999.84, 197810.92, 196619.03, 195424.17,
-                                     194226.31, 193025.46,
-                                     191821.61, 190614.74, 189404.87, 188191.96, 186976.03, 185757.05, 184535.03,
-                                     183309.95, 182081.81,
-                                     180850.59, 179616.3, 178378.93, 177138.46, 175894.89, 174648.21, 173398.42,
-                                     172145.5, 170889.44,
-                                     169630.25, 168367.91, 167102.41, 165833.75, 164561.92, 163286.91, 162008.71,
-                                     160727.32, 159442.72,
-                                     158154.91, 156863.88, 155569.63, 154272.13, 152971.4, 151667.41, 150360.16,
-                                     149049.65, 147735.85,
-                                     146418.78, 145098.41, 143774.74, 142447.76, 141117.46, 139783.84, 138446.88,
-                                     137106.58, 135762.93,
-                                     134415.93, 133065.55, 131711.8, 130354.66, 128994.13, 127630.2, 126262.86,
-                                     124892.1, 123517.91,
-                                     122140.29, 120759.23, 119374.71, 117986.73, 116595.28, 115200.35, 113801.94,
-                                     112400.03, 110994.61,
-                                     109585.68, 108173.23, 106757.25, 105337.72, 103914.65, 102488.02, 101057.83,
-                                     99624.05, 98186.7, 96745.75,
-                                     95301.2, 93853.03, 92401.25, 90945.84, 89486.79, 88024.09, 86557.73, 85087.71,
-                                     83614.01, 82136.63,
-                                     80655.56, 79170.78, 77682.29, 76190.08, 74694.14, 73194.46, 71691.03, 70183.84,
-                                     68672.88, 67158.15,
-                                     65639.63, 64117.31, 62591.19, 61061.25, 59527.49, 57989.89, 56448.45, 54903.15,
-                                     53353.99, 51800.96,
-                                     50244.05, 48683.24, 47118.54, 45549.92, 43977.37, 42400.9, 40820.49, 39236.12,
-                                     37647.8, 36055.5,
-                                     34459.22, 32858.96, 31254.69, 29646.41, 28034.11, 26417.78, 24797.4, 23172.98,
-                                     21544.5, 19911.94,
-                                     18275.31, 16634.58, 14989.75, 13340.81, 11687.74, 10030.55, 8369.21, 6703.71,
-                                     5034.06, 3360.23,
-                                     1682.21]}, {'name': 'Principle',
-                                                 'data': [686.42, 688.13, 689.85, 691.58, 693.31, 695.04, 696.78,
-                                                          698.52, 700.27, 702.02,
-                                                          703.77, 705.53, 707.29, 709.06, 710.84, 712.61, 714.39,
-                                                          716.18, 717.97, 719.77,
-                                                          721.56, 723.37, 725.18, 726.99, 728.81, 730.63, 732.46,
-                                                          734.29, 736.12, 737.96,
-                                                          739.81, 741.66, 743.51, 745.37, 747.23, 749.1, 750.97, 752.85,
-                                                          754.73, 756.62,
-                                                          758.51, 760.41, 762.31, 764.22, 766.13, 768.04, 769.96,
-                                                          771.89, 773.82, 775.75,
-                                                          777.69, 779.63, 781.58, 783.54, 785.5, 787.46, 789.43, 791.4,
-                                                          793.38, 795.36,
-                                                          797.35, 799.35, 801.34, 803.35, 805.36, 807.37, 809.39,
-                                                          811.41, 813.44, 815.47,
-                                                          817.51, 819.56, 821.6, 823.66, 825.72, 827.78, 829.85, 831.93,
-                                                          834.01, 836.09,
-                                                          838.18, 840.28, 842.38, 844.48, 846.59, 848.71, 850.83,
-                                                          852.96, 855.09, 857.23,
-                                                          859.37, 861.52, 863.68, 865.83, 868.0, 870.17, 872.34, 874.53,
-                                                          876.71, 878.9, 881.1,
-                                                          883.3, 885.51, 887.73, 889.94, 892.17, 894.4, 896.64, 898.88,
-                                                          901.13, 903.38,
-                                                          905.64, 907.9, 910.17, 912.45, 914.73, 917.01, 919.31, 921.6,
-                                                          923.91, 926.22,
-                                                          928.53, 930.85, 933.18, 935.52, 937.85, 940.2, 942.55, 944.91,
-                                                          947.27, 949.64,
-                                                          952.01, 954.39, 956.78, 959.17, 961.57, 963.97, 966.38, 968.8,
-                                                          971.22, 973.65,
-                                                          976.08, 978.52, 980.97, 983.42, 985.88, 988.34, 990.81,
-                                                          993.29, 995.77, 998.26,
-                                                          1000.76, 1003.26, 1005.77, 1008.28, 1010.8, 1013.33, 1015.86,
-                                                          1018.4, 1020.95,
-                                                          1023.5, 1026.06, 1028.63, 1031.2, 1033.77, 1036.36, 1038.95,
-                                                          1041.55, 1044.15,
-                                                          1046.76, 1049.38, 1052.0, 1054.63, 1057.27, 1059.91, 1062.56,
-                                                          1065.22, 1067.88,
-                                                          1070.55, 1073.23, 1075.91, 1078.6, 1081.3, 1084.0, 1086.71,
-                                                          1089.43, 1092.15,
-                                                          1094.88, 1097.62, 1100.36, 1103.11, 1105.87, 1108.64, 1111.41,
-                                                          1114.19, 1116.97,
-                                                          1119.76, 1122.56, 1125.37, 1128.18, 1131.0, 1133.83, 1136.67,
-                                                          1139.51, 1142.36,
-                                                          1145.21, 1148.07, 1150.94, 1153.82, 1156.71, 1159.6, 1162.5,
-                                                          1165.4, 1168.32,
-                                                          1171.24, 1174.17, 1177.1, 1180.04, 1182.99, 1185.95, 1188.92,
-                                                          1191.89, 1194.87,
-                                                          1197.86, 1200.85, 1203.85, 1206.86, 1209.88, 1212.9, 1215.94,
-                                                          1218.98, 1222.02,
-                                                          1225.08, 1228.14, 1231.21, 1234.29, 1237.38, 1240.47, 1243.57,
-                                                          1246.68, 1249.8,
-                                                          1252.92, 1256.05, 1259.19, 1262.34, 1265.5, 1268.66, 1271.83,
-                                                          1275.01, 1278.2,
-                                                          1281.39, 1284.6, 1287.81, 1291.03, 1294.26, 1297.49, 1300.74,
-                                                          1303.99, 1307.25,
-                                                          1310.52, 1313.79, 1317.08, 1320.37, 1323.67, 1326.98, 1330.3,
-                                                          1333.62, 1336.96,
-                                                          1340.3, 1343.65, 1347.01, 1350.38, 1353.75, 1357.14, 1360.53,
-                                                          1363.93, 1367.34,
-                                                          1370.76, 1374.19, 1377.62, 1381.07, 1384.52, 1387.98, 1391.45,
-                                                          1394.93, 1398.42,
-                                                          1401.91, 1405.42, 1408.93, 1412.45, 1415.98, 1419.52, 1423.07,
-                                                          1426.63, 1430.2,
-                                                          1433.77, 1437.36, 1440.95, 1444.55, 1448.16, 1451.78, 1455.41,
-                                                          1459.05, 1462.7,
-                                                          1466.36, 1470.02, 1473.7, 1477.38, 1481.07, 1484.78, 1488.49,
-                                                          1492.21, 1495.94,
-                                                          1499.68, 1503.43, 1507.19, 1510.96, 1514.73, 1518.52, 1522.32,
-                                                          1526.12, 1529.94,
-                                                          1533.76, 1537.6, 1541.44, 1545.3, 1549.16, 1553.03, 1556.91,
-                                                          1560.81, 1564.71,
-                                                          1568.62, 1572.54, 1576.47, 1580.41, 1584.36, 1588.33, 1592.3,
-                                                          1596.28, 1600.27,
-                                                          1604.27, 1608.28, 1612.3, 1616.33, 1620.37, 1624.42, 1628.48,
-                                                          1632.55, 1636.64,
-                                                          1640.73, 1644.83, 1648.94, 1653.06, 1657.2, 1661.34, 1665.49,
-                                                          1669.66, 1673.83,
-                                                          1678.02, 1682.21]}, {'name': 'Interest',
-                                                                               'data': [1000.0, 998.28, 996.56, 994.84,
-                                                                                        993.11, 991.38,
-                                                                                        989.64, 987.9, 986.15, 984.4,
-                                                                                        982.65, 980.89, 979.12,
-                                                                                        977.35, 975.58, 973.8, 972.02,
-                                                                                        970.24, 968.45, 966.65,
-                                                                                        964.85, 963.05, 961.24, 959.43,
-                                                                                        957.61, 955.79,
-                                                                                        953.96, 952.13, 950.29, 948.45,
-                                                                                        946.61, 944.76, 942.9,
-                                                                                        941.05, 939.18, 937.31, 935.44,
-                                                                                        933.56, 931.68, 929.8,
-                                                                                        927.9, 926.01, 924.11, 922.2,
-                                                                                        920.29, 918.37, 916.45,
-                                                                                        914.53, 912.6, 910.67, 908.73,
-                                                                                        906.78, 904.83, 902.88,
-                                                                                        900.92, 898.96, 896.99, 895.01,
-                                                                                        893.04, 891.05,
-                                                                                        889.06, 887.07, 885.07, 883.07,
-                                                                                        881.06, 879.05,
-                                                                                        877.03, 875.0, 872.98, 870.94,
-                                                                                        868.9, 866.86, 864.81,
-                                                                                        862.76, 860.7, 858.63, 856.56,
-                                                                                        854.49, 852.41, 850.33,
-                                                                                        848.23, 846.14, 844.04, 841.93,
-                                                                                        839.82, 837.71,
-                                                                                        835.58, 833.46, 831.32, 829.19,
-                                                                                        827.04, 824.89,
-                                                                                        822.74, 820.58, 818.42, 816.25,
-                                                                                        814.07, 811.89, 809.7,
-                                                                                        807.51, 805.32, 803.11, 800.9,
-                                                                                        798.69, 796.47, 794.25,
-                                                                                        792.02, 789.78, 787.54, 785.29,
-                                                                                        783.04, 780.78,
-                                                                                        778.52, 776.25, 773.97, 771.69,
-                                                                                        769.4, 767.11, 764.81,
-                                                                                        762.51, 760.2, 757.88, 755.56,
-                                                                                        753.23, 750.9, 748.56,
-                                                                                        746.22, 743.87, 741.51, 739.15,
-                                                                                        736.78, 734.41,
-                                                                                        732.03, 729.64, 727.25, 724.85,
-                                                                                        722.45, 720.04,
-                                                                                        717.62, 715.2, 712.77, 710.34,
-                                                                                        707.9, 705.45, 703.0,
-                                                                                        700.54, 698.07, 695.6, 693.13,
-                                                                                        690.64, 688.15, 685.66,
-                                                                                        683.16, 680.65, 678.13, 675.61,
-                                                                                        673.09, 670.55,
-                                                                                        668.01, 665.47, 662.91, 660.36,
-                                                                                        657.79, 655.22,
-                                                                                        652.64, 650.06, 647.47, 644.87,
-                                                                                        642.26, 639.65,
-                                                                                        637.04, 634.41, 631.78, 629.15,
-                                                                                        626.5, 623.85, 621.2,
-                                                                                        618.53, 615.87, 613.19, 610.51,
-                                                                                        607.82, 605.12,
-                                                                                        602.42, 599.71, 596.99, 594.27,
-                                                                                        591.54, 588.8, 586.05,
-                                                                                        583.3, 580.55, 577.78, 575.01,
-                                                                                        572.23, 569.45, 566.65,
-                                                                                        563.85, 561.05, 558.23, 555.41,
-                                                                                        552.59, 549.75,
-                                                                                        546.91, 544.06, 541.2, 538.34,
-                                                                                        535.47, 532.59, 529.71,
-                                                                                        526.82, 523.92, 521.01, 518.1,
-                                                                                        515.18, 512.25, 509.31,
-                                                                                        506.37, 503.42, 500.46, 497.5,
-                                                                                        494.53, 491.55, 488.56,
-                                                                                        485.57, 482.56, 479.55, 476.54,
-                                                                                        473.51, 470.48,
-                                                                                        467.44, 464.39, 461.34, 458.27,
-                                                                                        455.2, 452.13, 449.04,
-                                                                                        445.95, 442.85, 439.74, 436.62,
-                                                                                        433.5, 430.36, 427.22,
-                                                                                        424.08, 420.92, 417.76, 414.58,
-                                                                                        411.4, 408.22, 405.02,
-                                                                                        401.82, 398.61, 395.39, 392.16,
-                                                                                        388.92, 385.68,
-                                                                                        382.43, 379.17, 375.9, 372.62,
-                                                                                        369.34, 366.05, 362.75,
-                                                                                        359.44, 356.12, 352.79, 349.46,
-                                                                                        346.12, 342.77,
-                                                                                        339.41, 336.04, 332.66, 329.28,
-                                                                                        325.89, 322.49,
-                                                                                        319.08, 315.66, 312.23, 308.79,
-                                                                                        305.35, 301.9, 298.44,
-                                                                                        294.97, 291.49, 288.0, 284.5,
-                                                                                        281.0, 277.49, 273.96,
-                                                                                        270.43, 266.89, 263.34, 259.79,
-                                                                                        256.22, 252.64,
-                                                                                        249.06, 245.47, 241.86, 238.25,
-                                                                                        234.63, 231.0, 227.36,
-                                                                                        223.72, 220.06, 216.39, 212.72,
-                                                                                        209.04, 205.34,
-                                                                                        201.64, 197.93, 194.21, 190.48,
-                                                                                        186.74, 182.99,
-                                                                                        179.23, 175.46, 171.68, 167.9,
-                                                                                        164.1, 160.29, 156.48,
-                                                                                        152.65, 148.82, 144.97, 141.12,
-                                                                                        137.26, 133.38, 129.5,
-                                                                                        125.61, 121.71, 117.8, 113.87,
-                                                                                        109.94, 106.0, 102.05,
-                                                                                        98.09, 94.12, 90.14, 86.15,
-                                                                                        82.15, 78.14, 74.12,
-                                                                                        70.09, 66.04, 61.99, 57.93,
-                                                                                        53.86, 49.78, 45.69,
-                                                                                        41.59, 37.47, 33.35, 29.22,
-                                                                                        25.08, 20.92, 16.76,
-                                                                                        12.59, 8.4, 4.21]}]
-    mortgage_date_data = ['2022-10-01', '2022-11-01', '2022-12-01', '2023-01-01', '2023-02-01', '2023-03-01',
-                          '2023-04-01', '2023-05-01', '2023-06-01', '2023-07-01', '2023-08-01', '2023-09-01',
-                          '2023-10-01', '2023-11-01', '2023-12-01', '2024-01-01', '2024-02-01', '2024-03-01',
-                          '2024-04-01', '2024-05-01', '2024-06-01', '2024-07-01', '2024-08-01', '2024-09-01',
-                          '2024-10-01', '2024-11-01', '2024-12-01', '2025-01-01', '2025-02-01', '2025-03-01',
-                          '2025-04-01', '2025-05-01', '2025-06-01', '2025-07-01', '2025-08-01', '2025-09-01',
-                          '2025-10-01', '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01', '2026-03-01',
-                          '2026-04-01', '2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01',
-                          '2026-10-01', '2026-11-01', '2026-12-01', '2027-01-01', '2027-02-01', '2027-03-01',
-                          '2027-04-01', '2027-05-01', '2027-06-01', '2027-07-01', '2027-08-01', '2027-09-01',
-                          '2027-10-01', '2027-11-01', '2027-12-01', '2028-01-01', '2028-02-01', '2028-03-01',
-                          '2028-04-01', '2028-05-01', '2028-06-01', '2028-07-01', '2028-08-01', '2028-09-01',
-                          '2028-10-01', '2028-11-01', '2028-12-01', '2029-01-01', '2029-02-01', '2029-03-01',
-                          '2029-04-01', '2029-05-01', '2029-06-01', '2029-07-01', '2029-08-01', '2029-09-01',
-                          '2029-10-01', '2029-11-01', '2029-12-01', '2030-01-01', '2030-02-01', '2030-03-01',
-                          '2030-04-01', '2030-05-01', '2030-06-01', '2030-07-01', '2030-08-01', '2030-09-01',
-                          '2030-10-01', '2030-11-01', '2030-12-01', '2031-01-01', '2031-02-01', '2031-03-01',
-                          '2031-04-01', '2031-05-01', '2031-06-01', '2031-07-01', '2031-08-01', '2031-09-01',
-                          '2031-10-01', '2031-11-01', '2031-12-01', '2032-01-01', '2032-02-01', '2032-03-01',
-                          '2032-04-01', '2032-05-01', '2032-06-01', '2032-07-01', '2032-08-01', '2032-09-01',
-                          '2032-10-01', '2032-11-01', '2032-12-01', '2033-01-01', '2033-02-01', '2033-03-01',
-                          '2033-04-01', '2033-05-01', '2033-06-01', '2033-07-01', '2033-08-01', '2033-09-01',
-                          '2033-10-01', '2033-11-01', '2033-12-01', '2034-01-01', '2034-02-01', '2034-03-01',
-                          '2034-04-01', '2034-05-01', '2034-06-01', '2034-07-01', '2034-08-01', '2034-09-01',
-                          '2034-10-01', '2034-11-01', '2034-12-01', '2035-01-01', '2035-02-01', '2035-03-01',
-                          '2035-04-01', '2035-05-01', '2035-06-01', '2035-07-01', '2035-08-01', '2035-09-01',
-                          '2035-10-01', '2035-11-01', '2035-12-01', '2036-01-01', '2036-02-01', '2036-03-01',
-                          '2036-04-01', '2036-05-01', '2036-06-01', '2036-07-01', '2036-08-01', '2036-09-01',
-                          '2036-10-01', '2036-11-01', '2036-12-01', '2037-01-01', '2037-02-01', '2037-03-01',
-                          '2037-04-01', '2037-05-01', '2037-06-01', '2037-07-01', '2037-08-01', '2037-09-01',
-                          '2037-10-01', '2037-11-01', '2037-12-01', '2038-01-01', '2038-02-01', '2038-03-01',
-                          '2038-04-01', '2038-05-01', '2038-06-01', '2038-07-01', '2038-08-01', '2038-09-01',
-                          '2038-10-01', '2038-11-01', '2038-12-01', '2039-01-01', '2039-02-01', '2039-03-01',
-                          '2039-04-01', '2039-05-01', '2039-06-01', '2039-07-01', '2039-08-01', '2039-09-01',
-                          '2039-10-01', '2039-11-01', '2039-12-01', '2040-01-01', '2040-02-01', '2040-03-01',
-                          '2040-04-01', '2040-05-01', '2040-06-01', '2040-07-01', '2040-08-01', '2040-09-01',
-                          '2040-10-01', '2040-11-01', '2040-12-01', '2041-01-01', '2041-02-01', '2041-03-01',
-                          '2041-04-01', '2041-05-01', '2041-06-01', '2041-07-01', '2041-08-01', '2041-09-01',
-                          '2041-10-01', '2041-11-01', '2041-12-01', '2042-01-01', '2042-02-01', '2042-03-01',
-                          '2042-04-01', '2042-05-01', '2042-06-01', '2042-07-01', '2042-08-01', '2042-09-01',
-                          '2042-10-01', '2042-11-01', '2042-12-01', '2043-01-01', '2043-02-01', '2043-03-01',
-                          '2043-04-01', '2043-05-01', '2043-06-01', '2043-07-01', '2043-08-01', '2043-09-01',
-                          '2043-10-01', '2043-11-01', '2043-12-01', '2044-01-01', '2044-02-01', '2044-03-01',
-                          '2044-04-01', '2044-05-01', '2044-06-01', '2044-07-01', '2044-08-01', '2044-09-01',
-                          '2044-10-01', '2044-11-01', '2044-12-01', '2045-01-01', '2045-02-01', '2045-03-01',
-                          '2045-04-01', '2045-05-01', '2045-06-01', '2045-07-01', '2045-08-01', '2045-09-01',
-                          '2045-10-01', '2045-11-01', '2045-12-01', '2046-01-01', '2046-02-01', '2046-03-01',
-                          '2046-04-01', '2046-05-01', '2046-06-01', '2046-07-01', '2046-08-01', '2046-09-01',
-                          '2046-10-01', '2046-11-01', '2046-12-01', '2047-01-01', '2047-02-01', '2047-03-01',
-                          '2047-04-01', '2047-05-01', '2047-06-01', '2047-07-01', '2047-08-01', '2047-09-01',
-                          '2047-10-01', '2047-11-01', '2047-12-01', '2048-01-01', '2048-02-01', '2048-03-01',
-                          '2048-04-01', '2048-05-01', '2048-06-01', '2048-07-01', '2048-08-01', '2048-09-01',
-                          '2048-10-01', '2048-11-01', '2048-12-01', '2049-01-01', '2049-02-01', '2049-03-01',
-                          '2049-04-01', '2049-05-01', '2049-06-01', '2049-07-01', '2049-08-01', '2049-09-01',
-                          '2049-10-01', '2049-11-01', '2049-12-01', '2050-01-01', '2050-02-01', '2050-03-01',
-                          '2050-04-01', '2050-05-01', '2050-06-01', '2050-07-01', '2050-08-01', '2050-09-01',
-                          '2050-10-01', '2050-11-01', '2050-12-01', '2051-01-01', '2051-02-01', '2051-03-01',
-                          '2051-04-01', '2051-05-01', '2051-06-01', '2051-07-01', '2051-08-01', '2051-09-01',
-                          '2051-10-01', '2051-11-01', '2051-12-01', '2052-01-01', '2052-02-01', '2052-03-01',
-                          '2052-04-01', '2052-05-01', '2052-06-01', '2052-07-01', '2052-08-01', '2052-09-01']
     context = {
-        'cash_on_cash_return_data': cash_on_cash_return_data,
-        'projection_key': projection_key,
-        'return_on_investment_data': return_on_investment_data,
-        'debt_cov_ratio_data': debt_cov_ratio_data,
-        'return_investment_data': return_investment_data,
-        'property_expense_data': property_expense_data,
-        'mortgage_date_data': mortgage_date_data,
-        'mortgage_graph_data': mortgage_graph_data}
+        'cash_on_cash_return_data': SAMPLE_CASH_ON_CASH_RETURN_DATA,
+        'projection_key': SAMPLE_PROJECTION_KEY,
+        'return_on_investment_data': SAMPLE_RETURN_ON_INVESTMENT_DATA,
+        'debt_cov_ratio_data': SAMPLE_DEBT_COV_RATIO_DATA,
+        'return_investment_data': SAMPLE_RETURN_INVESTMENT_DATA,
+        'property_expense_data': SAMPLE_PROPERTY_EXPENSE_DATA,
+        'mortgage_date_data': SAMPLE_MORTGAGE_DATE_DATA,
+        'mortgage_graph_data': SAMPLE_MORTGAGE_GRAPH_DATA}
 
     return render(request, 'rental_prop_sample_page.html', context=context)
 
