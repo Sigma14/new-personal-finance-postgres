@@ -11,6 +11,7 @@ from io import BytesIO
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 import requests
+from decouple import config
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import authenticate, login, logout
@@ -52,10 +53,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .constants import category_icons
 
-# To-Do - remove api key
-wordpress_api_key = "YWxoyNoKNBmPmXy413m3jxYhTZ"
-
-# Move these dictionaries and lists to constant.py 
+# Move these dictionaries and lists to constant.py
 currency_dict = {'$': "US Dollar ($)", '€': 'Euro (€)', '₹': 'Indian rupee (₹)', '£': 'British Pound (£)', 'CAD': 'Canadian Dollar ($)'}
 scenario_dict = {'best_case': "Best Case Scenario Purchase Price", 'likely_case': 'Likely Case Scenario Purchase Price',
                  'worst_case': 'Worst Case Scenario Purchase Price'}
@@ -77,20 +75,18 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 
 # To-Do - Remove api creds
+PLAID_API_KEY = json.loads(config('PLAID_API_KEY'))
 configuration = plaid.Configuration(
     host=plaid.Environment.Sandbox,
-    api_key={
-        'clientId': "628518dd9002d30018305066",
-        'secret': "e14271c91cbc26e38782ed74bfa0cf",
-    }
+    api_key= PLAID_API_KEY
 )
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
 from django.utils.translation import gettext as _
 
-wordpress_domain = "https://simplefinancial.org"
-wordpress_api_key = "F4ARzxSFjQpZxqjt5jiJn7HlXqMu23Y"
+wordpress_domain = config('WORDPRESS_DOMAIN')
+wordpress_api_key = config('WORDPRESS_API_KEY')
 
 
 @ensure_csrf_cookie

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'rh$a_#87-yqqj%!oqn+)s(_hfet)*$)lgo=(bcve+e@om1dhf6'
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 mongodb_host = os.environ.get("NOSQL_HOST") or "localhost"
 # SECURITY WARNING: don't run with debug turned on in production!
