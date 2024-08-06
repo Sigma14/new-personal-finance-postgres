@@ -54,7 +54,7 @@ SAMPLE_RETURN_ON_INVESTMENT_DATA = [
         ]
     }
 ]
-
+# To-do same dtype
 SAMPLE_DEBT_COV_RATIO_DATA = [
     {
         'name': 'Debt Service Coverage Ratio (%)',
@@ -62,8 +62,8 @@ SAMPLE_DEBT_COV_RATIO_DATA = [
             1.49, 1.52, 1.55, 1.58, 1.62, 1.65,
             1.68, 1.71, 1.75, 1.78, 1.82, 1.86,
             1.89, 1.93, 1.97, 2.01, 2.05, 2.09,
-            2.13, 2.17, 2.22, 2.26, 2.31, 2.35, 2.4,
-            2.45, 2.5, 2.55, 2.6, 2.65
+            2.13, 2.17, 2.22, 2.26, 2.31, 2.35,
+            2.4, 2.45, 2.5, 2.55, 2.6, 2.65
         ]
     }
 ]
@@ -359,3 +359,7 @@ SAMPLE_MORTGAGE_DATE_DATA = [
     '2051-12-01', '2052-01-01', '2052-02-01', '2052-03-01', '2052-04-01',
     '2052-05-01', '2052-06-01', '2052-07-01', '2052-08-01', '2052-09-01'
 ]
+
+# Sample Property Page Constants
+GRAPH_LABELS = ['Total Open Invoices', 'Overdue', 'Partially Paid', 'Fully Paid']
+GRAPH_VALUES = [11500.0, 0, 0, 600.0]
