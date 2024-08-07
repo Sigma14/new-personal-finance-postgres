@@ -4,77 +4,12 @@ from django.urls import reverse
 from djongo import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from .constants import (
+    MORTGAGE_TYPES, INTEREST_PERIODS, BUDGET_ACCOUNT_TYPES, CURRENCIES,
+    BUDGET_PERIODS, PROPERTY_TYPE, MAINTENANCE_CATEGORY, MAINTENANCE_STATUS
+)
 # Create your models here.
-# To-do - Move to constants
-TYPES = (
-    ("Debt", 'Debt'),
-    ("Loan", 'Loan'),
-    ("Mortgage", 'Mortgage'),
-)
 
-BUDGET_ACCOUNT_TYPES = (
-    ("Checking", 'Checking'),
-    ("Savings", 'Savings'),
-    ("Cash", 'Cash'),
-    ("Credit Card", 'Credit Card'),
-    ("Line of Credit", 'Line of Credit'),
-    ("Emergency Fund", 'Emergency Fund'),
-    ("Mortgage", 'Mortgage'),
-    ("Loan", 'Loan'),
-    ("Student Loan", 'Student Loan'),
-    ("Personal Loan", 'Personal Loan'),
-    ("Medical Debt", 'Medical Debt'),
-    ("Other Debt", 'Other Debt'),
-    ("Asset", 'Asset'),
-    ("Liability", 'Liability'),
-)
-
-PERIODS = (
-    ("Per day", 'Per day'),
-    ("Per month", 'Per month'),
-    ("Per year", 'Per year'),
-)
-
-CURRENCIES = (
-    ("$", 'US Dollar ($)'),
-    ("€", 'Euro (€)'),
-    ("₹", 'Indian rupee (₹)'),
-    ("£", 'British Pound (£)'),
-    ("CAD", 'Canadian Dollar ($)'),
-)
-
-BUDGET_PERIODS = (
-    ("Daily", 'Daily'),
-    ("Weekly", 'Weekly'),
-    ("Monthly", 'Monthly'),
-    ("Quarterly", 'Quarterly'),
-    ("Yearly", 'Yearly'),
-)
-
-PROPERTY_TYPE = (
-    ("Apartment", 'Apartment'),
-    ("Commercial", 'Commercial'),
-    ("Condo", 'Condo'),
-    ("Duplex", 'Duplex'),
-    ("House", 'House'),
-    ("Mixed-Use", 'Mixed-Use'),
-    ("Other", 'Other'),
-)
-
-MAINTENANCE_CATEGORY = (
-    ("A/C", 'A/C'),
-    ("Appliance ", 'Appliance '),
-    ("Electrical", 'Electrical'),
-    ("Heat", 'Heat'),
-    ("Kitchen", 'Kitchen'),
-    ("Plumbing", 'Plumbing'),
-    ("Other", 'Other'),
-)
-
-MAINTENANCE_STATUS = (
-    ("Unresolved", 'Unresolved'),
-    ("Resolved", 'Resolved'),)
 
 class UserBudgets(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -86,11 +21,14 @@ class UserBudgets(models.Model):
         return str(self.name)
 
 # Create a default budget for new user
+
+
 @receiver(post_save, sender=User)
 def add_user_budget(sender, instance, created, **kwargs):
     if created:
         UserBudgets.objects.create(
                 name="Default Budget", user=instance)
+
 
 class Property(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='property_user')
@@ -280,8 +218,8 @@ class Account(models.Model):
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
     interest_rate = models.FloatField(verbose_name='Interest rate', default=0.00)
     include_net_worth = models.BooleanField(default=True, blank=True, null=True)
-    liability_type = models.CharField(max_length=10, choices=TYPES, blank=True, null=True)
-    interest_period = models.CharField(max_length=10, choices=PERIODS, blank=True, null=True)
+    liability_type = models.CharField(max_length=10, choices=MORTGAGE_TYPES, blank=True, null=True)
+    interest_period = models.CharField(max_length=10, choices=INTEREST_PERIODS, blank=True, null=True)
     mortgage_date = models.DateField(blank=True, null=True)
     mortgage_monthly_payment = models.CharField(max_length=10, blank=True, null=True)
     mortgage_year = models.CharField(max_length=10, blank=True, null=True)
@@ -302,7 +240,7 @@ class Account(models.Model):
 
 class BillDetail(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE,null=True)
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_details_account', blank=True,
                                 null=True)
@@ -320,7 +258,7 @@ class BillDetail(models.Model):
 
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE,null=True)
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='bill_account', blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)

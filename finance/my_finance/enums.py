@@ -98,6 +98,7 @@ class DateFormats(Enum):
         - MON_YYYY: Short month name-Year format (e.g., Aug-2024)
         - MON_DD_YYYY: Short month name Day, Year format (e.g., Aug 06, 2024)
         - DD_MM_YYYY: Day-Month-Year format (e.g., 06-08-2024)
+        - YYYY_MM: Year-Month format (e.g., 2024-08)
     """
     YYYY_MM_DD = "%Y-%m-%d"
     MONTH_DD_YYYY = "%B %d, %Y"
@@ -105,3 +106,5 @@ class DateFormats(Enum):
     MON_YYYY = "%b-%Y"
     MON_DD_YYYY = "%b %d, %Y"
     DD_MM_YYYY = "%d-%m-%Y"
+    YYYY_MM = "%Y-%m"
+

@@ -7,41 +7,21 @@ from itertools import chain
 from collections import OrderedDict
 from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
     Income, IncomeDetail, Budget, Tag
-
-# To-do -  move to constants 
-sub_category_suggested_list = {
-    "Entertainment": ["Concerts", "Movies", "Music", "Games", "Hobbies"],
-    "Food": ["Groceries", "Eating Out"],
-    "Healthcare": ["Doctor", "Fitness", "Dentist", "Pharmacy", "Health"],
-    "Housing": ["Mortgage", "Rent", "Hoa Fees", "Home Improvement"],
-    "Personal Care": ["Hair", "Shopping", "Electronic Items", "Beauty", "Spa", "Clothes"],
-    "Transportation": ["Ride Share", "Parking", "Public Transportation", "Fuel"],
-    "Bills & Subscriptions": ["Electricity", "Water", "Cellphone", "Internet",
-              "Spotify Subscription", "Netflix Spotify Subscription",
-              "Amazon Prime Spotify Subscription"],
-    "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
-    "Income": ["Job", "Business", "Bonus"],
-    "Non-Monthly":["Taxes","Car Maintenance","Medical Expenses","Insurance","Gifts","Holidays","Insurance"]
-}
+from .enums import (
+    DateFormats, BudgetPeriods
+)
+from .constants import (
+    GROUP_LIST, CATEGORIES_DICT, TEMPLATE_NAME_LIST
+)
 
 
 def create_category_group():
-    group_list = ["Entertainment", "Food", "Healthcare", "Housing", "Personal Care", "Transportation"]
-
-    for group in group_list:
+    for group in GROUP_LIST:
         SuggestiveCategory.objects.create(name=group)
 
 
 def create_categories(user):
-    categories_dict = {"Bills & Subscriptions": ['Electricity', 'Water', 'Cellphone'],
-                       "Goals": ["Phone", "Vacation", "Education", "New Car", "New House", "Electronic", "Other"],
-                       "Funds": [],
-                       "Food": ["Groceries", "Eating Out"],
-                       "Personal Care": ["Electronic Items", "Clothes"],
-                       "Income": ["Job", "Business", "Bonus"],
-                       "Non-Monthly": ["Taxes", "Insurance"]
-                       }
-    for category, sub_category in categories_dict.items():
+    for category, sub_category in CATEGORIES_DICT.items():
         category = Category.objects.create(user=user, name=category)
         for sub in sub_category:
             SubCategory.objects.create(category=category, name=sub)
@@ -131,13 +111,16 @@ def save_transaction(user, payee, amount, remaining_amount, transaction_date, ca
 
 def start_end_date(date_value, period):
     today_date = datetime.today().date()
-    if period == "Yearly":
+    if period == BudgetPeriods.YEARLY.value:
         start_year_date = f"01-01-{date_value.year}"
         end_year_date = f"31-12-{date_value.year}"
-        return datetime.strptime(start_year_date, "%d-%m-%Y").date(), datetime.strptime(end_year_date,
-                                                                                        "%d-%m-%Y").date()
+        return datetime.strptime(
+            start_year_date, DateFormats.DD_MM_YYYY.value
+        ).date(), datetime.strptime(
+            end_year_date, DateFormats.DD_MM_YYYY.value
+        ).date()
 
-    if period == "Quarterly":
+    if period == BudgetPeriods.QUARTERLY.value:
         current_date = datetime.now()
         upcoming_quarter = int((current_date.month - 1) / 3 + 1)
         if upcoming_quarter == 4:
@@ -147,12 +130,12 @@ def start_end_date(date_value, period):
         quarter_value = upcoming_quarter_date.date() - timedelta(days=88)
         return upcoming_quarter_date.date(), quarter_value.replace(day=1)
 
-    if period == "Monthly":
+    if period == BudgetPeriods.MONTHLY.value:
         start_date = date_value.replace(day=1)
         end_date = date_value.replace(day=calendar.monthrange(date_value.year, date_value.month)[1])
         return start_date, end_date
 
-    if period == "Weekly":
+    if period == BudgetPeriods.WEEKLY.value:
         week_start = today_date - timedelta(days=today_date.weekday())
         week_end = week_start + timedelta(days=6)
         return week_start, week_end
@@ -162,19 +145,19 @@ def start_end_date(date_value, period):
 
 def get_period_date(start_date, period):
 
-    if period == "Daily":
+    if period == BudgetPeriods.DAILY.value:
         period_date = start_date + relativedelta(days=1)
 
-    if period == "Weekly":
+    if period == BudgetPeriods.WEEKLY.value:
         period_date = start_date + relativedelta(weeks=1)
 
-    if period == "Monthly":
+    if period == BudgetPeriods.MONTHLY.value:
         period_date = start_date + relativedelta(months=1)
 
-    if period == "Quarterly":
+    if period == BudgetPeriods.QUARTERLY.value:
         period_date = start_date + relativedelta(months=3)
 
-    if period == "Yearly":
+    if period == BudgetPeriods.YEARLY.value:
         period_date = start_date + relativedelta(years=1)
 
     return period_date
@@ -196,7 +179,7 @@ def check_bill_is_due():
         auto_bill = bill_detail_obj.auto_bill
         auto_pay = bill_detail_obj.auto_pay
         bill_date = bill_detail_obj.date
-         # Calculate the next month and year
+        # Calculate the next month and year
         next_month = (today_date.month % 12) + 1
         next_year = today_date.year if next_month != 1 else today_date.year + 1
 
@@ -240,7 +223,6 @@ def request_bill():
     while True:
         check_bill_is_due()
         time.sleep(5)
-
 
 
 def create_bill_request():
@@ -390,11 +372,13 @@ def check_budget_date():
         amount = budget.amount
         budget_created_date = budget.budget_start_date
         auto_budget = budget.auto_budget
-        start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+        start_month_date, end_month_date = start_end_date(
+            budget_start_date, BudgetPeriods.MONTHLY.value
+        )
         print("budget_period=======>", budget_period)
         print("budget_name=======>", budget_name)
         budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
-        if budget_period == 'Quarterly':
+        if budget_period == BudgetPeriods.QUARTERLY.value:
             for month_value in range(3):
                 if month_value == 2:
                     budget_status = False
@@ -404,9 +388,11 @@ def check_budget_date():
                              currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
                              budget_created_date, subcategory, None, budget_status)
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(
+                    start_month_date, BudgetPeriods.MONTHLY.value
+                )
 
-        if budget_period == 'Yearly':
+        if budget_period == BudgetPeriods.YEARLY.value:
             for month_value in range(12):
                 if month_value == 11:
                     budget_status = False
@@ -416,9 +402,13 @@ def check_budget_date():
                              currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
                              budget_created_date, subcategory, None, budget_status)
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(
+                    start_month_date, BudgetPeriods.MONTHLY.value
+                )
 
-        if budget_period == 'Daily' or budget_period == 'Weekly' or budget_period == 'Monthly':
+        if budget_period in (
+                BudgetPeriods.DAILY.value, BudgetPeriods.WEEKLY.value, BudgetPeriods.MONTHLY.value
+        ):
             save_budgets(budget.user, start_month_date, end_month_date, budget_name, budget_period,
                          currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
                          budget_created_date, subcategory)
@@ -470,61 +460,68 @@ def get_template_budget():
     # Generate a list of all dates in the current month
     dates = [datetime(year, month, day) for day in range(1, num_days + 1)]
     template_end_date = dates[0]
-    template_name_list = ['Hobbies', 'Clothes', 'Study', 'Entertainment', 'Health']
     tem_daily_amount = 0
     tem_daily_spent = 0
     tem_weekly_amount = 0
     tem_weekly_spent = 0
 
-    template_dict = {'Yearly': [], 'Quarterly': [], 'Monthly': [],
-                     'Weekly': [['Entertainment', 500.0, 0.0, 500.0, 20]], 'Daily': [['Health', 500.0, 0.0, 500.0, 10]]}
+    template_dict = {
+        BudgetPeriods.YEARLY.value: [],
+        BudgetPeriods.QUARTERLY.value: [],
+        BudgetPeriods.MONTHLY.value: [],
+        BudgetPeriods.WEEKLY.value: [
+            ['Entertainment', 500.0, 0.0, 500.0, 20]
+        ],
+        BudgetPeriods.DAILY.value: [
+            ['Health', 500.0, 0.0, 500.0, 10]
+        ]}
     for tem_date in dates:
         if tem_date == template_end_date:
-            template_end_date = get_period_date(tem_date, "Weekly")
-            temp_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            temp_end_date = datetime.strftime(template_end_date - relativedelta(days=1), "%b %d, %Y")
-            template_dict['Weekly'].append(
-                ['Entertainment', 50.0, 30.0, 20.0, 1973, 'Weekly', temp_start_date, temp_end_date])
+            template_end_date = get_period_date(tem_date, BudgetPeriods.WEEKLY.value)
+            temp_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            temp_end_date = datetime.strftime(template_end_date - relativedelta(days=1), DateFormats.MON_DD_YYYY.value)
+            template_dict[BudgetPeriods.WEEKLY.value].append(
+                ['Entertainment', 50.0, 30.0, 20.0, 1973, BudgetPeriods.WEEKLY.value, temp_start_date, temp_end_date])
             tem_weekly_amount += 50.0
             tem_weekly_spent += 30.0
 
-        if not template_dict['Monthly'] or not template_dict['Quarterly'] or not template_dict['Quarterly']:
+        if not template_dict[BudgetPeriods.MONTHLY.value] or not template_dict[BudgetPeriods.QUARTERLY.value]:
             temp_month_end_date = datetime.strftime(
-                get_period_date(tem_date, "Monthly") - relativedelta(days=1), "%b %d, %Y")
-            temp_month_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Monthly'].append(
-                ['Hobbies', 150.0, 100.0, 50.0, 1979, 'Monthly', temp_month_start_date, temp_month_end_date])
+                get_period_date(tem_date, BudgetPeriods.MONTHLY.value) - relativedelta(days=1), DateFormats.MON_DD_YYYY.value)
+            temp_month_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            template_dict[BudgetPeriods.MONTHLY.value].append(
+                ['Hobbies', 150.0, 100.0, 50.0, 1979, BudgetPeriods.MONTHLY.value, temp_month_start_date, temp_month_end_date])
             temp_quart_end_date = datetime.strftime(
-                get_period_date(tem_date, "Quarterly") - relativedelta(days=1), "%b %d, %Y")
-            temp_quart_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Quarterly'].append(
-                ['Clothes', 200.0, 50.0, 150.0, 1979, 'Quarterly', temp_quart_start_date, temp_quart_end_date])
-            temp_year_end_date = datetime.strftime(get_period_date(tem_date, "Yearly") - relativedelta(days=1),
-                                                   "%b %d, %Y")
-            temp_year_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Yearly'].append(
-                ['Study', 2500.0, 1000.0, 1500.0, 1979, 'Yearly', temp_year_start_date, temp_year_end_date])
+                get_period_date(tem_date, BudgetPeriods.QUARTERLY.value) - relativedelta(days=1), DateFormats.MON_DD_YYYY.value)
+            temp_quart_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            template_dict[BudgetPeriods.QUARTERLY.value].append(
+                ['Clothes', 200.0, 50.0, 150.0, 1979, BudgetPeriods.QUARTERLY.value, temp_quart_start_date, temp_quart_end_date])
+            temp_year_end_date = datetime.strftime(get_period_date(tem_date, BudgetPeriods.YEARLY.value) - relativedelta(days=1),
+                                                   DateFormats.MON_DD_YYYY.value)
+            temp_year_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            template_dict[BudgetPeriods.YEARLY.value].append(
+                ['Study', 2500.0, 1000.0, 1500.0, 1979, BudgetPeriods.YEARLY.value, temp_year_start_date, temp_year_end_date])
 
-        template_dict['Daily'].append(
-            ['Health', 50.0, 40.0, 10.0, 1973, 'Daily', datetime.strftime(tem_date, "%b %d, %Y"),
-             datetime.strftime(tem_date, "%b %d, %Y")])
+        template_dict[BudgetPeriods.DAILY.value].append(
+            ['Health', 50.0, 40.0, 10.0, 1973, BudgetPeriods.DAILY.value, datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value),
+             datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)])
         tem_daily_amount += 50.0
         tem_daily_spent += 40.0
 
-    template_dict['Daily'][0][1] = tem_daily_amount
-    template_dict['Daily'][0][2] = tem_daily_spent
-    template_dict['Daily'][0][3] = tem_daily_amount - tem_daily_spent
-    template_dict['Weekly'][0][1] = tem_weekly_amount
-    template_dict['Weekly'][0][2] = tem_weekly_spent
-    template_dict['Weekly'][0][3] = tem_weekly_amount - tem_weekly_spent
+    template_dict[BudgetPeriods.DAILY.value][0][1] = tem_daily_amount
+    template_dict[BudgetPeriods.DAILY.value][0][2] = tem_daily_spent
+    template_dict[BudgetPeriods.DAILY.value][0][3] = tem_daily_amount - tem_daily_spent
+    template_dict[BudgetPeriods.WEEKLY.value][0][1] = tem_weekly_amount
+    template_dict[BudgetPeriods.WEEKLY.value][0][2] = tem_weekly_spent
+    template_dict[BudgetPeriods.WEEKLY.value][0][3] = tem_weekly_amount - tem_weekly_spent
     total_spent = tem_daily_spent + tem_weekly_spent + 100.0 + 50.0 + 1000.0
     total_amount = tem_daily_amount + tem_weekly_amount + 150.0 + 200.0 + 2500.0
     total_left = total_amount - total_spent
     template_values = [total_spent, total_left]
     template_graph_data = [{'name': 'Spent', 'data': [1000.0, 50.0, 100.0, tem_weekly_spent, tem_daily_spent]},
-                           {'name': 'Left', 'data': [1500.0, 150.0, 50.0, template_dict['Weekly'][0][3], template_dict['Daily'][0][3]]},
+                           {'name': 'Left', 'data': [1500.0, 150.0, 50.0, template_dict[BudgetPeriods.WEEKLY.value][0][3], template_dict[BudgetPeriods.DAILY.value][0][3]]},
                            {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
-    return template_dict, template_values, template_name_list, template_graph_data
+    return template_dict, template_values, TEMPLATE_NAME_LIST, template_graph_data
 
 
 def get_cmp_diff_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
@@ -559,7 +556,7 @@ def get_cmp_diff_data(budget_names, user_name, month_start, month_end, budget_ba
             budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_earn_amount])
             income_bdgt_names.append(bgt_name)
 
-    return budget_bar_value, budget_graph_value, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, budget_transaction_data_dict, total_bgt_spend_amount,\
+    return budget_bar_value, budget_graph_value, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, budget_transaction_data_dict, total_bgt_spend_amount, \
            total_bgt_earned_amount
 
 
@@ -582,8 +579,9 @@ def get_cmp_data(budget_names, user_name, month_start, month_end, budget_bar_val
     return budget_bar_value, budget_graph_value, budget_transaction_data_dict
 
 def get_list_of_months(user_name, user_budget):
-    '''
-    Generates a list of months in which Bills and Budgets exists'''
+    """
+        Generates a list of months in which Bills and Budgets exists
+    """
     try:
         earliest_budget = Budget.objects.filter(
             user=user_name,
@@ -606,11 +604,15 @@ def get_list_of_months(user_name, user_budget):
         
     except (IndexError, ValueError):
         date_value = datetime.today().date()
-        start, end = start_end_date(date_value, "Monthly")
+        start, end = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
     # Generate the list of unique months
     list_of_months = list(OrderedDict(
-        ((start + timedelta(_)).strftime("%b-%Y"), None) for _ in range((end - start).days + 1)
+        ((start + timedelta(_)).strftime(DateFormats.MON_YYYY.value), None) for _ in range((end - start).days + 1)
     ).keys())
-    
+    # Get the current month-year string
+    current_month_year = datetime.today().date().strftime(DateFormats.MON_YYYY.value)
+    # Check if current month-year exists in the list, and add it if it doesn't
+    if current_month_year not in list_of_months:
+        list_of_months.append(current_month_year)
     return list_of_months

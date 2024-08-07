@@ -6,35 +6,14 @@ from django.contrib.auth.models import User
 from .models import Category, Budget, Bill, Transaction, Goal, Account, MortgageCalculator, Property, AvailableFunds, \
     TemplateBudget, PropertyMaintenance, PropertyExpense, SubCategory, UserBudgets
 
-CURRENCIES = (
-    ("$", 'US Dollar ($)'),
-    ("€", 'Euro (€)'),
-    ("₹", 'Indian rupee (₹)'),
-    ("£", 'British Pound (£)'),
-    ("CAD", 'Canadian Dollar ($)'),
+from .constants import (
+    MORTGAGE_TYPES, INTEREST_PERIODS, CURRENCIES, BUDGET_PERIODS,
+    MAINTENANCE_CATEGORY, MAINTENANCE_STATUS
+)
+from .enums import (
+    AccountTypes
 )
 
-BUDGET_PERIODS = (
-    ("Daily", 'Daily'),
-    ("Weekly", 'Weekly'),
-    ("Monthly", 'Monthly'),
-    ("Quarterly", 'Quarterly'),
-    ("Yearly", 'Yearly'),
-)
-
-MAINTENANCE_CATEGORY = (
-    ("A/C", 'A/C'),
-    ("Appliance ", 'Appliance '),
-    ("Electrical", 'Electrical'),
-    ("Heat", 'Heat'),
-    ("Kitchen", 'Kitchen'),
-    ("Plumbing", 'Plumbing'),
-    ("Other", 'Other'),
-)
-
-MAINTENANCE_STATUS = (
-    ("Unresolved", 'Unresolved'),
-    ("Resolved", 'Resolved'),)
 
 class UserBudgetsForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
@@ -43,7 +22,6 @@ class UserBudgetsForm(forms.ModelForm):
         model = UserBudgets
         exclude = ('user', 'created_at', 'updated_at')
 
-    
 
 class CategoryForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
@@ -171,12 +149,7 @@ class BudgetForm(forms.ModelForm):
                 attrs={'class': 'form-control user_budget',
                 'method_name': 'add_budget'}))
             self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name,
-                                                                                        account_type__in=['Checking',
-                                                                                                          'Savings',
-                                                                                                          'Cash',
-                                                                                                          'Credit Card',
-                                                                                                          'Line of Credit',
-                                                                                                          'Emergency Fund']),
+                                                                                        account_type__in=AccountTypes.list()),
                                                         empty_label="Select Account",
                                                         widget=forms.Select(attrs={'class': 'form-control'}))
         except Exception as msg:
@@ -247,12 +220,7 @@ class TransactionForm(forms.ModelForm):
                                                      widget=forms.Select(attrs={'class': 'form-control'}),
                                                      required=False)
         self.fields['account'] = forms.ModelChoiceField(queryset=Account.objects.filter(user=user_name,
-                                                                                        account_type__in=['Checking',
-                                                                                                          'Savings',
-                                                                                                          'Cash',
-                                                                                                          'Credit Card',
-                                                                                                          'Line of Credit',
-                                                                                                          'Emergency Fund']),
+                                                                                        account_type__in=AccountTypes.list()),
                                                         empty_label="Select Account",
                                                         widget=forms.Select(attrs={'class': 'form-control'}))
 
@@ -285,20 +253,11 @@ class AccountForm(forms.ModelForm):
 
 
 class LiabilityForm(forms.ModelForm):
-    TYPES = (
-        ("Debt", 'Debt'),
-        ("Loan", 'Loan'),
-        ("Mortgage", 'Mortgage'),
-    )
-    PERIODS = (
-        ("Per day", 'Per day'),
-        ("Per month", 'Per month'),
-        ("Per year", 'Per year'),
-    )
+
     include_net_worth = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
     currency = forms.CharField(widget=forms.Select(choices=CURRENCIES, attrs={'class': 'form-control'}))
-    liability_type = forms.CharField(widget=forms.Select(choices=TYPES, attrs={'class': 'form-control'}))
-    interest_period = forms.CharField(widget=forms.Select(choices=PERIODS, attrs={'class': 'form-control'}))
+    liability_type = forms.CharField(widget=forms.Select(choices=MORTGAGE_TYPES, attrs={'class': 'form-control'}))
+    interest_period = forms.CharField(widget=forms.Select(choices=INTEREST_PERIODS, attrs={'class': 'form-control'}))
     lock_check = forms.CharField(widget=forms.CheckboxInput(attrs={'class': 'info'}))
 
     class Meta:

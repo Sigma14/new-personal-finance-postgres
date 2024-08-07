@@ -41,7 +41,7 @@ from finance.settings import stock_app_url
 from .forms import CategoryForm, BudgetForm, BillForm, TransactionForm, AccountForm, TemplateBudgetForm, \
     MortgageForm, LiabilityForm, MaintenanceForm, ExpenseForm, UserBudgetsForm
 from .helper import check_subcategory_exists, save_fund_obj, \
-    sub_category_suggested_list, create_bill_request, check_bill_is_due, save_transaction, save_income, \
+    create_bill_request, check_bill_is_due, save_transaction, save_income, \
     save_income_details, create_income_request, get_period_date, start_end_date, save_budgets, create_budget_request, \
     dict_value_to_list, get_template_budget, get_cmp_diff_data, get_list_of_months
 from .models import Category, Budget, Bill, Transaction, Goal, Account, SuggestiveCategory, Property, \
@@ -65,7 +65,8 @@ from .constants import (
     MONTH_DATE_DICT, SUB_CATEGORY_KEYS, TRANSACTION_KEYS, BUDGET_KEYS,
     BUDGET_LABELS, FUND_KEYS, LOAN_TYPES, MORTGAGE_KEYS, PROPERTY_KEYS,
     MAINTENANCE_KEYS, PROPERTY_EXPENSES_KEYS, INCOME_KEYS, INCOME_LABELS,
-    INVOICE_KEYS
+    INVOICE_KEYS, SUGGESTED_SUB_CATEGORIES, MORTGAGE_ACCOUNT_TYPES,
+    MORTGAGE_KEYWORDS, YEAR_LABELS, PORTFOLIO_CURRENCY
 )
 from .enums import (
     BudgetPeriods, CategoryTypes, AccountTypes, InvoiceStatuses, DateFormats
@@ -925,7 +926,7 @@ def net_worth_cal(account_data, property_data, date_range_list, stock_portfolio_
             balance_graph_dict = {}
             balance_graph_data = []
             date_list = []
-            if data.account_type not in ("Mortgage", "Loan", "Student Loan", "Personal Loan", "Medical Debt", "Other Loan", "Other Debt"):
+            if data.account_type not in MORTGAGE_ACCOUNT_TYPES:
                 if fun_name != "dash_board":
                     overtime_account_data(transaction_data, current_balance, balance_graph_dict, date_list,
                                           balance_graph_data,
@@ -1458,7 +1459,7 @@ class CategoryList(LoginRequiredMixin, ListView):
     template_name = 'category/category_list.html'
 
     def get(self, request, *args, **kwargs):
-        ''' Handles GET request '''
+        """Handles GET request"""
         
         self.object_list = self.get_queryset()
         self.date_value = datetime.datetime.today().date()
@@ -1469,7 +1470,8 @@ class CategoryList(LoginRequiredMixin, ListView):
         return self.render_to_response(self.get_context_data())
 
     def post(self, request, *args, **kwargs):
-        ''' Handles POST request'''
+        """Handles POST request"""
+        # To-do - method type
         if request.method == 'POST':
             self.object_list = self.get_queryset()
             select_period = self.request.POST.get('select_period')
@@ -1483,7 +1485,6 @@ class CategoryList(LoginRequiredMixin, ListView):
                 month_name = "01-" + select_period
                 self.date_value = datetime.datetime.strptime(month_name, DateFormats.DD_MON_YYYY.value).date()
                 
-            
             return self.render_to_response(self.get_context_data())
         else:
             return HttpResponseNotAllowed(['POST'])
@@ -1598,7 +1599,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data['categories_series'] = [{'name': 'Spent', 'data': categories_value}]
         data['category_icons'] = CATEGORY_ICONS
         data['page'] = "category_list"
-        data['transaction_key'] = TRANSACTION_KEYS[-1]
+        data['transaction_key'] = TRANSACTION_KEYS[:-1]
         data['transaction_data'] = category_transaction_data
         data['budget_form'] = budget_form
         data["bank_accounts"] = bank_accounts_dict
@@ -1747,7 +1748,7 @@ def category_group_add(request):
 def subcategory_suggestion(request):
     category_pk = int(request.POST['category_pk'])
     category_obj = Category.objects.get(pk=category_pk)
-    suggestion_list = sub_category_suggested_list[category_obj.name]
+    suggestion_list = SUGGESTED_SUB_CATEGORIES[category_obj.name]
     for name in suggestion_list:
         sub_obj = SubCategory.objects.filter(name=name, category=category_obj)
         if sub_obj:
@@ -1759,7 +1760,7 @@ def subcategory_suggestion(request):
 def subcategory_add(request, category_pk):
     category_obj = Category.objects.get(pk=category_pk)
     try:
-        suggestion_list = sub_category_suggested_list[category_obj.name]
+        suggestion_list = SUGGESTED_SUB_CATEGORIES[category_obj.name]
         for name in suggestion_list:
             sub_obj = SubCategory.objects.filter(name=name, category=category_obj)
             if sub_obj:
@@ -1822,7 +1823,6 @@ def subcategory_list(request):
     if request.method == "POST" and request.is_ajax():
         user = request.user
         category_group = request.POST.get('category_group')
-        print("caategoty_group=====>", category_group)
         try:
             category = Category.objects.get(user=user, pk=category_group)
         # To-Do  Remove bare except
@@ -2437,7 +2437,12 @@ def budgets_page_data(request, budget_page, template_page):
 @login_required(login_url="/login")
 def budget_list(request):
     time.sleep(3)
+    translated_data = {
+        'earned': _('Earned'),
+        'spending': _('Spending')
+    }
     context = budgets_page_data(request, "active", "")
+    context.update({'translated_data': json.dumps(translated_data)})
     return render(request, 'budget/budget_list.html', context=context)
 
 
@@ -3328,8 +3333,6 @@ def compare_different_budget_box(request):
         month_name = "01-" + request.POST['select_period']
         budget1_names = request.POST.getlist('budget1_name')
         budget2_names = request.POST.getlist('budget2_name')
-        date_value = datetime.datetime.strptime(month_name, "%d-%b-%Y").date()
-        current_month = datetime.datetime.strftime(date_value, "%b-%Y")
         date_value = datetime.datetime.strptime(month_name, DateFormats.DD_MON_YYYY.value).date()
         current_month = datetime.datetime.strftime(date_value, DateFormats.MON_YYYY.value)
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
@@ -3536,13 +3539,13 @@ def budget_details(request, pk):
     if request.method == "POST":
         start_date = request.POST['start_date']
         end_date = request.POST['end_date']
-        transaction_data = Transaction.objects.filter(user=user_name, categories=budget_obj.category,
+        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj, categories=budget_obj.category,
                                                       transaction_date__range=(start_date, end_date)).order_by(
             'transaction_date')
     else:
         start_date = False
         end_date = False
-        transaction_data = Transaction.objects.filter(user=user_name, categories=budget_obj.category).order_by(
+        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj, categories=budget_obj.category).order_by(
             'transaction_date')
     context = {
         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
@@ -4326,7 +4329,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         account = account.name
         account_obj, budget_obj = transaction_checks(user_name, transaction_amount, account, bill_name,
                                                      budget_name, cleared_amount, out_flow, transaction_date, user_budget)
-         # For Goals , Add transaction and add the amount to goal allocated amount
+        # For Goals , Add transaction and add the amount to goal allocated amount
         if category_name.name == CategoryTypes.GOALS.value:
             goal_obj = Goal.objects.get(user=user_name, label=budget_obj.category)
             if goal_obj:
@@ -4339,6 +4342,7 @@ class TransactionAdd(LoginRequiredMixin, CreateView):
         obj.cleared = True
         obj.save()
         return super().form_valid(form)
+
 
 class TransactionUpdate(LoginRequiredMixin, UpdateView):
     model = Transaction
@@ -4423,18 +4427,18 @@ class TransactionUpdate(LoginRequiredMixin, UpdateView):
             out_flow = False
 
         cleared_amount = "True"
-        if category_name.name == CategoryTypes.INCOME.value:
-            due_income_id = int(self.request.POST['due_income'])
-            income_obj = IncomeDetail.objects.get(pk=due_income_id)
-            income_obj.credited = True
-            income_obj.save()
-
-        if transaction_obj.categories.category.name == CategoryTypes.INCOME.value != category_name.name:
-            income_obj = IncomeDetail.objects.get(income__user=user_name, income__account=transaction_obj.account,
-                                                  income__sub_category__id=transaction_obj.categories.id,
-                                                  income_date=transaction_obj.transaction_date)
-            income_obj.credited = False
-            income_obj.save()
+        # if category_name.name == CategoryTypes.INCOME.value:
+        #     due_income_id = int(self.request.POST['due_income'])
+        #     income_obj = IncomeDetail.objects.get(pk=due_income_id)
+        #     income_obj.credited = True
+        #     income_obj.save()
+        #
+        # if transaction_obj.categories.category.name == CategoryTypes.INCOME.value != category_name.name:
+        #     income_obj = IncomeDetail.objects.get(income__user=user_name, income__account=transaction_obj.account,
+        #                                           income__sub_category__id=transaction_obj.categories.id,
+        #                                           income_date=transaction_obj.transaction_date)
+        #     income_obj.credited = False
+        #     income_obj.save()
 
         if transaction_obj.categories.category.name == CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value == category_name.name:
             bill_obj = transaction_obj.bill
@@ -5193,7 +5197,7 @@ def loan_add(request):
     category = Category.objects.filter(user=user)
     category_list = []
     for data in category:
-        if "Mortgage" in data.name or "Loan" in data.name or "Mortgages" in data.name or "Loans" in data.name or "Mortgages and Loans" in data.name or "Mortgages & Loans" in data.name:
+        if any(name in data.name for name in MORTGAGE_KEYWORDS):
             category_list.append(data.name)
 
     context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': CURRENCY_DICT,
@@ -5268,7 +5272,7 @@ def loan_update(request, pk):
     category = Category.objects.filter(user=user)
     category_list = []
     for data in category:
-        if "Mortgage" in data.name or "Loan" in data.name or "Mortgages" in data.name or "Loans" in data.name or "Mortgages and Loans" in data.name or "Mortgages & Loans" in data.name:
+        if any(name in data.name for name in MORTGAGE_KEYWORDS):
             category_list.append(data.name)
 
     context = {'category_list': category_list, 'today_date': str(today_date), 'currency_dict': CURRENCY_DICT,
@@ -6330,7 +6334,6 @@ def future_net_worth_calculator(request):
         fv = round(current_net_worth * interest_rate, 0)
         future_list.append(fv)
 
-    categories_name = ['5 Year', '10 Year', '25 Year']
     categories_series = [{'name': 'Net Worth', 'data': future_list}]
     context = {
         'current_net_worth': current_net_worth,
@@ -6358,7 +6361,7 @@ def future_net_worth_calculator(request):
         'other_liability': other_liab,
         'taxable_income': income,
         'asset_rate': asset_rate,
-        'categories_name': categories_name,
+        'categories_name': YEAR_LABELS,
         'categories_series': categories_series
     }
 
@@ -7550,7 +7553,6 @@ def add_port_in_networth(request):
             portfolio_value = request.POST['portfolio_value']
             portfolio_currency = request.POST['portfolio_currency']
             method_name = request.POST['method_name']
-            portfolio_curr = {'USD': "$", 'EUR': '€', 'INR': '₹', 'GBP': '£'}
             if method_name == "delete_port":
                 StockHoldings.objects.get(user=request.user, port_id=portfolio_id).delete()
                 return JsonResponse({'status': 'delete'})
@@ -7558,7 +7560,7 @@ def add_port_in_networth(request):
                 end_date = today_date + datetime.timedelta(hours=2)
                 StockHoldings.objects.create(user=request.user, port_id=portfolio_id, name=portfolio_name,
                                              value=portfolio_value, end_at=end_date,
-                                             currency=portfolio_curr[portfolio_currency])
+                                             currency=PORTFOLIO_CURRENCY[portfolio_currency])
                 return JsonResponse({'status': 'true'})
     # To-Do  Remove bare except
     except:
@@ -7566,237 +7568,237 @@ def add_port_in_networth(request):
 
 
 # Income views
-@login_required(login_url="/login")
-def income_add(request):
-    error = False
-    user = request.user
-    if request.method == 'POST':
-        sub_category_name = request.POST['sub_category_name'].title()
-        account_name = request.POST['account_name']
-        income_amount = request.POST['amount']
-        income_date = request.POST['income_date']
-        frequency = request.POST['frequency']
-        auto_income = request.POST.get('auto_income', False)
-        auto_credit = request.POST.get('auto_credit', False)
-        if auto_income:
-            auto_income = True
-        if auto_credit:
-            auto_credit = True
-
-        subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
-                                                    name=sub_category_name)
-        if not subcategory_qs:
-            sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
-                                                      name=sub_category_name)
-        else:
-            sub_category = subcategory_qs[0]
-
-        income_qs = Income.objects.filter(user=user, sub_category=sub_category)
-        if income_qs:
-            if income_qs[0].auto_bill:
-                error = 'Income Already Exit!!'
-            else:
-                pass
-        else:
-            account = Account.objects.get(user=user, name=account_name)
-            created_date = datetime.datetime.strptime(income_date, '%Y-%m-%d')
-            save_income(user, sub_category, account, income_amount, income_date, auto_income, frequency, auto_credit,
-                        created_date, "True")
-            if not auto_income:
-                income = Income.objects.get(user=user, sub_category=sub_category)
-                income_detail_obj = save_income_details(account, income_amount, income, False, income_date)
-                if auto_credit:
-                    account_balance = float(account.available_balance)
-                    remaining_amount = round(account_balance + income_amount, 2)
-                    tag_obj, _ = Tag.objects.get_or_create(user=income.user, name="Incomes")
-                    save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date,
-                                     sub_category,
-                                     account,
-                                     tag_obj, False, True)
-                    account.available_balance = remaining_amount
-                    account.transaction_count += 1
-                    account.save()
-                    income_detail_obj.credited = True
-                    income_detail_obj.save()
-            create_income_request()
-            return redirect('/income_list/')
-    income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
-    frequency = [period.value for period in BudgetPeriods]
-    context = {
-        'error': error,
-        'account_qs': account_qs,
-        'income_category': income_category,
-        'frequency': frequency
-    }
-    return render(request, "income/income_add.html", context=context)
-
-
-@login_required(login_url="/login")
-def income_update(request, pk):
-    error = False
-    user = request.user
-    income_obj = Income.objects.get(pk=pk)
-    if request.method == 'POST':
-        sub_category_name = request.POST['sub_category_name'].title()
-        account_name = request.POST['account_name']
-        income_amount = request.POST['amount']
-        income_date = request.POST['income_date']
-        frequency = request.POST['frequency']
-        auto_income = request.POST.get('auto_income', False)
-        auto_credit = request.POST.get('auto_credit', False)
-        if auto_income:
-            auto_income = True
-        if auto_credit:
-            auto_credit = True
-        account = Account.objects.get(user=user, name=account_name)
-        income_obj.account = account
-        income_obj.income_amount = income_amount
-        income_obj.income_date = income_date
-        income_obj.auto_income = auto_income
-        income_obj.frequency = frequency
-        income_obj.auto_credit = auto_credit
-
-        if income_obj.sub_category.name != sub_category_name:
-            subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
-                                                        name=sub_category_name)
-            if not subcategory_qs:
-                sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
-                                                          name=sub_category_name)
-            else:
-                sub_category = subcategory_qs[0]
-            income_qs = Income.objects.filter(user=user, sub_category=sub_category)
-            if income_qs:
-                error = 'Income Already Exit!!'
-            else:
-                Transaction.objects.filter(user=request.user, categories=income_obj.sub_category).update(
-                    categories=sub_category)
-                income_obj.sub_category = sub_category
-                income_obj.save()
-                return redirect(f"/income_details/{pk}")
-        else:
-            income_obj.save()
-            return redirect(f"/income_details/{pk}")
-
-    income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
-    account_qs = Account.objects.filter(user=user, account_type__in=[type.value for type in AccountTypes])
-    frequency = [period.value for period in BudgetPeriods]
-    context = {
-        'error': error,
-        'account_qs': account_qs,
-        'income_category': income_category,
-        'frequency': frequency,
-        'income_data': income_obj,
-        'income_date': income_obj.income_date.strftime('%Y-%m-%d'),
-    }
-    return render(request, "income/income_update.html", context=context)
+# @login_required(login_url="/login")
+# def income_add(request):
+#     error = False
+#     user = request.user
+#     if request.method == 'POST':
+#         sub_category_name = request.POST['sub_category_name'].title()
+#         account_name = request.POST['account_name']
+#         income_amount = request.POST['amount']
+#         income_date = request.POST['income_date']
+#         frequency = request.POST['frequency']
+#         auto_income = request.POST.get('auto_income', False)
+#         auto_credit = request.POST.get('auto_credit', False)
+#         if auto_income:
+#             auto_income = True
+#         if auto_credit:
+#             auto_credit = True
+#
+#         subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
+#                                                     name=sub_category_name)
+#         if not subcategory_qs:
+#             sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
+#                                                       name=sub_category_name)
+#         else:
+#             sub_category = subcategory_qs[0]
+#
+#         income_qs = Income.objects.filter(user=user, sub_category=sub_category)
+#         if income_qs:
+#             if income_qs[0].auto_bill:
+#                 error = 'Income Already Exit!!'
+#             else:
+#                 pass
+#         else:
+#             account = Account.objects.get(user=user, name=account_name)
+#             created_date = datetime.datetime.strptime(income_date, '%Y-%m-%d')
+#             save_income(user, sub_category, account, income_amount, income_date, auto_income, frequency, auto_credit,
+#                         created_date, "True")
+#             if not auto_income:
+#                 income = Income.objects.get(user=user, sub_category=sub_category)
+#                 income_detail_obj = save_income_details(account, income_amount, income, False, income_date)
+#                 if auto_credit:
+#                     account_balance = float(account.available_balance)
+#                     remaining_amount = round(account_balance + income_amount, 2)
+#                     tag_obj, _ = Tag.objects.get_or_create(user=income.user, name="Incomes")
+#                     save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date,
+#                                      sub_category,
+#                                      account,
+#                                      tag_obj, False, True)
+#                     account.available_balance = remaining_amount
+#                     account.transaction_count += 1
+#                     account.save()
+#                     income_detail_obj.credited = True
+#                     income_detail_obj.save()
+#             create_income_request()
+#             return redirect('/income_list/')
+#     income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
+#     account_qs = Account.objects.filter(user=user, account_type__in=AccountTypes.list())
+#     frequency = BudgetPeriods.list()
+#     context = {
+#         'error': error,
+#         'account_qs': account_qs,
+#         'income_category': income_category,
+#         'frequency': frequency
+#     }
+#     return render(request, "income/income_add.html", context=context)
 
 
-@login_required(login_url="/login")
-def income_list(request):
-    income_data = Income.objects.filter(user=request.user)
-    context = {'income_data': income_data}
-    return render(request, "income/income_list.html", context=context)
+# @login_required(login_url="/login")
+# def income_update(request, pk):
+#     error = False
+#     user = request.user
+#     income_obj = Income.objects.get(pk=pk)
+#     if request.method == 'POST':
+#         sub_category_name = request.POST['sub_category_name'].title()
+#         account_name = request.POST['account_name']
+#         income_amount = request.POST['amount']
+#         income_date = request.POST['income_date']
+#         frequency = request.POST['frequency']
+#         auto_income = request.POST.get('auto_income', False)
+#         auto_credit = request.POST.get('auto_credit', False)
+#         if auto_income:
+#             auto_income = True
+#         if auto_credit:
+#             auto_credit = True
+#         account = Account.objects.get(user=user, name=account_name)
+#         income_obj.account = account
+#         income_obj.income_amount = income_amount
+#         income_obj.income_date = income_date
+#         income_obj.auto_income = auto_income
+#         income_obj.frequency = frequency
+#         income_obj.auto_credit = auto_credit
+#
+#         if income_obj.sub_category.name != sub_category_name:
+#             subcategory_qs = SubCategory.objects.filter(category__user=user, category__name=CategoryTypes.INCOME.value,
+#                                                         name=sub_category_name)
+#             if not subcategory_qs:
+#                 sub_category = SubCategory.objects.create(category=Category.objects.get(user=user, name=CategoryTypes.INCOME.value),
+#                                                           name=sub_category_name)
+#             else:
+#                 sub_category = subcategory_qs[0]
+#             income_qs = Income.objects.filter(user=user, sub_category=sub_category)
+#             if income_qs:
+#                 error = 'Income Already Exit!!'
+#             else:
+#                 Transaction.objects.filter(user=request.user, categories=income_obj.sub_category).update(
+#                     categories=sub_category)
+#                 income_obj.sub_category = sub_category
+#                 income_obj.save()
+#                 return redirect(f"/income_details/{pk}")
+#         else:
+#             income_obj.save()
+#             return redirect(f"/income_details/{pk}")
+#
+#     income_category = SubCategory.objects.filter(category__name=CategoryTypes.INCOME.value, category__user=user)
+#     account_qs = Account.objects.filter(user=user, account_type__in=AccountTypes.list())
+#     frequency = BudgetPeriods.list()
+#     context = {
+#         'error': error,
+#         'account_qs': account_qs,
+#         'income_category': income_category,
+#         'frequency': frequency,
+#         'income_data': income_obj,
+#         'income_date': income_obj.income_date.strftime('%Y-%m-%d'),
+#     }
+#     return render(request, "income/income_update.html", context=context)
 
 
-def income_details(request, pk):
-    income_obj = Income.objects.get(pk=pk)
-    income_qs = IncomeDetail.objects.filter(income=income_obj).order_by('-income_date')
-    transaction_data = Transaction.objects.filter(user=request.user, categories=income_obj.sub_category).order_by(
-        '-transaction_date')
-    context = {'income_data': income_obj, 'income_list': income_qs, 'transaction_data': transaction_data}
-    return render(request, "income/income_details.html", context=context)
+# @login_required(login_url="/login")
+# def income_list(request):
+#     income_data = Income.objects.filter(user=request.user)
+#     context = {'income_data': income_data}
+#     return render(request, "income/income_list.html", context=context)
 
 
-@login_required(login_url="/login")
-def income_delete(request, pk):
-    income_obj = Income.objects.get(pk=pk)
-    user_name = request.user
-    transaction_details = Transaction.objects.filter(user=user_name, categories=income_obj.sub_category)
-    for data in transaction_details:
-        delete_transaction_details(data.pk, user_name)
-    income_obj.delete()
-    return JsonResponse({"status": "Successfully", "path": "/income_list/"})
+# def income_details(request, pk):
+#     income_obj = Income.objects.get(pk=pk)
+#     income_qs = IncomeDetail.objects.filter(income=income_obj).order_by('-income_date')
+#     transaction_data = Transaction.objects.filter(user=request.user, categories=income_obj.sub_category).order_by(
+#         '-transaction_date')
+#     context = {'income_data': income_obj, 'income_list': income_qs, 'transaction_data': transaction_data}
+#     return render(request, "income/income_details.html", context=context)
 
 
-def income_edit(request, pk):
-    income_obj = IncomeDetail.objects.get(pk=pk)
-    if request.method == 'POST':
-        new_amount = round(float(request.POST['amount']), 2)
-        income_date = request.POST['income_date']
-        credited = request.POST.get('credited', False)
-        old_amount = float(income_obj.income_amount)
-        account = income_obj.income.account
-        if credited:
-            credited = True
-        income_obj.income_date = income_date
-        if income_obj.credited is True and credited is True:
-            if old_amount > new_amount:
-                remaining_amount = old_amount - new_amount
-                account.available_balance = round(float(account.available_balance) - remaining_amount, 2)
-            if old_amount < new_amount:
-                remaining_amount = new_amount - old_amount
-                account.available_balance = round(float(account.available_balance) + remaining_amount, 2)
-            Transaction.objects.filter(user=income_obj.income.user, transaction_date=income_obj.income_date,
-                                       categories=income_obj.income.sub_category).update(amount=new_amount,
-                                                                                         transaction_date=income_date)
-            account.save()
-
-        if income_obj.credited is True and credited is False:
-            account.available_balance = round(float(account.available_balance) - old_amount, 2)
-            account.save()
-            Transaction.objects.filter(user=income_obj.income.user, transaction_date=income_obj.income_date,
-                                       categories=income_obj.income.sub_category).delete()
-            account.transaction_count -= 1
-
-        if income_obj.credited is False and credited is True:
-            account.available_balance = round(float(account.available_balance) + new_amount, 2)
-            tag_obj, _ = Tag.objects.get_or_create(user=income_obj.income.user, name="Incomes")
-            save_transaction(income_obj.income.user, income_obj.income.sub_category.name, new_amount,
-                             account.available_balance,
-                             income_date, income_obj.income.sub_category, account, tag_obj, False, True)
-            account.transaction_count += 1
-            account.save()
-        income_obj.income_amount = new_amount
-        income_obj.credited = credited
-        income_obj.save()
-
-        return redirect(f"/income_details/{income_obj.income.id}")
-
-    return render(request, "income/income_edit.html",
-                  {'income_data': income_obj, 'income_date': income_obj.income_date.strftime('%Y-%m-%d')})
+# @login_required(login_url="/login")
+# def income_delete(request, pk):
+#     income_obj = Income.objects.get(pk=pk)
+#     user_name = request.user
+#     transaction_details = Transaction.objects.filter(user=user_name, categories=income_obj.sub_category)
+#     for data in transaction_details:
+#         delete_transaction_details(data.pk, user_name)
+#     income_obj.delete()
+#     return JsonResponse({"status": "Successfully", "path": "/income_list/"})
 
 
-@login_required(login_url="/login")
-def income_date_delete(request, pk):
-    income_obj = IncomeDetail.objects.get(pk=pk)
-    user_name = income_obj.income.user
-    if income_obj.credited is True:
-        transaction_details = Transaction.objects.filter(user=user_name, transaction_date=income_obj.income_date,
-                                                         categories=income_obj.income.sub_category)
-        for data in transaction_details:
-            delete_transaction_details(data.pk, user_name)
-    income_obj.delete()
-    return JsonResponse({"status": "Successfully", "path": f"/income_details/{income_obj.income.id}"})
+# def income_edit(request, pk):
+#     income_obj = IncomeDetail.objects.get(pk=pk)
+#     if request.method == 'POST':
+#         new_amount = round(float(request.POST['amount']), 2)
+#         income_date = request.POST['income_date']
+#         credited = request.POST.get('credited', False)
+#         old_amount = float(income_obj.income_amount)
+#         account = income_obj.income.account
+#         if credited:
+#             credited = True
+#         income_obj.income_date = income_date
+#         if income_obj.credited is True and credited is True:
+#             if old_amount > new_amount:
+#                 remaining_amount = old_amount - new_amount
+#                 account.available_balance = round(float(account.available_balance) - remaining_amount, 2)
+#             if old_amount < new_amount:
+#                 remaining_amount = new_amount - old_amount
+#                 account.available_balance = round(float(account.available_balance) + remaining_amount, 2)
+#             Transaction.objects.filter(user=income_obj.income.user, transaction_date=income_obj.income_date,
+#                                        categories=income_obj.income.sub_category).update(amount=new_amount,
+#                                                                                          transaction_date=income_date)
+#             account.save()
+#
+#         if income_obj.credited is True and credited is False:
+#             account.available_balance = round(float(account.available_balance) - old_amount, 2)
+#             account.save()
+#             Transaction.objects.filter(user=income_obj.income.user, transaction_date=income_obj.income_date,
+#                                        categories=income_obj.income.sub_category).delete()
+#             account.transaction_count -= 1
+#
+#         if income_obj.credited is False and credited is True:
+#             account.available_balance = round(float(account.available_balance) + new_amount, 2)
+#             tag_obj, _ = Tag.objects.get_or_create(user=income_obj.income.user, name="Incomes")
+#             save_transaction(income_obj.income.user, income_obj.income.sub_category.name, new_amount,
+#                              account.available_balance,
+#                              income_date, income_obj.income.sub_category, account, tag_obj, False, True)
+#             account.transaction_count += 1
+#             account.save()
+#         income_obj.income_amount = new_amount
+#         income_obj.credited = credited
+#         income_obj.save()
+#
+#         return redirect(f"/income_details/{income_obj.income.id}")
+#
+#     return render(request, "income/income_edit.html",
+#                   {'income_data': income_obj, 'income_date': income_obj.income_date.strftime('%Y-%m-%d')})
 
 
-@login_required(login_url="/login")
-def income_uncredited_list(request):
-    print(request.POST)
-    category_id = int(request.POST['category_id'])
-    category_obj = Category.objects.get(pk=category_id)
-    subcategory_name = request.POST['sub_category'].strip()
-    user = request.user
-    income_qs = IncomeDetail.objects.filter(income__user=user, income__sub_category__name=subcategory_name,
-                                            credited=False)
-    uncredited_income_dict = {}
-    amount_dict = {}
-    for data in income_qs:
-        uncredited_income_dict[data.pk] = data.income_date
-        amount_dict[data.pk] = data.income_amount
+# @login_required(login_url="/login")
+# def income_date_delete(request, pk):
+#     income_obj = IncomeDetail.objects.get(pk=pk)
+#     user_name = income_obj.income.user
+#     if income_obj.credited is True:
+#         transaction_details = Transaction.objects.filter(user=user_name, transaction_date=income_obj.income_date,
+#                                                          categories=income_obj.income.sub_category)
+#         for data in transaction_details:
+#             delete_transaction_details(data.pk, user_name)
+#     income_obj.delete()
+#     return JsonResponse({"status": "Successfully", "path": f"/income_details/{income_obj.income.id}"})
 
-    return JsonResponse(
-        {"status": "true", "income_dict": uncredited_income_dict, "amount_dict": json.dumps(amount_dict)})
+
+# @login_required(login_url="/login")
+# def income_uncredited_list(request):
+#     print(request.POST)
+#     category_id = int(request.POST['category_id'])
+#     category_obj = Category.objects.get(pk=category_id)
+#     subcategory_name = request.POST['sub_category'].strip()
+#     user = request.user
+#     income_qs = IncomeDetail.objects.filter(income__user=user, income__sub_category__name=subcategory_name,
+#                                             credited=False)
+#     uncredited_income_dict = {}
+#     amount_dict = {}
+#     for data in income_qs:
+#         uncredited_income_dict[data.pk] = data.income_date
+#         amount_dict[data.pk] = data.income_amount
+#
+#     return JsonResponse(
+#         {"status": "true", "income_dict": uncredited_income_dict, "amount_dict": json.dumps(amount_dict)})
 
 
 # EXPENSES ADD
@@ -7807,7 +7809,7 @@ def expense_save(request, user_name, expenses_obj):
     month = request.POST['start_month']
     currency = request.POST['currency']
     category_data = Category.objects.get(user=user_name, name=category)
-    month = datetime.datetime.strptime(month, '%Y-%m').date()
+    month = datetime.datetime.strptime(month, DateFormats.YYYY_MM.value).date()
     if not expenses_obj:
         expenses_obj = Expenses()
     expenses_obj.user = user_name
@@ -7831,7 +7833,7 @@ def expenses_add(request):
     else:
         category_data = Category.objects.filter(user=user_name)
         current = datetime.datetime.today()
-        current_month = datetime.datetime.strftime(current, '%Y-%m')
+        current_month = datetime.datetime.strftime(current, DateFormats.YYYY_MM.value)
         context = {'current_month': current_month, 'category_data': category_data}
     return render(request, "expenses/expenses_add.html", context=context)
 
@@ -7848,7 +7850,7 @@ def expenses_update(request, pk):
         return redirect("/budget_list/")
     else:
         category_data = Category.objects.filter(user=user_name)
-        current_month = datetime.datetime.strftime(expense_obj.month, '%Y-%m')
+        current_month = datetime.datetime.strftime(expense_obj.month, DateFormats.YYYY_MM.value)
         context = {'expense_obj': expense_obj, 'category_data': category_data, 'current_month': current_month,
                    'currency_data': CURRENCY_DICT}
         return render(request, "expenses/expenses_update.html", context=context)
