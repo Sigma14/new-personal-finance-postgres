@@ -54,7 +54,8 @@ $(document).ready(function()
             // Remove the formatting to get integer data for summation
             var intVal = function ( i ) {
                 return typeof i === 'string' ?
-                    i.replace(/[\$,]/g, '')*1 :
+                    // Remove any special character except decimal
+                    i.replace(/[^\d.-]/g, '')*1 :
                     typeof i === 'number' ?
                         i : 0;
             };

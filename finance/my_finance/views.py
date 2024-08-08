@@ -125,6 +125,18 @@ def create_link_token(request):
 
 
 def get_access_token(request):
+    """
+        Handles the exchange of a public token for an access token and updates
+        the user's accounts.
+
+        Args:
+            request (HttpRequest): The HTTP request containing the user and body
+            data.
+
+        Returns:
+            HttpResponseRedirect: Redirects the user to the login page if not
+            authenticated.
+    """
     global access_token
     user = request.user
 
