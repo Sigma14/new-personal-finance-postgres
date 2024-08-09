@@ -207,7 +207,7 @@ def create_link_token(request):
             client_name="Personal Finance App",
             country_codes=[CountryCode("US")],
             language="en",
-            user=LinkTokenCreateRequestUser(client_user_id=str(client_user_id))
+            user=LinkTokenCreateRequestUser(client_user_id=str(client_user_id)),
         )
         response = client.link_token_create(request)
         response = response.to_dict()
@@ -221,16 +221,16 @@ def create_link_token(request):
 
 def get_access_token(request):
     """
-        Handles the exchange of a public token for an access token and updates
-        the user's accounts.
+    Handles the exchange of a public token for an access token and updates
+    the user's accounts.
 
-        Args:
-            request (HttpRequest): The HTTP request containing the user and body
-            data.
+    Args:
+        request (HttpRequest): The HTTP request containing the user and body
+        data.
 
-        Returns:
-            HttpResponseRedirect: Redirects the user to the login page if not
-            authenticated.
+    Returns:
+        HttpResponseRedirect: Redirects the user to the login page if not
+        authenticated.
     """
     global access_token
     user = request.user
@@ -303,7 +303,7 @@ def get_transactions(request):
                     access_token=access_token,
                     start_date=start_date,
                     end_date=end_date,
-                    options=TransactionsGetRequestOptions()
+                    options=TransactionsGetRequestOptions(),
                 )
                 response = client.transactions_get(request)
 
@@ -317,7 +317,7 @@ def get_transactions(request):
                             plaid_account_id=account["account_id"]
                         )
                         continue
-                    # To-Do  Remove bare except / 
+                    # To-Do  Remove bare except /
                     except Exception as e:
                         new_acct = Account()
                         new_acct.plaid_account_id = account["id"]
@@ -336,7 +336,7 @@ def get_transactions(request):
                         access_token=access_token,
                         start_date=start_date,
                         end_date=end_date,
-                        options=TransactionsGetRequestOptions(offset=len(transactions))
+                        options=TransactionsGetRequestOptions(offset=len(transactions)),
                     )
                     response = client.transactions_get(request)
                     transactions.extend(response["transactions"])
@@ -391,14 +391,14 @@ def get_transactions(request):
 
 def check_zero_division(first_val, second_val):
     """
-        Divides first_val by second_val, returning 0 if division by zero occurs.
+    Divides first_val by second_val, returning 0 if division by zero occurs.
 
-        Args:
-            first_val (float): The numerator.
-            second_val (float): The denominator.
+    Args:
+        first_val (float): The numerator.
+        second_val (float): The denominator.
 
-        Returns:
-            float: The result of the division, or 0 if division by zero occurs.
+    Returns:
+        float: The result of the division, or 0 if division by zero occurs.
     """
     try:
         return first_val / second_val
@@ -634,14 +634,14 @@ def save_rental_property(
 
 def check_float(data_var):
     """
-        Checks & converts data_var to a float, rounds it to two decimal places,
-        and handles invalid input by returning 0.0.
+    Checks & converts data_var to a float, rounds it to two decimal places,
+    and handles invalid input by returning 0.0.
 
-        Args:
-            data_var: The variable to be converted to a float.
+    Args:
+        data_var: The variable to be converted to a float.
 
-        Returns:
-            float: The converted and rounded float value, or 0.0 if conversion fails.
+    Returns:
+        float: The converted and rounded float value, or 0.0 if conversion fails.
     """
     if data_var:
         try:
@@ -655,23 +655,23 @@ def check_float(data_var):
 
 def make_capex_budget(result_list):
     """
-        Calculate the yearly and monthly capital expenditure budget.
+    Calculate the yearly and monthly capital expenditure budget.
 
-        The function takes a list containing the total cost and the number of years,
-        calculates the cost per year and per month, and appends these values to the
-        list.
+    The function takes a list containing the total cost and the number of years,
+    calculates the cost per year and per month, and appends these values to the
+    list.
 
-        Args:
-            result_list (list): A list containing two elements. The first element is
-                                the total cost (a float or string that can be
-                                converted to a float), and the second element is the
-                                number of years (an integer or string that can be
-                                converted to an integer).
+    Args:
+        result_list (list): A list containing two elements. The first element is
+                            the total cost (a float or string that can be
+                            converted to a float), and the second element is the
+                            number of years (an integer or string that can be
+                            converted to an integer).
 
-        Returns:
-            list: The original list with the added yearly and monthly budget
-                  calculations, rounded to two decimal places.
-        """
+    Returns:
+        list: The original list with the added yearly and monthly budget
+              calculations, rounded to two decimal places.
+    """
     try:
         # Attempt to calculate the cost per year
         cost_per_year = float(result_list[0]) / float(result_list[1])
@@ -681,7 +681,7 @@ def make_capex_budget(result_list):
 
     # Calculate the cost per month
     cost_per_month = cost_per_year / 12
-    
+
     # Append the calculated yearly and monthly costs to the result list
     result_list.append(round(cost_per_year, 2))
     result_list.append(round(cost_per_month, 2))
@@ -690,18 +690,18 @@ def make_capex_budget(result_list):
 
 def make_others_dict(other_unit_dict):
     """
-        Converts the unit values in the dictionary to annual units.
+    Converts the unit values in the dictionary to annual units.
 
-        This function takes a dictionary where the values are numeric values
-        representing units, multiplies each unit by 12 to convert to annual units,
-        and updates the dictionary in place.
+    This function takes a dictionary where the values are numeric values
+    representing units, multiplies each unit by 12 to convert to annual units,
+    and updates the dictionary in place.
 
-        Args:
-            other_unit_dict (dict): A dictionary where the keys are identifiers
-                                    and the values are numeric values representing units.
+    Args:
+        other_unit_dict (dict): A dictionary where the keys are identifiers
+                                and the values are numeric values representing units.
 
-        Returns:
-            dict: The updated dictionary with annual unit values.
+    Returns:
+        dict: The updated dictionary with annual unit values.
     """
     for key, units in other_unit_dict.items():
         other_unit_dict[key] = [float(units) * 12]
@@ -710,16 +710,16 @@ def make_others_dict(other_unit_dict):
 
 def make_other_data(other_unit_dict, year, mortgage_year, rent_increase_assumption):
     """
-        Updates unit values based on rent increase assumption.
+    Updates unit values based on rent increase assumption.
 
-        Args:
-            other_unit_dict (dict): Dictionary with lists of unit values.
-            year (int): Current year.
-            mortgage_year (int): Year when mortgage ends.
-            rent_increase_assumption (float): Annual rent increase percentage.
+    Args:
+        other_unit_dict (dict): Dictionary with lists of unit values.
+        year (int): Current year.
+        mortgage_year (int): Year when mortgage ends.
+        rent_increase_assumption (float): Annual rent increase percentage.
 
-        Returns:
-            dict: Updated dictionary with increased unit values.
+    Returns:
+        dict: Updated dictionary with increased unit values.
     """
     for key, unit_value in other_unit_dict.items():
         current_unit = unit_value[-1]
@@ -741,38 +741,36 @@ def update_budget_items(
     update_transaction_amount=None,
 ):
     """
-        Updates budget item based on transaction details.
+    Updates budget item based on transaction details.
 
-        Args:
-            user_name (str): The username of the budget owner.
-            budget_obj (Budget): The budget object to update.
-            transaction_amount (float): The amount of the transaction.
-            transaction_out_flow (bool): Indicates if the transaction is an outflow.
-            transaction_date (datetime): The date of the transaction.
-            update_transaction_amount (float, optional): An additional amount to update.
+    Args:
+        user_name (str): The username of the budget owner.
+        budget_obj (Budget): The budget object to update.
+        transaction_amount (float): The amount of the transaction.
+        transaction_out_flow (bool): Indicates if the transaction is an outflow.
+        transaction_date (datetime): The date of the transaction.
+        update_transaction_amount (float, optional): An additional amount to update.
 
-        Returns:
-            Budget: The updated budget object.
+    Returns:
+        Budget: The updated budget object.
     """
     amount_budget = float(budget_obj.amount)
     spent_budget = round(float(budget_obj.budget_spent) - transaction_amount, 2)
     if update_transaction_amount:
         spent_budget += update_transaction_amount
-    
+
     period_budget = budget_obj.budget_period
 
     # Handle case where category is income and adjust transaction flow
     if budget_obj.category.category.name == CategoryTypes.INCOME.value:
         transaction_out_flow = True
-    
+
     if transaction_out_flow:
         # Update spent budget for outflow transactions
         budget_obj.budget_spent = spent_budget
 
         # Handle yearly and quarterly budget periods
-        if period_budget in (
-                BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value
-        ):
+        if period_budget in (BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value):
             budget_left = float(budget_obj.budget_left) + transaction_amount
             budget_obj.budget_left = budget_left - update_transaction_amount
             print("budget_obj.budget_left", budget_obj.budget_left)
@@ -788,9 +786,7 @@ def update_budget_items(
                     budget_value.save()
 
         # Handle daily and weekly budget periods
-        if period_budget in (
-                BudgetPeriods.DAILY.value, BudgetPeriods.WEEKLY.value
-        ):
+        if period_budget in (BudgetPeriods.DAILY.value, BudgetPeriods.WEEKLY.value):
             try:
                 budget_obj = Budget.objects.get(
                     user=user_name,
@@ -820,9 +816,7 @@ def update_budget_items(
             float(budget_obj.budget_left) - transaction_amount, 2
         )
 
-        if period_budget in (
-                BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value
-        ):
+        if period_budget in (BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value):
             data_budget = Budget.objects.filter(
                 user=user_name,
                 name=budget_obj.name,
@@ -842,17 +836,17 @@ def add_new_budget_items(
     user_name, budget_obj, transaction_amount, out_flow, transaction_date=None
 ):
     """
-        Adds new budget items based on transaction details.
+    Adds new budget items based on transaction details.
 
-        Args:
-            user_name (str): The username of the budget owner.
-            budget_obj (Budget): The budget object to be updated.
-            transaction_amount (float): The amount of the transaction.
-            out_flow (str): Indicates if the transaction is an outflow ("True") or not.
-            transaction_date (datetime, optional): The date of the transaction.
+    Args:
+        user_name (str): The username of the budget owner.
+        budget_obj (Budget): The budget object to be updated.
+        transaction_amount (float): The amount of the transaction.
+        out_flow (str): Indicates if the transaction is an outflow ("True") or not.
+        transaction_date (datetime, optional): The date of the transaction.
 
-        Returns:
-            Budget: The updated budget object.
+    Returns:
+        Budget: The updated budget object.
     """
     amount_budget = float(budget_obj.amount)
     spent_budget = round(float(budget_obj.budget_spent) + transaction_amount, 2)
@@ -865,9 +859,7 @@ def add_new_budget_items(
         budget_obj.budget_spent = spent_budget
 
         # Handle yearly and quarterly budget periods
-        if period_budget in (
-                BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value
-        ):
+        if period_budget in (BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value):
             data_budget = Budget.objects.filter(
                 user=user_name,
                 name=budget_obj.name,
@@ -884,9 +876,7 @@ def add_new_budget_items(
                     budget_value.save()
 
         # Handle daily and weekly budget periods
-        if period_budget in (
-                BudgetPeriods.DAILY.value, BudgetPeriods.WEEKLY.value
-        ):
+        if period_budget in (BudgetPeriods.DAILY.value, BudgetPeriods.WEEKLY.value):
             try:
                 budget_obj = Budget.objects.get(
                     user=user_name,
@@ -909,9 +899,7 @@ def add_new_budget_items(
             float(budget_obj.budget_left) + transaction_amount, 2
         )
 
-        if period_budget in (
-                BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value
-        ):
+        if period_budget in (BudgetPeriods.YEARLY.value, BudgetPeriods.QUARTERLY.value):
             data_budget = Budget.objects.filter(
                 user=user_name,
                 name=budget_obj.name,
@@ -925,6 +913,7 @@ def add_new_budget_items(
                     budget_value.save()
 
     return budget_obj
+
 
 # Unused
 # def add_remains_budget(user_name):
@@ -962,20 +951,20 @@ def add_new_budget_items(
 
 def compare_budgets(user_name, start, end, budget_names_list):
     """
-        Compares budgets and transactions over a specified period.
+    Compares budgets and transactions over a specified period.
 
-        Args:
-            user_name (str): The username of the budget owner.
-            start (datetime): Start date of the comparison period.
-            end (datetime): End date of the comparison period.
-            budget_names_list (list): List of budget names to compare.
+    Args:
+        user_name (str): The username of the budget owner.
+        start (datetime): Start date of the comparison period.
+        end (datetime): End date of the comparison period.
+        budget_names_list (list): List of budget names to compare.
 
-        Returns:
-            tuple:
-                - transaction_budget (QuerySet): Transactions within the period.
-                - total_budget_summary (list): Total spent and left budget.
-                - cmp_budgets_dict (dict): Budget comparison details.
-                - cmp_transaction_budgets (list): List of transactions per budget.
+    Returns:
+        tuple:
+            - transaction_budget (QuerySet): Transactions within the period.
+            - total_budget_summary (list): Total spent and left budget.
+            - cmp_budgets_dict (dict): Budget comparison details.
+            - cmp_transaction_budgets (list): List of transactions per budget.
     """
     total_budget_amount = 0
     total_budget_spent = 0
@@ -1023,8 +1012,8 @@ def compare_budgets(user_name, start, end, budget_names_list):
 
             # Handle non-quarterly and non-yearly budgets
             if data.budget_period not in (
-                    BudgetPeriods.QUARTERLY.value, BudgetPeriods.YEARLY.value
-            ,
+                BudgetPeriods.QUARTERLY.value,
+                BudgetPeriods.YEARLY.value,
             ):
                 if data.budget_status:
                     if amount_budget_spent != 0.0:
@@ -1109,15 +1098,15 @@ def compare_budgets(user_name, start, end, budget_names_list):
 
 def transaction_summary(transaction_data, select_filter, user_name):
     """
-        Summarizes transaction data for generating graphs and reports.
+    Summarizes transaction data for generating graphs and reports.
 
-        Args:
-            transaction_data (QuerySet): List of transactions to summarize.
-            select_filter (str): Filter criteria for selecting transactions.
-            user_name (str): Username for fetching tags.
+    Args:
+        transaction_data (QuerySet): List of transactions to summarize.
+        select_filter (str): Filter criteria for selecting transactions.
+        user_name (str): Username for fetching tags.
 
-        Returns:
-            dict: Context dictionary with summarized transaction data and tags.
+    Returns:
+        dict: Context dictionary with summarized transaction data and tags.
     """
     credit_date_dict = {}
     debit_date_dict = {}
@@ -1195,21 +1184,21 @@ def transaction_checks(
     user_budget,
 ):
     """
-        Processes a transaction by updating account, bill, and budget information.
+    Processes a transaction by updating account, bill, and budget information.
 
-        Args:
-            username (str): The username of the user.
-            transaction_amount (float): Amount of the transaction.
-            account (str): Account name where the transaction occurred.
-            bill_name (str): Optional bill associated with the transaction.
-            budget_name (str): Optional budget for updating budget information.
-            cleared_amount (str): Status of whether the amount is cleared ("True"/"False").
-            out_flow (str): Indicator if the transaction is an outflow ("True"/"False").
-            transaction_date (str): Date of the transaction in YYYY-MM-DD format.
-            user_budget (int): ID of the user's budget.
+    Args:
+        username (str): The username of the user.
+        transaction_amount (float): Amount of the transaction.
+        account (str): Account name where the transaction occurred.
+        bill_name (str): Optional bill associated with the transaction.
+        budget_name (str): Optional budget for updating budget information.
+        cleared_amount (str): Status of whether the amount is cleared ("True"/"False").
+        out_flow (str): Indicator if the transaction is an outflow ("True"/"False").
+        transaction_date (str): Date of the transaction in YYYY-MM-DD format.
+        user_budget (int): ID of the user's budget.
 
-        Returns:
-            tuple: Updated account and budget objects.
+    Returns:
+        tuple: Updated account and budget objects.
     """
     if cleared_amount == "True":
         # Retrieve the account object
@@ -1282,17 +1271,17 @@ def category_spent_amount(
     category_data, user_name, categories_name, categories_value, total_spent_amount
 ):
     """
-        Calculates spent amounts for categories and updates lists and dicts.
+    Calculates spent amounts for categories and updates lists and dicts.
 
-        Args:
-            category_data (QuerySet): Categories to calculate amounts for.
-            user_name (str): Username for filtering transactions.
-            categories_name (list): List to append category names.
-            categories_value (list): List to append spent amounts for categories.
-            total_spent_amount (dict): Dict to update total spent amounts by currency.
+    Args:
+        category_data (QuerySet): Categories to calculate amounts for.
+        user_name (str): Username for filtering transactions.
+        categories_name (list): List to append category names.
+        categories_value (list): List to append spent amounts for categories.
+        total_spent_amount (dict): Dict to update total spent amounts by currency.
 
-        Returns:
-            None: Updates the provided lists and dictionary in place.
+    Returns:
+        None: Updates the provided lists and dictionary in place.
     """
     # Iterate through each category
     for category_name in category_data:
@@ -1330,19 +1319,19 @@ def multi_acc_chart(
     acc_available_balance,
 ):
     """
-        Updates account balance and transaction values for a chart.
+    Updates account balance and transaction values for a chart.
 
-        Args:
-            acc_transaction_data (QuerySet): Transactions to process.
-            amount_date_dict (dict): Dictionary mapping dates to account balances.
-            acc_current_balance (float): Current balance of the account.
-            account_date_list (list): List of dates for the chart.
-            acc_create_date (str): Account creation date (not used in current code).
-            account_transaction_value (list): List to append balance values.
-            acc_available_balance (float): Initial available balance.
+    Args:
+        acc_transaction_data (QuerySet): Transactions to process.
+        amount_date_dict (dict): Dictionary mapping dates to account balances.
+        acc_current_balance (float): Current balance of the account.
+        account_date_list (list): List of dates for the chart.
+        acc_create_date (str): Account creation date (not used in current code).
+        account_transaction_value (list): List to append balance values.
+        acc_available_balance (float): Initial available balance.
 
-        Returns:
-            None: Updates provided lists and dictionary in place.
+    Returns:
+        None: Updates provided lists and dictionary in place.
     """
     # Process each transaction
     for data in acc_transaction_data:
@@ -1380,17 +1369,17 @@ def net_worth_cal(
     account_data, property_data, date_range_list, stock_portfolio_data, fun_name=None
 ):
     """
-        Calculates net worth and associated financial data.
+    Calculates net worth and associated financial data.
 
-        Args:
-            account_data (QuerySet): User account data.
-            property_data (QuerySet): User property data.
-            date_range_list (list): List of dates for the calculation period.
-            stock_portfolio_data (QuerySet): User stock portfolio data.
-            fun_name (str, optional): Function name to control the return value.
+    Args:
+        account_data (QuerySet): User account data.
+        property_data (QuerySet): User property data.
+        date_range_list (list): List of dates for the calculation period.
+        stock_portfolio_data (QuerySet): User stock portfolio data.
+        fun_name (str, optional): Function name to control the return value.
 
-        Returns:
-            dict or tuple: Net worth dictionary or a tuple of multiple financial data.
+    Returns:
+        dict or tuple: Net worth dictionary or a tuple of multiple financial data.
     """
     liability_data = []
     assets_data = []
@@ -1590,15 +1579,15 @@ def overtime_account_data(
     date_range_list,
 ):
     """
-        Updates balance graph data over time based on transactions.
+    Updates balance graph data over time based on transactions.
 
-        Args:
-            transaction_data (QuerySet): User's transaction data.
-            current_balance (float): Current balance of the account.
-            balance_graph_dict (dict): Dictionary to track balance over time.
-            date_list (list): List of dates for transactions.
-            balance_graph_data (list): List to store balance graph data.
-            date_range_list (list): List of dates for the graph.
+    Args:
+        transaction_data (QuerySet): User's transaction data.
+        current_balance (float): Current balance of the account.
+        balance_graph_dict (dict): Dictionary to track balance over time.
+        date_list (list): List of dates for transactions.
+        balance_graph_data (list): List to store balance graph data.
+        date_range_list (list): List of dates for the graph.
     """
     # Initialize index for the account's transactions
     account_index = 1
@@ -1678,13 +1667,13 @@ def overtime_account_data(
 # Personal Finance Home Page
 def home(request):
     """
-        Renders the home page with context data.
+    Renders the home page with context data.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: Rendered HTML response for the home page.
+    Returns:
+        HttpResponse: Rendered HTML response for the home page.
     """
     # trans = translate(language='fr')
     context = {"page": "home"}
@@ -1704,13 +1693,13 @@ def home(request):
 # Real Estate Home Page
 def real_estate_home(request):
     """
-        Renders the real estate home page with context data.
+    Renders the real estate home page with context data.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: Rendered HTML response for the real estate home page.
+    Returns:
+        HttpResponse: Rendered HTML response for the real estate home page.
     """
     context = {"page": "real_estate_home"}
     return render(request, "real_estate_home.html", context)
@@ -1719,13 +1708,13 @@ def real_estate_home(request):
 @login_required(login_url="/login")
 def dash_board(request):
     """
-        Renders the dashboard page with various financial summaries and charts.
+    Renders the dashboard page with various financial summaries and charts.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: Rendered HTML response for the dashboard page.
+    Returns:
+        HttpResponse: Rendered HTML response for the dashboard page.
     """
     user_name = request.user
 
@@ -1947,14 +1936,14 @@ def dash_board(request):
 @login_required(login_url="/login")
 def net_worth(request):
     """
-        Renders the net worth page with detailed breakdowns of assets,
-        liabilities, and net worth over time.
+    Renders the net worth page with detailed breakdowns of assets,
+    liabilities, and net worth over time.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: Rendered HTML response for the net worth page.
+    Returns:
+        HttpResponse: Rendered HTML response for the net worth page.
     """
     user_name = request.user
     # Fetch user-related financial data
@@ -2145,9 +2134,10 @@ def net_worth(request):
 
 class CategoryList(LoginRequiredMixin, ListView):
     """
-        View to display and manage the user's category list, including budget tracking
-        and transaction summaries for each category.
+    View to display and manage the user's category list, including budget tracking
+    and transaction summaries for each category.
     """
+
     model = SubCategory
     template_name = "category/category_list.html"
 
@@ -2192,8 +2182,8 @@ class CategoryList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         """
-            Generates context data for rendering the category list page, including
-            budgets, transactions, and category summaries.
+        Generates context data for rendering the category list page, including
+        budgets, transactions, and category summaries.
         """
         user_name = self.request.user
         current_month = datetime.datetime.strftime(
@@ -2224,7 +2214,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         )
         for account_data in accounts_qs:
             bank_accounts_dict[account_data.id] = account_data.name
-        
+
         # Get the list of months for the selected budget
         list_of_months = get_list_of_months(user_name, self.user_budget)
 
@@ -2300,23 +2290,40 @@ class CategoryList(LoginRequiredMixin, ListView):
                 remaining_balance = (
                     budgeted_amount - transaction_amount
                 )  # Remaining balance amount
-# Populate the subcategory dictionary with the calculated data
+                # Populate the subcategory dictionary with the calculated data
                 category_key = val.category.name
                 if category_key in sub_category_dict:
-                    sub_category_dict[category_key][3].append([
-                        val.name, budgeted_amount, transaction_amount, val.id, percentage,
-                        remaining_balance, transaction_date, transactions_list, id
-                    ,
+                    sub_category_dict[category_key][3].append(
+                        [
+                            val.name,
+                            budgeted_amount,
+                            transaction_amount,
+                            val.id,
+                            percentage,
+                            remaining_balance,
+                            transaction_date,
+                            transactions_list,
+                            id,
                         ]
                     )
                 else:
                     sub_category_dict[category_key] = [
-                        0, 0, val.category.id, [
+                        0,
+                        0,
+                        val.category.id,
+                        [
                             [
-                                val.name, budgeted_amount, transaction_amount, val.id, percentage,
-                                remaining_balance, transaction_date, transactions_list, id
+                                val.name,
+                                budgeted_amount,
+                                transaction_amount,
+                                val.id,
+                                percentage,
+                                remaining_balance,
+                                transaction_date,
+                                transactions_list,
+                                id,
                             ]
-                        ]
+                        ],
                     ]
 
         # Prepares data for Category totals and graph
@@ -2360,8 +2367,9 @@ class CategoryList(LoginRequiredMixin, ListView):
 
 class CategoryDetail(LoginRequiredMixin, DetailView):
     """
-        View to display detailed information about a specific category.
+    View to display detailed information about a specific category.
     """
+
     model = Category
     template_name = "category/category_detail.html"
 
@@ -2373,8 +2381,9 @@ class CategoryDetail(LoginRequiredMixin, DetailView):
 
 class CategoryAdd(LoginRequiredMixin, CreateView):
     """
-        View to handle the creation of a new category.
+    View to handle the creation of a new category.
     """
+
     model = Category
     form_class = CategoryForm
     template_name = "category/category_add.html"
@@ -2404,7 +2413,7 @@ class CategoryAdd(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         """
-            Sets the user and processes the form submission.
+        Sets the user and processes the form submission.
         """
         obj = form.save(commit=False)
         obj.user = self.request.user
@@ -2425,8 +2434,9 @@ class CategoryAdd(LoginRequiredMixin, CreateView):
 
 class CategoryUpdate(LoginRequiredMixin, UpdateView):
     """
-        View to handle the updating of an existing category.
+    View to handle the updating of an existing category.
     """
+
     model = Category
     form_class = CategoryForm
     template_name = "category/category_update.html"
@@ -2434,15 +2444,16 @@ class CategoryUpdate(LoginRequiredMixin, UpdateView):
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
     """
-        View to handle the deletion of a category and its associated transactions.
+    View to handle the deletion of a category and its associated transactions.
     """
+
     def post(self, request, *args, **kwargs):
         """
-            Handles POST request for deleting a category.
-            - Retrieves the category object using the primary key (pk) from the URL.
-            - Deletes all associated transaction details for the user.
-            - Deletes the category object.
-            - Returns a JSON response indicating success.
+        Handles POST request for deleting a category.
+        - Retrieves the category object using the primary key (pk) from the URL.
+        - Deletes all associated transaction details for the user.
+        - Deletes the category object.
+        - Returns a JSON response indicating success.
         """
         # Retrieve the category object to be deleted
         category_obj = Category.objects.get(pk=self.kwargs["pk"])
@@ -2462,10 +2473,10 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
 
 def category_group_add(request):
     """
-        Handles the addition of a new category group via an AJAX POST request.
-        - Checks if the category already exists for the user.
-        - If it exists, returns an error response.
-        - If not, creates the new category and returns a success response.
+    Handles the addition of a new category group via an AJAX POST request.
+    - Checks if the category already exists for the user.
+    - If it exists, returns an error response.
+    - If not, creates the new category and returns a success response.
     """
     if request.method == "POST" and request.is_ajax():
         user_name = request.user
@@ -2483,13 +2494,13 @@ def category_group_add(request):
 
 def subcategory_suggestion(request):
     """
-        Returns subcategory suggestions for a given category.
+    Returns subcategory suggestions for a given category.
 
-        Args:
-            request (HttpRequest): The HTTP request object containing 'category_pk'.
+    Args:
+        request (HttpRequest): The HTTP request object containing 'category_pk'.
 
-        Returns:
-            JsonResponse: JSON with subcategory suggestions and category_pk.
+    Returns:
+        JsonResponse: JSON with subcategory suggestions and category_pk.
     """
     category_pk = int(request.POST["category_pk"])
     category_obj = Category.objects.get(pk=category_pk)
@@ -2504,14 +2515,14 @@ def subcategory_suggestion(request):
 
 def subcategory_add(request, category_pk):
     """
-        Handles adding a new subcategory to a specified category.
+    Handles adding a new subcategory to a specified category.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
-            category_pk (int): The primary key of the category to which the subcategory will be added.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        category_pk (int): The primary key of the category to which the subcategory will be added.
 
-        Returns:
-            HttpResponse: Renders a page to add a subcategory or redirects after successful addition.
+    Returns:
+        HttpResponse: Renders a page to add a subcategory or redirects after successful addition.
     """
     category_obj = Category.objects.get(pk=category_pk)
     try:
@@ -2552,14 +2563,14 @@ def subcategory_add(request, category_pk):
 
 def subcategory_update(request, pk):
     """
-        Updates an existing subcategory and its associated data.
+    Updates an existing subcategory and its associated data.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
-            pk (int): The primary key of the subcategory to update.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the subcategory to update.
 
-        Returns:
-            HttpResponse: Renders the update form or redirects to the category list.
+    Returns:
+        HttpResponse: Renders the update form or redirects to the category list.
     """
     user = request.user
     category_list = Category.objects.filter(user=user)
@@ -2599,14 +2610,14 @@ def subcategory_update(request, pk):
 
 def subcategory_delete(request, pk):
     """
-        Deletes a subcategory and associated transactions.
+    Deletes a subcategory and associated transactions.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
-            pk (int): The primary key of the subcategory to delete.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the subcategory to delete.
 
-        Returns:
-            JsonResponse: A JSON response indicating the success status.
+    Returns:
+        JsonResponse: A JSON response indicating the success status.
     """
     user = request.user
     subcategory_obj = SubCategory.objects.get(pk=pk)
@@ -2625,14 +2636,14 @@ def subcategory_delete(request, pk):
 
 def subcategory_list(request):
     """
-        Retrieves a list of subcategories for a given category.
+    Retrieves a list of subcategories for a given category.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            JsonResponse: A JSON response containing a list of subcategory names.
-            Redirect: Redirects to category list if not a POST request or not AJAX.
+    Returns:
+        JsonResponse: A JSON response containing a list of subcategory names.
+        Redirect: Redirects to category list if not a POST request or not AJAX.
     """
     if request.method == "POST" and request.is_ajax():
         user = request.user
@@ -2654,15 +2665,15 @@ def subcategory_list(request):
 
 def subcategory_budget(request):
     """
-        Retrieves the budget name associated with a specific subcategory
-        and user budget.
+    Retrieves the budget name associated with a specific subcategory
+    and user budget.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            JsonResponse: A JSON response containing the budget name or
-            False if not found.
+    Returns:
+        JsonResponse: A JSON response containing the budget name or
+        False if not found.
     """
     user_name = request.user
     category = int(request.POST.get("category"))
@@ -2938,13 +2949,13 @@ def user_login(request):
 @login_required(login_url="/login")
 def user_logout(request):
     """
-        Logs out the user and redirects to the login page.
+    Logs out the user and redirects to the login page.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponseRedirect: Redirects to the login page.
+    Returns:
+        HttpResponseRedirect: Redirects to the login page.
     """
     logout(request)
     return redirect("/login")
@@ -2952,17 +2963,17 @@ def user_logout(request):
 
 def make_budgets_values(user_name, budget_data, page_method):
     """
-        Calculates and organizes budget data for the specified user.
+    Calculates and organizes budget data for the specified user.
 
-        Args:
-            user_name (User): The user for whom the budget data is being calculated.
-            budget_data (QuerySet): The queryset of budget data.
-            page_method (str): The type of page requesting the budget data.
+    Args:
+        user_name (User): The user for whom the budget data is being calculated.
+        budget_data (QuerySet): The queryset of budget data.
+        page_method (str): The type of page requesting the budget data.
 
-        Returns:
-            tuple: Contains all budgets, budget graph data, budget values, budget currency,
-                   list of months, budget names list, budgets dictionary, income budgets dictionary,
-                   and total budget income.
+    Returns:
+        tuple: Contains all budgets, budget graph data, budget values, budget currency,
+               list of months, budget names list, budgets dictionary, income budgets dictionary,
+               and total budget income.
     """
     total_budget = 0
     total_spent = 0
@@ -3505,13 +3516,13 @@ def budgets_page_data(request, budget_page, template_page):
 @login_required(login_url="/login")
 def budget_list(request):
     """
-        Renders the budget list page with translated labels and budget data.
+    Renders the budget list page with translated labels and budget data.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: The rendered HTML page with budget data.
+    Returns:
+        HttpResponse: The rendered HTML page with budget data.
     """
     time.sleep(3)
     translated_data = {"earned": _("Earned"), "spending": _("Spending")}
@@ -3523,13 +3534,13 @@ def budget_list(request):
 @login_required(login_url="/login")
 def budgets_box(request):
     """
-        Renders the budget box page with the user's budgets and a form for user budgets.
+    Renders the budget box page with the user's budgets and a form for user budgets.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: The rendered HTML page with budgets and form data.
+    Returns:
+        HttpResponse: The rendered HTML page with budgets and form data.
     """
     user_name = request.user
 
@@ -5148,13 +5159,13 @@ def compare_target_budget_box(request):
 @login_required(login_url="/login")
 def sample_budget_box(request):
     """
-        Renders the sample budget box page with budget and cash flow data.
+    Renders the sample budget box page with budget and cash flow data.
 
-        Args:
-            request (HttpRequest): The HTTP request object.
+    Args:
+        request (HttpRequest): The HTTP request object.
 
-        Returns:
-            HttpResponse: The rendered HTML page with budget and cash flow data.
+    Returns:
+        HttpResponse: The rendered HTML page with budget and cash flow data.
     """
     date_value = datetime.datetime.today().date()
     start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
