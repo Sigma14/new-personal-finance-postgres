@@ -29,7 +29,7 @@ urlpatterns = [
     path("budgets/", budgets_box, name="budgets"),
     path("budgets/sample", sample_budget_box, name="sample-budgets"),
     path("budgets/current/<int:pk>", current_budget_box, name="current-budgets"),
-    path("budgets/compare", compare_boxes, name="compare_boxes"),
+    # path("budgets/compare", compare_boxes, name="compare_boxes"),
     path(
         "budgets/compare/target",
         compare_target_budget_box,

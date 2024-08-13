@@ -1357,7 +1357,7 @@ def multi_acc_chart(
     # Initialize balance for dates not in amount_date_dict
     amount_constant = acc_available_balance
     for date_value in account_date_list:
-        check_date = datetime.datetime.strptime(date_value, "%Y-%m-%d").date()
+        check_date = datetime.datetime.strptime(date_value, DateFormats.YYYY_MM_DD.value).date()
         if date_value in amount_date_dict:
             account_transaction_value.append(amount_date_dict[date_value])
             amount_constant = amount_date_dict[date_value]
@@ -2845,24 +2845,42 @@ def subcategory_budget(request):
 
 
 def user_login(request):
+    """
+    Handles user login, including authentication via Django and JWT,
+    as well as membership verification.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered login page or a redirect to the
+        target page after successful login.
+    """
+    # Initialize context with page identifier
     context = {"page": "login_page"}
+    
     if request.method == "POST":
+        # Retrieve username and password from POST data
         username = request.POST["register-username"]
         user_password = request.POST["register-password"]
         check_jwt_authentication = False
         check_user_membership = False
+
         try:
+            # Attempt to authenticate as a superuser
             user = authenticate(username=username, password=user_password)
             if user.is_superuser:
                 login(request, user)
                 try:
                     redirect_url = request.POST["redirect_url"]
-                    return redirect(redirect_url)
+                    return redirect(redirect_url)  # Redirect to specified URL if available
                 # To-Do  Remove bare except
                 except:
+                    # If no redirect URL is provided, render the home page
                     return render(request, "home.html", context=context)
 
         except Exception as e:
+            # Handle exceptions during superuser check
             print("admin check===>", e)
             pass
 
@@ -2900,6 +2918,7 @@ def user_login(request):
                     if verify_user_data["response"] == 1:
                         check_user_membership = True
             except Exception as e:
+                # Handle exceptions during membership verification
                 print("user membership exception===========>", e)
                 check_user_membership = False
 
@@ -2909,11 +2928,13 @@ def user_login(request):
 
         if check_jwt_authentication and check_user_membership:
             try:
+                # Attempt to get the user from the database and update the password
                 user = User.objects.get(id=user_id)
                 user.set_password(user_password)
                 user.save()
             # To-Do  Remove bare except / get or create
             except:
+                # If user doesn't exist, create a new user
                 user = User()
                 user.id = user_id
                 user.username = username
@@ -2923,12 +2944,13 @@ def user_login(request):
                 user.set_password(user_password)
                 user.save()
 
+            # Authenticate and log in the user
             user = authenticate(username=username, password=user_password)
             if user:
                 login(request, user)
                 try:
                     redirect_url = request.POST["redirect_url"]
-                    return redirect(redirect_url)
+                    return redirect(redirect_url)  # Redirect to specified URL if available
                 # To-Do  Remove bare except
                 except:
                     return render(request, "home.html", context=context)
@@ -3288,7 +3310,21 @@ def make_budgets_values(user_name, budget_data, page_method):
 
 
 def budgets_page_data(request, budget_page, template_page):
+    """
+    Generates context data for rendering budget pages, including user budgets,
+    comparisons across different periods, and template budgets.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        budget_page (str): The identifier for the current budget page.
+        template_page (str): The identifier for the template budget page.
+
+    Returns:
+        dict: The context data needed to render the budget page.
+    """
     user_name = request.user
+
+    # Determine the date range based on POST data or default to current date
     if request.method == "POST":
         month_name = "01-" + request.POST["select_period"]
         date_value = datetime.datetime.strptime(
@@ -3305,12 +3341,17 @@ def budgets_page_data(request, budget_page, template_page):
         )
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
+    # Fetch user-specific budget data for the given period
     budget_data = Budget.objects.filter(
         user=user_name, start_date=start_date, end_date=end_date
     ).order_by("-created_at")
+
+    # Fetch template budget data for the same period
     template_budget_data = TemplateBudget.objects.filter(
         start_date=start_date, end_date=end_date
     ).order_by("-created_at")
+
+    # Generate budget values and graph data
     (
         all_budgets,
         budget_graph_data,
@@ -3375,6 +3416,7 @@ def budgets_page_data(request, budget_page, template_page):
     total_spent = {"weekly": {}, "daily": {}}
     total_left = {"weekly": {}, "daily": {}}
 
+    # Populate the dictionaries with budget data
     for bdgt_list in all_budgets:
         if bdgt_list[5] == BudgetPeriods.DAILY.value:
             if bdgt_list[0] not in weekly_daily_budget["daily"]:
@@ -3440,9 +3482,12 @@ def budgets_page_data(request, budget_page, template_page):
                         ],
                     )
 
+    # Fetch template budget data for rendering
     template_budget_data, template_values, template_name_list, template_graph_data = (
         get_template_budget()
     )
+
+    # Calculate the left-over cash after expenses
     total_expense_list = budget_graph_data[0]["data"]
     left_over_cash = round(total_bgt_income - sum(total_expense_list), 2)
     context = {
@@ -3564,11 +3609,26 @@ def budgets_box(request):
 @login_required(login_url="/login")
 @login_required(login_url="/login")
 def budgets_walk_through(request, pk):
+    """
+    Handle budget walk-through for a user. Process form submissions to create
+    or update budgets, and prepare context data for rendering the budget
+    walk-through page.
+
+    Args:
+        request: The HTTP request object.
+        pk: The primary key of the user budget.
+
+    Returns:
+        HttpResponse: Rendered budget walk-through page with context data.
+    """
     user_name = request.user
     if request.method == "POST":
+        # Extract form data from the POST request
         category_group = request.POST["category_group"]
         category_name = request.POST["category_name"]
         category_obj = Category.objects.get(user=user_name, name=category_group)
+
+        # Retrieve or create subcategory
         try:
             subcategory_obj = SubCategory.objects.get(
                 name=category_name, category=category_obj
@@ -3590,13 +3650,16 @@ def budgets_walk_through(request, pk):
         if budget_check:
             return redirect("/budgets/current")
 
-        budget_start_date = datetime.datetime.strptime(budget_start_date, "%Y-%m-%d")
+        # Process dates and budget period
+        budget_start_date = datetime.datetime.strptime(budget_start_date, DateFormats.YYYY_MM_DD.value)
         start_month_date, end_month_date = start_end_date(
             budget_start_date.date(), BudgetPeriods.MONTHLY.value
         )
         budget_end_date = get_period_date(
             budget_start_date, budget_period
         ) - relativedelta(days=1)
+
+        # Create and save the budget object
         budget_obj = Budget()
         budget_obj.user = user_name
         budget_obj.category = subcategory_obj
@@ -3612,6 +3675,8 @@ def budgets_walk_through(request, pk):
         budget_obj.ended_at = budget_end_date
         budget_obj.budget_start_date = budget_start_date
         budget_obj.save()
+
+        # If the budget period is quarterly, create budgets for the next 2 months
         if budget_period == BudgetPeriods.QUARTERLY.value:
             for _ in range(2):
                 start_month_date = start_month_date + relativedelta(months=1)
@@ -3635,6 +3700,7 @@ def budgets_walk_through(request, pk):
                     None,
                     budget_status=True,
                 )
+        # If the budget period is yearly, create budgets for the next 11 months
         if budget_period == BudgetPeriods.YEARLY.value:
             for _ in range(11):
                 start_month_date = start_month_date + relativedelta(months=1)
@@ -3672,6 +3738,8 @@ def budgets_walk_through(request, pk):
     non_monthly_expense_categories = []
     goals_categories = []
     bills_dict = {"Bills": []}
+
+    # Retrieve and categorize the user's subcategories
     category_qs = SubCategory.objects.filter(category__user=user_name)
     for sub_data in category_qs:
         if sub_data.category.name == CategoryTypes.INCOME.value:
@@ -3712,10 +3780,12 @@ def budgets_walk_through(request, pk):
                     ]
                 ]
 
+    # Generate budget values and update categories
     _, _, _, budget_currency, _, _, budgets_dict, income_bdgt_dict, _ = (
         make_budgets_values(user_name, budget_data, "budget_page")
     )
 
+    # Retrieve and process bills associated with the user budget
     bills_qs = Bill.objects.filter(
         user=user_name, user_budget=pk, date__range=(start_date, end_date)
     ).order_by("-created_at")
@@ -3733,6 +3803,8 @@ def budgets_walk_through(request, pk):
         bill_start_date = datetime.datetime.strftime(
             bill_data.date, DateFormats.MON_DD_YYYY.value
         )
+
+        # Retrieve and sum transactions related to the bill
         transaction_qs = Transaction.objects.filter(
             user=user_name,
             bill=bill_data,
@@ -3753,11 +3825,12 @@ def budgets_walk_through(request, pk):
             bill_data.currency,
             bill_spent_amount,
         ]
-
+        # Append bill data to the bills dictionary
         bills_dict["Bills"].append(bill_bgt_list)
         if bill_name in bill_categories:
             bill_categories.remove(bill_name)
 
+    # Calculate the total expected and actual income
     total_income_expected = 0
     total_actual_income = 0
 
@@ -3773,12 +3846,14 @@ def budgets_walk_through(request, pk):
         income_bdgt_dict[CategoryTypes.INCOME.value].insert(
             0, [name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), "$", 0.0]
         )
-
+    
+    # Insert uncategorized bills into the bills dictionary
     for name in bill_categories:
         bills_dict["Bills"].insert(
             0, [name, 0.0, 0.0, 0.0, "false", str(start_date), str(end_date), "$", 0.0]
         )
 
+    # Retrieve the user's bank accounts and map them by account ID
     accounts_qs = Account.objects.filter(
         user=request.user, account_type__in=AccountTypes.list()
     )
@@ -3786,6 +3861,7 @@ def budgets_walk_through(request, pk):
     for account_data in accounts_qs:
         bank_accounts_dict[account_data.id] = account_data.name
 
+    # Calculate the total expected and actual expenses
     total_expected_expenses = 0
     total_actual_expenses = 0
     for key in budgets_dict:
@@ -3795,6 +3871,7 @@ def budgets_walk_through(request, pk):
                 total_expected_expenses += float(exp_data[1])
                 total_actual_expenses += float(exp_data[2])
 
+    # Calculate the total expected and actual non-monthly expenses
     total_non_monthly_expected_expenses = 0
     total_non_monthly_actual_expenses = 0
     non_monthly_expenses_dict = {}
@@ -3804,6 +3881,7 @@ def budgets_walk_through(request, pk):
             total_non_monthly_expected_expenses += float(exp[1])
             total_non_monthly_actual_expenses += float(exp[2])
 
+    # Calculate the total expected and actual goals expenses
     total_goals_expected = 0
     total_goals_actual = 0
     goals_dict = {}
@@ -3813,6 +3891,7 @@ def budgets_walk_through(request, pk):
             total_goals_expected += float(i[1])
             total_goals_actual += float(i[2])
 
+    # Initialize index counter for displaying expenses
     index_counter = 1
     for _, expenses in expense_categories.items():
         for expense_data in expenses:
@@ -3848,9 +3927,21 @@ def budgets_walk_through(request, pk):
 
 @login_required(login_url="/login")
 def budgets_income_walk_through(request):
+    """
+    Handles the income walk-through process for budgets. It allows users to
+    create or update their income budgets and save transactions.
+
+    Args:
+        request: The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+        HttpResponse: The income walk-through page with relevant context.
+    """
     user_name = request.user
-    print("Income request data====>", request.POST)
+
     if request.method == "POST" and request.is_ajax():
+        # Retrieve data from the POST request
         user_budget_id = request.POST.get("user_budget_id")
         budget_name = request.POST["name"]
         budget_exp_amount = float(request.POST["exp_amount"])
@@ -3858,6 +3949,8 @@ def budgets_income_walk_through(request):
         budget_id = request.POST["id"]
         income_account_id = request.POST["income_account_id"]
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
+
+        # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(income_account_id))
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
         # check subcategory exist or not
@@ -3879,13 +3972,18 @@ def budgets_income_walk_through(request):
             sub_cat_obj.save()
 
         if budget_id == "false":
+            # If budget ID is "false", create a new budget
             budget_start_date = datetime.datetime.today().date()
+
+            # Calculate the start and end dates for the budget period
             start_month_date, end_month_date = start_end_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
             )
             budget_end_date = get_period_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
             ) - relativedelta(days=1)
+
+            # Check if a budget with the same name already exists
             try:
                 budget_obj = Budget.objects.filter(
                     user=user_name,
@@ -3904,6 +4002,7 @@ def budgets_income_walk_through(request):
             except:
                 budget_obj = Budget()
 
+            # Set the budget properties and save it
             budget_obj.user_budget = user_budget
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
@@ -3924,7 +4023,7 @@ def budgets_income_walk_through(request):
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
         else:
-
+            # If budget ID is not "false", update the existing budget
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
             # Checks if new values are added or not
             if (
@@ -3946,6 +4045,7 @@ def budgets_income_walk_through(request):
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
         if budget_act_amount > 0:
+            # Update the account balance and save the transaction
             account_obj = Account.objects.get(id=int(income_account_id))
             remaining_amount = round(
                 float(account_obj.available_balance) + budget_act_amount, 2
@@ -3985,8 +4085,21 @@ def budgets_income_walk_through(request):
 
 @login_required(login_url="/login")
 def budgets_expenses_walk_through(request):
+    """
+    Handles the expenses walk-through process for budgets. It allows users to
+    create, update, and manage their budget expenses based on categories and
+    other inputs.
+
+    Args:
+        request: The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+        HttpResponse: The expenses walk-through page with the relevant context.
+    """
     user_name = request.user
     if request.method == "POST" and request.is_ajax():
+        # Retrieve data from the POST request
         user_budget_id = request.POST.get("user_budget_id")
         budget_name = request.POST["name"]
         category_name = request.POST["cat_name"]
@@ -3997,6 +4110,8 @@ def budgets_expenses_walk_through(request):
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         budget_start_date = request.POST["budget_date"]
         budget_period = request.POST["budget_period"]
+
+        # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(expense_account_id))
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
         # check subcategory exist or not
@@ -4023,18 +4138,23 @@ def budgets_expenses_walk_through(request):
             sub_cat_obj.save()
 
         if budget_id == "false":
+            # If budget ID is "false", create a new budget
             if budget_start_date:
                 budget_start_date = datetime.datetime.strptime(
-                    budget_start_date, "%Y-%m-%d"
+                    budget_start_date, DateFormats.YYYY_MM_DD.value
                 )
             else:
                 budget_start_date = datetime.datetime.today().date()
+
+            # Calculate the start and end dates for the budget period
             start_month_date, end_month_date = start_end_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
             )
             budget_end_date = get_period_date(
                 budget_start_date, budget_period
             ) - relativedelta(days=1)
+
+            # Check if a budget with the same name already exists
             try:
                 budget_obj = Budget.objects.filter(
                     user=user_name,
@@ -4052,6 +4172,8 @@ def budgets_expenses_walk_through(request):
             # To-Do  Remove bare except
             except:
                 budget_obj = Budget()
+
+            # Set the budget properties and save it
             budget_obj.user_budget = user_budget
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
@@ -4073,6 +4195,8 @@ def budgets_expenses_walk_through(request):
             ) - relativedelta(days=1)
             budget_obj.budget_start_date = budget_start_date
             budget_obj.save()
+
+            # If the budget period is yearly, create budgets for the next 11 months
             if budget_period == BudgetPeriods.YEARLY.value:
                 budget_amount = budget_exp_amount
                 budget_currency = "$"
@@ -4101,6 +4225,7 @@ def budgets_expenses_walk_through(request):
                         budget_status=True,
                     )
         else:
+            # If budget ID is not "false", update the existing budget
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
             # Checks if new values are added or not
             if (
@@ -4118,6 +4243,8 @@ def budgets_expenses_walk_through(request):
             budget_obj.budget_period = budget_period
             budget_obj.account = account_obj
             budget_obj.save()
+            
+            # Update budget amounts if actual amount has increased
             if budget_act_amount > old_spend_amount:
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
             if budget_period == BudgetPeriods.YEARLY.value:
@@ -4127,7 +4254,7 @@ def budgets_expenses_walk_through(request):
                 subcategory_obj = sub_cat_obj
                 if budget_start_date:
                     budget_start_date = datetime.datetime.strptime(
-                        budget_start_date, "%Y-%m-%d"
+                        budget_start_date, DateFormats.YYYY_MM_DD.value
                     )
                 else:
                     budget_start_date = budget_obj.start_date
@@ -4161,6 +4288,7 @@ def budgets_expenses_walk_through(request):
                     )
 
         if budget_act_amount > 0:
+            # Update the account balance and save the transaction
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(
                 float(account_obj.available_balance) - budget_act_amount, 2
@@ -4193,9 +4321,22 @@ def budgets_expenses_walk_through(request):
 
 @login_required(login_url="/login")
 def budgets_non_monthly_expenses_walk_through(request):
+    """
+    Handles the non-monthly expenses walk-through process for budgets.
+    It allows users to create, update, and manage their budget expenses
+    based on categories and other inputs.
+
+    Args:
+        request: The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+        HttpResponse: The non-monthly expenses walk-through page with the
+        relevant context.
+    """
     user_name = request.user
-    print("request data======>", request.POST)
     if request.method == "POST" and request.is_ajax():
+        # Retrieve data from the POST request
         user_budget_id = request.POST.get("user_budget_id")
         budget_name = request.POST["name"]
         category_name = CategoryTypes.NON_MONTHLY.value
@@ -4206,6 +4347,8 @@ def budgets_non_monthly_expenses_walk_through(request):
         budget_period = request.POST["budget_period"]
         budget_start_date = request.POST["budget_date"]
         # print("budget_date",budget_date)
+
+        # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(expense_account_id))
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
@@ -4233,18 +4376,23 @@ def budgets_non_monthly_expenses_walk_through(request):
             sub_cat_obj.save()
 
         if budget_id == "false":
+            # If budget ID is "false", create a new budget
             if budget_start_date:
                 budget_start_date = datetime.datetime.strptime(
-                    budget_start_date, "%Y-%m-%d"
+                    budget_start_date, DateFormats.YYYY_MM_DD.value
                 )
             else:
                 budget_start_date = datetime.datetime.today().date()
+
+            # Calculate the start and end dates for the budget period
             start_month_date, end_month_date = start_end_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
             )
             budget_end_date = get_period_date(
                 budget_start_date, budget_period
             ) - relativedelta(days=1)
+
+            # Check if a budget with the same name already exists
             try:
                 budget_obj = Budget.objects.filter(
                     user=user_name,
@@ -4263,6 +4411,7 @@ def budgets_non_monthly_expenses_walk_through(request):
             except:
                 budget_obj = Budget()
 
+            # Set the budget properties and save it
             budget_obj.user_budget = user_budget
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
@@ -4312,6 +4461,7 @@ def budgets_non_monthly_expenses_walk_through(request):
                         budget_status=True,
                     )
         else:
+            # If budget ID is not "false", update the existing budget
             budget_obj = Budget.objects.get(id=int(budget_id), user_budget=user_budget)
             # Checks if new values are added or not
             if (
@@ -4339,7 +4489,7 @@ def budgets_non_monthly_expenses_walk_through(request):
                 subcategory_obj = sub_cat_obj
                 if budget_start_date:
                     budget_start_date = datetime.datetime.strptime(
-                        budget_start_date, "%Y-%m-%d"
+                        budget_start_date, DateFormats.YYYY_MM_DD.value
                     )
                 else:
                     budget_start_date = budget_obj.start_date
@@ -4373,6 +4523,7 @@ def budgets_non_monthly_expenses_walk_through(request):
                     )
 
         if budget_act_amount > 0:
+            # Update the account balance and save the transaction
             account_obj = Account.objects.get(id=int(expense_account_id))
             remaining_amount = round(
                 float(account_obj.available_balance) - budget_act_amount, 2
@@ -4416,9 +4567,22 @@ def budgets_non_monthly_expenses_walk_through(request):
 
 @login_required(login_url="/login")
 def budgets_goals_walk_through(request):
+    """
+    Handles the goals walk-through process for budgets. It allows users to
+    create, update, and manage their budget goals based on categories and
+    other inputs.
+
+    Args:
+        request: The HTTP request object.
+
+    Returns:
+        JsonResponse: A JSON response indicating success or failure.
+        HttpResponse: The goals walk-through page with the relevant context.
+    """
     user_name = request.user
     print("request data======>", request.POST)
     if request.method == "POST" and request.is_ajax():
+        # Retrieve data from the POST request
         user_budget_id = request.POST.get("user_budget_id")
         budget_name = request.POST["name"]
         category_name = CategoryTypes.GOALS.value  # request.POST['cat_name']
@@ -4427,6 +4591,8 @@ def budgets_goals_walk_through(request):
         budget_id = request.POST["id"]
         goal_account_id = request.POST["goals_account_id"]
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
+
+        # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(goal_account_id))
         account_name = account_obj.name
         goal_date = request.POST["goal_date"]
@@ -4457,6 +4623,7 @@ def budgets_goals_walk_through(request):
             sub_cat_obj.save()
 
         if budget_id == "false":
+            # If budget ID is "false", create a new budget
             budget_start_date = datetime.datetime.today().date()
             start_month_date, end_month_date = start_end_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
@@ -4464,6 +4631,8 @@ def budgets_goals_walk_through(request):
             budget_end_date = get_period_date(
                 budget_start_date, BudgetPeriods.MONTHLY.value
             ) - relativedelta(days=1)
+
+            # Check if a budget with the same name already exists
             try:
                 budget_obj = Budget.objects.filter(
                     user=user_name,
@@ -4482,6 +4651,7 @@ def budgets_goals_walk_through(request):
             except:
                 budget_obj = Budget()
 
+            # Set the budget properties and save it
             budget_obj.user_budget = user_budget
             budget_obj.user = user_name
             budget_obj.start_date = start_month_date
@@ -4511,7 +4681,7 @@ def budgets_goals_walk_through(request):
                     message = "Goal already exists, Budget created!!"
             # To-Do  Remove bare except
             except:
-                # If goal doesn't exists, creates a new one
+                # If goal doesn't exist, creates a new one
                 goal_obj = Goal()
                 goal_obj.user = user_name
                 goal_obj.account = account_obj
@@ -4552,7 +4722,9 @@ def budgets_goals_walk_through(request):
                 message = ""
             # To-Do  Remove bare except
             except:
-                # If budget exists, but the Goal doesn't , It will create a goal with Expected amount as goal amount and transacation amount as budget_amount and allocate amount
+                # If budget exist, but the Goal doesn't , It will create a goal with
+                # Expected amount as goal amount and transacation amount as budget_amount
+                # and allocate amount
                 goal_obj = Goal()
                 goal_obj.user = user_name
                 goal_obj.account = account_obj
@@ -4571,6 +4743,7 @@ def budgets_goals_walk_through(request):
                 budget_act_amount = round(budget_act_amount - old_spend_amount, 2)
 
         if budget_act_amount > 0:
+            # Update the account balance and save the transaction
             account_obj = Account.objects.get(id=int(goal_account_id))
             remaining_amount = round(
                 float(account_obj.available_balance) - budget_act_amount, 2
@@ -4610,8 +4783,22 @@ def budgets_goals_walk_through(request):
 
 @login_required(login_url="/login")
 def current_budget_box(request, pk):
+    """
+    Renders the current budget overview for a specified user budget. It calculates
+    budget data, bills, and transactions within the selected or current month, and
+    prepares this data for visualization.
+
+    Args:
+        request: The HTTP request object.
+        pk: The primary key of the UserBudgets object.
+
+    Returns:
+        HttpResponse: The rendered current budget overview page with relevant context.
+    """
     user_name = request.user
     user_budget = UserBudgets.objects.get(user=user_name, pk=pk)
+
+    # Determine the date range based on user selection or current month
     if request.method == "POST":
         month_name = "01-" + request.POST["select_period"]
         date_value = datetime.datetime.strptime(
@@ -4628,12 +4815,15 @@ def current_budget_box(request, pk):
         )
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
 
+    # Fetch budget data for the current period
     budget_data = Budget.objects.filter(
         user=user_name,
         user_budget=user_budget,
         start_date=start_date,
         end_date=end_date,
     ).order_by("-created_at")
+
+    # Calculate budget values and prepare data for budget graph
     (
         all_budgets,
         budget_graph_data,
@@ -4646,9 +4836,12 @@ def current_budget_box(request, pk):
         total_bgt_income,
     ) = make_budgets_values(user_name, budget_data, "budget_page")
 
+    # Fetch bills for the current period and calculate related expenses
     bills_qs = Bill.objects.filter(
         user=user_name, user_budget=user_budget, date__range=(start_date, end_date)
     ).order_by("-created_at")
+
+    # Initialize a dictionary for weekly/daily bills
     week_daily_dict = {}
     for bill_data in bills_qs:
         bill = bill_data.bill_details
@@ -4659,6 +4852,8 @@ def current_budget_box(request, pk):
         bill_start_date = datetime.datetime.strftime(
             bill_data.date, DateFormats.MON_DD_YYYY.value
         )
+
+        # Fetch transactions related to the bill
         transaction_qs = Transaction.objects.filter(
             user=user_name,
             bill=bill_data,
@@ -4668,11 +4863,14 @@ def current_budget_box(request, pk):
         for trans_data in transaction_qs:
             current_spent_amount += float(trans_data.amount)
 
+        # Update budget graph data
         if budget_values:
             budget_values[0] += current_spent_amount
             budget_graph_data[0]["data"].append(current_spent_amount)
             budget_graph_data[1]["data"].append(bill_left_amount)
             budget_graph_data[2]["data"].append(0)
+
+        # Add bill to the list of current budget names
         current_budget_names_list.append(bill_name)
         bill_bgt_list = [
             bill_name,
@@ -4686,7 +4884,8 @@ def current_budget_box(request, pk):
             bill_data.currency,
             bill_spent_amount,
         ]
-
+        
+        # Categorize the bill based on its frequency
         if bill.frequency not in (
             BudgetPeriods.DAILY.value,
             BudgetPeriods.WEEKLY.value,
@@ -4712,7 +4911,7 @@ def current_budget_box(request, pk):
                     bill_left_amount,
                     [bill_bgt_list],
                 ]
-
+    # Adjust total expense list and budget names for weekly/daily bills
     total_expense_list = budget_graph_data[0]["data"]
     if CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value in budgets_dict:
         for key, value in week_daily_dict.items():
@@ -4743,6 +4942,7 @@ def current_budget_box(request, pk):
                     total_expense_list.pop(current_index)
                     current_budget_names_list.pop(current_index)
 
+    # Calculate leftover cash
     left_over_cash = round(total_bgt_income - sum(total_expense_list), 2)
 
     # Fetch and combine Bills and Budgets related transaction from a user budget
@@ -4759,6 +4959,8 @@ def current_budget_box(request, pk):
         transaction_date__range=(start_date, end_date),
     ).order_by("transaction_date")
     transaction_data = list(chain(bgt_transaction_data, bill_transaction_data))
+
+    # Prepare translation data and list of months
     translated_data = {"earned": _("Earned"), "spending": _("Spending")}
     list_of_months = get_list_of_months(user_name, pk)
 
@@ -5189,8 +5391,23 @@ def sample_budget_box(request):
 
 @login_required(login_url="/login")
 def budget_details(request, pk):
+    """
+    Renders the details of a specific budget, including transactions associated
+    with the budget. Allows filtering of transactions by a date range.
+
+    Args:
+        request: The HTTP request object.
+        pk: The primary key of the Budget object.
+
+    Returns:
+        HttpResponse: The rendered budget detail page with relevant context.
+    """
     user_name = request.user
+
+    # Fetch the budget object using the primary key (pk)
     budget_obj = Budget.objects.get(pk=pk)
+
+    # Handle POST request to filter transactions by date range
     if request.method == "POST":
         start_date = request.POST["start_date"]
         end_date = request.POST["end_date"]
@@ -5201,6 +5418,7 @@ def budget_details(request, pk):
             transaction_date__range=(start_date, end_date),
         ).order_by("transaction_date")
     else:
+        # Default to fetching all transactions associated with the budget
         start_date = False
         end_date = False
         transaction_data = Transaction.objects.filter(
@@ -5275,8 +5493,19 @@ class UserBudgetAdd(LoginRequiredMixin, CreateView):
         return reverse_lazy("budgets")
 
     def form_valid(self, form):
+        """
+        Validate the form and handle the creation of a new UserBudgets object.
+
+        Args:
+            form: The form instance with validated data.
+
+        Returns:
+            HttpResponseRedirect: Redirects to the success URL if form is valid.
+        """
         user_name = self.request.user
         user_budget_name = form.cleaned_data.get("name").title()
+
+        # Check if a budget with the same name already exists for the user
         budget_check = UserBudgets.objects.filter(user=user_name, name=user_budget_name)
         if budget_check:
             form.add_error("name", "User Budget already exist")
@@ -5352,7 +5581,7 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         budget_currency = form.cleaned_data["currency"]
         budget_auto = form.cleaned_data["auto_budget"]
         budget_start_date = self.request.POST["budget_date"]
-        budget_start_date = datetime.datetime.strptime(budget_start_date, "%Y-%m-%d")
+        budget_start_date = datetime.datetime.strptime(budget_start_date, DateFormats.YYYY_MM_DD.value)
         start_month_date, end_month_date = start_end_date(
             budget_start_date.date(), BudgetPeriods.MONTHLY.value
         )
@@ -5433,7 +5662,7 @@ def budget_update(request, pk):
         try:
             budget_period = request.POST["budget_period"]
             budget_date = request.POST["budget_date"]
-            budget_date = datetime.datetime.strptime(budget_date, "%Y-%m-%d").date()
+            budget_date = datetime.datetime.strptime(budget_date, DateFormats.YYYY_MM_DD.value).date()
         # To-Do  Remove bare except
         except:
             budget_period = old_budget_period
@@ -6184,8 +6413,8 @@ def transaction_report(request):
         start_date = request.POST["start_date"]
         end_date = request.POST["end_date"]
         tags_data = ast.literal_eval(tags_data)
-        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
+        start_date = datetime.datetime.strptime(start_date, DateFormats.YYYY_MM_DD.value).date()
+        end_date = datetime.datetime.strptime(end_date, DateFormats.YYYY_MM_DD.value).date()
         if tag_name != "All":
             transaction_data = Transaction.objects.filter(
                 user=user_name,
@@ -6201,8 +6430,8 @@ def transaction_report(request):
         start_date = request.GET["start_date"]
         end_date = request.GET["end_date"]
         if start_date != "" and end_date != "":
-            start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
-            end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
+            start_date = datetime.datetime.strptime(start_date, DateFormats.YYYY_MM_DD.value).date()
+            end_date = datetime.datetime.strptime(end_date, DateFormats.YYYY_MM_DD.value).date()
             transaction_data = Transaction.objects.filter(
                 user=user_name, transaction_date__range=(start_date, end_date)
             ).order_by("transaction_date")
@@ -8326,7 +8555,7 @@ def bill_walk_through(request):
 
         if bill_id == "false":
             if bill_date:
-                bill_date = datetime.datetime.strptime(bill_date, "%Y-%m-%d")
+                bill_date = datetime.datetime.strptime(bill_date, DateFormats.YYYY_MM_DD.value)
             else:
                 bill_date = datetime.datetime.today().date()
             bill_date, end_month_date = start_end_date(
@@ -8478,7 +8707,7 @@ def bill_update(request, pk):
                 bill_obj.save()
                 return redirect(f"/bill_detail/{pk}")
         else:
-            bill_date = datetime.datetime.strptime(str(bill_date), "%Y-%m-%d").date()
+            bill_date = datetime.datetime.strptime(str(bill_date), DateFormats.YYYY_MM_DD.value).date()
             if bill_date != bill_obj.date:
                 check_bill_obj = Bill.objects.filter(
                     user=request.user, label=label, account=account_obj, date=bill_date
