@@ -984,10 +984,76 @@ $('.check_primary').on("click", function(e)
 
 //  User Budget Filter
 
-    $('.user_budget_filter').on("change", function(e)
+    $(".user_budget_filter").on("change", function(e)
     {
         $("#user_budget_form").submit();
     });
+
+
+//  Function for Available user budgets dropdown
+    $("#user_budget_name").on("change", function(e)
+    {
+        location.assign($("#user_budget_name").val());
+        });
+
+
+// User Budget Update function
+    $("#bgt-update-btn").on("click", function(e)
+    {
+    e.preventDefault();
+    console.log(window.location.href)
+    action_url = $(this).attr("url");
+    console.log(action_url);
+    updated_name = $("#user_budget_input").val();
+    console.log("changed name", updated_name)
+    var csrf_token = getCookie('csrftoken');
+
+    $.ajax(
+        {
+            data: {
+                "user_budget_name":updated_name,
+                'csrfmiddlewaretoken': csrf_token,
+                },
+            type: 'POST',
+            url: action_url,
+            success: function(response)
+            {
+                console.log(response);
+                if (response.status === "true")
+                {
+                    Swal.fire
+                         ({
+                            title: 'Updated Successfully',
+                            icon: 'success',
+                            text: response.message,
+                            customClass: {
+                              confirmButton: 'btn btn-primary'
+                            },
+                            buttonsStyling: false
+                         }).then(function() {
+                   console.log("Swal closed, attempting to reload");
+                    // Ensure this reload doesn't trigger any unintended navigation
+                    location.reload(); // Reload the page after success
+                });
+                }
+                else
+                {
+                    Swal.fire
+                         ({
+                            title: 'Saving Failed',
+                            icon: 'error',
+                            text: response.message,
+                            customClass: {
+                              confirmButton: 'btn btn-primary'
+                            },
+                            buttonsStyling: false
+                         });
+                }
+            }
+        });
+    return false;
+    });
+
 
 // Budget type selection
 

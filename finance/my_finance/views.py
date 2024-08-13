@@ -3552,13 +3552,13 @@ def budget_details(request, pk):
     if request.method == "POST":
         start_date = request.POST['start_date']
         end_date = request.POST['end_date']
-        transaction_data = Transaction.objects.filter(user=user_name, categories=budget_obj.category,
+        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj, categories=budget_obj.category,
                                                       transaction_date__range=(start_date, end_date)).order_by(
             'transaction_date')
     else:
         start_date = False
         end_date = False
-        transaction_data = Transaction.objects.filter(user=user_name, categories=budget_obj.category).order_by(
+        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj, categories=budget_obj.category).order_by(
             'transaction_date')
     context = {
         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
@@ -3622,6 +3622,39 @@ class UserBudgetAdd(LoginRequiredMixin, CreateView):
             for error in errors:
                 messages.error(self.request, error)
         return redirect(self.get_success_url())
+
+
+def user_budget_update(request, pk):
+    """
+    Update the 'name' field of a UserBudget instance identified by pk.
+
+    Args:
+        request (HttpRequest): The request object with POST data.
+        pk (int): Primary key of the UserBudget instance.
+
+    Returns:
+        JsonResponse: JSON response with the result of the update.
+    """
+    if request.method == "POST":
+        # Get the new name from POST data
+        name = request.POST.get("user_budget_name")
+
+        # Get the UserBudget instance
+        user_budget = UserBudgets.objects.get(pk=pk)
+
+        # Check if the name is different from the current name
+        if name != user_budget.name:
+
+            # Check if the name is already used or not
+            if UserBudgets.objects.filter(user=request.user, name=name).exists():
+                return JsonResponse({"status": "false", "message": "Name already exist"})
+
+            user_budget.name = name
+            user_budget.save()
+            return JsonResponse({"status": "true", "message": "Updated successfully"})
+
+        return JsonResponse({"status": "false", "message": "No changes detected"})
+    
 
 class BudgetAdd(LoginRequiredMixin, CreateView):
     model = Budget

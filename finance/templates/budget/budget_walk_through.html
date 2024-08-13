@@ -136,9 +136,14 @@
                                                             <div class="col-sm-4">
                                                                 <div class="input-group input-group-merge">
                                                                     
-                                                                    <input type="text" id="user_budget_name" class="form-control" value="{{user_budget_name}}" required
+                                                                    <input type="text" id="user_budget_input" class="form-control" value="{{user_budget_name}}" required
                                                                            />
+
                                                                 </div>
+
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <button class="form-control" type="button" id="bgt-update-btn" url="{% url 'update_user_budget' pk=pk%}">Update</button>
                                                             </div>
                                                         </div>
 

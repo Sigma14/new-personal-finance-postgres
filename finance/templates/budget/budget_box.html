@@ -64,44 +64,53 @@
                     <div class="row" style="padding-top:20px;" >
                         <div class="col">
                             <a href="#" class="btn btn-primary add-user-bgt"  data-placement="top"  data-toggle="modal" data-target="#userBudgetFormModal"><i
-                                                class="fa fa-plus"></i> {% trans "Create User Budget" %}</a>
+                                                class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
                         </div>
+                        <div class="dropdown" style="padding-right:1rem;">
+                        <select class="form-control" id="user_budget_name"  name="user_budget" style="width:200px;">
+                            <option style="font-weight:bold;" selected value="All">Available Budgets</option>
+                            {% for budget in user_budgets %}
+                                <option value="{% url 'budgets_walk_through' pk=budget.id%}">{{budget}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     </div>
                 <!--END: Info card-->
                 
                 <section id="ecommerce-products" class="list-view col-md-6">
-                    <h4>Created Budgets</h4>
                     {% if messages %}
                         <ul class="messages">
                             {% for message in messages %}
-                                <li{% if message.tags %} class="{{ message.tags }} text-danger"{% endif %}><b>{{ message }}</b></li>
+                                <li {% if message.tags %} class="{{ message.tags }} text-danger"{% endif %}><b>{{ message }}</b></li>
                             {% endfor %}
                         </ul>
                     {% endif %}
-                    {% for object in user_budgets %}
-                    
-                            <div class="card ecommerce-card">
-                                
-                                <div class="card-body" style="width:400%;">
-                                    <div>
-                                    <a href="{% url 'budgets_walk_through' pk=object.id %}" >
-                                    <h4 class="item-name" style="float:left;">{{ object.name }}</h4>
-                                    
-                                    </a>
-                                    <h5>
-                                    <a href="{% url 'current-budgets' pk=object.id %}" style="float:right;" >
-                                        Budget Analysis
-                                        </a>
-                                    </h5>
-                                </div>
-                                </div>
-                                
-                                <!-- <div class="card-body">
-                                    
-                                </div>                                 -->
-                            </div>
-                    
-                    {% endfor %}
+
+
+<!--                    {% for object in user_budgets %}-->
+<!--                    -->
+<!--                            <div class="card ecommerce-card">-->
+<!--                                -->
+<!--                                <div class="card-body" style="width:400%;">-->
+<!--                                    <div>-->
+<!--                                    <a href="{% url 'budgets_walk_through' pk=object.id %}" >-->
+<!--                                    <h4 class="item-name" style="float:left;">{{ object.name }}</h4>-->
+<!--                                    -->
+<!--                                    </a>-->
+<!--                                    <h5>-->
+<!--                                    <a href="{% url 'current-budgets' pk=object.id %}" style="float:right;" >-->
+<!--                                        Budget Analysis-->
+<!--                                        </a>-->
+<!--                                    </h5>-->
+<!--                                </div>-->
+<!--                                </div>-->
+<!--                                -->
+<!--                                &lt;!&ndash; <div class="card-body">-->
+<!--                                    -->
+<!--                                </div>                                 &ndash;&gt;-->
+<!--                            </div>-->
+<!--                    -->
+<!--                    {% endfor %}-->
                 </section>
 
                 <section style="padding-top:20px;">
