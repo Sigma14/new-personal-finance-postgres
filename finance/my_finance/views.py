@@ -4934,17 +4934,49 @@ class GoalList(LoginRequiredMixin, ListView):
     model = Goal
     template_name = 'goal/goal_list.html'
 
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST request
+        """
+        if request.method == 'POST':
+            self.object_list = self.get_queryset()
+            user_budget_id = self.request.POST.get('user_budget')
+            if user_budget_id:
+                self.user_budget = UserBudgets.objects.get(
+                    user=request.user,
+                    pk=user_budget_id)
+
+            return self.render_to_response(self.get_context_data())
+        else:
+            return HttpResponseNotAllowed(['POST'])
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET request
+        """
+
+        self.object_list = self.get_queryset()
+        # self.date_value = datetime.datetime.today().date()
+        self.user_budget = UserBudgets.objects.filter(
+            user=self.request.user
+        ).first()
+
+        return self.render_to_response(self.get_context_data())
+
     def get_context_data(self, **kwargs):
         # self.request = kwargs.pop('request')
         data = super(GoalList, self).get_context_data(**kwargs)
         user_name = self.request.user
-        goal_data = Goal.objects.filter(user=user_name)
+        user_budget_qs = UserBudgets.objects.filter(user=user_name)
+        goal_data = Goal.objects.filter(user_budget=self.user_budget)
         fund_value = show_current_funds(user_name, fun_name='goal_funds')
         fund_key = ['S.No.', 'See Overtime Graph', 'Account Name', 'Current Balance', 'Freeze Amount', 'Used Lock Fund',
                     'Available Fund', 'Action']
         data['fund_key'] = fund_key
         data['fund_value'] = fund_value
         data['goal_data'] = goal_data
+        data['user_budget_qs'] = user_budget_qs
+        data['selected_budget'] = self.user_budget
         return data
 
 

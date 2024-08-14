@@ -385,6 +385,7 @@ class AvailableFunds(models.Model):
 
 class Goal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='goal_user')
+    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     goal_date = models.DateField(blank=True, null=True)
     currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
