@@ -46,6 +46,26 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label>User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="user_budget" style="width:200px">
+
+                                                {% for budget in budget_qs %}
+                                                    <option value="{{budget.id}}">{{budget}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Category Group</label>
                                     </div>
                                     <div class="col-sm-9">

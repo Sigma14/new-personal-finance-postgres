@@ -1098,6 +1098,7 @@ def overtime_account_data(transaction_data, current_balance, balance_graph_dict,
 
 
 # Personal Finance Home Page
+@login_required(login_url="/login")
 def home(request):
     # trans = translate(language='fr')
     context = {"page": "home"}
@@ -4821,6 +4822,7 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
     sub_category_name = request.POST['sub_category_name']
     goal_amount = request.POST['goal_amount'] 
     goal_date = request.POST['goal_date']
+    user_budget_id = request.POST.get("user_budget", "")
     if goal_date == '':
         goal_date = None
     account_name = request.POST['account_name']
@@ -4830,6 +4832,8 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
         allocate_amount  = 0
     
     account_obj = Account.objects.get(user=user, name=account_name)
+    if user_budget_id:
+        user_budget = UserBudgets.objects.get(user=user, pk=user_budget_id)
     fund_amount = 0
     if fun_name:
         # Fetches old goal amount and add the transaction amount to fund amount 
@@ -4876,7 +4880,7 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
             if not sub_category:
                 sub_category = SubCategory.objects.create(category=category_obj, name=sub_category_name)
             else:
-                goal = Goal.objects.filter(user=user, label=sub_category[0])
+                goal = Goal.objects.filter(user_budget=user_budget, label=sub_category[0])
                 if goal:
                     return_data['error'] = "Name is already exist"
                     return return_data
@@ -4912,13 +4916,14 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
         if not sub_category:
             sub_category = SubCategory.objects.create(category=category_obj, name=sub_category_name)
         else:
-            goal = Goal.objects.filter(user=user, label=sub_category[0])
+            goal = Goal.objects.filter(user_budget=user_budget, label=sub_category[0])
             if goal:
                 return_data['error'] = "Name is already exist"
                 return return_data
             sub_category = sub_category[0]
 
     goal_obj.user = user_name
+    goal_obj.user_budget = user_budget
     goal_obj.account = account_obj
     goal_obj.goal_amount = goal_amount
     goal_obj.currency = account_obj.currency
@@ -5008,6 +5013,7 @@ def goal_add(request):
     user_name = request.user
     error = False
     print(request.POST)
+    budget_qs = UserBudgets.objects.filter(user=user_name)
     if request.method == 'POST':
         goal_obj = Goal()
         goal_data = goal_obj_save(request, goal_obj, user_name)
@@ -5022,7 +5028,8 @@ def goal_add(request):
     category_obj = Category.objects.get(name="Goals", user=user_name)
     sub_obj = SubCategory.objects.filter(category__user=user_name, category__name="Goals")
     context = {'account_data': account_data, 'goal_category': sub_obj,
-               "page": "goal_add", "category_icons": category_icons}
+               "page": "goal_add", "category_icons": category_icons,
+               "budget_qs": budget_qs}
 
     if error:
         context['error'] = error
@@ -5034,6 +5041,7 @@ def goal_update(request, pk):
     user_name = request.user
     error = False
     goal_data = Goal.objects.get(pk=pk)
+    budget_qs = UserBudgets.objects.filter(user=user_name)
     if request.method == 'POST':
         goal_result = goal_obj_save(request, goal_data, user_name, fun_name='goal_update')
         if 'error' in goal_result:
@@ -5047,7 +5055,8 @@ def goal_update(request, pk):
 
     category_obj = Category.objects.get(name="Goals", user=user_name)
     context = {'account_data': account_data, 'goal_data': goal_data,
-               'goal_category': SubCategory.objects.filter(category=category_obj)}
+               'goal_category': SubCategory.objects.filter(category=category_obj),
+               "budget_qs": budget_qs}
     if error:
         context['error'] = error
     return render(request, 'goal/goal_update.html', context=context)

@@ -44,6 +44,30 @@
                             <div class="col-12">
                                 <div class="form-group row">
                                     <div class="col-sm-3 col-form-label">
+                                        <label>User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="user_budget" style="width:200px" disabled>
+
+                                                {% for budget in budget_qs %}
+                                                    {% if budget.id == goal_data.user_budget.id %}
+                                                        <option value="{{budget.id}}" selected>{{budget}}</option>
+                                                    {% else %}
+                                                    <option value="{{budget.id}}">{{budget}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
                                         <label for="fname-icon">Category Group</label>
                                     </div>
                                     <div class="col-sm-9">
