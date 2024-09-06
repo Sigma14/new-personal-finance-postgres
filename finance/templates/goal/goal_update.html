@@ -51,7 +51,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i data-feather="user"></i></span>
                                             </div>
-                                            <select class="form-control" name="user_budget" style="width:200px" disabled>
+                                            <select class="form-control" name="user_budget" style="width:200px; pointer-events: none;">
 
                                                 {% for budget in budget_qs %}
                                                     {% if budget.id == goal_data.user_budget.id %}
