@@ -54,9 +54,27 @@
                     </div>
                 </div>
                 <br/>
-                <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'goal_add' %}" class="btn btn-primary"><i
-                            class="fa fa-plus"></i> Add Goal</a>
+                <div class="row d-flex justify-content-between">
+                    <div style="margin-left:1rem;">
+                        <a href="{% url 'goal_add' %}" class="btn btn-primary"><i
+                                class="fa fa-plus"></i> Add Goal</a>
+                    </div>
+                    <!-- User Budget dropdown -->
+                    <div class="dropdown" style="margin-right:1rem; ">
+                        <form method="post" action="{% url 'goal_list' %}" id="user_budget_form">
+
+                            {% csrf_token %}
+                            <select class="form-control user_budget_filter" name="user_budget" style="width:200px">
+                                {% for budget in user_budget_qs %}
+                                    {% if budget.id == selected_budget.id %}
+                                        <option selected value="{{budget.id}}">{{budget}}</option>
+                                    {% else %}
+                                        <option value="{{budget.id}}">{{budget}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
                 </div>
                 <br/>
                 <section id="ecommerce-products" class="list-view">

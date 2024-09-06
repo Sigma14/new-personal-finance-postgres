@@ -2,23 +2,26 @@
 
 from django.db import migrations
 
+
 def create_user_budgets(apps, schema_editor):
-    User = apps.get_model('auth', 'User')
-    UserBudgets = apps.get_model('my_finance', 'UserBudgets')
+    User = apps.get_model("auth", "User")
+    UserBudgets = apps.get_model("my_finance", "UserBudgets")
 
     for user in User.objects.all():
-        UserBudgets.objects.create(user=user, name=f"Default Budget")
+        UserBudgets.objects.create(user=user, name=f"{user.username}'s Default Budget")
+
 
 def delete_user_budgets(apps, schema_editor):
-    UserBudgets = apps.get_model('my_finance', 'UserBudgets')
+    UserBudgets = apps.get_model("my_finance", "UserBudgets")
     UserBudgets.objects.all().delete()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('my_finance', '0021_userbudgets'),
+        ("my_finance", "0021_userbudgets"),
     ]
 
     operations = [
-        migrations.RunPython(create_user_budgets,delete_user_budgets),
+        migrations.RunPython(create_user_budgets, delete_user_budgets),
     ]

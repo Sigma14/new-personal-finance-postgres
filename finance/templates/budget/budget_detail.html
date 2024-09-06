@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% load mathfilters %}
+{% load mathfilters i18n %}
 <!DOCTYPE html>
 <head>
     {% block title %} Budget Detials {% endblock title %}
@@ -60,7 +60,7 @@
 									<form action="{% url 'budget_detail' pk=budget_obj.id %}" id="jquery-val-form" method="post" target="">
 										{% csrf_token %}
                                     <!-- users edit account form start -->
-                                    <div class="form-validate">
+
                                         <div class="row">
                                             {% if start_date %}
                                             <div class="col-md-3">
@@ -95,7 +95,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+
                                     </form>
                                     <div class="download_csv_form"></div>
                                     <div class="card-header border-bottom">
@@ -104,10 +104,10 @@
                                         {% else %}
                                         <h4 class="card-title mb-25">"{{budget_obj.name}}" {{ _('Budget Transactions')}}</h4>
                                         {% endif %}
-                                        <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{budget_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary download_csv" file_name="{{budget_obj.name}}_budget.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#budget-transactions" fun_name="download_csv" url="{% url 'download_csv' %}">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
-                                        <table class="table table-hover" id="budgets">
+                                        <table class="table table-hover" id="budget-transactions">
                                             <thead>
                                             <tr>
                                                 {% for name in transaction_key %}

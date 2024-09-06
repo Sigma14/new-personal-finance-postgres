@@ -68,6 +68,24 @@
                             class="fa fa-plus"></i> Add Category Group</a>
                         
                         </div>
+                        <!-- User Budget dropdown -->
+                        <div class="dropdown">
+                            <form method="post" action="{% url 'category_list' %}" id="user_budget_form">
+                                {% csrf_token %}
+                                <select class="form-control user_budget_filter" name="user_budget" style="width:200px">
+                                    
+                                    {% for budget in user_budgets %}
+                                        {% if budget.id == selected_budget.id %}
+                                            <option selected value="{{budget.id}}">{{budget}}</option>
+                                        {% else %}                                  
+                                            <option value="{{budget.id}}">{{budget}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                
+                            </form>
+                            
+                        </div>
                         <div class="dropdown">
                             <form method="post" action="{% url 'category_list' %}" id="period_filter_form">
                                 {% csrf_token %}
@@ -80,6 +98,7 @@
                                     {% endif %}
                                     {% endfor %}
                                 </select>
+                                <input class="form-control" type="hidden" value="{{selected_budget.id}}" name="user_budget" >
                             </form>
                             
                         </div>
@@ -196,7 +215,7 @@
                                                                     <li class="list-inline-item">
                                                                         <a type="button" href="#"
                                                                            class="btn btn-warning btn-sm rounded-0 add-transaction-btn "
-                                                                           data-toggle="tooltip" data-placement="top" title="Add Transactions " data-toggle="modal" data-target="#transactionFormModal" data-category="{{ key }}" data-subcategory="{{ data.0 }}" data-button-id="{{data.3}}"><i
+                                                                           data-toggle="tooltip" data-placement="top" title="Add Transactions " data-toggle="modal" data-target="#transactionFormModal" data-category="{{ key }}" data-subcategory="{{ data.0 }}" data-selected-bgt="{{selected_budget.id}}" data-button-id="{{data.3}}"><i
                                                                                 class="fa fa-plus"></i></a>
                                                                     </li>
                                                                     {% endif %}
@@ -414,23 +433,11 @@
                                             <div class="col-12">
                                                 <div class="form-group row">
                                                     <div class="col-sm-3 col-form-label">
-                                                        <label for="account">Account</label>
+                                                        <label for="fname-icon">Account</label>
                                                     </div>
                                                     <div class="col-sm-9">
                                                         <div class="input-group input-group-merge">
-                                                            
-                                                            <div class="form-group">
-                                                                
-                                                                <select class="form-control"  name="account" style='width:100%' required>
-                                                                    {% for key, value in bank_accounts.items %}
-                                                                    {% if forloop.counter == 1 %}
-                                                                        <option value="{{key}}" selected>{{value}}</option>
-                                                                    {% else %}
-                                                                        <option value="{{key}}">{{value}}</option>
-                                                                    {% endif %}
-                                                                    {% endfor %}
-                                                                </select>
-                                                            </div>
+                                                           {{ budget_form.account }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -494,7 +501,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-sm-9 offset-sm-3">
-                                                <button type="submit" class="btn btn-primary mr-1 " name="budget-add-button" >{% trans 'Create' %}</button>
+                                                <button type="submit" class="btn btn-primary mr-1 " user_budget="{{selected_budget.id}}" name="budget-add-button" >{% trans 'Create' %}</button>
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Cancel' %}</button>
                                             </div>
                                         </div>
@@ -563,6 +570,7 @@
                                                         <div class="input-group input-group-merge" name="transaction_category">
                                                             {{ form.category }}
                                                         </div>
+                                                        <input type="text" class="form-control"  name="user_budget" hidden>
                                                     </div>
                                                 </div>
                                             </div>
