@@ -1,5 +1,6 @@
-from .models import Category, SuggestiveCategory
 from .helper import create_categories, create_category_group
+from .models import Category, SuggestiveCategory
+
 
 def user_category(request):
     try:
