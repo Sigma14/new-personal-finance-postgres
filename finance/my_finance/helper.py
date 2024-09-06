@@ -1,43 +1,36 @@
+import calendar
 import threading
 import time
-import calendar
+from collections import OrderedDict
 from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-from my_finance.models import Category, SubCategory, Transaction, Account, AvailableFunds, SuggestiveCategory, Bill, \
-    Income, IncomeDetail, Budget, Tag
+from itertools import chain
 
-sub_category_suggested_list = {
-    "Entertainment": ["Concerts", "Movies", "Music", "Games", "Hobbies"],
-    "Food": ["Groceries", "Eating Out"],
-    "Healthcare": ["Doctor", "Fitness", "Dentist", "Pharmacy", "Health"],
-    "Housing": ["Mortgage", "Rent", "Hoa Fees", "Home Improvement"],
-    "Personal Care": ["Hair", "Shopping", "Electronic Items", "Beauty", "Spa", "Clothes"],
-    "Transportation": ["Ride Share", "Parking", "Public Transportation", "Fuel"],
-    "Bills & Subscriptions": ["Electricity", "Water", "Cellphone", "Internet",
-              "Spotify Subscription", "Netflix Spotify Subscription",
-              "Amazon Prime Spotify Subscription"],
-    "Goals": ["Phone", "Vacation", "Education", "Wedding", "Home Improvement"],
-    "Income": ["Job", "Business", "Bonus"],
-    "Non-Monthly":["Taxes","Car Maintenance","Medical Expenses","Insurance","Gifts","Holidays","Insurance"]
-}
+from dateutil.relativedelta import relativedelta
+from my_finance.models import (
+    Account,
+    AvailableFunds,
+    Bill,
+    Budget,
+    Category,
+    Income,
+    IncomeDetail,
+    SubCategory,
+    SuggestiveCategory,
+    Tag,
+    Transaction,
+)
+
+from .constants import CATEGORIES_DICT, GROUP_LIST, TEMPLATE_NAME_LIST
+from .enums import BudgetPeriods, DateFormats
 
 
 def create_category_group():
-    group_list = ["Entertainment", "Food", "Healthcare", "Housing", "Personal Care", "Transportation"]
-
-    for group in group_list:
+    for group in GROUP_LIST:
         SuggestiveCategory.objects.create(name=group)
 
 
 def create_categories(user):
-    categories_dict = {"Bills & Subscriptions": ['Electricity', 'Water', 'Cellphone'],
-                       "Goals": ["Phone", "Vacation", "Education", "New Car", "New House", "Electronic", "Other"],
-                       "Funds": [],
-                       "Food": ["Groceries", "Eating Out"],
-                       "Personal Care": ["Electronic Items", "Clothes"],
-                       "Income": ["Job", "Business", "Bonus"],
-                       }
-    for category, sub_category in categories_dict.items():
+    for category, sub_category in CATEGORIES_DICT.items():
         category = Category.objects.create(user=user, name=category)
         for sub in sub_category:
             SubCategory.objects.create(category=category, name=sub)
@@ -45,7 +38,9 @@ def create_categories(user):
 
 def check_subcategory_exists(subcategory_obj, name, category_obj):
     if subcategory_obj.name != name:
-        subcategory_qs = SubCategory.objects.filter(category__user=category_obj.user, name=name)
+        subcategory_qs = SubCategory.objects.filter(
+            category__user=category_obj.user, name=name
+        )
         if subcategory_qs.exists():
             return True
     return False
@@ -53,24 +48,30 @@ def check_subcategory_exists(subcategory_obj, name, category_obj):
 
 def save_fund_obj(request, user_name):
     fund_data = {}
-    category_name = request.POST['category']
-    account_name = request.POST['account_name']
-    freeze_amount = round(float(request.POST['freeze_amount']), 2)
+    category_name = request.POST["category"]
+    account_name = request.POST["account_name"]
+    freeze_amount = round(float(request.POST["freeze_amount"]), 2)
     category = Category.objects.filter(user=user_name, name=category_name)
     account_obj = Account.objects.get(user=user_name, name=account_name)
     account_balance = float(account_obj.available_balance)
 
     if account_balance < freeze_amount:
-        fund_data['error'] = f"Freeze amount should be less than {account_obj.name} account balance"
+        fund_data["error"] = (
+            f"Freeze amount should be less than {account_obj.name} account balance"
+        )
         return fund_data
     if not category:
         category_obj = Category.objects.create(name=category_name, user=user_name)
     else:
         category_obj = category[0]
 
-    sub_category = SubCategory.objects.filter(category__user=user_name, name=account_name)
+    sub_category = SubCategory.objects.filter(
+        category__user=user_name, name=account_name
+    )
     if not sub_category:
-        sub_category = SubCategory.objects.create(category=category_obj, name=account_name)
+        sub_category = SubCategory.objects.create(
+            category=category_obj, name=account_name
+        )
     else:
         sub_category = sub_category[0]
 
@@ -84,7 +85,9 @@ def save_fund_obj(request, user_name):
     transaction_obj.transaction_date = datetime.today().date()
     transaction_obj.categories = sub_category
     transaction_obj.account = account_obj
-    tag_obj, tag_created = Tag.objects.get_or_create(user=user_name, name="Adding Funds")
+    tag_obj, tag_created = Tag.objects.get_or_create(
+        user=user_name, name="Adding Funds"
+    )
     if tag_created:
         transaction_obj.tags = tag_obj
     else:
@@ -100,13 +103,26 @@ def save_fund_obj(request, user_name):
         fund_obj[0].total_fund = total_fund
         fund_obj[0].save()
     else:
-        AvailableFunds.objects.create(user=user_name, account=account_obj,
-                                      total_fund=freeze_amount, lock_fund=0.0)
+        AvailableFunds.objects.create(
+            user=user_name, account=account_obj, total_fund=freeze_amount, lock_fund=0.0
+        )
     return fund_data
 
 
-def save_transaction(user, payee, amount, remaining_amount, transaction_date, categories, account, tags, out_flow,
-                     cleared, bill=None, budget=None):
+def save_transaction(
+    user,
+    payee,
+    amount,
+    remaining_amount,
+    transaction_date,
+    categories,
+    account,
+    tags,
+    out_flow,
+    cleared,
+    bill=None,
+    budget=None,
+):
     transaction_obj = Transaction()
     transaction_obj.user = user
     transaction_obj.payee = payee
@@ -127,28 +143,36 @@ def save_transaction(user, payee, amount, remaining_amount, transaction_date, ca
 
 def start_end_date(date_value, period):
     today_date = datetime.today().date()
-    if period == "Yearly":
+    if period == BudgetPeriods.YEARLY.value:
         start_year_date = f"01-01-{date_value.year}"
         end_year_date = f"31-12-{date_value.year}"
-        return datetime.strptime(start_year_date, "%d-%m-%Y").date(), datetime.strptime(end_year_date,
-                                                                                        "%d-%m-%Y").date()
+        return (
+            datetime.strptime(start_year_date, DateFormats.DD_MM_YYYY.value).date(),
+            datetime.strptime(end_year_date, DateFormats.DD_MM_YYYY.value).date(),
+        )
 
-    if period == "Quarterly":
+    if period == BudgetPeriods.QUARTERLY.value:
         current_date = datetime.now()
         upcoming_quarter = int((current_date.month - 1) / 3 + 1)
         if upcoming_quarter == 4:
-            upcoming_quarter_date = datetime(current_date.year, 3 * upcoming_quarter, 31)
+            upcoming_quarter_date = datetime(
+                current_date.year, 3 * upcoming_quarter, 31
+            )
         else:
-            upcoming_quarter_date = datetime(current_date.year, 3 * upcoming_quarter + 1, 1) + timedelta(days=-1)
+            upcoming_quarter_date = datetime(
+                current_date.year, 3 * upcoming_quarter + 1, 1
+            ) + timedelta(days=-1)
         quarter_value = upcoming_quarter_date.date() - timedelta(days=88)
         return upcoming_quarter_date.date(), quarter_value.replace(day=1)
 
-    if period == "Monthly":
+    if period == BudgetPeriods.MONTHLY.value:
         start_date = date_value.replace(day=1)
-        end_date = date_value.replace(day=calendar.monthrange(date_value.year, date_value.month)[1])
+        end_date = date_value.replace(
+            day=calendar.monthrange(date_value.year, date_value.month)[1]
+        )
         return start_date, end_date
 
-    if period == "Weekly":
+    if period == BudgetPeriods.WEEKLY.value:
         week_start = today_date - timedelta(days=today_date.weekday())
         week_end = week_start + timedelta(days=6)
         return week_start, week_end
@@ -158,19 +182,19 @@ def start_end_date(date_value, period):
 
 def get_period_date(start_date, period):
 
-    if period == "Daily":
+    if period == BudgetPeriods.DAILY.value:
         period_date = start_date + relativedelta(days=1)
 
-    if period == "Weekly":
+    if period == BudgetPeriods.WEEKLY.value:
         period_date = start_date + relativedelta(weeks=1)
 
-    if period == "Monthly":
+    if period == BudgetPeriods.MONTHLY.value:
         period_date = start_date + relativedelta(months=1)
 
-    if period == "Quarterly":
+    if period == BudgetPeriods.QUARTERLY.value:
         period_date = start_date + relativedelta(months=3)
 
-    if period == "Yearly":
+    if period == BudgetPeriods.YEARLY.value:
         period_date = start_date + relativedelta(years=1)
 
     return period_date
@@ -178,11 +202,11 @@ def get_period_date(start_date, period):
 
 def check_bill_is_due():
     """
-        Check bill date is due or not
+    Check bill date is due or not
     """
     today_date = datetime.today().date()
     bill_data = Bill.objects.filter(date__lte=today_date, status="unpaid")
-    for bill in bill_data:        
+    for bill in bill_data:
         bill_detail_obj = bill.bill_details
         account_obj = bill_detail_obj.account
         account_balance = float(account_obj.available_balance)
@@ -192,7 +216,7 @@ def check_bill_is_due():
         auto_bill = bill_detail_obj.auto_bill
         auto_pay = bill_detail_obj.auto_pay
         bill_date = bill_detail_obj.date
-         # Calculate the next month and year
+        # Calculate the next month and year
         next_month = (today_date.month % 12) + 1
         next_year = today_date.year if next_month != 1 else today_date.year + 1
 
@@ -200,23 +224,47 @@ def check_bill_is_due():
         if bill_date.month == next_month and bill_date.year == next_year:
             continue
         frequency = bill_detail_obj.frequency
-        next_bill_date = get_period_date(bill_date, frequency)
-        bill_detail_obj.date = next_bill_date
-        bill_detail_obj.save()
+        if frequency is not None:
+            next_bill_date = get_period_date(bill_date, frequency)
+            bill_detail_obj.date = next_bill_date
+            bill_detail_obj.save()
 
         if auto_bill:
             next_bill_date = get_period_date(bill_date, frequency)
-            Bill.objects.create(user=bill.user, account=account_obj, currency=currency, label=label,
-                                amount=bill_amount, remaining_amount=bill_amount, date=next_bill_date,
-                                frequency=frequency, bill_details=bill_detail_obj, auto_bill=auto_bill,
-                                auto_pay=auto_pay)
+            Bill.objects.create(
+                user=bill.user,
+                user_budget=bill.user_budget,
+                account=account_obj,
+                currency=currency,
+                label=label,
+                amount=bill_amount,
+                remaining_amount=bill_amount,
+                date=next_bill_date,
+                frequency=frequency,
+                bill_details=bill_detail_obj,
+                auto_bill=auto_bill,
+                auto_pay=auto_pay,
+            )
 
         if auto_pay:
             remaining_amount = round(account_balance - bill_amount, 2)
             categories = SubCategory.objects.get(name=label, category__user=bill.user)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=bill.user, name="Bills")
-            save_transaction(bill.user, label, bill_amount, remaining_amount, bill.date, categories, account_obj,
-                             tag_obj, True, True, bill)
+            tag_obj, tag_created = Tag.objects.get_or_create(
+                user=bill.user, name="Bills"
+            )
+            save_transaction(
+                bill.user,
+                label,
+                bill_amount,
+                remaining_amount,
+                bill.date,
+                categories,
+                account_obj,
+                tag_obj,
+                True,
+                True,
+                bill,
+            )
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
@@ -237,7 +285,6 @@ def request_bill():
         time.sleep(5)
 
 
-
 def create_bill_request():
     """
     Create bill request log
@@ -246,16 +293,26 @@ def create_bill_request():
     alive_threads = threading.enumerate()
     bills_thread1 = False
     for thread in alive_threads:
-        if thread.name == 'bills_thread1':
+        if thread.name == "bills_thread1":
             bills_thread1 = True
 
     if not bills_thread1:
-        t1 = threading.Thread(target=request_bill, name='bills_thread1')
+        t1 = threading.Thread(target=request_bill, name="bills_thread1")
         t1.start()
 
 
-def save_income(user, sub_category, account, income_amount, income_date, auto_income, frequency, auto_credit,
-                created_date, primary):
+def save_income(
+    user,
+    sub_category,
+    account,
+    income_amount,
+    income_date,
+    auto_income,
+    frequency,
+    auto_credit,
+    created_date,
+    primary,
+):
     """
     Save income
     """
@@ -290,7 +347,7 @@ def save_income_details(account, income_amount, income, credited, income_date):
 
 def check_income_date():
     """
-        Check income date
+    Check income date
     """
     today_date = datetime.today().date()
     income_data = Income.objects.filter(income_date__lte=today_date, auto_income=True)
@@ -303,16 +360,29 @@ def check_income_date():
         auto_credit = income.auto_credit
         income_date = income.income_date
         frequency = income.frequency
-        income_detail_obj = save_income_details(account_obj, income_amount, income, False, income_date)
+        income_detail_obj = save_income_details(
+            account_obj, income_amount, income, False, income_date
+        )
         if auto_income:
             next_bill_date = get_period_date(income_date, frequency)
             income.income_date = next_bill_date
         if auto_credit:
             remaining_amount = round(account_balance + income_amount, 2)
-            tag_obj, tag_created = Tag.objects.get_or_create(user=income.user, name="Incomes")
-            save_transaction(income.user, sub_category.name, income_amount, remaining_amount, income_date, sub_category,
-                             account_obj,
-                             tag_obj, False, True)
+            tag_obj, tag_created = Tag.objects.get_or_create(
+                user=income.user, name="Incomes"
+            )
+            save_transaction(
+                income.user,
+                sub_category.name,
+                income_amount,
+                remaining_amount,
+                income_date,
+                sub_category,
+                account_obj,
+                tag_obj,
+                False,
+                True,
+            )
             account_obj.available_balance = remaining_amount
             account_obj.transaction_count += 1
             account_obj.save()
@@ -337,17 +407,31 @@ def create_income_request():
     alive_threads = threading.enumerate()
     income_thread1 = False
     for thread in alive_threads:
-        if thread.name == 'income_thread1':
+        if thread.name == "income_thread1":
             income_thread1 = True
 
     if not income_thread1:
-        t1 = threading.Thread(target=request_income, name='income_thread1')
+        t1 = threading.Thread(target=request_income, name="income_thread1")
         t1.start()
 
 
-def save_budgets(user_name, start_date, end_date, budget_name, budget_period, budget_currency, budget_amount,
-                 budget_auto, created_date, ended_date, initial_amount, budget_start_date, subcategory_obj=None,
-                 budget_obj=None, budget_status=None):
+def save_budgets(
+    user_name,
+    start_date,
+    end_date,
+    budget_name,
+    budget_period,
+    budget_currency,
+    budget_amount,
+    budget_auto,
+    created_date,
+    ended_date,
+    initial_amount,
+    budget_start_date,
+    subcategory_obj=None,
+    budget_obj=None,
+    budget_status=None,
+):
     if not budget_obj:
         budget_obj = Budget()
     budget_obj.user = user_name
@@ -371,10 +455,12 @@ def save_budgets(user_name, start_date, end_date, budget_name, budget_period, bu
 
 def check_budget_date():
     """
-        Check budget date
+    Check budget date
     """
     today_date = datetime.today().date()
-    budget_data = Budget.objects.filter(ended_at__lt=today_date, auto_budget=True, budget_status=False)
+    budget_data = Budget.objects.filter(
+        ended_at__lt=today_date, auto_budget=True, budget_status=False
+    )
     for budget in budget_data:
         print("===========auto pay budget call================")
         budget_name = budget.name
@@ -385,38 +471,90 @@ def check_budget_date():
         amount = budget.amount
         budget_created_date = budget.budget_start_date
         auto_budget = budget.auto_budget
-        start_month_date, end_month_date = start_end_date(budget_start_date, "Monthly")
+        start_month_date, end_month_date = start_end_date(
+            budget_start_date, BudgetPeriods.MONTHLY.value
+        )
         print("budget_period=======>", budget_period)
         print("budget_name=======>", budget_name)
-        budget_end_date = get_period_date(budget_start_date, budget_period) - relativedelta(days=1)
-        if budget_period == 'Quarterly':
+        budget_end_date = get_period_date(
+            budget_start_date, budget_period
+        ) - relativedelta(days=1)
+        if budget_period == BudgetPeriods.QUARTERLY.value:
             for month_value in range(3):
                 if month_value == 2:
                     budget_status = False
                 else:
                     budget_status = True
-                save_budgets(budget.user, start_month_date, end_month_date, budget_name, budget_period,
-                             currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
-                             budget_created_date, subcategory, None, budget_status)
+                save_budgets(
+                    budget.user,
+                    start_month_date,
+                    end_month_date,
+                    budget_name,
+                    budget_period,
+                    currency,
+                    amount,
+                    auto_budget,
+                    budget_start_date,
+                    budget_end_date,
+                    amount,
+                    budget_created_date,
+                    subcategory,
+                    None,
+                    budget_status,
+                )
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(
+                    start_month_date, BudgetPeriods.MONTHLY.value
+                )
 
-        if budget_period == 'Yearly':
+        if budget_period == BudgetPeriods.YEARLY.value:
             for month_value in range(12):
                 if month_value == 11:
                     budget_status = False
                 else:
                     budget_status = True
-                save_budgets(budget.user, start_month_date, end_month_date, budget_name, budget_period,
-                             currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
-                             budget_created_date, subcategory, None, budget_status)
+                save_budgets(
+                    budget.user,
+                    start_month_date,
+                    end_month_date,
+                    budget_name,
+                    budget_period,
+                    currency,
+                    amount,
+                    auto_budget,
+                    budget_start_date,
+                    budget_end_date,
+                    amount,
+                    budget_created_date,
+                    subcategory,
+                    None,
+                    budget_status,
+                )
                 start_month_date = start_month_date + relativedelta(months=1)
-                start_month_date, end_month_date = start_end_date(start_month_date, "Monthly")
+                start_month_date, end_month_date = start_end_date(
+                    start_month_date, BudgetPeriods.MONTHLY.value
+                )
 
-        if budget_period == 'Daily' or budget_period == 'Weekly' or budget_period == 'Monthly':
-            save_budgets(budget.user, start_month_date, end_month_date, budget_name, budget_period,
-                         currency, amount, auto_budget, budget_start_date, budget_end_date, amount,
-                         budget_created_date, subcategory)
+        if budget_period in (
+            BudgetPeriods.DAILY.value,
+            BudgetPeriods.WEEKLY.value,
+            BudgetPeriods.MONTHLY.value,
+        ):
+            save_budgets(
+                budget.user,
+                start_month_date,
+                end_month_date,
+                budget_name,
+                budget_period,
+                currency,
+                amount,
+                auto_budget,
+                budget_start_date,
+                budget_end_date,
+                amount,
+                budget_created_date,
+                subcategory,
+            )
         budget.budget_status = True
         budget.save()
 
@@ -438,11 +576,11 @@ def create_budget_request():
     alive_threads = threading.enumerate()
     budget_thread1 = False
     for thread in alive_threads:
-        if thread.name == 'budget_thread1':
+        if thread.name == "budget_thread1":
             budget_thread1 = True
 
     if not budget_thread1:
-        t1 = threading.Thread(target=request_budget, name='budget_thread1')
+        t1 = threading.Thread(target=request_budget, name="budget_thread1")
         t1.start()
 
 
@@ -465,69 +603,173 @@ def get_template_budget():
     # Generate a list of all dates in the current month
     dates = [datetime(year, month, day) for day in range(1, num_days + 1)]
     template_end_date = dates[0]
-    template_name_list = ['Hobbies', 'Clothes', 'Study', 'Entertainment', 'Health']
     tem_daily_amount = 0
     tem_daily_spent = 0
     tem_weekly_amount = 0
     tem_weekly_spent = 0
 
-    template_dict = {'Yearly': [], 'Quarterly': [], 'Monthly': [],
-                     'Weekly': [['Entertainment', 500.0, 0.0, 500.0, 20]], 'Daily': [['Health', 500.0, 0.0, 500.0, 10]]}
+    template_dict = {
+        BudgetPeriods.YEARLY.value: [],
+        BudgetPeriods.QUARTERLY.value: [],
+        BudgetPeriods.MONTHLY.value: [],
+        BudgetPeriods.WEEKLY.value: [["Entertainment", 500.0, 0.0, 500.0, 20]],
+        BudgetPeriods.DAILY.value: [["Health", 500.0, 0.0, 500.0, 10]],
+    }
     for tem_date in dates:
         if tem_date == template_end_date:
-            template_end_date = get_period_date(tem_date, "Weekly")
-            temp_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            temp_end_date = datetime.strftime(template_end_date - relativedelta(days=1), "%b %d, %Y")
-            template_dict['Weekly'].append(
-                ['Entertainment', 50.0, 30.0, 20.0, 1973, 'Weekly', temp_start_date, temp_end_date])
+            template_end_date = get_period_date(tem_date, BudgetPeriods.WEEKLY.value)
+            temp_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            temp_end_date = datetime.strftime(
+                template_end_date - relativedelta(days=1), DateFormats.MON_DD_YYYY.value
+            )
+            template_dict[BudgetPeriods.WEEKLY.value].append(
+                [
+                    "Entertainment",
+                    50.0,
+                    30.0,
+                    20.0,
+                    1973,
+                    BudgetPeriods.WEEKLY.value,
+                    temp_start_date,
+                    temp_end_date,
+                ]
+            )
             tem_weekly_amount += 50.0
             tem_weekly_spent += 30.0
 
-        if not template_dict['Monthly'] or not template_dict['Quarterly'] or not template_dict['Quarterly']:
+        if (
+            not template_dict[BudgetPeriods.MONTHLY.value]
+            or not template_dict[BudgetPeriods.QUARTERLY.value]
+        ):
             temp_month_end_date = datetime.strftime(
-                get_period_date(tem_date, "Monthly") - relativedelta(days=1), "%b %d, %Y")
-            temp_month_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Monthly'].append(
-                ['Hobbies', 150.0, 100.0, 50.0, 1979, 'Monthly', temp_month_start_date, temp_month_end_date])
+                get_period_date(tem_date, BudgetPeriods.MONTHLY.value)
+                - relativedelta(days=1),
+                DateFormats.MON_DD_YYYY.value,
+            )
+            temp_month_start_date = datetime.strftime(
+                tem_date, DateFormats.MON_DD_YYYY.value
+            )
+            template_dict[BudgetPeriods.MONTHLY.value].append(
+                [
+                    "Hobbies",
+                    150.0,
+                    100.0,
+                    50.0,
+                    1979,
+                    BudgetPeriods.MONTHLY.value,
+                    temp_month_start_date,
+                    temp_month_end_date,
+                ]
+            )
             temp_quart_end_date = datetime.strftime(
-                get_period_date(tem_date, "Quarterly") - relativedelta(days=1), "%b %d, %Y")
-            temp_quart_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Quarterly'].append(
-                ['Clothes', 200.0, 50.0, 150.0, 1979, 'Quarterly', temp_quart_start_date, temp_quart_end_date])
-            temp_year_end_date = datetime.strftime(get_period_date(tem_date, "Yearly") - relativedelta(days=1),
-                                                   "%b %d, %Y")
-            temp_year_start_date = datetime.strftime(tem_date, "%b %d, %Y")
-            template_dict['Yearly'].append(
-                ['Study', 2500.0, 1000.0, 1500.0, 1979, 'Yearly', temp_year_start_date, temp_year_end_date])
+                get_period_date(tem_date, BudgetPeriods.QUARTERLY.value)
+                - relativedelta(days=1),
+                DateFormats.MON_DD_YYYY.value,
+            )
+            temp_quart_start_date = datetime.strftime(
+                tem_date, DateFormats.MON_DD_YYYY.value
+            )
+            template_dict[BudgetPeriods.QUARTERLY.value].append(
+                [
+                    "Clothes",
+                    200.0,
+                    50.0,
+                    150.0,
+                    1979,
+                    BudgetPeriods.QUARTERLY.value,
+                    temp_quart_start_date,
+                    temp_quart_end_date,
+                ]
+            )
+            temp_year_end_date = datetime.strftime(
+                get_period_date(tem_date, BudgetPeriods.YEARLY.value)
+                - relativedelta(days=1),
+                DateFormats.MON_DD_YYYY.value,
+            )
+            temp_year_start_date = datetime.strftime(
+                tem_date, DateFormats.MON_DD_YYYY.value
+            )
+            template_dict[BudgetPeriods.YEARLY.value].append(
+                [
+                    "Study",
+                    2500.0,
+                    1000.0,
+                    1500.0,
+                    1979,
+                    BudgetPeriods.YEARLY.value,
+                    temp_year_start_date,
+                    temp_year_end_date,
+                ]
+            )
 
-        template_dict['Daily'].append(
-            ['Health', 50.0, 40.0, 10.0, 1973, 'Daily', datetime.strftime(tem_date, "%b %d, %Y"),
-             datetime.strftime(tem_date, "%b %d, %Y")])
+        template_dict[BudgetPeriods.DAILY.value].append(
+            [
+                "Health",
+                50.0,
+                40.0,
+                10.0,
+                1973,
+                BudgetPeriods.DAILY.value,
+                datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value),
+                datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value),
+            ]
+        )
         tem_daily_amount += 50.0
         tem_daily_spent += 40.0
 
-    template_dict['Daily'][0][1] = tem_daily_amount
-    template_dict['Daily'][0][2] = tem_daily_spent
-    template_dict['Daily'][0][3] = tem_daily_amount - tem_daily_spent
-    template_dict['Weekly'][0][1] = tem_weekly_amount
-    template_dict['Weekly'][0][2] = tem_weekly_spent
-    template_dict['Weekly'][0][3] = tem_weekly_amount - tem_weekly_spent
+    template_dict[BudgetPeriods.DAILY.value][0][1] = tem_daily_amount
+    template_dict[BudgetPeriods.DAILY.value][0][2] = tem_daily_spent
+    template_dict[BudgetPeriods.DAILY.value][0][3] = tem_daily_amount - tem_daily_spent
+    template_dict[BudgetPeriods.WEEKLY.value][0][1] = tem_weekly_amount
+    template_dict[BudgetPeriods.WEEKLY.value][0][2] = tem_weekly_spent
+    template_dict[BudgetPeriods.WEEKLY.value][0][3] = (
+        tem_weekly_amount - tem_weekly_spent
+    )
     total_spent = tem_daily_spent + tem_weekly_spent + 100.0 + 50.0 + 1000.0
     total_amount = tem_daily_amount + tem_weekly_amount + 150.0 + 200.0 + 2500.0
     total_left = total_amount - total_spent
     template_values = [total_spent, total_left]
-    template_graph_data = [{'name': 'Spent', 'data': [1000.0, 50.0, 100.0, tem_weekly_spent, tem_daily_spent]},
-                           {'name': 'Left', 'data': [1500.0, 150.0, 50.0, template_dict['Weekly'][0][3], template_dict['Daily'][0][3]]},
-                           {'name': 'OverSpent', 'data': [0, 0, 0, 0, 0]}]
-    return template_dict, template_values, template_name_list, template_graph_data
+    template_graph_data = [
+        {
+            "name": "Spent",
+            "data": [1000.0, 50.0, 100.0, tem_weekly_spent, tem_daily_spent],
+        },
+        {
+            "name": "Left",
+            "data": [
+                1500.0,
+                150.0,
+                50.0,
+                template_dict[BudgetPeriods.WEEKLY.value][0][3],
+                template_dict[BudgetPeriods.DAILY.value][0][3],
+            ],
+        },
+        {"name": "OverSpent", "data": [0, 0, 0, 0, 0]},
+    ]
+    return template_dict, template_values, TEMPLATE_NAME_LIST, template_graph_data
 
 
-def get_cmp_diff_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
-                      budget_transaction_data_dict, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, total_bgt_spend_amount=None, total_bgt_earned_amount=None):
+def get_cmp_diff_data(
+    budget_names,
+    user_name,
+    month_start,
+    month_end,
+    budget_bar_value,
+    budget_graph_value,
+    budget_transaction_data_dict,
+    budget_income_graph_value,
+    budget_income_bar_value,
+    expense_bdgt_names,
+    income_bdgt_names,
+    total_bgt_spend_amount=None,
+    total_bgt_earned_amount=None,
+):
     for bgt_name in budget_names:
-        transaction_budget = Transaction.objects.filter(user=user_name, categories__name=bgt_name,
-                                                        transaction_date__range=(month_start, month_end)).order_by(
-            '-transaction_date')
+        transaction_budget = Transaction.objects.filter(
+            user=user_name,
+            categories__name=bgt_name,
+            transaction_date__range=(month_start, month_end),
+        ).order_by("-transaction_date")
         total_spent_amount = 0
         total_earn_amount = 0
         trans_type = "spend"
@@ -541,37 +783,112 @@ def get_cmp_diff_data(budget_names, user_name, month_start, month_end, budget_ba
                 total_spent_amount += float(t.amount)
                 total_bgt_spend_amount += float(t.amount)
 
-            budget_transaction_data_dict[bgt_name].append([str(t.transaction_date), float(t.amount), trans_type])
+            budget_transaction_data_dict[bgt_name].append(
+                [str(t.transaction_date), float(t.amount), trans_type]
+            )
 
         if trans_type == "spend":
             budget_graph_value.append(total_spent_amount)
-            budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_spent_amount])
-            budget_bar_value[0]['data'].append(total_spent_amount)
+            budget_transaction_data_dict[bgt_name].insert(
+                0, [bgt_name, total_spent_amount]
+            )
+            budget_bar_value[0]["data"].append(total_spent_amount)
             expense_bdgt_names.append(bgt_name)
         else:
             budget_income_graph_value.append(total_earn_amount)
-            budget_income_bar_value[0]['data'].append(total_earn_amount)
-            budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_earn_amount])
+            budget_income_bar_value[0]["data"].append(total_earn_amount)
+            budget_transaction_data_dict[bgt_name].insert(
+                0, [bgt_name, total_earn_amount]
+            )
             income_bdgt_names.append(bgt_name)
 
-    return budget_bar_value, budget_graph_value, budget_income_graph_value, budget_income_bar_value, expense_bdgt_names, income_bdgt_names, budget_transaction_data_dict, total_bgt_spend_amount,\
-           total_bgt_earned_amount
+    return (
+        budget_bar_value,
+        budget_graph_value,
+        budget_income_graph_value,
+        budget_income_bar_value,
+        expense_bdgt_names,
+        income_bdgt_names,
+        budget_transaction_data_dict,
+        total_bgt_spend_amount,
+        total_bgt_earned_amount,
+    )
 
 
-def get_cmp_data(budget_names, user_name, month_start, month_end, budget_bar_value, budget_graph_value,
-                 budget_transaction_data_dict):
+def get_cmp_data(
+    budget_names,
+    user_name,
+    month_start,
+    month_end,
+    budget_bar_value,
+    budget_graph_value,
+    budget_transaction_data_dict,
+):
     for bgt_name in budget_names:
-        transaction_budget = Transaction.objects.filter(user=user_name, categories__name=bgt_name,
-                                                        transaction_date__range=(month_start, month_end)).order_by(
-            '-transaction_date')
+        transaction_budget = Transaction.objects.filter(
+            user=user_name,
+            categories__name=bgt_name,
+            transaction_date__range=(month_start, month_end),
+        ).order_by("-transaction_date")
         total_spent_amount = 0
         budget_transaction_data_dict[bgt_name] = []
         for t in transaction_budget:
             total_spent_amount += float(t.amount)
-            budget_transaction_data_dict[bgt_name].append([str(t.transaction_date), float(t.amount)])
+            budget_transaction_data_dict[bgt_name].append(
+                [str(t.transaction_date), float(t.amount)]
+            )
 
         budget_graph_value.append(total_spent_amount)
         budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_spent_amount])
-        budget_bar_value[0]['data'].append(total_spent_amount)
+        budget_bar_value[0]["data"].append(total_spent_amount)
 
     return budget_bar_value, budget_graph_value, budget_transaction_data_dict
+
+
+def get_list_of_months(user_name, user_budget):
+    """
+    Generates a list of months in which Bills and Budgets exists
+    """
+    try:
+        earliest_budget = Budget.objects.filter(
+            user=user_name, user_budget=user_budget, start_date__isnull=False
+        ).order_by("start_date")
+
+        earliest_bill = Bill.objects.filter(
+            user=user_name, user_budget=user_budget, date__isnull=False
+        ).order_by("date")
+        earliest_dates = list(chain(earliest_budget, earliest_bill))
+        # Sort by date, handling different field names
+        earliest_dates.sort(
+            key=lambda x: x.start_date if hasattr(x, "start_date") else x.date
+        )
+
+        # Get the overall start and end dates
+        start = (
+            earliest_dates[0].start_date
+            if hasattr(earliest_dates[0], "start_date")
+            else earliest_dates[0].date
+        )
+        end = (
+            earliest_dates[-1].start_date
+            if hasattr(earliest_dates[-1], "start_date")
+            else earliest_dates[-1].date
+        )
+
+    except (IndexError, ValueError):
+        date_value = datetime.today().date()
+        start, end = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+
+    # Generate the list of unique months
+    list_of_months = list(
+        OrderedDict(
+            ((start + timedelta(_)).strftime(DateFormats.MON_YYYY.value), None)
+            for _ in range((end - start).days + 1)
+        ).keys()
+    )
+    # Get the current month-year string
+    current_month_year = datetime.today().date().strftime(DateFormats.MON_YYYY.value)
+    # Check if current month-year exists in the list, and add it if it doesn't
+    if current_month_year not in list_of_months:
+        list_of_months.append(current_month_year)
+    return list_of_months
