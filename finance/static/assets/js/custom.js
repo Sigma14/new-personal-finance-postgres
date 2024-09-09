@@ -2698,7 +2698,12 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $("body").delegate(".add_other_income", "click", function(e)
     {
         last_index = parseInt($(this).attr('last_index')) + 1
-        trHTML = "<tr><td><input type='text' value='Other Income' id='income_sources" + last_index +"' name='income_sources' class='form-control income_sources' required/></td><td><input type='number' value='0.0' id='income_expected_amount" + last_index +"' name='income_expected_amount' class='form-control total_income_exp' required/></td><td><input type='number' value='0.0' id='income_actual_amount" + last_index +"' name='income_actual_amount' class='form-control total_income_act' required/></td><td><button class='btn btn-outline-secondary update_income_bgt_walkthrough' income_index='" + last_index +"' income_id='false'>Update</button></td></tr>"
+        var user_budget = $(this).attr('user_budget')
+        trHTML = "<tr>"+
+        "<td><input type='text' value='Other Income' id='income_sources" + last_index +"' name='income_sources' class='form-control income_sources' required/></td>"+
+        "<td><input type='number' value='0.0' id='income_expected_amount" + last_index +"' name='income_expected_amount' class='form-control total_income_exp' required/>"+
+        "<input type='number' value='0.0' id='income_actual_amount" + last_index +"' name='income_actual_amount' class='form-control total_income_act' required hidden/></td>"+
+        "<td><button class='btn btn-outline-secondary update_income_bgt_walkthrough' income_index='" + last_index +"' income_id='false' user_budget='" + user_budget + "'>Update</button></td></tr>"
         $(".total_income_row").before(trHTML)
         return false
     });
@@ -2810,8 +2815,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
 
         trHTML = "<tr>"+
         "<td><input type='text' value='Other Bill' id='bill_sources" + last_index +"' name='bill_sources' class='form-control bill_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='bill_actual_amount" + last_index +"' name='income_bill_amount' class='form-control total_bill_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/>"+
+        "<input type='number' value='0.0' id='bill_actual_amount" + last_index +"' name='income_bill_amount' class='form-control total_bill_act' required hidden/></td>"+
         "<td>" +
         "<select id='bill_budget_period" + last_index + "' name='bill_budget_period' class='form-control' required>" +
         "<option value='Monthly'>Monthly</option>" +
@@ -2957,8 +2962,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         trHTML = "<tr><th colspan='4'><input type=text class='form-control other_exp_name' btn_id='other_exp_btn" + last_index + "' placeholder='Enter Group Name'</th></tr>"
         trHTML += "<tr>"+
         "<td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/>"+
+        "<input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required hidden/></td>"+
         "<td>" +
         "<select id='expenses_budget_period" + last_index + "' name='expenses_budget_period' class='form-control' required>" +
         "<option value='Monthly'>Monthly</option>" +
@@ -3113,8 +3118,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         var user_budget = $(this).attr('user_budget')
         trHTML = "<tr>"+
         "<td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/>"+
+        "<input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required hidden/></td>"+
 
         "<td>" +
         "<select id='non_monthly_expenses_budget_period" + last_index + "' name='non_monthly_expenses_budget_period' class='form-control' required>" +
@@ -3277,8 +3282,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
             "{% endfor %}" +
             "</datalist>" +
             "</td>" +
-        "<td><input type='number' value='0.0' id='goals_expected_amount" + last_index +"' name='goals_expected_amount' class='form-control total_goals_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='goals_expected_amount" + last_index +"' name='goals_expected_amount' class='form-control total_goals_exp' required/>"+
+        "<input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required hidden/></td>"+
         "<td>" +
         "<i class='fa fa-calendar fa-1 goal_calender_icon' index='" + last_index + "' id='goal_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='goals_add_budget_date" + last_index + "' name='goals_add_budget_date' class='form-control flatpickr-basic' hidden required>" +

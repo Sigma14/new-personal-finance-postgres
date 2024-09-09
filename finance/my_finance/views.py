@@ -3921,6 +3921,8 @@ def budgets_walk_through(request, pk):
         "index_counter": index_counter,
         "today_date": str(today_date),
         "page": "budgets",
+        "category_icons": CATEGORY_ICONS,
+        "subcategories": category_qs,
     }
 
     return render(request, "budget/budget_walk_through.html", context=context)
@@ -4672,7 +4674,7 @@ def budgets_goals_walk_through(request):
             budget_obj.ended_at = budget_end_date
             budget_obj.budget_start_date = budget_start_date
             try:
-                goal_obj = Goal.objects.get(user=user_name, label=sub_cat_obj)
+                goal_obj = Goal.objects.get(user_budget=user_budget, label=sub_cat_obj)
                 # If goal already exists, it'll allocate the budget actual amount to goals
                 if goal_obj:
                     budget_obj.save()
@@ -4685,6 +4687,7 @@ def budgets_goals_walk_through(request):
                 # If goal doesn't exist, creates a new one
                 goal_obj = Goal()
                 goal_obj.user = user_name
+                goal_obj.user_budget = user_budget
                 goal_obj.account = account_obj
                 goal_obj.goal_amount = budget_exp_amount
                 goal_obj.currency = account_obj.currency
@@ -4728,6 +4731,7 @@ def budgets_goals_walk_through(request):
                 # and allocate amount
                 goal_obj = Goal()
                 goal_obj.user = user_name
+                goal_obj.user_budget = user_budget
                 goal_obj.account = account_obj
                 goal_obj.goal_amount = budget_exp_amount
                 goal_obj.currency = account_obj.currency
