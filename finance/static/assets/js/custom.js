@@ -997,6 +997,13 @@ $('.check_primary').on("click", function(e)
         location.assign($("#user_budget_name").val());
         });
 
+    //  Function for Setting a Budget as Default
+    $(".default_bgt_select").on("change", function(e)
+    {
+        form_index = $(this).data("form-id");
+        $("#defaultBudgetForm" + form_index).submit();
+        });
+
 
 // User Budget Update function
     $("#bgt-update-btn").on("click", function(e)
