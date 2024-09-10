@@ -3453,6 +3453,53 @@ $("body").delegate("#down_pay_per", "change", function(event)
 
     });
 
+    // Budget Walk-through suggestions
+    $("body").delegate(".sub-cat-name", "click", function(e) {
+        e.preventDefault();
+
+        // Fetch the Category & Sub-category
+        var name = $(this).data("name");
+        var category = $(this).data("category")
+        console.log("Name ==>", name, "Category==>", category)
+
+        // This block fetches the last index from the btn and set the
+        // selected suggestion values of category & sub-category name
+        if(category==="Income"){
+            last_index = parseInt($(".add_other_income").attr('last_index')) + 1;
+            $(".add_other_income").click();
+            input_id = "#income_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Bills & Subscriptions"){
+            last_index = parseInt($(".add_other_bill").attr('last_index')) + 1;
+            $(".add_other_bill").click();
+            input_id = "#bill_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Non-Monthly"){
+            last_index = parseInt($(".add_other_non_monthly_expenses").attr('last_index')) + 1;
+            $(".add_other_non_monthly_expenses").click();
+            input_id = "#non_monthly_expenses_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Goals"){
+            last_index = parseInt($(".add_other_goals").attr('last_index')) + 1;
+            $(".add_other_goals").click();
+            input_id = "#sub_category_name"+last_index
+            $(input_id).val(name);
+        }
+        else {
+            // Sets the values for expenses sections
+            last_index = parseInt($(".add_other_expenses ").attr('last_index')) + 1;
+            $(".add_other_expenses ").click();
+            btn_id = "#other_exp_btn"+last_index
+            $(btn_id).attr("category_name", category)
+            input_id = "#expenses_sources"+last_index
+            $(input_id).val(name);
+            $(".other_exp_name").val(category);
+        }
+    });
+
     // Compare different budget tables dropdown
     // Dropdown function for Budget 1 Table
     $("body").delegate("#spentAmountDropdown", "change", function() {

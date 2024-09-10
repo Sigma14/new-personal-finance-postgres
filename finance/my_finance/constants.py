@@ -151,9 +151,17 @@ SUGGESTED_SUB_CATEGORIES = {
         "Insurance",
         "Gifts",
         "Holidays",
-        "Insurance",
     ],
 }
+
+# Excluded Sub-Categories for Budget Walk-through Expense suggestions
+EXCLUDED_SUB_CATEGORIES = [
+    "Bills & Subscriptions",
+    "Goals",
+    "Income",
+    "Funds",
+    "Non-Monthly"
+]
 
 # Expense category group list
 GROUP_LIST = [

@@ -165,7 +165,7 @@
                                 </div>
                                 <div id="income-section" class="content">
                                     <section>
-                                        <div class="row match-height">
+                                        <div class="row">
                                             <div class="col-md-6 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
@@ -229,6 +229,17 @@
                                                                 </tbody>
                                                             </table>
                                                         </div>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Incomes :-</h5>
+                                                            {% for category in subcategories.Income %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Income" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -247,7 +258,7 @@
                                 </div>
                                 <div id="bill-section" class="content">
                                     <section>
-                                        <div class="row match-height">
+                                        <div class="row">
                                             <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
@@ -331,6 +342,17 @@
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Bills :-</h5>
+                                                            {% for category in subcategories|get_item:'Bills & Subscriptions' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Bills & Subscriptions" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -436,6 +458,23 @@
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Expenses :-</h5>
+                                                            {% for category, sub_cat in subcategories.items %}
+                                                                {% if category not in excluded_subcategories %}
+                                                                <h5>{{category}}</h5>
+                                                                {% for sub_cat_name in sub_cat %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{sub_cat_name}}" data-category="{{category}}" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:sub_cat_name %}
+                                                                            <img src="{% static category_icons|get_item:sub_cat_name %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{sub_cat_name}}&nbsp;
+                                                                </a>
+                                                                {% endfor %}
+                                                                {% endif %}
+
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -457,7 +496,7 @@
                                 </div>
                                 <div id="non-monthly-expenses-section" class="content">
                                     <section>
-                                        <div class="row match-height">
+                                        <div class="row">
                                             <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
@@ -540,6 +579,17 @@
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Non-Monthly Expenses :-</h5>
+                                                            {% for category in subcategories|get_item:'Non-Monthly' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Non-Monthly" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -562,7 +612,7 @@
                                 </div>
                                 <div id="goals-section" class="content">
                                     <section>
-                                        <div class="row match-height">
+                                        <div class="row">
                                             <div class="col-md-12 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
@@ -637,6 +687,17 @@
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Goals :-</h5>
+                                                            {% for category in subcategories|get_item:'Goals' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Goals" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
