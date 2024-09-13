@@ -763,13 +763,36 @@ def get_cmp_diff_data(
     income_bdgt_names,
     total_bgt_spend_amount=None,
     total_bgt_earned_amount=None,
+    user_budget=None
 ):
     for bgt_name in budget_names:
-        transaction_budget = Transaction.objects.filter(
-            user=user_name,
-            categories__name=bgt_name,
-            transaction_date__range=(month_start, month_end),
-        ).order_by("-transaction_date")
+        if user_budget:
+
+            transaction_budget = Transaction.objects.filter(
+                budgets__user_budget=user_budget,
+                user=user_name,
+                categories__name=bgt_name,
+                transaction_date__range=(month_start, month_end)
+            ).order_by("-transaction_date")
+
+            if not transaction_budget:
+                transaction_budget = Transaction.objects.filter(
+                    bill__user_budget=user_budget,
+                    user=user_name,
+                    categories__name=bgt_name,
+                    transaction_date__range=(month_start, month_end),
+                ).order_by("-transaction_date")
+
+
+
+
+        else:
+            transaction_budget = Transaction.objects.filter(
+                user=user_name,
+                categories__name=bgt_name,
+                transaction_date__range=(month_start, month_end),
+            ).order_by("-transaction_date")
+
         total_spent_amount = 0
         total_earn_amount = 0
         trans_type = "spend"
@@ -787,10 +810,11 @@ def get_cmp_diff_data(
                 [str(t.transaction_date), float(t.amount), trans_type]
             )
 
+        category_name = SubCategory.objects.get(category__user=user_name,name=bgt_name).category.name
         if trans_type == "spend":
             budget_graph_value.append(total_spent_amount)
             budget_transaction_data_dict[bgt_name].insert(
-                0, [bgt_name, total_spent_amount]
+                0, [bgt_name, total_spent_amount, category_name]
             )
             budget_bar_value[0]["data"].append(total_spent_amount)
             expense_bdgt_names.append(bgt_name)
@@ -798,7 +822,7 @@ def get_cmp_diff_data(
             budget_income_graph_value.append(total_earn_amount)
             budget_income_bar_value[0]["data"].append(total_earn_amount)
             budget_transaction_data_dict[bgt_name].insert(
-                0, [bgt_name, total_earn_amount]
+                0, [bgt_name, total_earn_amount, category_name]
             )
             income_bdgt_names.append(bgt_name)
 
