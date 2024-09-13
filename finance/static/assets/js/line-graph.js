@@ -899,6 +899,12 @@ var options = {
         },
         xaxis: {
           categories: budgets_name,
+          labels:{
+            formatter: function(value) {
+                    // Custom formatter to handle long labels
+                    return value.length > 20 ? value.slice(0, 20) + '...' : value;
+                }
+          },
         },
         legend: {
           show: false
