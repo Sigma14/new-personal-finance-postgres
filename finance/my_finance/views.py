@@ -5160,7 +5160,7 @@ def compare_different_budget_box(request):
             spending_amount_bgt1,
             earned_amount_bgt1,
         ) = get_cmp_diff_data(
-            budget1_names,
+            budget2_names,
             user_name,
             start_date,
             end_date,
@@ -5186,7 +5186,7 @@ def compare_different_budget_box(request):
             spending_amount_bgt2,
             earned_amount_bgt2,
         ) = get_cmp_diff_data(
-            budget1_names,
+            budget2_names,
             user_name,
             start_date,
             end_date,
@@ -5274,6 +5274,7 @@ def compare_different_budget_box(request):
         "user_budget_1": user_bgt1,
         "user_budget_2": user_bgt2,
         'grouped_data': grouped_data,
+        'category_icons': CATEGORY_ICONS,
     }
     return render(request, "budget/compare_diff_bgt_box.html", context=context)
 

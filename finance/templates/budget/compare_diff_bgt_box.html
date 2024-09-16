@@ -1,5 +1,5 @@
 {% extends "index.html" %}
-{% load mathfilters %}
+{% load mathfilters static %}
 {% load custom_filters %}
 <head>
     {% block title %} Compare Different Budgets {% endblock title %}
@@ -59,34 +59,7 @@
 <!--                                                    </select>-->
 <!--                                                </div>-->
 <!--                                            </div>-->
-                                            <div class="col-md-3">
-                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget Categories</label>
-                                                    <select class="select2 form-control" name="budget2_name" multiple required>
-                                                        {% for name in budgets %}
-                                                        {% if name in budget2_names %}
-                                                            <option value="{{name}}" selected>{{name}}</option>
-                                                        {% else %}
-                                                            <option value="{{name}}">{{name}}</option>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
-                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#MonthSelect"></i> Select Month</label>
-                                                    <select class="form-control" name="select_period" required>
-                                                        {% for month in list_of_months %}
-                                                            {% if month == current_month %}
-                                                                <option selected value="{{month}}">{{month}}</option>
-                                                            {% else %}
-                                                                <option value="{{month}}">{{month}}</option>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
+
                                             <div class="col-md-3">
                                                 <div class="dropdown" style="padding-right:1rem;">
                                                     <label> Budget 1</label>
@@ -113,6 +86,34 @@
                                                                 <option value="{{budget.id}}" selected>{{budget}}</option>
                                                             {% endif%}
                                                             <option value="{{budget.id}}">{{budget}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget Categories</label>
+                                                    <select class="select2 form-control" name="budget2_name" multiple required>
+                                                        {% for name in budgets %}
+                                                        {% if name in budget2_names %}
+                                                            <option value="{{name}}" selected>{{name}}</option>
+                                                        {% else %}
+                                                            <option value="{{name}}">{{name}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#MonthSelect"></i> Select Month</label>
+                                                    <select class="form-control" name="select_period" required>
+                                                        {% for month in list_of_months %}
+                                                            {% if month == current_month %}
+                                                                <option selected value="{{month}}">{{month}}</option>
+                                                            {% else %}
+                                                                <option value="{{month}}">{{month}}</option>
+                                                            {% endif %}
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -161,7 +162,13 @@
                                                     <!-- Subcategory Rows -->
                                                     {% for item in data.items %}
                                                         <tr class="collapse category-{{ forloop.parentloop.counter }}">
-                                                            <td>&emsp;{{ item.name }}</td>
+                                                            <td>
+                                                                {% if category_icons|get_item:item.name %}
+                                                                    <img src="{% static category_icons|get_item:item.name %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                {% else %}
+                                                                    <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                {% endif %}
+                                                                &emsp;{{ item.name }}</td>
                                                             <td>{{ item.amount1 }}</td>
                                                             <td>{{ item.amount2 }}</td>
                                                         </tr>
