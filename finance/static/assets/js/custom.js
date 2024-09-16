@@ -3553,4 +3553,26 @@ $("body").delegate("#down_pay_per", "change", function(event)
         $("#bill_filter_form").submit();
     });
 
+    // Function for Mortgage chart view
+    $('.chart-view-dropdown').on("change", function(e)
+    {
+        // Fetch the selected chart view
+        let chart_view = $(this).val();
+
+        // Remove tickAmount, if "Monthly View" selected
+        if (chart_view === "Monthly View"){
+            if (areaChart) {
+                areaChart.updateOptions({
+                    xaxis: {
+                        categories: mortgage_date_data,
+                        tickAmount: undefined, // Removes tickAmount
+                    }
+                });
+            }
+        }
+        // If yearly view selected, reloads the page
+        else{
+            location.reload();
+        }
+    });
 });
