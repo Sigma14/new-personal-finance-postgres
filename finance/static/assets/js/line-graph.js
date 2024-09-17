@@ -960,3 +960,12 @@ var options = {
         var chart = new ApexCharts(document.querySelector(budget_cashflow_id), options);
         chart.render();
 }
+
+function AddNotes(notes_desc)
+    {
+      var ele = document.getElementById('task-desc');
+      if(notes_desc)
+      {
+          ele.innerHTML += notes_desc;
+      }
+    }

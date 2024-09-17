@@ -142,6 +142,7 @@ from .models import (
     Income,
     IncomeDetail,
     MortgageDetails,
+    MyNotes,
     PlaidItem,
     Property,
     PropertyExpense,
@@ -12038,9 +12039,85 @@ def rental_property_sample_page(request):
     return render(request, "rental_prop_sample_page.html", context=context)
 
 
+def add_update_notes(request):
+    """
+    Handles adding, updating, and deleting user notes via AJAX POST requests.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
+    Returns:
+        JsonResponse: JSON containing the operation status and updated note list.
+    """
+
+    if request.method == "POST" and request.is_ajax():
+        user = request.user
+        title = request.POST.get("title", "").strip()
+        notes = request.POST.get("notes", "").strip()
+        notes_method = request.POST.get("notes_method", "").strip()
+        select_title = request.POST.get("select_title", "").strip().title()
+
+        result = {}
+        notes_check = MyNotes.objects.filter(user=user, title=title).exists()
+
+        if notes_method == "Update":
+            if select_title == title:
+                # Update existing note with the same title
+                notes_obj = MyNotes.objects.get(user=user, title=title)
+                notes_obj.title = title
+                notes_obj.notes = notes
+                notes_obj.save()
+                result = {"status": "Updated"}
+            else:
+                # Check if a note with the new title already exists
+                if notes_check:
+                    result = {
+                        "status": "This Title Named Note Already Exists!!"}
+                else:
+                    # Update note with a different title
+                    notes_obj = MyNotes.objects.get(
+                        user=user, title=select_title)
+                    notes_obj.title = title
+                    notes_obj.notes = notes
+                    notes_obj.save()
+                    result = {"status": "Updated"}
+
+        elif notes_method == "Delete":
+            # Delete the specified note
+            notes_obj = MyNotes.objects.get(user=user, title=select_title)
+            notes_obj.delete()
+            result = {"status": "Deleted Successfully"}
+
+        elif notes_method == "Add":
+            if notes_check:
+                result = {"status": "This Title Named Note Already Exists!!"}
+            else:
+                # Add a new note
+                notes_obj = MyNotes()
+                notes_obj.user = user
+                notes_obj.title = title.title()
+                notes_obj.notes = notes
+                notes_obj.save()
+                result = {"status": "Added"}
+
+        # Retrieve and return the updated list of user notes
+        user_notes = MyNotes.objects.filter(user=user)
+        notes_list = [[data.title, data.notes] for data in user_notes]
+
+        result["user_notes"] = notes_list
+        print("Notes list", notes_list)
+        return JsonResponse(result)
+    else:
+        # Retrieve and return the updated list of user notes
+        user_notes = MyNotes.objects.filter(user=request.user)
+        notes_list = [[data.title, data.notes] for data in user_notes]
+        result = {}
+        result["user_notes"] = notes_list
+
+        return JsonResponse(result)
+
+
 # Page Errors
-
-
 def error_404(request, exception):
     data = {"error": "Page Not Found!"}
     return render(request, "error.html", data)

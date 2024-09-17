@@ -59,6 +59,10 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-number-input.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/katex.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/monokai-sublime.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/quill.snow.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-quill-editor.css' %}">
         <!-- END: Page CSS-->
         <!-- BEGIN: Custom CSS-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
@@ -112,6 +116,11 @@
                 <ul class="nav navbar-nav align-items-center ml-auto">
                     <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="sun"></i></a></li>
                     {% if user.is_authenticated %}
+                    <li class="nav-item d-none d-lg-block">
+                        <a class="nav-link" href="#" data-toggle="modal" data-target="#new-task-modal" data-placement="top" title="Add Notes">
+                        <i class="ficon" data-feather="file-text"></i>
+                        </a>
+                    </li>
                     <li class="nav-item dropdown dropdown-user">
                         <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="user-nav d-sm-flex d-none"><span class="user-name font-weight-bolder">Hi,</span><span class="user-status">{{user.first_name}}</span></div>
@@ -129,6 +138,90 @@
                 </ul>
             </div>
         </nav>
+        <!-- ADD NOTES Right Sidebar starts -->
+        <div class="modal modal-slide-in sidebar-todo-modal fade" id="new-task-modal">
+            <div class="modal-dialog sidebar-lg">
+                <div class="modal-content p-0">
+                    <form>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+                        <div class="modal-header align-items-center mb-1">
+                            <h5 class="modal-title">{% trans 'NOTES' %}</h5>
+                        </div>
+                        <div class="modal-body flex-grow-1 pb-sm-0 pb-3">
+                            <div class="action-tags">
+                                <ul class="nav nav-pills">
+                                    {% if note_title %}
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="all_notes_tab" data-toggle="pill" href="#all_notes_data" aria-expanded="false">
+                                        {% trans 'My Notes' %}
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="new_notes_tab" data-toggle="pill" href="#new_notes_data" aria-expanded="false">
+                                        {% trans 'New Notes' %}
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="nav-item">
+                                        <a class="nav-link initial_notes" id="all_notes_tab" data-toggle="pill" href="#all_notes_data" aria-expanded="false">
+                                        {{_('My Notes')}}
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active add_stock_note" id="new_notes_tab" data-toggle="pill" href="#new_notes_data" aria-expanded="false">
+                                        {{_('New Notes')}}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                                {% if note_title %}
+                                <div class="form-group" id="my_notes_list">
+                                    <label class="form-label">{% trans 'Notes List' %} </label>
+                                    <select class="form-control" name="select_note" id="select_notes">
+                                        {% for data in user_notes %}
+                                        <option>{{data.title}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endif %}
+                                <div class="form-group" id="my_notes_list"></div>
+                                <div class="form-group">
+                                    <label class="form-label">{% trans 'Title' %}</label>
+                                    {% if note_title %}
+                                    <input type="text" id="note_title" value="{{note_title}}" class="form-control" placeholder="Title" required/>
+                                    {% else %}
+                                    <input type="text" id="note_title" class="form-control" placeholder="Title" required />
+                                    {% endif %}
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">{% trans 'Notes' %}</label>
+                                    <div id="task-desc" style="height:400px;" class="border-bottom-0" data-placeholder="Write Your Notes"></div>
+                                    <div class="d-flex justify-content-end desc-toolbar border-top-0" id="text-editor-area">
+                                        <span class="ql-formats mr-0">
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-align"></button>
+                                        <button class="ql-link"></button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group my-1">
+                                    {% if note_title %}
+                                    <button type="button" url="{% url 'add-update-notes' %}" id="submit_note_btn" class="btn btn-primary add-update-user-notes">{% trans 'Update' %}</button>
+                                    <button type="button" url="{% url 'add-update-notes' %}" class="btn btn-danger delete_notes" data-dismiss="modal">{% trans 'Delete' %}</button>
+                                    {% else %}
+                                    <button type="button" url="{% url 'add-update-notes' %}" id="submit_note_btn" class="btn btn-primary add-update-user-notes">{% trans 'Add' %}</button>
+                                    <button type="button" url="{% url 'add-update-notes' %}" class="btn btn-danger delete_notes" id="initial_delete" data-dismiss="modal">{% trans 'Delete' %}</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--  ADD NOTES Right Sidebar ends -->
         <!-- BEGIN: Main Menu-->
         <div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
             <div class="navbar-header">
@@ -325,6 +418,9 @@
         <script src="{% static 'app-assets/js/scripts/forms/form-number-input.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.responsive.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/responsive.bootstrap4.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/editors/quill/katex.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/editors/quill/highlight.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/editors/quill/quill.min.js' %}"></script>
         <!-- END: Page Vendor JS-->
         <!-- BEGIN: Theme JS-->
         <script src="{% static '/app-assets/js/core/app-menu.js' %}"></script>
@@ -343,9 +439,11 @@
         <script src="{% static 'app-assets/js/scripts/pages/app-user-edit.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-navs.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-collapse.js' %}"></script>
+        <script src="{% static 'app-assets/js/scripts/pages/app-todo.js' %}"></script>
         <!-- END: Page JS-->
         <script src="{% static 'assets/js/line-graph.js' %}"></script>
         <script src="{% static 'assets/js/custom.js' %}"></script>
+        <script src="{% static 'assets/js/notes.js' %}"></script>
         <script src="{% static 'assets/js/pie_graphs.js' %}"></script>
         <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
         <script src="{% static 'assets/js/loader.js' %}"></script>
@@ -385,6 +483,7 @@
         <script>CategorySpentChart({{ projection_key | safe }}, {{ return_investment_data | safe}}, "#investment-return-bar");</script>
         <script>CategorySpentChart({{ projection_key | safe }}, {{ property_expense_data | safe}}, "#expense-bar");</script>
         <script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>
+        <script>AddNotes({{note_desc | safe}});</script>
         <script>showStockAmount({{stocks_amount | safe}});</script>
         <script>portfolioWeights({{code_list | safe}}, {{weight1 | safe}}, {{weight2 | safe}});</script>
         <script>PortfolioValueChart( {{ candle_graph_data | safe }}, {{ candle_graph_data_id | safe }});</script>
