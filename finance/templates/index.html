@@ -348,8 +348,7 @@
                         <ul class="menu-content">
                             <li class="{% if request.resolver_match.view_name == 'mortgagecalculator_list' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
                             </li>
-                            <li class="{% if request.resolver_match.view_name == 'future_net_worth_calculator' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'future_net_worth_calculator' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Future Net Worth Calculator">Future Net Worth Calculator</span></a>
-                            </li>
+
                         </ul>
                     </li>
                     <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_holdings' %}active{% endif %}">
@@ -374,6 +373,15 @@
                             </li>
                             {% endfor %}
                         </ul>
+                    </li>
+                    <li class=" nav-item">
+                        <a class="d-flex align-items-center" href="#"><i class="fa fa-lock fa-1"></i><span class="menu-title text-truncate" data-i18n="Admin Pages">Admin Pages</span></a>
+                        {% if user.is_superuser %}
+                        <ul class="menu-content">
+                            <li class="{% if request.resolver_match.view_name == 'future_net_worth_calculator' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'future_net_worth_calculator' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Future Net Worth Calculator">Future Net Worth Calculator</span></a>
+                            </li>
+                        </ul>
+                        {% endif %}
                     </li>
                 </ul>
             </div>
