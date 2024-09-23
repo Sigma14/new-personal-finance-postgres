@@ -1,7 +1,12 @@
 {% extends "index.html" %}
-{% load mathfilters %}
+{% load mathfilters custom_filters %}
 {% load static %}
 {% block content %}
+<style>
+    .form-control{
+        width: 8rem;
+    }
+</style>
 <div class="app-content content ecommerce-application">
         <div class="content-overlay"></div>
         <div class="header-navbar-shadow"></div>
@@ -165,7 +170,7 @@
                                 </div>
                                 <div id="income-section" class="content">
                                     <section>
-                                        <div class="row match-height">
+                                        <div class="row">
                                             <div class="col-md-6 col-lg-6">
                                                 <div class="card">
                                                     <div class="card-body">
@@ -198,7 +203,7 @@
                                                                     <tr>
                                                                         <th>Sources</th>
                                                                         <th>Expected Amount</th>
-                                                                        <th>Actual Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
                                                                         <th>Action</th>
                                                                     </tr>
                                                                 </thead>
@@ -206,9 +211,16 @@
                                                                     {% for key, value in income_bdgt_dict.items %}
                                                                         {% for data in value %}
                                                                             <tr>
-                                                                                <td><input type="text" value="{{data.0}}" id="income_sources{{forloop.counter}}" name="income_sources" class="form-control income_sources" required/></td>
-                                                                                <td><input type="number" value="{{data.1}}" id="income_expected_amount{{forloop.counter}}" name="income_expected_amount" class="form-control total_income_exp" required/></td>
-                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="income_actual_amount{{forloop.counter}}" name="income_actual_amount" class="form-control total_income_act" required/></td>
+                                                                                <td><span style="display: flex; align-items: center;">
+                                                                                {% if category_icons|get_item:data.0 %}
+                                                                                    <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                {% else %}
+                                                                                    <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                {% endif %}&ensp;
+                                                                                <input type="text" value="{{data.0}}" id="income_sources{{forloop.counter}}" name="income_sources" class="form-control income_sources" required/></span></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="income_expected_amount{{forloop.counter}}" name="income_expected_amount" class="form-control total_income_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="income_actual_amount{{forloop.counter}}" name="income_actual_amount" class="form-control total_income_act" required hidden/></td>
+
                                                                                 <td><button class="btn btn-outline-secondary update_income_bgt_walkthrough" income_index="{{forloop.counter}}" income_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
                                                                             </tr>
                                                                         {% endfor %}
@@ -216,11 +228,22 @@
                                                                     <tr class="total_income_row">
                                                                         <td><strong >Total Income</strong></td>
                                                                         <td><strong id="total_inc_exp">{{total_income_expected}}</strong></td>
-                                                                        <td><strong id="total_inc_act">{{total_actual_income}}</strong></td>
+<!--                                                                        <td><strong id="total_inc_act">{{total_actual_income}}</strong></td>-->
                                                                         <td><button class="btn btn-outline-success add_other_income" last_index="{{income_bdgt_dict.Income|length}}" title="Add other income" user_budget="{{pk}}">+ Other Income</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Incomes :-</h5>
+                                                            {% for category in subcategories.Income %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Income" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -240,8 +263,8 @@
                                 </div>
                                 <div id="bill-section" class="content">
                                     <section>
-                                        <div class="row match-height">
-                                            <div class="col-md-12 col-lg-6">
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Bill Creation Walkthrough.</h4>
@@ -255,7 +278,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12 col-lg-6">
+                                            <div class="col-md-12 col-lg-8">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Bill Summary (Monthly) </h4>
@@ -277,7 +300,7 @@
                                                                     <tr>
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
-                                                                        <th>Actual Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
                                                                         <th>Period</th>
                                                                         <th>Calender</th>
                                                                         <th>Action</th>
@@ -287,9 +310,19 @@
                                                                     {% for key, value in bills_dict.items %}
                                                                         {% for data in value %}
                                                                             <tr>
-                                                                                <td><input type="text" value="{{data.0}}" id="bill_sources{{forloop.counter}}" name="bill_sources" class="form-control bill_sources" required/></td>
-                                                                                <td><input type="number" value="{{data.1}}" id="bill_expected_amount{{forloop.counter}}" name="bill_expected_amount" class="form-control total_bill_exp" required/></td>
-                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="bill_actual_amount{{forloop.counter}}" name="bill_actual_amount" class="form-control total_bill_act" required/></td>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="bill_sources{{forloop.counter}}" name="bill_sources" class="form-control bill_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="bill_expected_amount{{forloop.counter}}" name="bill_expected_amount" class="form-control total_bill_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="bill_actual_amount{{forloop.counter}}" name="bill_actual_amount" class="form-control total_bill_act" required hidden/></td>
+<!--                                                                                <td></td>-->
                                                                                 <td>
                                                                                     <select id="bill_budget_period{{ forloop.counter }}" name="bill_budget_period" class="form-control" required>
                                                                                         <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
@@ -307,13 +340,24 @@
                                                                     <tr class="total_bill_row">
                                                                         <td><strong >Total Bill</strong></td>
                                                                         <td><strong id="total_bill_exp">{{total_expected_bill}}</strong></td>
-                                                                        <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>
+<!--                                                                        <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>-->
                                                                         <td></td>
                                                                         <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Bill</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Bills :-</h5>
+                                                            {% for category in subcategories|get_item:'Bills & Subscriptions' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Bills & Subscriptions" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -333,8 +377,8 @@
                                 </div>
                                 <div id="expense-section" class="content">
                                     <section>
-                                        <div class="row match-height">
-                                            <div class="col-md-12 col-lg-6">
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Expense Creation Walkthrough.</h4>
@@ -346,7 +390,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12 col-lg-6">
+                                            <div class="col-md-12 col-lg-8">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Expenses Summary (Monthly) </h4>
@@ -368,7 +412,7 @@
                                                                     <tr>
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
-                                                                        <th>Actual Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
                                                                         <th>Period</th>
                                                                         <th>Calender</th>
                                                                         <th>Action</th>
@@ -380,9 +424,19 @@
                                                                     <tr><th colspan="4">{{key}}</th></tr>
                                                                         {% for data in value %}
                                                                             <tr>
-                                                                                <td><input type="text" value="{{data.0}}" id="expenses_sources{{data|last}}" name="expenses_sources" class="form-control expenses_sources" required/></td>
-                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{data|last}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/></td>
-                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{data|last}}" name="expenses_actual_amount" class="form-control total_expenses_act" required/></td>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="expenses_sources{{data|last}}" name="expenses_sources" class="form-control expenses_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{data|last}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{data|last}}" name="expenses_actual_amount" class="form-control total_expenses_act" required hidden/></td>
+<!--                                                                                <td></td>-->
                                                                                 <td>
                                                                                     <select id="expenses_budget_period{{ data|last }}" name="expenses_budget_period" class="form-control" required>
                                                                                         <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
@@ -402,13 +456,30 @@
                                                                     <tr class="total_expenses_row">
                                                                         <td><strong >Total Expenses</strong></td>
                                                                         <td><strong id="total_expenses_exp">{{total_expected_expenses}}</strong></td>
-                                                                        <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>
+<!--                                                                        <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>-->
                                                                         <td></td>
                                                                         <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Expenses :-</h5>
+                                                            {% for category, sub_cat in subcategories.items %}
+                                                                {% if category not in excluded_subcategories %}
+                                                                <h5>{{category}}</h5>
+                                                                {% for sub_cat_name in sub_cat %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{sub_cat_name}}" data-category="{{category}}" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:sub_cat_name %}
+                                                                            <img src="{% static category_icons|get_item:sub_cat_name %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{sub_cat_name}}&nbsp;
+                                                                </a>
+                                                                {% endfor %}
+                                                                {% endif %}
+
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -430,8 +501,8 @@
                                 </div>
                                 <div id="non-monthly-expenses-section" class="content">
                                     <section>
-                                        <div class="row match-height">
-                                            <div class="col-md-12 col-lg-6">
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Non Monthly Expense Creation Walkthrough.</h4>
@@ -443,7 +514,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12 col-lg-6">
+                                            <div class="col-md-12 col-lg-8">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Non Monthly Expenses Summary (Monthly) </h4>
@@ -465,7 +536,7 @@
                                                                     <tr>
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
-                                                                        <th>Actual Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
                                                                         <th>Period</th>
                                                                         <th>Calender</th>
                                                                         <th>Action</th>
@@ -476,9 +547,19 @@
                                                                     
                                                                        
                                                                         <tr>
-                                                                            <td><input type="text" value="{{data.0}}" id="non_monthly_expenses_sources{{forloop.counter}}" name="non_monthly_expenses_sources" class="form-control non_monthly_expenses_sources" required/></td>
-                                                                            <td><input type="number" value="{{data.1}}" id="non_monthly_expenses_expected_amount{{forloop.counter}}" name="non_monthly_expenses_expected_amount" class="form-control total_non_monthly_expenses_exp" required/></td>
-                                                                            <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="non_monthly_expenses_actual_amount{{forloop.counter}}" name="non_monthly_expenses_actual_amount" class="form-control total_non_monthly_expenses_act" required/></td>
+                                                                            <td>
+                                                                                <span style="display: flex; align-items: center;">
+                                                                                    {% if category_icons|get_item:data.0 %}
+                                                                                        <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                    {% else %}
+                                                                                        <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                    {% endif %}&ensp;
+                                                                                    <input type="text" value="{{data.0}}" id="non_monthly_expenses_sources{{forloop.counter}}" name="non_monthly_expenses_sources" class="form-control non_monthly_expenses_sources" required/>
+                                                                                </span>
+                                                                            </td>
+                                                                            <td><input type="number" value="{{data.1}}" id="non_monthly_expenses_expected_amount{{forloop.counter}}" name="non_monthly_expenses_expected_amount" class="form-control total_non_monthly_expenses_exp" required/>
+                                                                            <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="non_monthly_expenses_actual_amount{{forloop.counter}}" name="non_monthly_expenses_actual_amount" class="form-control total_non_monthly_expenses_act" required hidden/></td>
+<!--                                                                            <td></td>-->
                                                                             <td>
                                                                                 <select id="non_monthly_expenses_budget_period{{ forloop.counter }}" name="non_monthly_expenses_budget_period" class="form-control" required>
                                                                                     <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
@@ -496,13 +577,24 @@
                                                                     <tr class="total_non_monthly_expenses_row">
                                                                         <td><strong >Total Expenses</strong></td>
                                                                         <td><strong id="total_non_monthly_expenses_exp">{{total_non_monthly_expected_expenses}}</strong></td>
-                                                                        <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>
+<!--                                                                        <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>-->
                                                                         <td></td>
                                                                         <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Non-Monthly Expenses :-</h5>
+                                                            {% for category in subcategories|get_item:'Non-Monthly' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Non-Monthly" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -525,8 +617,8 @@
                                 </div>
                                 <div id="goals-section" class="content">
                                     <section>
-                                        <div class="row match-height">
-                                            <div class="col-md-12 col-lg-6">
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Goals Creation Walkthrough.</h4>
@@ -538,7 +630,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12 col-lg-6">
+                                            <div class="col-md-12 col-lg-8">
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <h4 class="card-title">Goals Summary (Monthly) </h4>
@@ -560,7 +652,7 @@
                                                                     <tr>
                                                                         <th>Name</th>
                                                                         <th>Expected Amount</th>
-                                                                        <th>Actual Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
                                                                         <th>Budget date</th>
                                                                         <th>Action</th>
                                                                     </tr>
@@ -570,9 +662,19 @@
                                                                         
                                                                         
                                                                             <tr>
-                                                                                <td><input type="text" value="{{data.0}}" id="goals_sources{{forloop.counter}}" name="goals_sources" class="form-control goals_sources" required/></td>
-                                                                                <td><input type="number" value="{{data.1}}" id="goals_expected_amount{{forloop.counter}}" name="goals_expected_amount" class="form-control total_goals_exp" required/></td>
-                                                                                <td><input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required/></td>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="goals_sources{{forloop.counter}}" name="goals_sources" class="form-control goals_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="goals_expected_amount{{forloop.counter}}" name="goals_expected_amount" class="form-control total_goals_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required hidden/></td>
+<!--                                                                                <td></td>-->
                                                                                 <td>
                                                                                     <i class="fa fa-calendar fa-1 goal_calender_icon " id="goal_calender_icon" index="{{forloop.counter}}"></i> 
                                                                                     <input type="text" id="goals_add_budget_date{{forloop.counter}}"  name="goals_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
@@ -584,12 +686,23 @@
                                                                     <tr class="total_goals_row">
                                                                         <td><strong >Total Goals</strong></td>
                                                                         <td><strong id="total_goals_exp">{{total_goals_expected}}</strong></td>
-                                                                        <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>
+<!--                                                                        <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>-->
                                                                         <td></td>
                                                                         <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Goals</button></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Goals :-</h5>
+                                                            {% for category in subcategories|get_item:'Goals' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Goals" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
                                                         </div>
                                                     </div>
                                                 </div>

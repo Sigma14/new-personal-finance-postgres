@@ -1,6 +1,7 @@
 # Category Icons
 CATEGORY_ICONS = {
-    "Rent/Mortgage": "app-assets/images/categories/Rent.png",
+    "Rent": "app-assets/images/categories/Rent.png",
+    "Mortgage": "app-assets/images/categories/Rent.png",
     "Electricity": "app-assets/images/categories/Electricity.png",
     "Water": "app-assets/images/categories/Water-Bill.png",
     "Internet": "app-assets/images/categories/Internet.png",
@@ -11,6 +12,7 @@ CATEGORY_ICONS = {
     "Amazon Prime Subscription": "app-assets/images/categories/Amazon.png",
     "Gym Membership": "app-assets/images/categories/Gym.png",
     "Groceries": "app-assets/images/categories/Shoping.png",
+    "Shopping": "app-assets/images/categories/Shoping.png",
     "Eating Out": "app-assets/images/categories/dinner.png",
     "Gas / Transportation": "app-assets/images/categories/transport.png",
     "Entertainment": "app-assets/images/categories/entertainment.png",
@@ -19,6 +21,7 @@ CATEGORY_ICONS = {
     "Taxes": "app-assets/images/categories/taxes.png",
     "Car Maintenance": "app-assets/images/categories/car-maintenance.png",
     "Medical Expenses": "app-assets/images/categories/medical.png",
+    "Doctor": "app-assets/images/categories/medical.png",
     "Gifts": "app-assets/images/categories/gift-box.png",
     "Holidays": "app-assets/images/categories/holiday.png",
     "Emergency Fund": "app-assets/images/categories/emergency-fund.png",
@@ -42,6 +45,17 @@ CATEGORY_ICONS = {
     "Clothes": "app-assets/images/categories/clothes-hanger.png",
     "Movies": "app-assets/images/categories/entertainment.png",
     "Interest": "app-assets/images/categories/interest-rate.png",
+    "Gym": "app-assets/images/categories/gym.png",
+    "First-Aid": "app-assets/images/categories/first-aid-kit.png",
+    "Dentist": "app-assets/images/categories/dentist.png",
+    "Property Loan": "app-assets/images/categories/mortgage-loan.png",
+    "Home Loan": "app-assets/images/categories/mortgage-loan.png",
+    "Vehicle Loan": "app-assets/images/categories/car-loan.png",
+    "Fuel": "app-assets/images/categories/gas-pump.png",
+    "Pharmacy": "app-assets/images/categories/pharmacy.png",
+    "Refreshments": "app-assets/images/categories/juice.png",
+    "New Bike": "app-assets/images/categories/bike.png",
+
 }
 # To-do consisent symbols
 # Currencies
@@ -137,9 +151,17 @@ SUGGESTED_SUB_CATEGORIES = {
         "Insurance",
         "Gifts",
         "Holidays",
-        "Insurance",
     ],
 }
+
+# Excluded Sub-Categories for Budget Walk-through Expense suggestions
+EXCLUDED_SUB_CATEGORIES = [
+    "Bills & Subscriptions",
+    "Goals",
+    "Income",
+    "Funds",
+    "Non-Monthly"
+]
 
 # Expense category group list
 GROUP_LIST = [
