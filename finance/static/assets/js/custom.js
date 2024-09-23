@@ -2698,7 +2698,12 @@ $("body").delegate("#down_pay_per", "change", function(event)
     $("body").delegate(".add_other_income", "click", function(e)
     {
         last_index = parseInt($(this).attr('last_index')) + 1
-        trHTML = "<tr><td><input type='text' value='Other Income' id='income_sources" + last_index +"' name='income_sources' class='form-control income_sources' required/></td><td><input type='number' value='0.0' id='income_expected_amount" + last_index +"' name='income_expected_amount' class='form-control total_income_exp' required/></td><td><input type='number' value='0.0' id='income_actual_amount" + last_index +"' name='income_actual_amount' class='form-control total_income_act' required/></td><td><button class='btn btn-outline-secondary update_income_bgt_walkthrough' income_index='" + last_index +"' income_id='false'>Update</button></td></tr>"
+        var user_budget = $(this).attr('user_budget')
+        trHTML = "<tr>"+
+        "<td><input type='text' value='Other Income' id='income_sources" + last_index +"' name='income_sources' class='form-control income_sources' required/></td>"+
+        "<td><input type='number' value='0.0' id='income_expected_amount" + last_index +"' name='income_expected_amount' class='form-control total_income_exp' required/>"+
+        "<input type='number' value='0.0' id='income_actual_amount" + last_index +"' name='income_actual_amount' class='form-control total_income_act' required hidden/></td>"+
+        "<td><button class='btn btn-outline-secondary update_income_bgt_walkthrough' income_index='" + last_index +"' income_id='false' user_budget='" + user_budget + "'>Update</button></td></tr>"
         $(".total_income_row").before(trHTML)
         return false
     });
@@ -2810,8 +2815,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
 
         trHTML = "<tr>"+
         "<td><input type='text' value='Other Bill' id='bill_sources" + last_index +"' name='bill_sources' class='form-control bill_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='bill_actual_amount" + last_index +"' name='income_bill_amount' class='form-control total_bill_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='bill_expected_amount" + last_index +"' name='bill_expected_amount' class='form-control total_bill_exp' required/>"+
+        "<input type='number' value='0.0' id='bill_actual_amount" + last_index +"' name='income_bill_amount' class='form-control total_bill_act' required hidden/></td>"+
         "<td>" +
         "<select id='bill_budget_period" + last_index + "' name='bill_budget_period' class='form-control' required>" +
         "<option value='Monthly'>Monthly</option>" +
@@ -2957,8 +2962,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         trHTML = "<tr><th colspan='4'><input type=text class='form-control other_exp_name' btn_id='other_exp_btn" + last_index + "' placeholder='Enter Group Name'</th></tr>"
         trHTML += "<tr>"+
         "<td><input type='text' placeholder='Enter Category name' id='expenses_sources" + last_index +"' name='expenses_sources' class='form-control expenses_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='expenses_expected_amount" + last_index +"' name='expenses_expected_amount' class='form-control total_expenses_exp' required/>"+
+        "<input type='number' value='0.0' id='expenses_actual_amount" + last_index +"' name='income_expenses_amount' class='form-control total_expenses_act' required hidden/></td>"+
         "<td>" +
         "<select id='expenses_budget_period" + last_index + "' name='expenses_budget_period' class='form-control' required>" +
         "<option value='Monthly'>Monthly</option>" +
@@ -3113,8 +3118,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
         var user_budget = $(this).attr('user_budget')
         trHTML = "<tr>"+
         "<td><input type='text' value='Other' id='non_monthly_expenses_sources" + last_index +"' name='non_monthly_expenses_sources' class='form-control non_monthly_expenses_sources' required/></td>"+
-        "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='non_monthly_expenses_expected_amount" + last_index +"' name='non_monthly_expenses_expected_amount' class='form-control total_non_monthly_expenses_exp' required/>"+
+        "<input type='number' value='0.0' id='non_monthly_expenses_actual_amount" + last_index +"' name='non_monthly_expenses_amount' class='form-control total_non_monthly_expenses_act' required hidden/></td>"+
 
         "<td>" +
         "<select id='non_monthly_expenses_budget_period" + last_index + "' name='non_monthly_expenses_budget_period' class='form-control' required>" +
@@ -3277,8 +3282,8 @@ $("body").delegate("#down_pay_per", "change", function(event)
             "{% endfor %}" +
             "</datalist>" +
             "</td>" +
-        "<td><input type='number' value='0.0' id='goals_expected_amount" + last_index +"' name='goals_expected_amount' class='form-control total_goals_exp' required/></td>"+
-        "<td><input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required/></td>"+
+        "<td><input type='number' value='0.0' id='goals_expected_amount" + last_index +"' name='goals_expected_amount' class='form-control total_goals_exp' required/>"+
+        "<input type='number' value='0.0' id='goals_actual_amount" + last_index +"' name='goals_actual_amount' class='form-control total_goals_act' required hidden/></td>"+
         "<td>" +
         "<i class='fa fa-calendar fa-1 goal_calender_icon' index='" + last_index + "' id='goal_calender_icon" + last_index + "'></i>" +
         "<input type='text' id='goals_add_budget_date" + last_index + "' name='goals_add_budget_date' class='form-control flatpickr-basic' hidden required>" +
@@ -3448,6 +3453,53 @@ $("body").delegate("#down_pay_per", "change", function(event)
 
     });
 
+    // Budget Walk-through suggestions
+    $("body").delegate(".sub-cat-name", "click", function(e) {
+        e.preventDefault();
+
+        // Fetch the Category & Sub-category
+        var name = $(this).data("name");
+        var category = $(this).data("category")
+        console.log("Name ==>", name, "Category==>", category)
+
+        // This block fetches the last index from the btn and set the
+        // selected suggestion values of category & sub-category name
+        if(category==="Income"){
+            last_index = parseInt($(".add_other_income").attr('last_index')) + 1;
+            $(".add_other_income").click();
+            input_id = "#income_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Bills & Subscriptions"){
+            last_index = parseInt($(".add_other_bill").attr('last_index')) + 1;
+            $(".add_other_bill").click();
+            input_id = "#bill_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Non-Monthly"){
+            last_index = parseInt($(".add_other_non_monthly_expenses").attr('last_index')) + 1;
+            $(".add_other_non_monthly_expenses").click();
+            input_id = "#non_monthly_expenses_sources"+last_index
+            $(input_id).val(name);
+        }
+        else if(category==="Goals"){
+            last_index = parseInt($(".add_other_goals").attr('last_index')) + 1;
+            $(".add_other_goals").click();
+            input_id = "#sub_category_name"+last_index
+            $(input_id).val(name);
+        }
+        else {
+            // Sets the values for expenses sections
+            last_index = parseInt($(".add_other_expenses ").attr('last_index')) + 1;
+            $(".add_other_expenses ").click();
+            btn_id = "#other_exp_btn"+last_index
+            $(btn_id).attr("category_name", category)
+            input_id = "#expenses_sources"+last_index
+            $(input_id).val(name);
+            $(".other_exp_name").val(category);
+        }
+    });
+
     // Compare different budget tables dropdown
     // Dropdown function for Budget 1 Table
     $("body").delegate("#spentAmountDropdown", "change", function() {
@@ -3501,4 +3553,26 @@ $("body").delegate("#down_pay_per", "change", function(event)
         $("#bill_filter_form").submit();
     });
 
+    // Function for Mortgage chart view
+    $('.chart-view-dropdown').on("change", function(e)
+    {
+        // Fetch the selected chart view
+        let chart_view = $(this).val();
+
+        // Remove tickAmount, if "Monthly View" selected
+        if (chart_view === "Monthly View"){
+            if (areaChart) {
+                areaChart.updateOptions({
+                    xaxis: {
+                        categories: mortgage_date_data,
+                        tickAmount: undefined, // Removes tickAmount
+                    }
+                });
+            }
+        }
+        // If yearly view selected, reloads the page
+        else{
+            location.reload();
+        }
+    });
 });

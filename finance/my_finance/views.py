@@ -88,6 +88,7 @@ from .constants import (
     SUGGESTED_SUB_CATEGORIES,
     TRANSACTION_KEYS,
     YEAR_LABELS,
+    EXCLUDED_SUB_CATEGORIES,
 )
 from .enums import (
     AccountTypes,
@@ -3921,6 +3922,9 @@ def budgets_walk_through(request, pk):
         "index_counter": index_counter,
         "today_date": str(today_date),
         "page": "budgets",
+        "category_icons": CATEGORY_ICONS,
+        "subcategories": SUGGESTED_SUB_CATEGORIES,
+        "excluded_subcategories": EXCLUDED_SUB_CATEGORIES,
     }
 
     return render(request, "budget/budget_walk_through.html", context=context)
@@ -3954,6 +3958,11 @@ def budgets_income_walk_through(request):
         # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(income_account_id))
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
+
+        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+        if budget_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
@@ -4115,6 +4124,11 @@ def budgets_expenses_walk_through(request):
         # Get the account and user budget objects
         account_obj = Account.objects.get(id=int(expense_account_id))
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
+
+        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+        if budget_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
@@ -4353,6 +4367,11 @@ def budgets_non_monthly_expenses_walk_through(request):
         account_obj = Account.objects.get(id=int(expense_account_id))
         budget_left_amount = round(budget_exp_amount - budget_act_amount, 2)
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
+
+        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+        if budget_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
@@ -4600,6 +4619,11 @@ def budgets_goals_walk_through(request):
         if goal_date == "":
             goal_date = None
         user_budget = UserBudgets.objects.get(pk=int(user_budget_id))
+
+        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+        if budget_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
@@ -4672,7 +4696,7 @@ def budgets_goals_walk_through(request):
             budget_obj.ended_at = budget_end_date
             budget_obj.budget_start_date = budget_start_date
             try:
-                goal_obj = Goal.objects.get(user=user_name, label=sub_cat_obj)
+                goal_obj = Goal.objects.get(user_budget=user_budget, label=sub_cat_obj)
                 # If goal already exists, it'll allocate the budget actual amount to goals
                 if goal_obj:
                     budget_obj.save()
@@ -4685,6 +4709,7 @@ def budgets_goals_walk_through(request):
                 # If goal doesn't exist, creates a new one
                 goal_obj = Goal()
                 goal_obj.user = user_name
+                goal_obj.user_budget = user_budget
                 goal_obj.account = account_obj
                 goal_obj.goal_amount = budget_exp_amount
                 goal_obj.currency = account_obj.currency
@@ -4728,6 +4753,7 @@ def budgets_goals_walk_through(request):
                 # and allocate amount
                 goal_obj = Goal()
                 goal_obj.user = user_name
+                goal_obj.user_budget = user_budget
                 goal_obj.account = account_obj
                 goal_obj.goal_amount = budget_exp_amount
                 goal_obj.currency = account_obj.currency

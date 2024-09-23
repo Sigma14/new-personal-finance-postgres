@@ -162,9 +162,12 @@
 
   // MortgageCalculator Area Chart
   // --------------------------------------------------------------------
-
+  // Setting global variables for changing chart view
+  var areaChart = null
+  var mortgage_date_data = null
   function MortgageChart(mortgage_graph_data, date_data)
   {
+      mortgage_date_data = date_data;
       var areaChartEl = document.querySelector('#line-area-chart'),
         areaChartConfig = {
           chart: {
@@ -197,7 +200,8 @@
           colors: ['#ffe700', '#00d4bd', '#826bf8',],
           series: mortgage_graph_data,
           xaxis: {
-            categories: date_data
+            categories: date_data,
+            tickAmount: Math.min(date_data.length/12, date_data.length), // Show one label per year
           },
           fill: {
             opacity: 0.40,
@@ -221,7 +225,7 @@
                   ]
         };
       if (typeof areaChartEl !== undefined && areaChartEl !== null) {
-        var areaChart = new ApexCharts(areaChartEl, areaChartConfig);
+        areaChart = new ApexCharts(areaChartEl, areaChartConfig);
         areaChart.render();
       }
   };
