@@ -8555,51 +8555,54 @@ def bill_adding_fun(request, method_name=None):
             if method_name:
                 return "Bill_list"
             else:
-                error = "Bill Already Exit!!"
+                error = "Bill Already Exist!!"
         else:
-            bill_obj = Bill()
-            bill_obj.user = request.user
-            bill_obj.label = label
-            bill_obj.account = account_obj
-            bill_obj.amount = amount
-            bill_obj.date = bill_date
-            bill_obj.currency = currency
-            bill_obj.remaining_amount = amount
-            bill_obj.user_budget = user_budget
+            if float(amount) > 0:
+                bill_obj = Bill()
+                bill_obj.user = request.user
+                bill_obj.label = label
+                bill_obj.account = account_obj
+                bill_obj.amount = amount
+                bill_obj.date = bill_date
+                bill_obj.currency = currency
+                bill_obj.remaining_amount = amount
+                bill_obj.user_budget = user_budget
 
-            try:
-                auto_bill = request.POST["auto_bill"]
-                bill_obj.frequency = frequency
-                bill_obj.auto_bill = True
-            # To-Do  Remove bare except
-            except:
-                bill_obj.auto_bill = False
+                try:
+                    auto_bill = request.POST["auto_bill"]
+                    bill_obj.frequency = frequency
+                    bill_obj.auto_bill = True
+                # To-Do  Remove bare except
+                except:
+                    bill_obj.auto_bill = False
 
-            try:
-                auto_pay = request.POST["auto_pay"]
-                bill_obj.auto_pay = True
-            except:
-                bill_obj.auto_pay = False
+                try:
+                    auto_pay = request.POST["auto_pay"]
+                    bill_obj.auto_pay = True
+                except:
+                    bill_obj.auto_pay = False
 
-            bill_details_obj = BillDetail.objects.create(
-                user=user,
-                label=label,
-                user_budget=user_budget,
-                account=account_obj,
-                amount=amount,
-                date=bill_date,
-                frequency=bill_obj.frequency,
-                auto_bill=bill_obj.auto_bill,
-                auto_pay=bill_obj.auto_pay,
-            )
-            bill_obj.bill_details = bill_details_obj
-            bill_obj.save()
-            # if bill_date <= today_date:
-            #     check_bill_is_due()
-            # else:
-            create_bill_request()
-            return "Bill_list"
+                bill_details_obj = BillDetail.objects.create(
+                    user=user,
+                    label=label,
+                    user_budget=user_budget,
+                    account=account_obj,
+                    amount=amount,
+                    date=bill_date,
+                    frequency=bill_obj.frequency,
+                    auto_bill=bill_obj.auto_bill,
+                    auto_pay=bill_obj.auto_pay,
+                )
+                bill_obj.bill_details = bill_details_obj
+                bill_obj.save()
+                # if bill_date <= today_date:
+                #     check_bill_is_due()
+                # else:
+                create_bill_request()
+                return "Bill_list"
 
+            else:
+                error = "Please enter Bill amount greater than 0."
     bill_category = SubCategory.objects.filter(
         category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value, category__user=user
     )
@@ -8632,6 +8635,11 @@ def bill_walk_through(request):
         budget_period = request.POST["budget_period"]
         bill_date = request.POST["budget_date"]
         user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
+
+        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+        if bill_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Bill amount cannot be 0"})
+        
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
