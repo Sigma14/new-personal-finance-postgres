@@ -5006,7 +5006,7 @@ def compare_different_budget_box(request):
     user_name = request.user
     budget_graph_currency = "$"
     budget_type = "Expenses"
-
+    no_budgets = True
     # Fetch all the user budgets
     user_budgets = UserBudgets.objects.filter(user=user_name)
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
@@ -5023,6 +5023,7 @@ def compare_different_budget_box(request):
     total_budget_count = len(budgets)
     budget1_names = []
     budget2_names = []
+    list_of_months = []
     spending_amount_bgt1 = 0
     spending_amount_bgt2 = 0
     earned_amount_bgt1 = 0
@@ -5508,6 +5509,7 @@ def compare_target_budget_box(request):
     user_name = request.user
     budget_graph_currency = "$"
     budget_type = "Expenses"
+    list_of_months = []
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
     )
