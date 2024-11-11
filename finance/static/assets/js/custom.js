@@ -2146,6 +2146,21 @@ $("body").delegate(".category", "click", function(event)
     $("." + class_name + "_dropdown").toggle();
 });
 
+$("body").on("click", ".compare-category", function(event) {
+    var class_name = $(this).data("class-name");
+    var arrow = $("#arrow-" + class_name);
+
+    // Toggle the collapse of the rows
+    $("." + class_name).collapse('toggle');
+
+    // Immediately toggle the arrow direction
+    if (arrow.hasClass("fa-chevron-right")) {
+        arrow.removeClass("fa-chevron-right").addClass("fa-chevron-down");
+    } else {
+        arrow.removeClass("fa-chevron-down").addClass("fa-chevron-right");
+    }
+});
+
 //  Show and hide subcategory
 $("body").delegate(".pick_category", "change", function(event)
 {
