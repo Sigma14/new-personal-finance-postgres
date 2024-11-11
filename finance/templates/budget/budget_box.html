@@ -188,14 +188,15 @@
                 <section class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Created budgets</h4>
+                            <h4 style="float-left">Created budgets</h4>
+                            <h4 style="float-right">Default budget</h4>
                         </div>
                         <div class="card-body">
                             {% for budget in user_budgets %}
                             <div class="row">
                                 <div class="col-md-12">
                                     <span style="">
-                                        <p style="float:left;"><strong>{{budget.name}}</strong></p>
+                                        <p style="float:left;"><strong><a href="{% url 'budgets_walk_through' pk=budget.id%}">{{budget.name}}</a></strong></p>
                                         <form method="POST" action="{% url 'default_budget' %}" id="defaultBudgetForm{{forloop.counter}}" method="POST">
                                         {% csrf_token %}
                                             <div class="dropdown" style="float: right;">
