@@ -185,7 +185,7 @@
                         
                     </div>
                 </section>
-                <section>
+                <section class="col-md-6">
                     <div class="card">
                         <div class="card-header">
                             <h4>Created budgets</h4>
@@ -193,7 +193,7 @@
                         <div class="card-body">
                             {% for budget in user_budgets %}
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <span style="">
                                         <p style="float:left;"><strong>{{budget.name}}</strong></p>
                                         <form method="POST" action="{% url 'default_budget' %}" id="defaultBudgetForm{{forloop.counter}}" method="POST">
