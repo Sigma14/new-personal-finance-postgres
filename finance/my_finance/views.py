@@ -3592,6 +3592,10 @@ def budgets_box(request):
     """
     user_name = request.user
 
+    selected_budget_id = request.session.get('default_budget_id', None)
+    if selected_budget_id:
+        selected_budget_id = int(selected_budget_id)
+
     # Fetch the existing user budgets
     user_budgets_qs = UserBudgets.objects.filter(user=user_name)
     budgets_qs = Budget.objects.filter(user=request.user)
@@ -3605,6 +3609,7 @@ def budgets_box(request):
         "budgets_list": budgets,
         "user_budgets": user_budgets_qs,
         "user_budget_form": form,
+        "selected_budget": selected_budget_id,
     }
     return render(request, "budget/budget_box.html", context)
 
@@ -5694,6 +5699,32 @@ def sample_budget_box(request):
     }
     return render(request, "budget/sample_budget_box.html", context=context)
 
+@login_required(login_url="/login")
+def set_default_budget(request):
+    """
+    Sets the default budget in the session based on user selection in POST data.
+    If 'user_budget' is 'No', the session budget is removed. Otherwise, the
+    selected budget is stored.
+
+    Args:
+        request: HttpRequest object containing POST data.
+
+    Returns:
+        HttpResponse: Redirects to the 'budgets' view.
+    """
+
+    if request.POST:
+        user_budget = request.POST.get("user_budget")
+        if user_budget != "No":
+            # Store the selected budget in the session
+            request.session['default_budget_id'] = user_budget
+        else:
+            # Delete the session 
+            request.session.pop('default_budget_id', None)
+        return redirect('budgets')
+
+
+
 
 @login_required(login_url="/login")
 def budget_details(request, pk):
@@ -7615,9 +7646,21 @@ class GoalList(LoginRequiredMixin, ListView):
 
         self.object_list = self.get_queryset()
         # self.date_value = datetime.datetime.today().date()
-        self.user_budget = UserBudgets.objects.filter(
-            user=self.request.user
-        ).first()
+
+        # Fetch the Default budget id if available, if not fetch the \
+        # first user budget
+        selected_budget_id = request.session.get('default_budget_id')
+        if selected_budget_id:
+            try:
+                self.user_budget = UserBudgets.objects.get(
+                    user=request.user,
+                    pk=int(selected_budget_id))
+            except UserBudgets.DoesNotExist:
+                self.user_budget = UserBudgets.objects.filter(user=request.user).first()
+        else:
+            self.user_budget = UserBudgets.objects.filter(
+                user=self.request.user
+            ).first()
 
         return self.render_to_response(self.get_context_data())
 
@@ -8756,11 +8799,29 @@ def bill_pay(request, pk):
 @login_required(login_url="/login")
 def bill_list(request):
     user_name = request.user
+    selected_budget_id = request.session.get('default_budget_id', None)
+
     user_budget_qs = UserBudgets.objects.filter(user=request.user)
+    user_budget = None
+
+    # Fetch the user budget from POST request
     if "user_budget" in request.POST:
         user_budget_id = request.POST.get("user_budget")
-        user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
-    else:
+        user_budget = UserBudgets.objects.get(
+            user=user_name,
+            pk=int(user_budget_id)
+        )
+
+    # If session data available, fetch the default budget object
+    if user_budget is None and selected_budget_id:
+        user_budget = UserBudgets.objects.get(
+            user=user_name,
+            pk=int(selected_budget_id)
+        )
+
+    # If neither session is availabe nor the POST data, fetch \
+    # first budget object
+    if user_budget is None :
         user_budget = UserBudgets.objects.filter(user=user_name).first()
 
     bill_list_data = BillDetail.objects.filter(

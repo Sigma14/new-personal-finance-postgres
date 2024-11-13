@@ -185,6 +185,40 @@
                         
                     </div>
                 </section>
+                <section class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="float-left">Created budgets</h4>
+                            <h4 style="float-right">Default budget</h4>
+                        </div>
+                        <div class="card-body">
+                            {% for budget in user_budgets %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span style="">
+                                        <p style="float:left;"><strong><a href="{% url 'budgets_walk_through' pk=budget.id%}">{{budget.name}}</a></strong></p>
+                                        <form method="POST" action="{% url 'default_budget' %}" id="defaultBudgetForm{{forloop.counter}}" method="POST">
+                                        {% csrf_token %}
+                                            <div class="dropdown" style="float: right;">
+                                                <select class="form-control default_bgt_select" data-form-id="{{forloop.counter}}" name="user_budget" style="width:200px;">
+                                                    {% if selected_budget == budget.id %}
+                                                        <option value="{{budget.id}}" selected>Yes</option>
+                                                        <option value="No" >No</option>
+                                                    {% else %}
+                                                        <option value="{{budget.id}}">Yes</option>
+                                                        <option value="No" selected>No</option>
+                                                    {% endif %}
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 <div class="modal fade" id="userBudgetFormModal" tabindex="-1" role="dialog" aria-labelledby="userBudgetFormModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">

@@ -45,6 +45,7 @@ urlpatterns = [
     path("budget_add/", BudgetAdd.as_view(), name="budget_add"),
     path("budget_update/<int:pk>", budget_update, name="budget_update"),
     path("budget_delete/<int:pk>", BudgetDelete.as_view(), name="budget_delete"),
+    path("budget/default/", set_default_budget, name="default_budget"),
     path(
         "budgets/walk_through/<int:pk>",
         budgets_walk_through,
