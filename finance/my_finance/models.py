@@ -1,4 +1,5 @@
 # from django.db import models
+import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -739,3 +740,13 @@ class StockHoldings(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class MyNotes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    notes = models.TextField()
+    added_on = models.DateField(default=datetime.date.today)
+
+    def __str__(self):
+        return str(self.title + " " + self.user.username)

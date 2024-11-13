@@ -308,4 +308,7 @@ urlpatterns = [
     path("download/csv", download_csv, name="download_csv"),
     path("download/rental_pdf", download_rental_pdf, name="download_rental_pdf"),
     path("process_image", process_image, name="property_checkout"),
+
+    # Endpoint to add or update notes
+    path("add-update/notes", add_update_notes, name="add-update-notes"),
 ]
