@@ -18,10 +18,30 @@ const lessonsContent = document.querySelector("#lessonsContent");
 
 // Sidebar options and their content
 const sidebarItems = [
-  { button: aiChatButton, content: aiChatContent },
-  { button: feedbackButton, content: feedbackContent },
-  { button: notesButton, content: notesContent },
-  { button: lessonsButton, content: lessonsContent },
+  {
+    button: aiChatButton,
+    content: aiChatContent,
+    header: "AI Chat",
+    description: "Start a conversation with AI",
+  },
+  {
+    button: feedbackButton,
+    content: feedbackContent,
+    header: "Feedback",
+    description: "Give feedback or report an issue",
+  },
+  {
+    button: notesButton,
+    content: notesContent,
+    header: "Notes",
+    description: "Take a quick notes",
+  },
+  {
+    button: lessonsButton,
+    content: lessonsContent,
+    header: "Interactive Lessons",
+    description: "Page interactive lessons",
+  },
 ];
 
 // Function to activate a button and its corresponding content
@@ -32,6 +52,11 @@ const activateButton = (button, content) => {
     item.button.classList.remove("btn-primary");
     item.button.classList.add("btn-outline-secondary");
     item.button.setAttribute("aria-expanded", "false");
+    // set heading
+    if(item.button === button) {
+      $("#rightSidebarHeader").text(item.header);
+      $("#rightSidebarDescription").text(item.description);
+    }
   });
 
   // Set the clicked button and content as active
@@ -263,7 +288,6 @@ const renderAccordion = (data) => {
 
   $("#lessonsContent").append(html);
 };
-
 
 $(document).ready(function () {
   $.ajax({
