@@ -9,6 +9,10 @@ urlpatterns = [
     path("create_link_token", create_link_token, name="create-link-token"),
     path("get_access_token", get_access_token, name="get-access-token"),
     path("transactions/get", get_transactions, name="get-transactions"),
+    # Right sidebar urls:
+    path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
+    path("chats/load-messages/", load_ai_chat, name="load-ai-chat"),
+    path("documentation/", read_documentation_csv, name="documentation"),
     # Category urls :-
     path("category_list/", CategoryList.as_view(), name="category_list"),
     path("category_detail/<int:pk>", CategoryDetail.as_view(), name="category_detail"),
@@ -71,7 +75,7 @@ urlpatterns = [
         name="budgets_goals_walk_through",
     ),
     path("create_user_budget/", UserBudgetAdd.as_view(), name="create_user_budget"),
-    path('user_budget_update/<int:pk>', user_budget_update, name='update_user_budget'),
+    path("user_budget_update/<int:pk>", user_budget_update, name="update_user_budget"),
     # Template Budget urls :-
     path("template_budget_list/", template_budget_list, name="template_budget_list"),
     # path('template_budget_detail/<int:pk>', template_budget_details, name='template_budget_detail'),

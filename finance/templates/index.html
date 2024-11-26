@@ -62,6 +62,8 @@
         <!-- END: Page CSS-->
         <!-- BEGIN: Custom CSS-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
+        <!--JQuery-->
+        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
         <!-- END: Custom CSS-->
         <!-- BEGIN: Google ANALYTICS  -->
@@ -289,6 +291,12 @@
         <div class='my-loader'> 
             <img src="{% static 'assets/animations/loading_small.gif' %}" alt="Loading..." />
         </div>
+        <!--START: Right Sidebar-->
+        {% if request.user.is_authenticated %}
+        {% include "./right-sidebar/sidebar_toggler.html" %}
+        {% include "./right-sidebar/sidebar_body.html" %}
+        {% endif %}
+        <!--END: Right Sidebar-->
         <!-- BEGIN: Content-->
         {% block content %}
         {% endblock content %}
@@ -303,6 +311,9 @@
         </footer>
         <button class="btn btn-primary btn-icon scroll-top" type="button"><i data-feather="arrow-up"></i></button>
         <!-- END: Footer-->
+        <!--START: right-sidebar-js -->
+        <script src="{% static 'assets/js/custom/right_sidebar.js' %}"></script>
+        <!--END: right-sidebar-js -->
         <!-- BEGIN: Vendor JS-->
         <script src="{% static 'app-assets/vendors/js/vendors.min.js' %}"></script>
         <!-- BEGIN Vendor JS-->

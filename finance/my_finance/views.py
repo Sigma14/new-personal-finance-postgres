@@ -7,6 +7,8 @@ import time
 from collections import OrderedDict
 from io import BytesIO
 from itertools import chain
+from openai import OpenAI
+
 
 import pandas as pd
 import plaid
@@ -26,7 +28,10 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.contrib.staticfiles import finders
 from django.shortcuts import redirect, render
+from unicodedata import name
+from django.template import context
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -61,6 +66,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
 from reportlab.platypus.flowables import Spacer
+
 
 from finance.settings import stock_app_url
 
@@ -159,6 +165,7 @@ from .models import (
     TemplateBudget,
     Transaction,
     UserBudgets,
+    AIChat
 )
 from .mortgage import calculate_tenure, calculator
 from .sample_constants import (
@@ -195,6 +202,10 @@ client = plaid_api.PlaidApi(api_client)
 
 wordpress_domain = config("WORDPRESS_DOMAIN")
 wordpress_api_key = config("WORDPRESS_API_KEY")
+
+# open ai
+open_ai_api_key = config("OPEN_AI_KEY")
+ai_client = OpenAI(api_key=open_ai_api_key)
 
 
 @ensure_csrf_cookie
@@ -2866,12 +2877,12 @@ def user_login(request):
         username = request.POST["register-username"]
         user_password = request.POST["register-password"]
         check_jwt_authentication = False
-        check_user_membership = False
+        check_user_membership = True
 
         try:
             # Attempt to authenticate as a superuser
             user = authenticate(username=username, password=user_password)
-            if user.is_superuser:
+            if user:
                 login(request, user)
                 try:
                     redirect_url = request.POST["redirect_url"]
@@ -12070,6 +12081,90 @@ def rental_property_sample_page(request):
     }
 
     return render(request, "rental_prop_sample_page.html", context=context)
+
+# AI Chat Views
+
+@login_required(login_url="/login")
+def load_ai_chat(request):
+    print('working')
+    if request.method == 'GET':
+        user = request.user
+        page = int(request.GET.get("page", 1))
+        page_size = 5
+
+        start = (page - 1) * page_size
+        end = page * page_size
+
+        messages = AIChat.objects.filter(user=user).order_by("-id")[start:end]
+        reversed_messages = messages[::-1]
+
+        messages_data = [
+            {
+                "id": message.id,
+                "ai_msg": message.ai_response,
+                "user_msg": message.message,
+                "timestamp": message.created_at,
+            }
+            for message in messages
+        ]
+
+        has_more = AIChat.objects.filter(user=user).count() > end
+
+        return JsonResponse({"messages": messages_data, "has_more": has_more})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+@login_required(login_url="/login")
+def send_message_to_ai(request):
+    if request.method == "POST":
+        try:
+            user_message = request.POST.get("message", "")
+            response = ai_client.chat.completions.create(
+                model='gpt-3.5-turbo',
+                messages=[{
+                    'role': 'user',
+                    'content': user_message
+                }]
+            )
+        except Exception:
+            return JsonResponse({
+                'error': "Failed to connect open ai"
+            }, status=400)
+        
+        # save response into db
+        ai_res = response.choices[0].message.content
+        instance = AIChat.objects.create(
+            user=request.user,
+            message=user_message,
+            ai_response=ai_res
+        )
+
+        if instance :
+            return JsonResponse({
+                "usr_msg": instance.message,
+                "ai_res": instance.ai_response
+            }, status=200)
+        
+        return JsonResponse({
+                'error': "Failed to save into databse"
+            }, status=400)
+    
+    return JsonResponse({
+                'error': "Invalid request method"
+            }, status=400)
+
+# Read data from csv file
+def read_documentation_csv(request):
+    try:
+        file_path = finders.find("documentation/lesson.csv")
+    except Exception:
+        return JsonResponse({"error": "File not found"}, status=404)
+
+    with open(file_path, mode="r", encoding="utf-8") as file:
+        csv_reader = csv.DictReader(file)  # Use DictReader for better structure
+        data = [row for row in csv_reader]  # Convert rows into a list of dictionaries
+
+    return JsonResponse(data, safe=False)
 
 
 # Page Errors
