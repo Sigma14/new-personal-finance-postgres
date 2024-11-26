@@ -62,9 +62,14 @@
         <!-- END: Page CSS-->
         <!-- BEGIN: Custom CSS-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
+        
         <!--JQuery-->
         <script src="{% static 'assets/js/jquery.min.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+        <!--HTML2Canvs-->
+        <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
+        <!--Fabric JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.js"></script>
         <!-- END: Custom CSS-->
         <!-- BEGIN: Google ANALYTICS  -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-EXPQGENY93"></script>
@@ -296,6 +301,7 @@
         {% include "./right-sidebar/sidebar_toggler.html" %}
         {% include "./right-sidebar/sidebar_body.html" %}
         {% endif %}
+        {% include "./right-sidebar/image_preview_modal.html" %}
         <!--END: Right Sidebar-->
         <!-- BEGIN: Content-->
         {% block content %}

@@ -53,7 +53,7 @@ const activateButton = (button, content) => {
     item.button.classList.add("btn-outline-secondary");
     item.button.setAttribute("aria-expanded", "false");
     // set heading
-    if(item.button === button) {
+    if (item.button === button) {
       $("#rightSidebarHeader").text(item.header);
       $("#rightSidebarDescription").text(item.description);
     }
@@ -295,10 +295,123 @@ $(document).ready(function () {
     url: "/documentation/",
     dataType: "json",
     success: function (response) {
-      console.log(response);
       response.forEach((data) => {
         renderAccordion(data);
       });
     },
   });
+});
+
+/*
+ * Handle feedback screenshot
+ * Taking screenshot using html2canvas
+ * Editing screenshot using fabric.js
+ */
+
+// Fabric.js canvas initialization
+$(document).ready(function () {
+  let canvas;
+
+  // Function to initialize and set up the canvas
+  function initializeCanvas(img, containerWidth, containerHeight) {
+    const canvasElement = document.getElementById("snapEditCanvas");
+
+    let canvasWidth, canvasHeight;
+
+    if (containerWidth > 1200) {
+      canvasWidth = 800;
+      canvasHeight = 500;
+    } else if (containerWidth > 768) {
+      canvasWidth = 600;
+      canvasHeight = 400;
+    } else {
+      canvasWidth = 400;
+      canvasHeight = 300;
+    }
+
+    canvasElement.width = canvasWidth;
+    canvasElement.height = canvasHeight;
+
+    canvas = new fabric.Canvas("snapEditCanvas");
+
+    const fabricImage = new fabric.Image(img, {
+      left: 0,
+      top: 0,
+      selectable: false,
+      scaleX: canvasWidth / img.width,
+      scaleY: canvasHeight / img.height,
+    });
+
+    canvas.setWidth(canvasWidth);
+    canvas.setHeight(canvasHeight);
+    canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+  }
+
+  // Take Screenshot and Initialize Fabric.js
+  $("#takeScreenshot").on("click", function () {
+    html2canvas(document.body, {
+      ignoreElements: function (element) {
+        return element.id === "rightSettingBody";
+      },
+      width: window.innerWidth,
+      height: window.innerHeight,
+    })
+      .then((snap) => {
+        const imgData = snap.toDataURL("image/png");
+        const img = new Image();
+        img.src = imgData;
+
+        img.onload = function () {
+          const containerWidth = window.innerWidth;
+          const containerHeight = window.innerHeight;
+          initializeCanvas(img, containerWidth, containerHeight);
+        };
+
+        const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
+          backdrop: "static",
+          keyboard: false,
+        });
+        modal.show();
+      })
+      .catch((error) => {
+        console.error("Error taking screenshot:", error);
+      });
+  });
+
+  // Save Edited Image
+  $("#saveEditedImage").on("click", function () {
+    const editedImage = canvas.toDataURL({ format: "png" });
+
+    const link = document.createElement("a");
+    link.href = editedImage;
+    link.download = "edited-screenshot.png";
+    link.click();
+  });
+
+  // Drawing Mode
+  $("#enableDrawing").on("click", function () {
+    canvas.isDrawingMode = !canvas.isDrawingMode;
+    if (canvas.isDrawingMode) {
+      canvas.freeDrawingBrush.width = 2;
+      canvas.freeDrawingBrush.color = "#ff0000";
+      $(this).removeClass("btn-outline-success");
+      $(this).addClass("btn-outline-danger");
+    } else {
+      $(this).removeClass("btn-outline-danger");
+      $(this).addClass("btn-outline-success");
+    }
+  });
+
+
+  // Clear Canvas
+  $("#clearCanvas").on("click", function () {
+    const objects = canvas.getObjects(); // Get all objects on the canvas
+    objects.forEach((obj) => {
+      if (obj !== canvas.backgroundImage) {
+        canvas.remove(obj); // Remove all objects except the background image
+      }
+    });
+    canvas.renderAll(); // Re-render the canvas
+  });
+
 });
