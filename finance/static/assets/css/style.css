@@ -188,7 +188,7 @@ input[type="file"]::file-selector-button:hover {
 
 .right-side-toggler,
 .offcanvas {
-  z-index: 9999;
+  z-index: 8888;
 }
 
 /* Chat Message CSS */
@@ -296,7 +296,7 @@ input[type="file"]::file-selector-button:hover {
 
 /* Custom scrollbar styles */
 .theme-scrollbar::-webkit-scrollbar {
-  width: 1vw; /* Set the width of the scrollbar */
+  width: 9px; /* Set the width of the scrollbar */
 }
 
 .theme-scrollbar::-webkit-scrollbar-track {
@@ -313,23 +313,16 @@ input[type="file"]::file-selector-button:hover {
 
 #lessonsContent {
   max-height: 100%;
-  padding-right: 10px;
 }
 
 .accordion-card-body {
   max-height: 100%;
   overflow-y: auto;
 }
-
-/* Feedback Modal */
-#feedbackSnapImgPrev {
-  max-width: 100%; /* Ensure the image doesn't overflow */
-  height: auto; /* Maintain aspect ratio */
-  border: 1px solid #ddd; /* Optional: Add a border for aesthetics */
-  border-radius: 5px; /* Optional: Add rounded corners */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a shadow for emphasis */
+.modal-lg{
+  max-width: 70% !important;
 }
 
-.modal-lg {
-  max-width: 90%; /* Make the modal take up more width on larger screens */
+.canvasModal{
+  z-index: 9999 !important;
 }

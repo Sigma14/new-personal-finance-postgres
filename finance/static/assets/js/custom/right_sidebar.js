@@ -312,25 +312,18 @@ $(document).ready(function () {
 $(document).ready(function () {
   let canvas;
 
-  // Function to initialize and set up the canvas
+  /**
+   * Initializes the Fabric.js canvas with the provided image.
+   * @param {HTMLImageElement} img - The image to set as the canvas background.
+   * @param {number} containerWidth - Width of the container.
+   * @param {number} containerHeight - Height of the container.
+   */
   function initializeCanvas(img, containerWidth, containerHeight) {
     const canvasElement = document.getElementById("snapEditCanvas");
 
-    let canvasWidth, canvasHeight;
-
-    if (containerWidth > 1200) {
-      canvasWidth = 800;
-      canvasHeight = 500;
-    } else if (containerWidth > 768) {
-      canvasWidth = 600;
-      canvasHeight = 400;
-    } else {
-      canvasWidth = 400;
-      canvasHeight = 300;
-    }
-
-    canvasElement.width = canvasWidth;
-    canvasElement.height = canvasHeight;
+    const dimensions = calculateCanvasDimensions(containerWidth);
+    canvasElement.width = dimensions.width;
+    canvasElement.height = dimensions.height;
 
     canvas = new fabric.Canvas("snapEditCanvas");
 
@@ -338,49 +331,88 @@ $(document).ready(function () {
       left: 0,
       top: 0,
       selectable: false,
-      scaleX: canvasWidth / img.width,
-      scaleY: canvasHeight / img.height,
+      scaleX: dimensions.width / img.width,
+      scaleY: dimensions.height / img.height,
     });
 
-    canvas.setWidth(canvasWidth);
-    canvas.setHeight(canvasHeight);
+    canvas.setWidth(dimensions.width);
+    canvas.setHeight(dimensions.height);
     canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+
+    ensureModalResponsive(canvasElement);
   }
 
-  // Take Screenshot and Initialize Fabric.js
+  /**
+   * Calculates the dimensions for the canvas based on the container width.
+   * @param {number} containerWidth - The width of the container.
+   * @returns {Object} The width and height for the canvas.
+   */
+  function calculateCanvasDimensions(containerWidth) {
+    if (containerWidth > 1200) {
+      return { width: 800, height: 500 };
+    } else if (containerWidth > 768) {
+      return { width: 600, height: 400 };
+    } else {
+      return { width: 500, height: 350 };
+    }
+  }
+
+  /**
+   * Ensures the modal containing the canvas is responsive based on canvas size.
+   * @param {HTMLElement} canvasElement - The canvas element.
+   */
+  function ensureModalResponsive(canvasElement) {
+    const modalContent = document.querySelector(".canvasModal .modal-content");
+    modalContent.style.maxWidth = `${canvasElement.width + 50}px`;
+    modalContent.style.overflowX = "auto";
+  }
+
+  /**
+   * Captures a screenshot of the current page and initializes the Fabric.js canvas.
+   */
   $("#takeScreenshot").on("click", function () {
     html2canvas(document.body, {
-      ignoreElements: function (element) {
-        return element.id === "rightSettingBody";
-      },
+      ignoreElements: (element) => element.id === "rightSettingBody",
       width: window.innerWidth,
       height: window.innerHeight,
     })
-      .then((snap) => {
-        const imgData = snap.toDataURL("image/png");
+      .then((snapshot) => {
         const img = new Image();
-        img.src = imgData;
+        img.src = snapshot.toDataURL("image/png");
 
         img.onload = function () {
-          const containerWidth = window.innerWidth;
-          const containerHeight = window.innerHeight;
-          initializeCanvas(img, containerWidth, containerHeight);
+          initializeCanvas(img, window.innerWidth, window.innerHeight);
+          showModal();
         };
-
-        const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
-          backdrop: "static",
-          keyboard: false,
-        });
-        modal.show();
       })
-      .catch((error) => {
-        console.error("Error taking screenshot:", error);
-      });
+      .catch((error) => console.error("Error taking screenshot:", error));
   });
 
-  // Save Edited Image
+  /**
+   * Handles uploading an image for editing on the Fabric.js canvas.
+   */
+  $("#feedbackImg").on("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = function () {
+          initializeCanvas(img, window.innerWidth, window.innerHeight);
+          showModal();
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  /**
+   * Saves the edited canvas image.
+   */
   $("#saveEditedImage").on("click", function () {
-    const editedImage = canvas.toDataURL({ format: "png" });
+    const editedImage = canvas.toDataURL("image/png");
 
     const link = document.createElement("a");
     link.href = editedImage;
@@ -388,30 +420,39 @@ $(document).ready(function () {
     link.click();
   });
 
-  // Drawing Mode
+  /**
+   * Toggles the drawing mode on the Fabric.js canvas.
+   */
   $("#enableDrawing").on("click", function () {
     canvas.isDrawingMode = !canvas.isDrawingMode;
+    $(this).toggleClass("btn-outline-success btn-outline-danger");
+
     if (canvas.isDrawingMode) {
       canvas.freeDrawingBrush.width = 2;
       canvas.freeDrawingBrush.color = "#ff0000";
-      $(this).removeClass("btn-outline-success");
-      $(this).addClass("btn-outline-danger");
-    } else {
-      $(this).removeClass("btn-outline-danger");
-      $(this).addClass("btn-outline-success");
     }
   });
 
-
-  // Clear Canvas
+  /**
+   * Clears all objects from the Fabric.js canvas except the background image.
+   */
   $("#clearCanvas").on("click", function () {
-    const objects = canvas.getObjects(); // Get all objects on the canvas
-    objects.forEach((obj) => {
+    canvas.getObjects().forEach((obj) => {
       if (obj !== canvas.backgroundImage) {
-        canvas.remove(obj); // Remove all objects except the background image
+        canvas.remove(obj);
       }
     });
-    canvas.renderAll(); // Re-render the canvas
+    canvas.renderAll();
   });
 
+  /**
+   * Displays the modal dialog for canvas editing.
+   */
+  function showModal() {
+    const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
+      backdrop: "static",
+      keyboard: false,
+    });
+    modal.show();
+  }
 });
