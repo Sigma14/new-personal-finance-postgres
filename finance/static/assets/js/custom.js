@@ -4335,10 +4335,9 @@ $(document).ready(function () {
                 const fileInput = document.querySelector("#screenshotData");
                 fileInput.files = dataTransfer.files;
 
-                console.log("Image successfully added to the file input!");
-            } else {
-                console.error("Canvas element not found.");
-            }
+                $('#feedbackSnapAdded').removeClass('d-none');
+
+            } 
         });
 
         // Helper function to convert Base64 to File
