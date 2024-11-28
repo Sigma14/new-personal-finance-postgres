@@ -12167,7 +12167,7 @@ def read_documentation_csv(request):
         csv_reader = csv.DictReader(file)  # Use DictReader for better structure
         data = [row for row in csv_reader]  # Convert rows into a list of dictionaries
 
-    return JsonResponse(data, safe=False)
+    return JsonResponse({"data": data, "status": "success"}, safe=False)
 
 
 # Create a feedback

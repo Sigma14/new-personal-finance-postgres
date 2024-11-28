@@ -1,5 +1,5 @@
 number,id,queryParamName,queryParamValue,lesson_name,lesson_content
-1,,lessonNumber,,Budget Section,"<h2>Budget Section</h2>
+1,,lessonNumber,/en/budgets/,Budget Section,"<h2>Budget Section</h2>
 
 <h3>Lesson Objective:</h3>
 <p>By the end of this lesson, users will be able to navigate the Budget section of the personal finance app, understand how to create and monitor budgets, and utilize the features to achieve their financial goals.</p>
@@ -59,7 +59,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 <h3>Conclusion:</h3>
 <p>In this lesson, you have learned how to navigate the Budget section, create and monitor budgets, and set financial goals. Understanding these features will help you make informed decisions and enhance your financial planning. Keep exploring the app to deepen your knowledge and improve your financial health!</p>
 "
-2,,lessonNumber,,Bills Section,"<h2>Bills Section</h2>
+2,,lessonNumber,/en/bill_list/,Bills Section,"<h2>Bills Section</h2>
 
 <h3>Lesson Objective:</h3>
 <p>By the end of this lesson, users will be able to navigate the Bills section of the personal finance app, understand how to manage their recurring financial commitments, and utilize the features to track due dates and avoid missed payments.</p>
@@ -118,7 +118,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 
 <h3>Conclusion:</h3>
 <p>In this lesson, you have learned how to navigate the Bills section, add and categorize bills, monitor and manage bill payments, and set reminders. Understanding these features will help you make informed decisions and enhance your financial planning. Keep exploring the app to deepen your knowledge and improve your financial health!</p>"
-3,,lessonNumber,,Category Section,"<h2>Category Section</h2>
+3,,lessonNumber,/en/category_list/,Category Section,"<h2>Category Section</h2>
 
 <h3>Lesson Objective:</h3>
 <p>By the end of this lesson, users will be able to navigate the Category section of the personal finance app, understand how to group budgets and transactions, and utilize the features to analyze spending patterns and make better financial decisions.</p>
@@ -175,7 +175,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 <h3>Conclusion:</h3>
 <p>In this lesson, you have learned how to navigate the Category section, add and manage categories, and analyze spending patterns. Understanding these features will help you make informed decisions and enhance your financial planning. Keep exploring the app to deepen your knowledge and improve your financial health!</p>
 "
-4,,lessonNumber,,Bank Accounts ,"<h2>Bank Accounts</h2>
+4,,lessonNumber,/en/accounts/,"Bank Accounts ","<h2>Bank Accounts</h2>
 
 <h3>Lesson: Understanding and Managing Bank Accounts on Our Platform</h3>
 
@@ -239,7 +239,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 
 <h3>Conclusion:</h3>
 <p>By completing these tasks and reflecting on the questions, you should now have a better understanding of how to navigate and utilize the Accounts section of our platform. This knowledge will enable you to manage your financial accounts more effectively, leading to improved financial health and informed decision-making. Continue exploring the features and applying what you've learned to maximize the benefits of using our platform.</p>"
-5,,lessonNumber,,Transaction Page,"<h2>Transaction Page</h2>
+5,,lessonNumber,/en/transaction_list/,Transaction Page,"<h2>Transaction Page</h2>
 
 <h3>Lesson: Navigating and Utilizing the Transactions Page</h3>
 
@@ -304,7 +304,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 
 <h3>Conclusion:</h3>
 <p>By completing these tasks and reflecting on the questions, you should now have a better understanding of how to navigate and utilize the Transactions page on our platform. This knowledge will help you manage your transactions more effectively, providing you with valuable insights into your financial habits and enabling you to make better financial decisions. Continue exploring the features and applying what you've learned to maximize the benefits of using our platform.</p>"
-6,,lessonNumber,,Goals,"<h2>Goals</h2>
+6,,lessonNumber,/en/goal_list/,Goals,"<h2>Goals</h2>
 
 <h3>Lesson: Setting and Achieving Financial Goals on Our Platform</h3>
 
@@ -372,7 +372,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 
 <h3>Conclusion:</h3>
 <p>By completing these tasks and reflecting on the questions, you should now have a better understanding of how to set, track, and manage your financial goals on our platform. This knowledge will help you achieve your long-term financial aspirations systematically and efficiently. Continue exploring the features and applying what you've learned to maximize the benefits of using our platform.</p>"
-7,,lessonNumber,,Mortgage Calculator,"<h2>Mortgage Calculator</h2>
+7,,lessonNumber,/en/mortgagecalculator/,Mortgage Calculator,"<h2>Mortgage Calculator</h2>
 
 <h3>Lesson: Utilizing the Mortgage Calculator on Our Platform</h3>
 
@@ -459,7 +459,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 
 <h3>Conclusion:</h3>
 <p>By completing these tasks and reflecting on the questions, you should now have a better understanding of how to use the Mortgage Calculator on our platform. This knowledge will help you estimate your mortgage payments accurately, analyze the long-term costs, and make informed decisions about your property investments. Continue exploring the features and applying what you've learned to maximize the benefits of using our platform.</p>"
-8,,lessonNumber,,Real State Overview,"<h2>Real Estate Overview</h2>
+8,,lessonNumber,/en/real-estate-home,Real State Overview,"<h2>Real Estate Overview</h2>
 
 <h3>Lesson: Navigating and Utilizing Features in the Real Estate Section of Our Financial Learning Application</h3>
 
@@ -555,7 +555,7 @@ number,id,queryParamName,queryParamValue,lesson_name,lesson_content
 <h3>Conclusion:</h3>
 <p>In this lesson, you have explored key features of the Real Estate section in our application. By completing tasks related to property management, tenant management, rent collection, and maintenance requests, you have gained practical experience in using the application to manage your real estate investments. Reflect on the tasks and think about how you can apply these features in real-world scenarios to enhance your property management skills.</p>
 "
-9,,lessonNumber,,Technical Analysis lesson,"<h2>Technical Analysis Lesson</h2>
+9,,lessonNumber,/en/,Technical Analysis lesson,"<h2>Technical Analysis Lesson</h2>
 
 <h3>Lesson: Utilizing the Technical Analysis Tools in Our Financial Learning Application</h3>
 

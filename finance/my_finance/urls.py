@@ -5,7 +5,7 @@ from .views import *
 urlpatterns = [
     # Home url:-
     path("", home, name="home"),
-    # Right sidebar urls:
+    # Right sidebar urls:-
     path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
     path("chats/load-messages/", load_ai_chat, name="load_ai_chats"),
     path("documentation/", read_documentation_csv, name="documentation"),

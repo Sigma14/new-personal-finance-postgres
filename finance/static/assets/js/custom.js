@@ -4447,13 +4447,17 @@ $(document).ready(function () {
     })();
 
     // Helper function to render Lessons content
-    function renderAccordion(data) {
+    function renderAccordion(data, curPath) {
         const html = `
         <div class="h-100" id="accParent-${data.number}">
             <div class="card">
                 <h2 class="mb-0" id="heading-${data.number}">
                     <button 
-                        class="btn btn-outline-primary btn-block text-left" 
+                        class="btn ${
+                            curPath === data.queryParamValue
+                                ? "btn-outline-primary"
+                                : "btn-outline-secondary"
+                        } btn-block text-left" 
                         type="button" 
                         data-toggle="collapse" 
                         data-target="#collapse${data.number}" 
@@ -4482,12 +4486,17 @@ $(document).ready(function () {
     // Backend call to fetch the data
     $.ajax({
         type: "GET",
-        url: "/documentation/",
+        url: $("#lessonsContent").data("url"),
         dataType: "json",
         success: function (response) {
-            response.forEach((data) => {
-                renderAccordion(data);
-            });
+            console.log(response);
+            if (response.status === "success") {
+                const data = response.data;
+                const curPath = $("#lessonsContent").data("current-path");
+                data.forEach(function (item) {
+                    renderAccordion(item, curPath);
+                });
+            }
         },
     });
 });
