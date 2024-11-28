@@ -319,8 +319,24 @@ input[type="file"]::file-selector-button:hover {
   max-height: 100%;
   overflow-y: auto;
 }
-.modal-lg{
-  max-width: 70% !important;
+.modal-lg {
+    max-width: 90%;
+    width: auto !important;
+}
+
+.modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+#snapEditCanvas {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .canvasModal{

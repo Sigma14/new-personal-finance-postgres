@@ -1,6 +1,6 @@
 <!-- User Chat messages -->
  {% load static %}
-<div class="user-chats theme-scrollbar" id="chatContainer">
+<div class="user-chats theme-scrollbar" id="chatContainer" data-url="{% url 'load_ai_chats' %}">
     <!--Loading-->
     <!--Actual chat message container-->
     <div class="chats " id="chatMsgContainer">

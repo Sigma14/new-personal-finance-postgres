@@ -20,6 +20,7 @@ from decouple import config
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.http import (
@@ -165,7 +166,8 @@ from .models import (
     TemplateBudget,
     Transaction,
     UserBudgets,
-    AIChat
+    AIChat,
+    Feedback
 )
 from .mortgage import calculate_tenure, calculator
 from .sample_constants import (
@@ -12115,6 +12117,7 @@ def load_ai_chat(request):
 
 
 @login_required(login_url="/login")
+@require_POST
 def send_message_to_ai(request):
     if request.method == "POST":
         try:
@@ -12165,6 +12168,32 @@ def read_documentation_csv(request):
         data = [row for row in csv_reader]  # Convert rows into a list of dictionaries
 
     return JsonResponse(data, safe=False)
+
+
+# Create a feedback
+@login_required(login_url="/login")
+@require_POST
+def create_feedback(request):
+    user = request.user
+    feature = request.POST.get("feedbackFeature")
+    issue = request.POST.get("feedback_issue")
+    screenshot = request.FILES.get("screenshotData")
+    description = request.POST.get("feedbackDetails")
+    suggestion = request.POST.get("featureSuggestions")
+    importance = request.POST.get("feedback_priority")
+    try:
+        Feedback.objects.create(
+            user=user,
+            feature=feature,
+            issue=issue,
+            screenshot=screenshot,
+            description=description,
+            suggestion=suggestion,
+            importance=importance,
+        )
+    except:
+        return JsonResponse({"error": "Failed to create feedback"}, status=400)
+    return JsonResponse({"message": "Feedback created successfully", "status": "success"}, status=201)
 
 
 # Page Errors

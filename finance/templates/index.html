@@ -64,7 +64,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
         
         <!--JQuery-->
-        <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/jquery.min.js' %}"></script> {% endcomment %}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
         <!--HTML2Canvs-->
         <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
@@ -317,9 +317,6 @@
         </footer>
         <button class="btn btn-primary btn-icon scroll-top" type="button"><i data-feather="arrow-up"></i></button>
         <!-- END: Footer-->
-        <!--START: right-sidebar-js -->
-        <script src="{% static 'assets/js/custom/right_sidebar.js' %}"></script>
-        <!--END: right-sidebar-js -->
         <!-- BEGIN: Vendor JS-->
         <script src="{% static 'app-assets/vendors/js/vendors.min.js' %}"></script>
         <!-- BEGIN Vendor JS-->

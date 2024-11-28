@@ -5,14 +5,16 @@ from .views import *
 urlpatterns = [
     # Home url:-
     path("", home, name="home"),
+    # Right sidebar urls:
+    path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
+    path("chats/load-messages/", load_ai_chat, name="load_ai_chats"),
+    path("documentation/", read_documentation_csv, name="documentation"),
+    path("feedback/", create_feedback, name="create-feedback"),
+    # Real estate urls:-
     path("real-estate-home", real_estate_home, name="real_estate_home"),
     path("create_link_token", create_link_token, name="create-link-token"),
     path("get_access_token", get_access_token, name="get-access-token"),
     path("transactions/get", get_transactions, name="get-transactions"),
-    # Right sidebar urls:
-    path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
-    path("chats/load-messages/", load_ai_chat, name="load-ai-chat"),
-    path("documentation/", read_documentation_csv, name="documentation"),
     # Category urls :-
     path("category_list/", CategoryList.as_view(), name="category_list"),
     path("category_detail/<int:pk>", CategoryDetail.as_view(), name="category_detail"),
