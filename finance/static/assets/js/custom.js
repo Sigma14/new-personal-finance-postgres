@@ -4035,7 +4035,7 @@ $(document).ready(function () {
         <div class="chat chat-right">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
-                    <img src="{% static 'app-assets/images/icons/vuejs.svg' %}" alt="avatar" height="36" width="36" />
+                    <img src="{% static 'Images/logo.png' %}" alt="avatar" height="36" width="36" />
                 </span>
             </div>
             <div class="chat-body">
@@ -4473,7 +4473,7 @@ $(document).ready(function () {
                     aria-labelledby="heading-${data.number}" 
                     data-parent="#accParent-${data.number}">
                     <div class="card text-white accordion-card-body theme-scrollbar">
-                       <p class="card-text"> ${data.lesson_content} </p>
+                        ${data.lesson_content} 
                     </div>
                 </div>
             </div>
@@ -4498,11 +4498,4 @@ $(document).ready(function () {
             }
         },
     });
-
-    // Add css to document
-    // $("#lessonsContent").find("p").addClass("d-none");
-    if ($("html").attr("data-layout") === "light-layout") {
-        $("#lessonsContent").addClass("d-none");
-    }
-
 });

@@ -277,21 +277,20 @@ input[type="file"]::file-selector-button:hover {
     border-radius: 1rem; /* Rounded corners */
 }
 
+.light-layout .theme-scrollbar::-webkit-scrollbar-track{
+    background-color: #B8C2CC !important;
+}
+
 .theme-scrollbar::-webkit-scrollbar-thumb {
     background-color: #7367f0; /* Thumb color */
     border-radius: 1rem; /* Rounded corners */
 }
 
-/* Dark mode chats css */
-[data-layout="dark-layout"] .user-chats {
-    color: #6e6b7b;
-    border: 1px solid var(--indigo);
-}
 
-[data-layout="dark-layout"] .chats .chat-left .chat-content {
-}
+/* Lessons css */
 
-[data-layout="dark-layout"] .chats .chat-right .chat-content {
+.light-layout #lessonsContent .accordion-card-body p, .light-layout #lessonsContent .accordion-card-body li {
+    color: #1E1E1E !important;
 }
 
 /* Accordion */
