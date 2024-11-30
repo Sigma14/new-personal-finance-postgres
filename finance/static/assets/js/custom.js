@@ -4032,7 +4032,7 @@ $(document).ready(function () {
     // Helper function to push messages to chat window
     function pushUserChat(content, prepend) {
         const chatHTML = `
-        <div class="chat">
+        <div class="chat chat-right">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
                     <img src="{% static 'app-assets/images/icons/vuejs.svg' %}" alt="avatar" height="36" width="36" />
@@ -4335,9 +4335,8 @@ $(document).ready(function () {
                 const fileInput = document.querySelector("#screenshotData");
                 fileInput.files = dataTransfer.files;
 
-                $('#feedbackSnapAdded').removeClass('d-none');
-
-            } 
+                $("#feedbackSnapAdded").removeClass("d-none");
+            }
         });
 
         // Helper function to convert Base64 to File
@@ -4413,6 +4412,8 @@ $(document).ready(function () {
                             $("#feedbackForm")
                                 .find(".is-valid, .is-invalid")
                                 .removeClass("is-valid is-invalid");
+
+                            $("#feedbackForm")[0].reset();
                             // show success message
                             Swal.fire({
                                 title: response.message,
@@ -4472,7 +4473,7 @@ $(document).ready(function () {
                     aria-labelledby="heading-${data.number}" 
                     data-parent="#accParent-${data.number}">
                     <div class="card text-white accordion-card-body theme-scrollbar">
-                        ${data.lesson_content}
+                       <p class="card-text"> ${data.lesson_content} </p>
                     </div>
                 </div>
             </div>
@@ -4488,7 +4489,6 @@ $(document).ready(function () {
         url: $("#lessonsContent").data("url"),
         dataType: "json",
         success: function (response) {
-            console.log(response);
             if (response.status === "success") {
                 const data = response.data;
                 const curPath = $("#lessonsContent").data("current-path");
@@ -4498,4 +4498,11 @@ $(document).ready(function () {
             }
         },
     });
+
+    // Add css to document
+    // $("#lessonsContent").find("p").addClass("d-none");
+    if ($("html").attr("data-layout") === "light-layout") {
+        $("#lessonsContent").addClass("d-none");
+    }
+
 });

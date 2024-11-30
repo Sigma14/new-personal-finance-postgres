@@ -12195,7 +12195,8 @@ def create_feedback(request):
         return JsonResponse({"error": "Failed to create feedback"}, status=400)
     return JsonResponse({"message": "Feedback created successfully", "status": "success"}, status=201)
 
-
+def test_component(request):
+    return render(request, "test-component.html")
 # Page Errors
 
 

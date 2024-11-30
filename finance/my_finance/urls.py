@@ -10,6 +10,7 @@ urlpatterns = [
     path("chats/load-messages/", load_ai_chat, name="load_ai_chats"),
     path("documentation/", read_documentation_csv, name="documentation"),
     path("feedback/", create_feedback, name="create-feedback"),
+    path("test-component", test_component, name="test-component"),
     # Real estate urls:-
     path("real-estate-home", real_estate_home, name="real_estate_home"),
     path("create_link_token", create_link_token, name="create-link-token"),
