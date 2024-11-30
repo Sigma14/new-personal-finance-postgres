@@ -20,7 +20,7 @@ from decouple import config
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.http import (
@@ -12084,80 +12084,96 @@ def rental_property_sample_page(request):
 
     return render(request, "rental_prop_sample_page.html", context=context)
 
-# AI Chat Views
+# Right Sidebar Views
 
 @login_required(login_url="/login")
+@require_GET
 def load_ai_chat(request):
-    print('working')
-    if request.method == 'GET':
-        user = request.user
-        page = int(request.GET.get("page", 1))
-        page_size = 5
+    """
+    - Only GET method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handled user's previous chats as chat history.
+    - A pagination system has added to reduce load in db.
+    - Each page includes 5 pair of messages means 5 objects from database.
+    - Works on AIChat database model.
+    """
+    user = request.user
+    page = int(request.GET.get("page", 1))
+    page_size = 5
 
-        start = (page - 1) * page_size
-        end = page * page_size
+    start = (page - 1) * page_size
+    end = page * page_size
 
-        messages = AIChat.objects.filter(user=user).order_by("-id")[start:end]
-        reversed_messages = messages[::-1]
+    messages = AIChat.objects.filter(user=user).order_by("-id")[start:end]
+    reversed_messages = messages[::-1]
 
-        messages_data = [
-            {
-                "id": message.id,
-                "ai_msg": message.ai_response,
-                "user_msg": message.message,
-                "timestamp": message.created_at,
-            }
-            for message in messages
-        ]
+    messages_data = [
+        {
+            "id": message.id,
+            "ai_msg": message.ai_response,
+            "user_msg": message.message,
+            "timestamp": message.created_at,
+        }
+        for message in messages
+    ]
 
-        has_more = AIChat.objects.filter(user=user).count() > end
+    has_more = AIChat.objects.filter(user=user).count() > end
 
-        return JsonResponse({"messages": messages_data, "has_more": has_more})
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    return JsonResponse({"messages": messages_data, "has_more": has_more})
 
 
 @login_required(login_url="/login")
 @require_POST
 def send_message_to_ai(request):
-    if request.method == "POST":
-        try:
-            user_message = request.POST.get("message", "")
-            response = ai_client.chat.completions.create(
-                model='gpt-3.5-turbo',
-                messages=[{
-                    'role': 'user',
-                    'content': user_message
-                }]
-            )
-        except Exception:
-            return JsonResponse({
-                'error': "Failed to connect open ai"
-            }, status=400)
-        
-        # save response into db
-        ai_res = response.choices[0].message.content
-        instance = AIChat.objects.create(
-            user=request.user,
-            message=user_message,
-            ai_response=ai_res
+    """
+    - Only POST method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handled user's chat messages and send it to open ai for AI response.
+    - On successful AI response, AIChat database model is used to store data.
+    """
+    try:
+        user_message = request.POST.get("message", "")
+        response = ai_client.chat.completions.create(
+            model='gpt-3.5-turbo', # Open AI Language Model
+            messages=[{
+                'role': 'user', # Promp sender type
+                'content': user_message # User message or promp
+            }]
         )
-
-        if instance :
-            return JsonResponse({
-                "usr_msg": instance.message,
-                "ai_res": instance.ai_response
-            }, status=200)
-        
+    except Exception:
         return JsonResponse({
-                'error': "Failed to save into databse"
-            }, status=400)
+            'error': "Failed to connect open ai"
+        }, status=400)
+    
+    # save response into db
+    ai_res = response.choices[0].message.content
+    instance = AIChat.objects.create(
+        user=request.user,
+        message=user_message,
+        ai_response=ai_res
+    )
+
+    if instance :
+        return JsonResponse({
+            "usr_msg": instance.message,
+            "ai_res": instance.ai_response
+        }, status=200)
     
     return JsonResponse({
-                'error': "Invalid request method"
-            }, status=400)
+            'error': "Failed to save into databse"
+        }, status=400)
+    
 
-# Read data from csv file
+# Read data from csv 
+@require_GET
 def read_documentation_csv(request):
+    """
+    - Only get message allowed.
+    - This view reads a CSV file & convert the data into python dictionary.
+    - On successful conversion, it sends data as json response.
+    - CSV file should be located at "documentation/lesson.csv".
+    - On file change, have to change find() arguments.
+    """
     try:
         file_path = finders.find("documentation/lesson.csv")
     except Exception:
@@ -12174,6 +12190,13 @@ def read_documentation_csv(request):
 @login_required(login_url="/login")
 @require_POST
 def create_feedback(request):
+    """
+    - Only POST method allowed.
+    - Only Authenticated user allowed.
+    - This view handled user feedback request data.
+    - All fields are required except screenshot.
+    - On successful creation, Feedback database model is used to store data.
+    """
     user = request.user
     feature = request.POST.get("feedbackFeature")
     issue = request.POST.get("feedback_issue")
