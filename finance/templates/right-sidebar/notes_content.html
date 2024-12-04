@@ -38,7 +38,6 @@
         >
             <div class="card text-white accordion-card-body">
                 <form
-                    action="{% url 'create-note' %}"
                     id="createNoteForm"
                     method="post"
                     novalidate
@@ -77,7 +76,7 @@
 
 <h3 class="h3 text-center mb-2">Your Notes</h3>
 
-<div class="" id="notesContainer" data-url="{% url 'get-notes' %}">
+<div class="" id="notesContainer">
     <!--Notes heare-->
 </div>
 
