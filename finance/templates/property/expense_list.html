@@ -1,0 +1,131 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+<!DOCTYPE html>
+<head>
+    {% block title %}   {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">EXPENSE</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">expense
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="col-sm-40 offset-sm-20">
+                    <div class="download_csv_form"></div>
+                    <a href="{% url 'property_expense_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Expense</a>
+                    <button style="float: right;" class="btn btn-primary download_csv" file_name="property_expenses.csv" table_heading="{{expense_key_dumps}}" table_length="{{expense_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                </div>
+                <br/>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <!-- Company Table Card -->
+                        <div class="col-lg-12 col-12">
+                            <div class="card card-company-table">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="property_table">
+                                            <thead>
+                                                <tr>
+                                                    {% for name in expense_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for data in expense_obj %}
+                                                <tr class="property_tr" property_detail_url="{% url 'property_expense_update'  pk=data.id%}">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-primary mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="home" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.property_details.property_name}}</div>
+                                                                <div class="font-small-2 ">Unit :- {{data.unit_name}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-warning mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="tool" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.category}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-info mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="calendar" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.expense_date}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="media align-items-center">
+                                                            <div class="avatar avatar-xl mr-1">
+                                                                <img src="{% static 'app-assets/images/portrait/small/avatar-s-11.jpg' %}" alt="Avatar" width="38" height="38" />
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h6 class="mb-0">{{data.description}}</h6>
+                                                                <p class="mb-0">By {{data.payee_name}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-success mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="dollar-sign" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.property_details.currency}}{{data.amount}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/ Company Table Card -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+

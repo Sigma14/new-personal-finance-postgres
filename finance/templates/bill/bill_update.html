@@ -1,0 +1,180 @@
+{% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Bill Update {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Update Bill</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Update Bill
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% if error %}
+                            <p class="text-danger">{{error}}</p>
+                        {% endif %}
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Category</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select type="text" id="fname-icon" class="form-control" name="label" required>
+                                                {% for label in bill_category %}
+                                                    {% if label.name == bill_data.label %}
+                                                        <option selected value="{{label.name}}">{{label.name}}</option>
+                                                    {% else %}
+                                                        <option value="{{label.name}}">{{label.name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Account</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select name="account_name" class="form-control" id="account_name" required>
+                                                {% for account in account_qs %}
+                                                    {% if bill_data.account.name == account.name %}
+                                                        <option selected>{{account.name}}</option>
+                                                    {% else %}
+                                                        <option>{{account.name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input value="{{bill_data.amount}}" type="text" id="email-icon" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bill Due Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input value="{{bill_data.date|date:'c'}}" type="text" id="email-icon" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        {% if bill_data.auto_bill %}
+                                            <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1" checked/>
+                                        {% else %}
+                                            <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1"/>
+                                        {% endif %}
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Auto-bill</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 show_bill_budget_periods">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Frequency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select name="frequency" class="form-control" id="id_frequency">
+                                              {% for name in bill_frequency %}
+                                                {%if name == bill_data.frequency %}
+                                                    <option selected>{{name}}</option>
+                                                {% else %}
+                                                    <option>{{name}}</option>
+                                                {% endif %}
+                                              {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        {% if bill_data.auto_pay %}
+                                            <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2" checked/>
+                                        {% else %}
+                                            <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2"/>
+                                        {% endif %}
+                                        <label class="custom-control-label" for="customCheck2">&nbsp;&nbsp;Auto-pay</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                <a href="{% url 'bill_detail' pk=bill_data.id %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content%}

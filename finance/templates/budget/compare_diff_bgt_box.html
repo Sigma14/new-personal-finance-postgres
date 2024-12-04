@@ -1,0 +1,584 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load custom_filters %}
+<head>
+    {% block title %} Compare Different Budgets {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Compare 2 different Budgets</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'compare_boxes' %}">Compare</a>
+                                    </li>
+                                    <li class="breadcrumb-item">different</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if no_budgets == True %}
+                        <div class="col-sm-40 offset-sm-20">
+                            <p class="text-danger">No available budgets for comparison, Please add some budgets</p>
+                            <a href="{% url 'budgets_walk_through' %}" class="btn btn-primary"><i
+                                class="fa fa-plus"></i> Add Budgets</a>
+                        </div><br>
+            {% endif %}
+            <div class="content-body" float="left">
+				<section id="current-bgt">
+                    <div class="row match-height">
+                        <div class="col-xl-12 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <form id="compare_bgt_form" action="{% url 'compare-different-budgets'  %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget 1</label>
+                                                    <select class="select2 form-control" name="budget1_name" multiple required>
+                                                        {% for name in budgets %}
+                                                        {% if name in budget1_names %}
+                                                            <option value="{{name}}" selected>{{name}}</option>
+                                                        {% else %}
+                                                            <option value="{{name}}">{{name}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget 2</label>
+                                                    <select class="select2 form-control" name="budget2_name" multiple required>
+                                                        {% for name in budgets %}
+                                                        {% if name in budget2_names %}
+                                                            <option value="{{name}}" selected>{{name}}</option>
+                                                        {% else %}
+                                                            <option value="{{name}}">{{name}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#MonthSelect"></i> Select Month</label>
+                                                    <select class="form-control" name="select_period" required>
+                                                        {% for month in list_of_months %}
+                                                            {% if month == current_month %}
+                                                                <option selected value="{{month}}">{{month}}</option>
+                                                            {% else %}
+                                                                <option value="{{month}}">{{month}}</option>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Compare</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-xl-6 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTable"></i> 
+                                        Transactions For Budget 1
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding:0px;">
+                                        <div class="card-datatable table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th colspan="2">Budgetted Amount</th>
+                                                        <!-- Dropdown for spent amonunt -->
+                                                        <th colspan="2">
+                                                            <div class="dropdown">
+                                                                <select class="form-control" id="spentAmountDropdown" style="width: 11rem; margin-left: -1rem;" >
+                                                                    <option value="spent">Spent Amount</option>
+                                                                    <option value="monthly">Monthly Transaction Total</option>
+                                                                </select>
+                                                            </div>
+                                                        </th>
+                                                        <th colspan="2">Remaining <br>Balance</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th><h5><b>Total Income</b></h5></th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_earn_amount_bgt1}}&nbsp;&nbsp;</b></h5></td></th>
+                                                    </tr>
+                                                    <th><h5><b>Total Spending</b></h5></th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_spent_amount_bgt1}}&nbsp;&nbsp;</b></h5></td></th>
+                                                    {% for key,value in transaction_data1.items %}
+                                                        
+                                                        <tr class="show_bdgt_trans" method_name="trans_data1{{forloop.counter0}}">
+                                                            <th><h5><b>{{key}}</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2">{{budget_dict|get_item:key|get_list_item:0}}</th>
+                                                            <th colspan="2" class="spent-amount" data-bgt="{{budget_dict|get_item:key|get_list_item:0}}" data-spent="{{budget_dict|get_item:key|get_list_item:1}}" data-monthly="{{value.0.1}}">{{budget_dict|get_item:key|get_list_item:1}}</th>
+                                                            <th colspan="2" class="remaining-balance">{{budget_graph_currency}}{{budget_dict|get_item:key|get_list_item:2}}&nbsp;&nbsp;</b></td></th>
+                                                        </tr>
+                                                        {% if value.1 %}
+                                                            <tr class="trans_data1{{forloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                <th colspan="3"><h5><b>Date</b></h5></th>
+                                                                <th colspan="2"><h5><b>Amount</b></h5></th>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% for data in value %}
+                                                        {% if forloop.counter0 > 0 %}
+                                                        <tr class="trans_data1{{forloop.parentloop.counter0}}" style="display:None;">
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                            <th colspan="3"><span>{{data.0}}</span></th>
+                                                            <th colspan="2"><span class="text-danger">{{budget_graph_currency}}{{data.1}}</span></th>
+                                                        </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% endfor %}
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title mb-25">
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTable"></i> 
+                                        Transactions For Budget 2
+                                    </h4>
+                                </div>
+                                <div class="card-body" style="padding:0px;">
+                                        <div class="card-datatable table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>&nbsp;</th>
+                                                        <th>&nbsp;</th>
+                                                        <th colspan="2">Budgetted Amount</th>
+                                                        <th colspan="2">
+                                                            <!-- Dropdown for spent amount -->
+                                                            <div class="dropdown">
+                                                                <select class="form-control" id="spentAmountDropdown2" style="width: 11rem; margin-left: -1rem;" >
+                                                                    <option value="spent2">Spent Amount</option>
+                                                                    <option value="monthly2">Monthly Transaction Total</option>
+                                                                </select>
+                                                            </div>
+                                                        </th>
+                                                        <th colspan="2">Remaining <br>Balance</th>
+                                                    </tr>   
+                                                <tr>
+                                                    <th><h5><b>Total Income</b></h5></th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_earn_amount_bgt2}}&nbsp;&nbsp;</b></h5></td></th>
+                                                </tr>
+                                                <tr>
+                                                    <th><h5><b>Total Spending</b></h5></th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th>&nbsp;</th>
+                                                    <th colspan="2"><h5><b>{{budget_graph_currency}}{{total_spent_amount_bgt2}}&nbsp;&nbsp;</b></h5></td></th>
+                                                </tr>
+                                                    {% for key,value in transaction_data2.items %}
+                                                        <tr class="show_bdgt_trans" method_name="trans_data2{{forloop.counter0}}">
+                                                            <th><h5><b>{{key}}</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2">{{budget_dict|get_item:key|get_list_item:0}}</th>
+                                                            <th colspan="2" class="spent-amount2" data-bgt2="{{budget_dict|get_item:key|get_list_item:0}}" data-spent2="{{budget_dict|get_item:key|get_list_item:1}}" data-monthly2="{{value.0.1}}">{{budget_dict|get_item:key|get_list_item:1}}</th>
+                                                            <th colspan="2" class="remaining-balance2">{{budget_graph_currency}}{{budget_dict|get_item:key|get_list_item:2}}&nbsp;&nbsp;</b></td></th>
+                                                        </tr>
+                                                        {% if value.1 %}
+                                                            <tr class="trans_data2{{forloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                <th colspan="3"><h5><b>Date</b></h5></th>
+                                                                <th colspan="2"><h5><b>Amount</b></h5></th>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% for data in value %}
+                                                        {% if forloop.counter0 > 0 %}
+                                                        <tr class="trans_data2{{forloop.parentloop.counter0}}" style="display:None;">
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                            <th colspan="3"><span>{{data.0}}</span></th>
+                                                            <th colspan="2">
+                                                                <span class="{% if data.2 == 'earned' %}text-success{% else %}text-danger{% endif %}">
+                                                                    {{budget_graph_currency}}{{data.1}}
+                                                                </span>
+                                                            </th>
+                                                        </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% endfor %}
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="expense_diff_tab" data-toggle="tab" href="#expense_diff_data" aria-controls="expense_diff_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Expense Comparison</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="income_diff_tab" data-toggle="tab" href="#income_diff_data" aria-controls="income_diff_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Income Comparison</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="tab-content" style="background-color:#161D31;">
+                            <div class="tab-pane active" id="expense_diff_data" aria-labelledby="expense_diff_tab" role="tabpanel">
+                                <section>
+                                    <!-- BEGIN: Info card-->
+                                    <div class="row" style="padding-bottom:20px;">
+                                        <div class="col-12">
+                                            <div class="collapse-margin collapse-icon mt-2" id="Expense-qna">
+                                                <div class="card">
+                                                    <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#Expense-one" aria-expanded="false" aria-controls="Expense-one">
+                                                        <ul class="nav nav-pills">
+                                                            <li class="nav-item">
+                                                                <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Expense Comparison Page Info</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div id="Expense-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#Expense-qna">
+                                                        <div class="card-header">
+                                                            <ul class="nav nav-pills">
+                                                                <li class="nav-item">
+                                                                This provides a visual breakdown of your expenses in both budgets. You can switch between pie charts for a percentage view or bar graphs for a direct comparison. This visual aid helps in quickly understanding how your spending differs between the two budgets.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--END: Info card-->
+                                    <div class="row match-height">
+                                        <div class="col-xl-6 col-md-12 col-12">
+                                            <div class="card">
+                                            <div class="card-body">
+                                                <span><strong style="font-size:17px;">Expenses For Budget 1</strong>
+                                                    <ul class="nav nav-pills" style="float:right" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center" id="budget_bar_tab" data-toggle="tab" href="#budget_bar_data" aria-controls="budget_bar_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                </span>
+                                                <div class="tab-content">
+                                                <div class="tab-pane active" id="budget_pie_data" aria-labelledby="budget_pie_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="total_budget"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="tab-pane" id="budget_bar_data" aria-labelledby="budget_bar_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="budgets-bar"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <div class="col-xl-6 col-md-12 col-12">
+                                            <div class="card">
+                                            <div class="card-body">
+                                                <span><strong style="font-size:17px;">Expenses For Budget 2</strong>
+                                                    <ul class="nav nav-pills" style="float:right" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center active" id="budget_pie_tab2" data-toggle="tab" href="#budget_pie_data2" aria-controls="budget_pie_data2" role="tab" aria-selected="false">
+                                                            <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center" id="budget_bar_tab2" data-toggle="tab" href="#budget_bar_data2" aria-controls="budget_bar_data2" role="tab" aria-selected="false">
+                                                            <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                </span>
+                                                <div class="tab-content">
+                                                <div class="tab-pane active" id="budget_pie_data2" aria-labelledby="budget_pie_tab2" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="total_budget2"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="tab-pane" id="budget_bar_data2" aria-labelledby="budget_bar_tab2" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="budgets-bar2"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="tab-pane" id="income_diff_data" aria-labelledby="income_diff_tab" role="tabpanel">
+                                <section>
+                                    <!-- BEGIN: Info card-->
+                                    <div class="row" style="padding-bottom:20px;">
+                                        <div class="col-12">
+                                            <div class="collapse-margin collapse-icon mt-2" id="income-qna">
+                                                <div class="card">
+                                                    <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#income-one" aria-expanded="false" aria-controls="income-one">
+                                                        <ul class="nav nav-pills">
+                                                            <li class="nav-item">
+                                                                <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Income Comparison Page Info</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div id="income-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#income-qna">
+                                                        <div class="card-header">
+                                                            <ul class="nav nav-pills">
+                                                                <li class="nav-item">
+                                                                    This section shows how your income sources stack up in each budget. Whether it's your salary, freelance income, or any other earnings, the pie or bar graphs make it easy to see where your money comes from in each scenario.                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--END: Info card-->
+                                    <div class="row match-height">
+                                        <div class="col-xl-6 col-md-12 col-12">
+                                            <div class="card">
+                                            <div class="card-body">
+                                                <span><strong style="font-size:17px;">Incomes For Budget 1</strong>
+                                                    <ul class="nav nav-pills" style="float:right" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center active" id="income_pie_tab" data-toggle="tab" href="#income_pie_data" aria-controls="income_pie_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center" id="income_bar_tab" data-toggle="tab" href="#income_bar_data" aria-controls="income_bar_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                </span>
+                                                <div class="tab-content">
+                                                <div class="tab-pane active" id="income_pie_data" aria-labelledby="income_pie_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="total_income_budget"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="tab-pane" id="income_bar_data" aria-labelledby="income_bar_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="income-budgets-bar"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <div class="col-xl-6 col-md-12 col-12">
+                                            <div class="card">
+                                            <div class="card-body">
+                                                <span><strong style="font-size:17px;">Incomes For Budget 2</strong>
+                                                    <ul class="nav nav-pills" style="float:right" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center active" id="income_pie_tab2" data-toggle="tab" href="#income_pie_data2" aria-controls="income_pie_data2" role="tab" aria-selected="false">
+                                                            <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center" id="income_bar_tab2" data-toggle="tab" href="#income_bar_data2" aria-controls="income_bar_data2" role="tab" aria-selected="false">
+                                                            <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                </span>
+                                                <div class="tab-content">
+                                                <div class="tab-pane active" id="income_pie_data2" aria-labelledby="income_pie_tab2" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="total_income_budget2"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="tab-pane" id="income_bar_data2" aria-labelledby="income_bar_tab2" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="income-budgets-bar2"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- Models-->
+            <div class="modal fade" id="CompareModel" tabindex="-1" role="dialog" aria-labelledby="CompareModelTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="CompareModelTitle">Budget Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        Here, you select which parts of each budget you want to compare. For example, you might choose to compare your spending on groceries or entertainment from one budget to another. This feature helps focus on areas most relevant to your financial planning.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="MonthSelect" tabindex="-1" role="dialog" aria-labelledby="MonthSelectModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="MonthSelectModel">Months Selection Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        Choose a specific month to compare the budgets. This is useful for understanding how your spending habits change month-to-month, or for comparing the same month across different years.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="TransactionTable" tabindex="-1" role="dialog" aria-labelledby="TransactionTableModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="TransactionTableModel">TransactionTable Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        These tables give a detailed view of your income and expenses for each budget. They break down your spending into categories, making it easy to compare where your money is going in each budget.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="ExpenseComparison" tabindex="-1" role="dialog" aria-labelledby="ExpenseComparisonModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="ExpenseComparisonModel">Expenses For Budget 1 Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        This provides a visual breakdown of your expenses in both budgets. You can switch between pie charts for a percentage view or bar graphs for a direct comparison. This visual aid helps in quickly understanding how your spending differs between the two budgets.                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>            
+        </div>
+    </div>
+{% endblock content%}
+

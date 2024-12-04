@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<head>
+    <title> Account List</title>
+</head>
+<body>
+{% extends "index.html" %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{name}} | Bank accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'account_box' %}">Accounts</a>
+                                    </li>
+                                    <li class="breadcrumb-item">{{name}}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'account_add' %}#{{name}}" class="btn btn-primary" style="margin-right: 10px;"><i
+                            class="fa fa-plus"></i> Add Account</a>
+                    <button class="btn btn-success" id="link-button"><i
+                            class="fa fa-plus" title="linked our account"></i> Link Account</button>
+                </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    {% for object in account_qs %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a href="{% url 'account_detail' pk=object.id %}">
+                                <div class="card-body">
+                                    <h2 style="float: left;">{{ object.name }}</h2>
+                                    <h2 style="float: right;">
+                                        <div class="avatar bg-light-info" float="right">
+                                            <div class="avatar-content">{{ object.transaction_count }}</div>
+                                        </div>
+                                    </h2>
+                                </div>
+                                <div class="card-body" style="padding-bottom:40px;">
+                                    <h4 style="float: left;">{{ object.currency }}{{ object.available_balance}}</h4>
+                                    <h4 style="float: right;">{{ object.updated_at }}</h4>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </section>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+

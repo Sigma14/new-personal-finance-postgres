@@ -1,0 +1,146 @@
+{% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Account Update {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Update Account</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'account_box' %}">Accounts</a>
+                                    </li>
+                                     <li class="breadcrumb-item"><a href="{% url 'account_list' name=account_type %}">{{account_type}}</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Update
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{form.name}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Bank Account Type</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="account_type">
+                                                {% if account_type == 'Checking' %}
+                                                    <option selected>Checking</option>
+                                                {% else %}
+                                                    <option>Checking</option>
+                                                {% endif %}
+                                                {% if account_type == 'Savings' %}
+                                                    <option selected>Savings</option>
+                                                {% else %}
+                                                    <option>Savings</option>
+                                                {% endif %}
+                                                {% if account_type == 'Cash' %}
+                                                    <option selected>Cash</option>
+                                                {% else %}
+                                                    <option>Cash</option>
+                                                {% endif %}
+                                                {% if account_type == 'Credit Card' %}
+                                                    <option selected>Credit Card</option>
+                                                {% else %}
+                                                    <option>Credit Card</option>
+                                                {% endif %}
+                                                {% if account_type == 'Line of Credit' %}
+                                                    <option selected>Line of Credit</option>
+                                                {% else %}
+                                                    <option>Line of Credit</option>
+                                                {% endif %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Balance</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control" name="balance" value="{{balance}}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Currency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.currency }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="include_net_worth" class="custom-control-input new_tab_check" id="customCheck1" checked/>
+                                        <label class="custom-control-label" for="customCheck1">&nbsp;&nbsp;Include in net worth</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                <a href="{% url 'account_box' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

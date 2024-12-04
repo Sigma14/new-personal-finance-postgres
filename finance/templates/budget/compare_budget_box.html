@@ -1,0 +1,505 @@
+{% extends "index.html" %}
+{% load mathfilters i18n %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Compare Budget Box {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Compare Target Budgets</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">{{ _('Budget')}}</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'compare_boxes' %}">Compare</a>
+                                    </li>
+                                    <li class="breadcrumb-item">target</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+				<section id="current-bgt">
+                    <div class="row match-height">
+                        <div class="col-xl-12 col-md-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <form id="compare_bgt_form" action="budgets/compare/target" method="post">
+                                        {% csrf_token %}
+                                        <div class="">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="type">{% trans 'Type' %}</label>
+                                                    <select id="type" class="form-control select_cmp_type" name="budget_type">
+                                                        {% if budget_type == "Expenses" %}
+                                                            <option selected>{% trans 'Expenses' %}</option>
+                                                        {% else %}
+                                                            <option>{{ _('Expenses')}}</option>
+                                                        {% endif %}
+                                                        {% if budget_type == "Incomes" %}
+                                                            <option selected>{% trans 'Incomes' %}</option>
+                                                        {% else %}
+                                                            <option>{{ _('Incomes')}}</option>
+                                                        {% endif %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
+                                                    <label> {% trans 'Select' %} {{ _('Budgets')}}</label>
+                                                    <select class="select2 form-control select_exp_budget" id="expense_budgets_list" name="expense_bgt" multiple>
+                                                        {% for name in budgets %}
+                                                        {% if name in budget_names %}
+                                                            <option value="{{name}}" selected>{{name}}</option>
+                                                        {% else %}
+                                                            <option value="{{name}}">{{name}}</option>
+                                                        {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="form-group select_income_budget" style="{% if budget_type == 'Expenses' %}display:None;{% endif %}">
+                                                    <label>{{ _('Select')}} {{ _('Budgets')}}</label>
+                                                    <select class="select2 form-control" id="income_budgets_list" name="income_bgt" multiple>
+                                                        {% for budget in income_budgets %}
+                                                            {% if budget.name in budget_names %}
+                                                                <option value="{{budget.name}}" selected>{{budget.name}}</option>
+                                                            {% else %}
+                                                                <option value="{{budget.name}}">{{budget.name}}</option>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">{{ _('Compare')}}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="app-user-edit">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="weekly_tab" data-toggle="tab" href="#weekly_data" aria-controls="weekly_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">{% trans 'Weekly' %} </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="monthly_tab" data-toggle="tab" href="#monthly_data" aria-controls="monthly_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">{% trans 'Monthly' %} </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="quarterly_tab" data-toggle="tab" href="#quarterly_data" aria-controls="quarterly_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">{% trans 'Quarterly' %} </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center" id="yearly_tab" data-toggle="tab" href="#yearly_data" aria-controls="yearly_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">{% trans 'Yearly' %} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="monthly_data" aria-labelledby="monthly_tab" role="tabpanel">
+                        <section>
+                        <div class="row match-height">
+                            <div class="col-xl-6 col-md-12 col-12">
+                                <div class="card card-congratulation-medal">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">{{ _('Monthly')}} {{budget_type}}</h4>
+                                    </div>
+                                    <div class="card-body" style="padding:0px;">
+                                        <div class="card-datatable table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    {% for key,value in transaction_dict.items %}
+                                                        <tr class="show_bdgt_trans" method_name="trans_data{{forloop.counter0}}">
+                                                            <th><h5><b>{{key}}</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down trans_data{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right trans_data{{forloop.counter0}}"></i></h5></td></th>
+                                                        </tr>
+                                                        {% if value.1 %}
+                                                            <tr class="trans_data{{forloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                <th colspan="3"><h5><b>{% trans 'Date' %} </b></h5></th>
+                                                                <th colspan="2"><h5><b>{% trans 'Amount' %} </b></h5></th>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% for data in value %}
+                                                        {% if forloop.counter0 > 0 %}
+                                                        <tr class="trans_data{{forloop.parentloop.counter0}}" style="display:None;">
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                            <th colspan="3"><span>{{data.0}}</span></th>
+                                                            <th colspan="2"><span class="text-danger">{{budget_graph_currency}}{{data.1}}</span></th>
+                                                        </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% endfor %}
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-12 col-12">
+                                <div class="card">
+                                <div class="card-body">
+                                    <span><b>{{ _('Monthly')}} {% if budget_type == 'Expenses' %} {% trans 'Spending' %} {% else %} {{ _('Income')}} {% endif %}{{ _('Categories')}}</b>
+                                        <ul class="nav nav-pills" style="float:right" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
+                                                <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center" id="budget_bar_tab" data-toggle="tab" href="#budget_bar_data" aria-controls="budget_bar_data" role="tab" aria-selected="false">
+                                                <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    </span>
+                                    <div class="tab-content">
+                                    <div class="tab-pane active" id="budget_pie_data" aria-labelledby="budget_pie_tab" role="tabpanel">
+                                        <section class="app-user-edit">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="total_budget"></div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="tab-pane" id="budget_bar_data" aria-labelledby="budget_bar_tab" role="tabpanel">
+                                        <section class="app-user-edit">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="budgets-bar"></div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </section>
+                    </div>
+                    <div class="tab-pane" id="weekly_data" aria-labelledby="weekly_tab" role="tabpanel">
+                        <section>
+                        <div class="row match-height">
+                            <div class="col-xl-6 col-md-12 col-12">
+                                <div class="card card-congratulation-medal">
+                                    <div class="card-header border-bottom">
+                                        <h4 class="card-title mb-25">{{ _('Weekly')}} {{budget_type}}</h4>
+                                    </div>
+                                    <div class="card-body" style="padding:0px;">
+                                        <div class="card-datatable table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    {% for key,value in week_transaction_dict.items %}
+                                                        <tr class="show_bdgt_trans" method_name="week_trans_data{{forloop.counter0}}">
+                                                            <th><h5><b>{{key}}</b></h5></th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down week_trans_data{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right week_trans_data{{forloop.counter0}}"></i></h5></td></th>
+                                                        </tr>
+                                                        {% if value.1 %}
+                                                            <tr class="week_trans_data{{forloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                <th colspan="3"><h5><b>Date</b></h5></th>
+                                                                <th colspan="2"><h5><b>Amount</b></h5></th>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% for data in value %}
+                                                        {% if forloop.counter0 > 0 %}
+                                                        <tr class="week_trans_data{{forloop.parentloop.counter0}}" style="display:None;">
+                                                            <th>&nbsp;</th>
+                                                            <th>&nbsp;</th>
+                                                            <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                            <th colspan="3"><span>{{data.0}}</span></th>
+                                                            <th colspan="2"><span class="text-danger">{{budget_graph_currency}}{{data.1}}</span></th>
+                                                        </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% endfor %}
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-md-12 col-12">
+                                <div class="card">
+                                <div class="card-body">
+                                    <span><b>{{ _('Weekly')}} {% if budget_type == 'Expenses' %} {{ _('Spending')}} {% else %} {{ _('Income')}} {% endif %}{{ _('Categories')}}</b>
+                                    <ul class="nav nav-pills" style="float:right" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center active" id="week_budget_pie_tab" data-toggle="tab" href="#week_budget_pie_data" aria-controls="week_budget_pie_data" role="tab" aria-selected="false">
+                                                <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link d-flex align-items-center" id="week_budget_bar_tab" data-toggle="tab" href="#week_budget_bar_data" aria-controls="week_budget_bar_data" role="tab" aria-selected="false">
+                                                <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    </span>
+                                    <div class="tab-content">
+                                    <div class="tab-pane active" id="week_budget_pie_data" aria-labelledby="week_budget_pie_tab" role="tabpanel">
+                                        <section class="app-user-edit">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="week_total_budget"></div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="tab-pane" id="week_budget_bar_data" aria-labelledby="week_budget_bar_tab" role="tabpanel">
+                                        <section class="app-user-edit">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div id="week_budgets-bar"></div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </section>
+                    </div>
+                    <div class="tab-pane" id="quarterly_data" aria-labelledby="quarterly_tab" role="tabpanel">
+                        <section>
+                            <div class="row match-height">
+                                <div class="col-xl-6 col-md-12 col-12">
+                                    <div class="card card-congratulation-medal">
+                                        <div class="card-header border-bottom">
+                                            <h4 class="card-title mb-25">{{ _('Quarterly')}} {{budget_type}}</h4>
+                                        </div>
+                                        <div class="card-body" style="padding:0px;">
+                                            <div class="card-datatable table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        {% for key,value in quart_transaction_dict.items %}
+                                                            <tr class="show_bdgt_trans" method_name="quart_trans_data{{forloop.counter0}}">
+                                                                <th><h5><b>{{key}}</b></h5></th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down quart_trans_data{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right quart_trans_data{{forloop.counter0}}"></i></h5></td></th>
+                                                            </tr>
+                                                            {% if value.1 %}
+                                                                <tr class="quart_trans_data{{forloop.counter0}}" style="display:None;">
+                                                                    <th>&nbsp;</th>
+                                                                    <th>&nbsp;</th>
+                                                                    <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                    <th colspan="3"><h5><b>Date</b></h5></th>
+                                                                    <th colspan="2"><h5><b>Amount</b></h5></th>
+                                                                </tr>
+                                                            {% endif %}
+                                                        {% for data in value %}
+                                                            {% if forloop.counter0 > 0 %}
+                                                            <tr class="quart_trans_data{{forloop.parentloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                                <th colspan="3"><span>{{data.0}}</span></th>
+                                                                <th colspan="2"><span class="text-danger">{{budget_graph_currency}}{{data.1}}</span></th>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-md-12 col-12">
+                                    <div class="card">
+                                    <div class="card-body">
+                                        <span><b>{{ _('Quarterly')}} {% if budget_type == 'Expenses' %} {{ _('Spending')}} {% else %} {{ _('Income')}} {% endif %}{{ _('Categories')}}</b>
+                                        <ul class="nav nav-pills" style="float:right" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center active" id="quart_budget_pie_tab" data-toggle="tab" href="#quart_budget_pie_data" aria-controls="quart_budget_pie_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center" id="quart_budget_bar_tab" data-toggle="tab" href="#quart_budget_bar_data" aria-controls="quart_budget_bar_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        </span>
+                                        <div class="tab-content">
+                                        <div class="tab-pane active" id="quart_budget_pie_data" aria-labelledby="quart_budget_pie_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="quart_total_budget"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="tab-pane" id="quart_budget_bar_data" aria-labelledby="quart_budget_bar_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="quart_budgets-bar"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="tab-pane" id="yearly_data" aria-labelledby="yearly_tab" role="tabpanel">
+                        <section>
+                            <div class="row match-height">
+                                <div class="col-xl-6 col-md-12 col-12">
+                                    <div class="card card-congratulation-medal">
+                                        <div class="card-header border-bottom">
+                                            <h4 class="card-title mb-25">{{ _('Yearly')}} {{budget_type}}</h4>
+                                        </div>
+                                        <div class="card-body" style="padding:0px;">
+                                            <div class="card-datatable table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        {% for key,value in yearly_transaction_dict.items %}
+                                                            <tr class="show_bdgt_trans" method_name="yearly_trans_data{{forloop.counter0}}">
+                                                                <th><h5><b>{{key}}</b></h5></th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><h5><b>{{budget_graph_currency}}{{value.0.1}}&nbsp;&nbsp;</b><i class="fa fa-chevron-down yearly_trans_data{{forloop.counter0}}" style="display:None;"></i><i class="fa fa-chevron-right yearly_trans_data{{forloop.counter0}}"></i></h5></td></th>
+                                                            </tr>
+                                                            {% if value.1 %}
+                                                                <tr class="yearly_trans_data{{forloop.counter0}}" style="display:None;">
+                                                                    <th>&nbsp;</th>
+                                                                    <th>&nbsp;</th>
+                                                                    <th colspan="2"><h5><b>S.No.</b></h5></th>
+                                                                    <th colspan="3"><h5><b>Date</b></h5></th>
+                                                                    <th colspan="2"><h5><b>Amount</b></h5></th>
+                                                                </tr>
+                                                            {% endif %}
+                                                        {% for data in value %}
+                                                            {% if forloop.counter0 > 0 %}
+                                                            <tr class="yearly_trans_data{{forloop.parentloop.counter0}}" style="display:None;">
+                                                                <th>&nbsp;</th>
+                                                                <th>&nbsp;</th>
+                                                                <th colspan="2"><span>{{forloop.counter0}}</span></th>
+                                                                <th colspan="3"><span>{{data.0}}</span></th>
+                                                                <th colspan="2"><span class="text-danger">{{budget_graph_currency}}{{data.1}}</span></th>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% endfor %}
+                                                    </thead>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 col-md-12 col-12">
+                                    <div class="card">
+                                    <div class="card-body">
+                                        <span><b>{{ _('Yearly')}} {% if budget_type == 'Expenses' %} {{ _('Spending')}} {% else %} {{ _('Income')}} {% endif %}{{ _('Categories')}}</b>
+                                        <ul class="nav nav-pills" style="float:right" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center active" id="yearly_budget_pie_tab" data-toggle="tab" href="#yearly_budget_pie_data" aria-controls="yearly_budget_pie_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link d-flex align-items-center" id="yearly_budget_bar_tab" data-toggle="tab" href="#yearly_budget_bar_data" aria-controls="yearly_budget_bar_data" role="tab" aria-selected="false">
+                                                    <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        </span>
+                                        <div class="tab-content">
+                                        <div class="tab-pane active" id="yearly_budget_pie_data" aria-labelledby="yearly_budget_pie_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="yearly_total_budget"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="tab-pane" id="yearly_budget_bar_data" aria-labelledby="yearly_budget_bar_tab" role="tabpanel">
+                                            <section class="app-user-edit">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div id="yearly_budgets-bar"></div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+
