@@ -3834,4 +3834,751 @@ $(document).ready(function () {
       location.reload();
     }
   });
+
+  /*
+   * Right sidebar scripts handled here.
+   * 1. Handled on Click events for sidebar items
+   * 2. Open and close sidebar
+   * 3. Handle AI Chat contents
+   * 4. Handle Feedback contents
+   * 5. Handle Notes contents
+   * 6. Handle Interactive Lessons
+   *
+   */
+
+  // List of sidebar items
+  const sidebarItems = [
+    {
+      button: "#aiChatButton",
+      content: "#aiChatContent",
+      header: "AI Chat",
+      description: "Start a conversation with AI",
+    },
+    {
+      button: "#feedbackButton",
+      content: "#feedbackContent",
+      header: "Feedback",
+      description: "Please provide proper information with feedback",
+    },
+    {
+      button: "#notesButton",
+      content: "#notesContent",
+      header: "Notes",
+      description: "Take a quick notes",
+    },
+    {
+      button: "#lessonsButton",
+      content: "#lessonsContent",
+      header: "Interactive Lessons",
+      description: "Page interactive lessons",
+    },
+  ];
+
+  // Helper function to activate a sidebar item
+  function activateButton(button, content) {
+    //! reset all buttons and content
+    sidebarItems.forEach((item) => {
+      $(item.content).attr("data-visible", "false");
+      $(item.button)
+        .removeClass("btn-primary")
+        .addClass("btn-outline-secondary")
+        .attr("aria-expanded", "false");
+
+      // set heading
+      if (item.button === button) {
+        $("#rightSidebarHeader").text(item.header);
+        $("#rightSidebarDescription").text(item.description);
+      }
+    });
+
+    // set the clicked button and content as active
+    $(button)
+      .removeClass("btn-outline-secondary")
+      .addClass("btn-primary")
+      .attr("aria-expanded", "true");
+    $(content).attr("data-visible", "true");
+  }
+
+  // add click event listener for all buttons
+  sidebarItems.forEach((item) => {
+    $(item.button).on("click", () => {
+      activateButton(item.button, item.content);
+    });
+  });
+
+  // Activate AI Chat by default when opening the sidebar
+  activateButton("#aiChatButton", "#aiChatContent");
+
+  // Open and close sidebar
+  $("#rightSettingsButton").click(() => {
+    const visibility = $("#rightSettingBody").attr("data-visible");
+    if (visibility === "false") {
+      $("#rightSettingBody").attr("data-visible", "true");
+      $("#rightSettingsButton").attr("aria-expanded", "true");
+    }
+  });
+
+  $("#closeSidebar").click(() => {
+    const visibility = $("#rightSettingBody").attr("data-visible");
+    if (visibility === "true") {
+      $("#rightSettingBody").attr("data-visible", "false");
+      $("#rightSettingsButton").attr("aria-expanded", "false");
+    }
+  });
+
+  // Helper function to push messages to chat window
+  function pushUserChat(content, prepend) {
+    const chatHTML = `
+        <div class="chat chat-right">
+            <div class="chat-avatar">
+                <span class="avatar box-shadow-1 cursor-pointer">
+                    <img src="{% static 'Images/logo.png' %}" alt="avatar" height="36" width="36" />
+                </span>
+            </div>
+            <div class="chat-body">
+                <div class="chat-content">
+                    <p>${content}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (prepend) {
+      $("#chatMsgContainer").prepend(chatHTML);
+    } else {
+      $("#chatMsgContainer").append(chatHTML);
+    }
+  }
+
+  function pushAIChat(content, prepend) {
+    const chatHTML = `
+        <div class="chat chat-left">
+            <div class="chat-avatar">
+                <span class="avatar box-shadow-1 cursor-pointer">
+                    <img src="{% static 'app-assets/images/icons/vuejs.svg' %}" alt="avatar"  height="36" width="36" />
+                </span>
+            </div>
+            <div class="chat-body">
+                <div class="chat-content">
+                    <p>${content}</p>
+                </div>
+            </div>
+        </div>`;
+
+    if (prepend) {
+      $("#chatMsgContainer").prepend(chatHTML);
+    } else {
+      $("#chatMsgContainer").append(chatHTML);
+    }
+  }
+
+  // Helper function to show all chats loaded indicator
+  function allChatsLoaded() {
+    const chatHTML = `
+            <p class="text-center"> No messages left</p>
+        `;
+    $("#chatContainer").prepend(chatHTML);
+  }
+
+  // Function to load all chats -> API call
+  (function () {
+    let page = 1;
+    let loading = false;
+    let has_more = true;
+
+    function loadChats() {
+      if (loading || !has_more) return;
+      loading = true;
+
+      // previous scroll height
+      const chatContainer = $("#chatContainer");
+      const previousScrollHeight = chatContainer[0]?.scrollHeight || 0;
+
+      // Make ajax call
+      $.ajax({
+        url: $("#chatContainer").data("url"),
+        type: "GET",
+        data: {
+          page,
+        },
+        dataType: "json",
+        success: function (response) {
+          const messages = response.messages;
+          if (messages.length === 0 && page === 1) {
+            pushAIChat(
+              "Hi, I'm your personal AI assistant. How can I help you?",
+              true
+            );
+          }
+
+          messages.forEach((msg) => {
+            if (msg.ai_msg) pushAIChat(msg.ai_msg, true);
+            if (msg.user_msg) pushUserChat(msg.user_msg, true);
+          });
+
+          page++; // Increment page
+          has_more = response.has_more;
+
+          // Stop scrolling if no more data
+          if (!has_more) {
+            $("#chatContainer").off("scroll");
+            allChatsLoaded();
+          }
+
+          // Adjust scroll position to maintain view
+          const newScrollHeight = chatContainer[0]?.scrollHeight || 0;
+          const scrollDiff = newScrollHeight - previousScrollHeight;
+          chatContainer.scrollTop(scrollDiff);
+          loading = false;
+        },
+        error: function (xhr, status, error) {
+          console.log(error);
+          loading = false;
+        },
+      });
+    }
+
+    // Initial chat load
+    loadChats();
+
+    // Scroll event to load more chats
+    $("#chatContainer").on("scroll", function () {
+      if ($("#chatContainer").scrollTop() === 0 && !loading) {
+        loadChats();
+      }
+    });
+  })();
+
+  // Prevent 'Enter' key from going new line in user msg textarea
+  $("#aiMsgInput").on("keydown", function (event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      $("#sendMessageButton").click();
+    }
+  });
+
+  // Send message to ai through post request
+  $("#sendMessageButton").click(function (e) {
+    e.preventDefault();
+    const csrfmiddlewaretoken = getCookie("csrftoken");
+    const msg = $("#aiMsgInput").val();
+    if (msg.trim() === "") return;
+
+    // API call to send message
+    $.ajax({
+      type: "POST",
+      url: "chats/send-message/",
+      data: {
+        message: msg,
+        csrfmiddlewaretoken,
+      },
+      dataType: "json",
+      beforeSend: function () {
+        pushUserChat(msg, false);
+        $("#aiMsgInput").val("");
+        $("#chatContainer").scrollTop($("#chatContainer")[0].scrollHeight);
+      },
+      success: function (response) {
+        pushAIChat(response.ai_res, false);
+        $("#chatContainer").scrollTop($("#chatContainer")[0].scrollHeight);
+      },
+      error: function (xhr, status, error) {
+        console.log(error);
+      },
+    });
+  });
+
+  // Handle screenshot image upload for feedback form
+  (function () {
+    let canvas;
+
+    // function to initialize canvas
+    function initCanvas(img, containerWidth, containerHeight) {
+      const dimensions = calculateCanvasDimensions(containerWidth);
+
+      $("#snapEditCanvas").width = dimensions.width;
+      $("#snapEditCanvas").height = dimensions.height;
+
+      canvas = new fabric.Canvas("snapEditCanvas");
+
+      const fabricImage = new fabric.Image(img, {
+        left: 0,
+        top: 0,
+        selectable: false,
+        scaleX: dimensions.width / img.width,
+        scaleY: dimensions.height / img.height,
+      });
+
+      canvas.setWidth(dimensions.width);
+      canvas.setHeight(dimensions.height);
+      canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+
+      ensureModalResponsive($("#snapEditCanvas"));
+    }
+
+    // Helper function to calculate canvas dimensions
+    function calculateCanvasDimensions(containerWidth) {
+      if (containerWidth > 1200) {
+        return { width: 800, height: 500 };
+      } else if (containerWidth > 768) {
+        return { width: 600, height: 400 };
+      } else {
+        return { width: 500, height: 350 };
+      }
+    }
+
+    // Helper function to ensure modal is responsive
+    function ensureModalResponsive(canvasElement) {
+      const modalContent = document.querySelector(
+        ".canvasModal .modal-content"
+      );
+      modalContent.style.maxWidth = `${canvasElement.width + 40}px`;
+      modalContent.style.overflowX = "auto";
+    }
+
+    // screenshot event to capture current page's screenshot & edit by fabric.js
+    $("#takeScreenshot").on("click", function () {
+      html2canvas(document.body, {
+        ignoreElements: (element) => element.id === "rightSettingBody",
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+        .then((snapshot) => {
+          const img = new Image();
+          img.src = snapshot.toDataURL("image/png");
+
+          img.onload = function () {
+            initCanvas(img, window.innerWidth, window.innerHeight);
+            showModal();
+          };
+        })
+        .catch((error) => console.error("Error taking screenshot:", error));
+    });
+
+    // upload existing photo for feedback form & edit by fabric.js
+    $("#feedbackImg").on("change", function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.src = e.target.result;
+
+          img.onload = function () {
+            initCanvas(img, window.innerWidth, window.innerHeight);
+            showModal();
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Download button event to download edited image
+    $("#downloadEditedImage").click(function () {
+      const editedImage = canvas.toDataURL("image/png");
+
+      const link = document.createElement("a");
+      link.href = editedImage;
+      link.download = "edited-screenshot.png";
+      link.click();
+    });
+
+    // Toggle the drawing mode on the Fabric.js canvas
+    $("#enableDrawing").click(function () {
+      canvas.isDrawingMode = !canvas.isDrawingMode;
+      $(this).toggleClass("btn-outline-success btn-outline-danger");
+
+      if (canvas.isDrawingMode) {
+        canvas.freeDrawingBrush.width = 2;
+        canvas.freeDrawingBrush.color = "#ff0000";
+      }
+    });
+
+    // Clear all drawing from canvas
+    $("#clearCanvas").click(function () {
+      canvas.getObjects().forEach((obj) => {
+        if (obj !== canvas.backgroundImage) {
+          canvas.remove(obj);
+        }
+      });
+      canvas.renderAll();
+    });
+
+    // Transfer edited image from canvas-modal to feedback form img field
+    $("#saveEditedImage").click(function () {
+      // Get the canvas element
+      // Ensure the canvas exists
+      if (canvas) {
+        // Convert canvas to a Base64 string
+        const dataURL = canvas.toDataURL("image/png");
+
+        // Convert Base64 string to a File
+        const file = dataURLToFile(dataURL, "edited-image.png");
+
+        // Create a DataTransfer to simulate a FileList
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        // Assign to the input element
+        const fileInput = document.querySelector("#screenshotData");
+        fileInput.files = dataTransfer.files;
+
+        $("#feedbackSnapAdded").removeClass("d-none");
+      }
+    });
+
+    // Helper function to convert Base64 to File
+    function dataURLToFile(dataURL, filename) {
+      const arr = dataURL.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const binary = atob(arr[1]);
+      const array = [];
+      for (let i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+      }
+      return new File([new Uint8Array(array)], filename, { type: mime });
+    }
+
+    // display bootstrap modal dialog
+    function showModal() {
+      const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
+        backdrop: "static",
+        keyboard: false,
+      });
+      modal.show();
+    }
+
+    // Handle Form submission
+
+    $("#feedbackForm").submit(function (e) {
+      e.preventDefault();
+
+      // validate form data and all requried fieds
+      let isValid = true;
+
+      $(this)
+        .find("input[required], select[required], textarea[required]")
+        .each(function () {
+          const $field = $(this);
+          if (!$field.val()) {
+            // if field is invalid add error class and show message
+            $field.addClass("is-invalid").removeClass("is-valid");
+            isValid = false;
+          } else {
+            // if field is valid remove error class and hide message
+            $field.removeClass("is-invalid").addClass("is-valid");
+          }
+        });
+
+      // Live validation on input change
+      $("input[required], select[required], textarea[required]").on(
+        "input change",
+        function () {
+          const $field = $(this);
+
+          if (!$field.val()) {
+            $field.addClass("is-invalid").removeClass("is-valid");
+          } else {
+            $field.addClass("is-valid").removeClass("is-invalid");
+          }
+        }
+      );
+      // Form submission with validate data
+      if (isValid) {
+        const formData = new FormData(this);
+        console.log(formData.get("screenshotData"));
+        $.ajax({
+          url: $(this).attr("action"),
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          enctype: "multipart/form-data",
+          success: function (response) {
+            console.log(response);
+            if (response.status === "success") {
+              $("#feedbackForm")
+                .find(".is-valid, .is-invalid")
+                .removeClass("is-valid is-invalid");
+
+              $("#feedbackForm")[0].reset();
+              $("#feedbackSnapAdded").addClass("d-none");
+              // show success message
+              Swal.fire({
+                title: response.message,
+                icon: "success",
+                customClass: {
+                  confirmButton: "btn btn-primary",
+                },
+                buttonsStyling: false,
+              });
+              $("#closeSidebar").click();
+            } else {
+              // show error message
+              Swal.fire({
+                title: response.error,
+                icon: "error",
+                customClass: {
+                  confirmButton: "btn btn-danger",
+                },
+                buttonsStyling: false,
+              });
+              $("#closeSidebar").click();
+            }
+          },
+          error: function (xhr, status, error) {
+            // Handle error response
+            console.error("Error submitting feedback:", error);
+          },
+        });
+      }
+    });
+  })();
+
+  // Helper function to render notes content
+  function renderNotes(data) {
+    const formattedTimestamp = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "UTC", // Adjust to your desired time zone
+    }).format(new Date(data.timestamp));
+
+    const html = `
+        <div class="h-100" id="accParent-${data.id}">
+            <div class="card">
+                <h2 class="mb-0" id="heading-${data.id}">
+                    <button 
+                        class="btn acc-custom-btn btn-outline-secondary btn-block text-left" 
+                        type="button" 
+                        data-toggle="collapse" 
+                        data-target="#collapse${data.id}" 
+                        aria-expanded="true" 
+                        aria-controls="collapse${data.id}">
+                        <div>
+                            <span class="float-left">${data.title}</span>
+                            <span class="float-right acc-arrow-icon text-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </button>
+                </h2>
+
+                <div 
+                    id="collapse${data.id}" 
+                    class="collapse p-1 pb-0 mt-1 border rounded-sm" 
+                    aria-labelledby="heading-${data.id}" 
+                    data-parent="#accParent-${data.id}">
+                    <div class="card text-white accordion-card-body ">
+                        <h6> ${formattedTimestamp} </h6>
+                        ${data.description} 
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+    $("#notesContainer").append(html);
+  }
+
+  // Helper function to render empty notes
+  function noNotesFound() {
+    const html = `
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="text-center">
+                <h3 class="text-muted">No Notes Found</h3>
+            </div>
+        </div>
+        `;
+    $("#notesContent").append(html);
+  }
+
+  // helper function to render previous and next
+
+  // Function to show all notes loaded indicator
+  (function () {
+    let page = 1;
+    let loading = false;
+    let has_more = true;
+
+    function loadNotes(reload = false) {
+      if (loading || (!has_more && !reload)) return;
+      loading = true;
+
+      if (reload) {
+        page = 1;
+        has_more = true;
+        $("#notesContainer").empty();
+      }
+
+      console.log("AJAX URL:", $("#notesContainer").data("url"));
+      console.log("Page:", page);
+
+      $.ajax({
+        url: $("#notesContainer").data("url"),
+        type: "GET",
+        data: { page },
+        dataType: "json",
+        success: function (response) {
+          console.log("Notes Response:", response);
+          const notes = response.notes || [];
+
+          if (notes.length === 0 && page === 1) {
+            noNotesFound();
+          } else {
+            notes.forEach((note) => {
+              renderNotes(note);
+            });
+          }
+
+          has_more = response.has_more || false;
+          updateButtons();
+          loading = false;
+        },
+        error: function (xhr, status, error) {
+          console.error("Error loading notes:", error);
+          loading = false;
+        },
+      });
+    }
+
+    function updateButtons() {
+      $("#prevNotes").prop("disabled", page <= 1);
+      $("#nextNotes").prop("disabled", !has_more);
+    }
+
+    $("#nextNotes").click(function () {
+      if (has_more) {
+        page++;
+        loadNotes();
+      }
+    });
+
+    $("#createNoteForm").submit(function (e) {
+      e.preventDefault();
+      let isValid = true;
+      $(this)
+        .find("input[required], textarea[required]")
+        .each(function () {
+          const $field = $(this);
+          if (!$field.val()) {
+            $field.addClass("is-invalid").removeClass("is-valid");
+            isValid = false;
+          } else {
+            $field.removeClass("is-invalid").addClass("is-valid");
+          }
+        });
+
+      if (isValid) {
+        const formData = new FormData(this);
+        $.ajax({
+          url: $(this).attr("action"),
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.status === "success") {
+              Swal.fire({
+                title: response.message,
+                icon: "success",
+              });
+              $("#createNoteForm").trigger("reset");
+              $("#createNoteForm input, textarea").removeClass(
+                "is-valid is-invalid"
+              );
+              loadNotes(true);
+              $("#closeSidebar").click();
+            } else {
+              Swal.fire({
+                title: response.error,
+                icon: "error",
+              });
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error("Error submitting form:", error);
+          },
+        });
+      }
+    });
+
+    loadNotes();
+  })();
+
+  // Helper function to render Lessons content
+  function renderAccordion(data, curPath) {
+    const html = `
+        <div class="h-100" id="accParent-${data.number}">
+            <div class="card">
+                <h2 class="mb-0" id="heading-${data.number}">
+                    <button 
+                        class="btn acc-custom-btn ${
+                          curPath === data.queryParamValue
+                            ? "btn-outline-primary"
+                            : "btn-outline-secondary"
+                        } btn-block text-left" 
+                        type="button" 
+                        data-toggle="collapse" 
+                        data-target="#collapse${data.number}" 
+                        aria-expanded="true" 
+                        aria-controls="collapse${data.number}">
+                        <div>
+                            <span class="float-left">${data.lesson_name}</span>
+                            <span class="float-right acc-arrow-icon text-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </button>
+                </h2>
+
+                <div 
+                    id="collapse${data.number}" 
+                    class="collapse pt-1" 
+                    aria-labelledby="heading-${data.number}" 
+                    data-parent="#accParent-${data.number}">
+                    <div class="card text-white accordion-card-body ">
+                        ${data.lesson_content} 
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+    $("#lessonsContent").append(html);
+  }
+
+  // Backend call to fetch the data
+  $.ajax({
+    type: "GET",
+    url: $("#lessonsContent").data("url"),
+    dataType: "json",
+    success: function (response) {
+      if (response.status === "success") {
+        const data = response.data;
+        const curPath = $("#lessonsContent").data("current-path");
+        data.forEach(function (item) {
+          renderAccordion(item, curPath);
+        });
+      }
+    },
+  });
+
+  // Accordion arrow rotation
+  $(document).on("click", ".acc-custom-btn", function () {
+    const $icon = $(this).find(".acc-arrow-icon svg");
+    const isExpanded = $(this).attr("aria-expanded") === "true";
+    if (isExpanded) {
+      $icon.addClass("rotate-180deg");
+    } else {
+      $icon.removeClass("rotate-180deg");
+    }
+  });
 });

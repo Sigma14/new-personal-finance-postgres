@@ -289,6 +289,13 @@
         <div class='my-loader'> 
             <img src="{% static 'assets/animations/loading_small.gif' %}" alt="Loading..." />
         </div>
+        <!--START: Right Sidebar Includes-->
+        {% if request.user.is_authenticated %}
+        {% include "./right-sidebar/sidebar_toggler.html" %}
+        {% include "./right-sidebar/sidebar_body.html" %}
+        {% endif %}
+        {% include "./right-sidebar/image_preview_modal.html" %}
+        <!--END: Right Sidebar Includes-->
         <!-- BEGIN: Content-->
         {% block content %}
         {% endblock content %}

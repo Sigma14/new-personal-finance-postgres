@@ -1,0 +1,141 @@
+<form
+    action="{% url 'create-feedback' %}"
+    id="feedbackForm"
+    method="post"
+    novalidate
+>
+    {% csrf_token %}
+    <!-- Select Feature -->
+    <div class="form-group">
+        <label class="form-label" for="feedbackFeature"
+            >Which feature or section are you providing feedback on?</label
+        >
+        <input
+            name="feedbackFeature"
+            id="feedbackFeature"
+            type="text"
+            class="form-control"
+            placeholder="Enter feature or section name"
+            required
+        />
+        <div class="invalid-feedback">
+            Please enter the feature or section name.
+        </div>
+    </div>
+
+    <!-- Select Issue  -->
+    <div class="form-group">
+        <label class="form-label" for="feedbackIssue"
+            >What issue did you experience on this page?</label
+        >
+        <select
+            class="form-control select2"
+            name="feedback_issue"
+            id="feedbackIssue"
+            required
+        >
+            <option value="VISUAL BUG">Visual bug</option>
+            <option value="CONFUSING LAYOUT">Confusing Layout</option>
+            <option value="SLOW LOADING">Slow Loading</option>
+            <option value="ERROR MESSAGE">Error Message</option>
+            <option value="OTHER">Other</option>
+        </select>
+        <div class="invalid-feedback">Please select at least one issue.</div>
+    </div>
+
+    <!-- Screenshot (Optional) -->
+    <div class="form-group">
+        <label for="screenshot" class="form-label"
+            >Would you like to include a screenshot?</label
+        >
+        <div class="d-flex gap-2 align-items-center justify-content-between">
+            <button
+                id="takeScreenshot"
+                type="button"
+                class="btn btn-sm text-primary"
+            >
+                Take Screenshot
+            </button>
+            <label for="feedbackImg" class="btn btn-sm text-primary">
+                Upload existing one
+            </label>
+            <input
+                id="feedbackImg"
+                name="feedbackImg"
+                class="d-none"
+                type="file"
+                accept="image/*"
+            />
+        </div>
+        <input
+            class="d-none"
+            name="screenshotData"
+            id="screenshotData"
+            type="file"
+            accept="image/*"
+        />
+
+        <div class="d-none text-success" id="feedbackSnapAdded">
+            A screenshot has attached.
+        </div>
+    </div>
+
+    <!-- Feedback Details -->
+    <div class="form-group">
+        <label for="feedbackDetails" class="form-label"
+            >Please describe the issue or feedback in detail.</label
+        >
+        <textarea
+            class="form-control"
+            placeholder="Leave a comment here"
+            id="feedbackDetails"
+            name="feedbackDetails"
+            style="height: 100px"
+            required
+        ></textarea>
+        <div class="invalid-feedback">
+            Please describe the issue or feedback.
+        </div>
+    </div>
+
+    <!-- Features Suggestions -->
+    <div class="form-group">
+        <label for="featureSuggestions" class="form-label"
+            >Do you have any suggestion to improve the feature/page?</label
+        >
+        <textarea
+            class="form-control"
+            placeholder="Leave a comment here"
+            id="featureSuggestions"
+            name="featureSuggestions"
+            style="height: 100px"
+            required
+        ></textarea>
+        <div class="invalid-feedback">Please provide your suggestions.</div>
+    </div>
+
+    <!-- Priority Dropdown -->
+    <div class="form-group">
+        <label class="form-label" for="priority"
+            >How important is this issue to you?</label
+        >
+        <select
+            class="form-control"
+            name="feedback_priority"
+            id="priority"
+            required
+        >
+            <option value="">Select priority</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="MAJOR">Major</option>
+            <option value="MINOR">Minor</option>
+            <option value="NOT URGENT">Not Urgent</option>
+            <option value="JUST A SUGGESTION">Just a suggestion</option>
+        </select>
+        <div class="invalid-feedback">Please select the priority level.</div>
+    </div>
+
+    <button id="submitFeedbackForm" class="btn btn-primary w-100" type="submit">
+        Submit
+    </button>
+</form>
