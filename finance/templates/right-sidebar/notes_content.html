@@ -39,6 +39,7 @@
             <div class="card text-white accordion-card-body">
                 <form
                     id="createNoteForm"
+                    action="{% url 'add-update-notes' %}"
                     method="post"
                     novalidate
                 >
@@ -60,7 +61,7 @@
                             type="text"
                             class="form-control"
                             placeholder="Enter note description"
-                            name="note"
+                            name="notes"
                             required
                         ></textarea>
                         <div class="invalid-feedback">
@@ -76,10 +77,7 @@
 
 <h3 class="h3 text-center mb-2">Your Notes</h3>
 
-<div class="" id="notesContainer">
-    <!--Notes heare-->
+<div class="" id="notesContainer" data-url="{% url 'get-notes' %}">
+
 </div>
 
-<div class="text-center my-3">
-    <button id="nextNotes" class="btn btn-primary">Next</button>
-</div>

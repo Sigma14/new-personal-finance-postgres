@@ -4335,181 +4335,239 @@ $(document).ready(function () {
     });
   })();
 
-  // Helper function to render notes content
-  function renderNotes(data) {
-    const formattedTimestamp = new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-      timeZone: "UTC", // Adjust to your desired time zone
-    }).format(new Date(data.timestamp));
 
-    const html = `
-        <div class="h-100" id="accParent-${data.id}">
-            <div class="card">
-                <h2 class="mb-0" id="heading-${data.id}">
-                    <button 
-                        class="btn acc-custom-btn btn-outline-secondary btn-block text-left" 
-                        type="button" 
-                        data-toggle="collapse" 
-                        data-target="#collapse${data.id}" 
-                        aria-expanded="true" 
-                        aria-controls="collapse${data.id}">
-                        <div>
-                            <span class="float-left">${data.title}</span>
-                            <span class="float-right acc-arrow-icon text-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                                </svg>
-                            </span>
+// Handle Notes Here
+ (function () {
+   function renderNotes(notes) {
+     $("#notesContainer").empty();
+     if (notes.length === 0) {
+       $("#notesContainer").append(`<p>No notes found</p>`);
+     }
+
+     notes.forEach((note) => {
+       $("#notesContainer").append(
+         `
+                <div class="h-100" id="accParent-${note.id}">
+                    <div class="card">
+                        <h2 class="mb-0" id="heading-${note.id}">
+                            <button 
+                                class="btn acc-custom-btn btn-outline-secondary btn-block text-left" 
+                                type="button" 
+                                data-toggle="collapse" 
+                                data-target="#collapse${note.id}" 
+                                aria-expanded="true" 
+                                aria-controls="collapse${note.id}">
+                                <div>
+                                    <span class="float-left">${note.title}</span>
+                                    <span class="float-right acc-arrow-icon text-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                                            <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </button>
+                        </h2>
+
+                        <div 
+                            id="collapse${note.id}" 
+                            class="collapse p-1 pb-0 mt-1 border rounded-sm" 
+                            aria-labelledby="heading-${note.id}" 
+                            data-parent="#accParent-${note.id}">
+                            <div class="card text-white accordion-card-body">
+                                <h6>${note.added_on}</h6>
+                                ${note.notes}
+                                <div class="d-flex justify-content-around mt-2">
+                                    <button class="btn btn-danger delete-note-btn" data-title="${note.title}" data-id="${note.id}">
+                                        Delete
+                                    </button>
+                                    <button class="btn btn-success edit-note-btn" data-title="${note.title}" data-id="${note.id}" data-notes="${note.notes}">
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </button>
-                </h2>
-
-                <div 
-                    id="collapse${data.id}" 
-                    class="collapse p-1 pb-0 mt-1 border rounded-sm" 
-                    aria-labelledby="heading-${data.id}" 
-                    data-parent="#accParent-${data.id}">
-                    <div class="card text-white accordion-card-body ">
-                        <h6> ${formattedTimestamp} </h6>
-                        ${data.description} 
                     </div>
                 </div>
-            </div>
-        </div>
-        `;
+                `
+       );
+     });
+   }
 
-    $("#notesContainer").append(html);
-  }
+   function loadNotes() {
+     $.ajax({
+       type: "GET",
+       url: $("#notesContainer").data("url"),
+       dataType: "json",
+       success: function (response) {
+         if (response.success === "true") {
+           if (response.data.length > 0) {
+             renderNotes(response.data);
+           } else renderNotes([]);
+         }
+       },
+     });
+   }
 
-  // Helper function to render empty notes
-  function noNotesFound() {
-    const html = `
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <div class="text-center">
-                <h3 class="text-muted">No Notes Found</h3>
-            </div>
-        </div>
-        `;
-    $("#notesContent").append(html);
-  }
+   loadNotes();
 
-  // helper function to render previous and next
+   function deleteNote(noteId, noteTitle) {
+     $.ajax({
+       type: "POST",
+       url: $("#createNoteForm").attr("action"),
+       data: {
+         notes_method: "Delete",
+         select_title: noteTitle,
+         csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+       },
+       success: function (response) {
+         if (response.status === "Deleted Successfully") {
+           Swal.fire({
+             title: "Note deleted successfully!",
+             icon: "success",
+           });
+           loadNotes(); // Reload notes to reflect the deletion
+         } else {
+           Swal.fire({
+             title: response.status,
+             icon: "error",
+           });
+         }
+       },
+       error: function (xhr, status, error) {
+         console.error("Error deleting note:", error);
+         Swal.fire({
+           title: "Error deleting the note.",
+           text: error,
+           icon: "error",
+         });
+       },
+     });
+   }
 
-  // Function to show all notes loaded indicator
-  (function () {
-    let page = 1;
-    let loading = false;
-    let has_more = true;
+   // Create note form submission
+   $("#createNoteForm").submit(function (e) {
+     e.preventDefault(); // Prevent the default form submission behavior
 
-    function loadNotes(reload = false) {
-      if (loading || (!has_more && !reload)) return;
-      loading = true;
+     let isValid = true;
+     $(this)
+       .find("input[required], textarea[required]")
+       .each(function () {
+         const $field = $(this);
+         if (!$field.val()) {
+           $field.addClass("is-invalid").removeClass("is-valid");
+           isValid = false;
+         } else {
+           $field.removeClass("is-invalid").addClass("is-valid");
+         }
+       });
 
-      if (reload) {
-        page = 1;
-        has_more = true;
-        $("#notesContainer").empty();
-      }
+     if (isValid) {
+       const formData = new FormData(this);
+       formData.append("notes_method", "Add");
 
-      console.log("AJAX URL:", $("#notesContainer").data("url"));
-      console.log("Page:", page);
+       $.ajax({
+         url: $(this).attr("action"),
+         method: "POST",
+         data: formData,
+         processData: false,
+         contentType: false,
+         success: function (response) {
+           if (response.status === "Added") {
+             Swal.fire({
+               title: "Note added successfully!",
+               icon: "success",
+             });
+             $("#createNoteForm").trigger("reset");
+             $("#createNoteForm input, textarea").removeClass(
+               "is-valid is-invalid"
+             );
+             $("#closeSidebar").click();
+             loadNotes();
+           } else {
+             Swal.fire({
+               title: response.status,
+               icon: "error",
+             });
+           }
+         },
+         error: function (xhr, status, error) {
+           console.error("Error submitting form:", error);
+           Swal.fire({
+             title: "Error submitting the form.",
+             text: error,
+             icon: "error",
+           });
+         },
+       });
+     }
+   });
 
-      $.ajax({
-        url: $("#notesContainer").data("url"),
-        type: "GET",
-        data: { page },
-        dataType: "json",
-        success: function (response) {
-          console.log("Notes Response:", response);
-          const notes = response.notes || [];
+   // Handle delete note button click
+   $("#notesContainer").on("click", ".delete-note-btn", function () {
+     const noteId = $(this).data("id");
+     const noteTitle = $(this).data("title");
+     $("#closeSidebar").click();
 
-          if (notes.length === 0 && page === 1) {
-            noNotesFound();
-          } else {
-            notes.forEach((note) => {
-              renderNotes(note);
-            });
-          }
+     Swal.fire({
+       title: "Are you sure?",
+       text: "This will delete the note permanently!",
+       icon: "warning",
+       showCancelButton: true,
+       confirmButtonText: "Yes, delete it!",
+     }).then((result) => {
+       if (result.isConfirmed) {
+         deleteNote(noteId, noteTitle);
+       }
+     });
+   });
 
-          has_more = response.has_more || false;
-          updateButtons();
-          loading = false;
-        },
-        error: function (xhr, status, error) {
-          console.error("Error loading notes:", error);
-          loading = false;
-        },
-      });
-    }
+   // Handle edit note button click
+   $("#notesContainer").on("click", ".edit-note-btn", function () {
+      $("#closeSidebar").click();
+     const noteTitle = $(this).data("title");
+     const noteNotes = $(this).data("notes");
+     $("#editNoteForm input[name=title]").val(noteTitle);
+     $("#editNoteForm textarea[name=notes]").val(noteNotes);
+     const modal = new bootstrap.Modal($("#editNoteModal").get(0), {
+       backdrop: "static",
+       keyboard: false,
+     });
+     modal.show();
 
-    function updateButtons() {
-      $("#prevNotes").prop("disabled", page <= 1);
-      $("#nextNotes").prop("disabled", !has_more);
-    }
+     $("#editNoteForm").submit(function (e) {
+       e.preventDefault();
 
-    $("#nextNotes").click(function () {
-      if (has_more) {
-        page++;
-        loadNotes();
-      }
-    });
+       const formData = new FormData(this);
+       formData.append("notes_method", "Update");
+       formData.append("select_title", noteTitle);
 
-    $("#createNoteForm").submit(function (e) {
-      e.preventDefault();
-      let isValid = true;
-      $(this)
-        .find("input[required], textarea[required]")
-        .each(function () {
-          const $field = $(this);
-          if (!$field.val()) {
-            $field.addClass("is-invalid").removeClass("is-valid");
-            isValid = false;
-          } else {
-            $field.removeClass("is-invalid").addClass("is-valid");
-          }
-        });
+       $.ajax({
+         url: $(this).attr("action"),
+         method: "POST",
+         data: formData,
+         processData: false,
+         contentType: false,
+         success: function (response) {
+           if (response.status === "Updated") {
+             Swal.fire({
+               title: "Note updated successfully!",
+               icon: "success",
+             });
+             modal.hide();
+             loadNotes();
+           } else {
+             Swal.fire({
+               title: response.status,
+               icon: "error",
+             });
+             modal.hide();
+           }
+         },
+       })
+     });
+   });
+ })();
 
-      if (isValid) {
-        const formData = new FormData(this);
-        $.ajax({
-          url: $(this).attr("action"),
-          method: "POST",
-          data: formData,
-          processData: false,
-          contentType: false,
-          success: function (response) {
-            if (response.status === "success") {
-              Swal.fire({
-                title: response.message,
-                icon: "success",
-              });
-              $("#createNoteForm").trigger("reset");
-              $("#createNoteForm input, textarea").removeClass(
-                "is-valid is-invalid"
-              );
-              loadNotes(true);
-              $("#closeSidebar").click();
-            } else {
-              Swal.fire({
-                title: response.error,
-                icon: "error",
-              });
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("Error submitting form:", error);
-          },
-        });
-      }
-    });
-
-    loadNotes();
-  })();
 
   // Helper function to render Lessons content
   function renderAccordion(data, curPath) {

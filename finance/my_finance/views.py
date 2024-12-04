@@ -7,6 +7,7 @@ import time
 from collections import OrderedDict
 from io import BytesIO
 from itertools import chain
+from openai import OpenAI
 
 import pandas as pd
 import plaid
@@ -196,6 +197,10 @@ configuration = plaid.Configuration(
 )
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
+
+# open ai
+open_ai_api_key = config("OPEN_AI_KEY")
+ai_client = OpenAI(api_key=open_ai_api_key)
 
 
 wordpress_domain = config("WORDPRESS_DOMAIN")
@@ -12534,7 +12539,29 @@ def add_update_notes(request):
 
         return JsonResponse(result)
 
+
 # Right Sidebar Views
+@login_required
+@require_GET
+def get_notes(request):
+    try:
+        print("working get notes")
+        user = request.user
+        notes = MyNotes.objects.filter(user=user).order_by("-id")
+        data = [
+            {
+                "id": note.id,
+                "title": note.title,
+                "notes": note.notes,
+                "added_on": note.added_on,
+            }
+            for note in notes
+        ]
+        return JsonResponse({"data": data, "success": "true"})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": "Bad Request", "success": "false"})
+
 
 @login_required(login_url="/login")
 @require_GET
@@ -12577,40 +12604,51 @@ def send_message_to_ai(request):
     """
     - Only POST method is allowed.
     - Only Authenticated user is allowed.
-    - This view handled user's chat messages and send it to open ai for AI response.
+    - This view handles user's chat messages and sends them to OpenAI for AI response.
     - On successful AI response, AIChat database model is used to store data.
     """
     try:
-        user_message = request.POST.get("message", "")
-        response = ai_client.chat.completions.create(
-            model='gpt-3.5-turbo', # Open AI Language Model
-            messages=[{
-                'role': 'user', # Promp sender type
-                'content': user_message # User message or promp
-            }]
-        )
-    except Exception:
-        return JsonResponse({
-            'error': "Failed to connect open ai"
-        }, status=400)
-    
-    # save response into db
-    ai_res = response.choices[0].message.content
-    instance = AIChat.objects.create(
-        user=request.user,
-        message=user_message,
-        ai_response=ai_res
-    )
+        # Ensure the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "User not authenticated"}, status=401)
 
-    if instance :
-        return JsonResponse({
-            "usr_msg": instance.message,
-            "ai_res": instance.ai_response
-        }, status=200)
-    
-    return JsonResponse({
-            'error': "Failed to save into databse"
-        }, status=400)
+        # Get the user message
+        user_message = request.POST.get("message", "").strip()
+
+        # Validate the user message
+        if not user_message:
+            return JsonResponse({"error": "Message is required"}, status=400)
+
+        # Send the message to OpenAI
+        try:
+            response = ai_client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",  # Prompt sender type
+                        "content": user_message,  # User message or prompt
+                    }
+                ],
+                model="gpt-3.5-turbo",  # OpenAI Language Model
+            )
+            ai_res = response.choices[0].message["content"]
+        except Exception as e:
+            print(e)
+            return JsonResponse({"error": "OpenAI request limit exceeded"}, status=400)
+
+        # Save the AI response to the database
+        instance = AIChat.objects.create(
+            user=request.user, message=user_message, ai_response=ai_res
+        )
+
+        return JsonResponse(
+            {"usr_msg": instance.message, "ai_res": instance.ai_response}, status=200
+        )
+
+    except KeyError as e:
+        return JsonResponse({"error": f"KeyError: {str(e)}"}, status=400)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Exception: {str(e)}"}, status=400)
 
 
 # Read data from csv
@@ -12665,8 +12703,9 @@ def create_feedback(request):
         )
     except:
         return JsonResponse({"error": "Failed to create feedback"}, status=400)
-    return JsonResponse({"message": "Feedback created successfully", "status": "success"}, status=201)
-
+    return JsonResponse(
+        {"message": "Feedback created successfully", "status": "success"}, status=201
+    )
 
 
 # Page Errors
