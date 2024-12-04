@@ -27,6 +27,8 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_GET, require_POST
+from django.contrib.staticfiles import finders
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -139,6 +141,8 @@ from .models import (
     ClosingCostDetails,
     Expenses,
     ExpensesDetails,
+    Feedback,
+    AIChat,
     Goal,
     Income,
     IncomeDetail,
@@ -12529,6 +12533,140 @@ def add_update_notes(request):
         result["user_notes"] = notes_list
 
         return JsonResponse(result)
+
+# Right Sidebar Views
+
+@login_required(login_url="/login")
+@require_GET
+def load_ai_chat(request):
+    """
+    - Only GET method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handled user's previous chats as chat history.
+    - A pagination system has added to reduce load in db.
+    - Each page includes 5 pair of messages means 5 objects from database.
+    - Works on AIChat database model.
+    """
+    user = request.user
+    page = int(request.GET.get("page", 1))
+    page_size = 5
+
+    start = (page - 1) * page_size
+    end = page * page_size
+
+    messages = AIChat.objects.filter(user=user).order_by("-id")[start:end]
+
+    messages_data = [
+        {
+            "id": message.id,
+            "ai_msg": message.ai_response,
+            "user_msg": message.message,
+            "timestamp": message.created_at,
+        }
+        for message in messages
+    ]
+
+    has_more = AIChat.objects.filter(user=user).count() > end
+
+    return JsonResponse({"messages": messages_data, "has_more": has_more})
+
+
+@login_required(login_url="/login")
+@require_POST
+def send_message_to_ai(request):
+    """
+    - Only POST method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handled user's chat messages and send it to open ai for AI response.
+    - On successful AI response, AIChat database model is used to store data.
+    """
+    try:
+        user_message = request.POST.get("message", "")
+        response = ai_client.chat.completions.create(
+            model='gpt-3.5-turbo', # Open AI Language Model
+            messages=[{
+                'role': 'user', # Promp sender type
+                'content': user_message # User message or promp
+            }]
+        )
+    except Exception:
+        return JsonResponse({
+            'error': "Failed to connect open ai"
+        }, status=400)
+    
+    # save response into db
+    ai_res = response.choices[0].message.content
+    instance = AIChat.objects.create(
+        user=request.user,
+        message=user_message,
+        ai_response=ai_res
+    )
+
+    if instance :
+        return JsonResponse({
+            "usr_msg": instance.message,
+            "ai_res": instance.ai_response
+        }, status=200)
+    
+    return JsonResponse({
+            'error': "Failed to save into databse"
+        }, status=400)
+
+
+# Read data from csv
+@require_GET
+def read_documentation_csv(request):
+    """
+    - Only get message allowed.
+    - This view reads a CSV file & convert the data into python dictionary.
+    - On successful conversion, it sends data as json response.
+    - CSV file should be located at "documentation/lesson.csv".
+    - On file change, have to change find() arguments.
+    """
+    try:
+        file_path = finders.find("documentation/lesson.csv")
+    except Exception:
+        return JsonResponse({"error": "File not found"}, status=404)
+
+    with open(file_path, mode="r", encoding="utf-8") as file:
+        csv_reader = csv.DictReader(file)  # Use DictReader for better structure
+        data = [row for row in csv_reader]  # Convert rows into a list of dictionaries
+
+    return JsonResponse({"data": data, "status": "success"}, safe=False)
+
+
+# Create a feedback
+@login_required(login_url="/login")
+@require_POST
+def create_feedback(request):
+    """
+    - Only POST method allowed.
+    - Only Authenticated user allowed.
+    - This view handled user feedback request data.
+    - All fields are required except screenshot.
+    - On successful creation, Feedback database model is used to store data.
+    """
+    user = request.user
+    feature = request.POST.get("feedbackFeature")
+    issue = request.POST.get("feedback_issue")
+    screenshot = request.FILES.get("screenshotData")
+    description = request.POST.get("feedbackDetails")
+    suggestion = request.POST.get("featureSuggestions")
+    importance = request.POST.get("feedback_priority")
+    try:
+        Feedback.objects.create(
+            user=user,
+            feature=feature,
+            issue=issue,
+            screenshot=screenshot,
+            description=description,
+            suggestion=suggestion,
+            importance=importance,
+        )
+    except:
+        return JsonResponse({"error": "Failed to create feedback"}, status=400)
+    return JsonResponse({"message": "Feedback created successfully", "status": "success"}, status=201)
+
 
 
 # Page Errors

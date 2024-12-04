@@ -750,3 +750,42 @@ class MyNotes(models.Model):
 
     def __str__(self):
         return str(self.title + " " + self.user.username)
+
+
+# Chat Model for chatting with chatgpt
+class AIChat(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aichat_user")
+    message = models.TextField()
+    ai_response = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.message}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+# Feedback model
+class Feedback(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="feedback_user"
+    )
+    feature = models.CharField(max_length=255)
+    issue = models.CharField(max_length=255)
+    screenshot = models.ImageField(
+        upload_to="feedback_screenshots/", null=True, blank=True
+    )
+    description = models.TextField()
+    suggestion = models.TextField()
+    importance = models.CharField(max_length=255)
+    is_reviewed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.issue}"
+
+    class Meta:
+        ordering = ["-created_at"]
