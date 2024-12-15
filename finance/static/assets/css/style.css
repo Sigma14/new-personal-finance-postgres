@@ -339,3 +339,40 @@ input[type=file]::file-selector-button:hover {
 .canvasModal, #editNoteModal {
     z-index: 9999 !important;
 }
+
+/* Submit Error Form CSS */
+.submit-error-form{
+    width: 300px;
+}
+
+/* Error Log page */
+.log-container {
+    background-color: #212529;
+    color: #0f0;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 75vh;
+    white-space: pre-wrap; /* Preserve line breaks */
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.log-info {
+    color: #6c757d; /* Gray for INFO logs */
+}
+
+.log-warning {
+    color: #ffc107; /* Yellow for WARNING logs */
+    font-weight: bold;
+}
+
+.log-error {
+    color: #dc3545; /* Red for ERROR logs */
+    font-weight: bold;
+}
+
+.log-critical {
+    color: #b71c1c; /* Dark red for CRITICAL logs */
+    font-weight: bold;
+    text-decoration: underline;
+}

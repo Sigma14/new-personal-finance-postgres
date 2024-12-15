@@ -1,0 +1,26 @@
+WARNING django.request 2024-12-12 15:34:07,454 log 73030 136044183815872 Not Found: /adsfWARNING django.server 2024-12-12 15:34:07,455 basehttp 73030 136044183815872 "GET /adsf HTTP/1.1" 404 2180
+WARNING django.server 2024-12-12 15:36:41,724 basehttp 73030 136044072666816 "GET /static/images/budget.jpg HTTP/1.1" 404 1677
+WARNING django.server 2024-12-12 15:36:41,724 basehttp 73030 136044041209536 "GET /static/images/bills.jpg HTTP/1.1" 404 1674
+WARNING django.server 2024-12-12 15:36:41,727 basehttp 73030 136044051695296 "GET /static/images/category.jpg HTTP/1.1" 404 1683
+WARNING django.request 2024-12-12 15:36:41,734 log 73030 136044093638336 Not Found: /en/my_image.png
+WARNING django.server 2024-12-12 15:36:41,735 basehttp 73030 136044093638336 "GET /en/my_image.png HTTP/1.1" 404 36478
+WARNING django.server 2024-12-12 15:36:41,797 basehttp 73030 136044093638336 "GET /static/images/account.jpg HTTP/1.1" 404 1680
+WARNING django.server 2024-12-12 15:36:41,799 basehttp 73030 136044062181056 "GET /static/images/transaction.jpeg HTTP/1.1" 404 1695
+WARNING django.server 2024-12-12 15:36:41,805 basehttp 73030 136044041209536 "GET /static/images/calculator.jpg HTTP/1.1" 404 1689
+WARNING django.server 2024-12-12 15:36:41,809 basehttp 73030 136044051695296 "GET /static/images/goals.jpg HTTP/1.1" 404 1674
+WARNING django.server 2024-12-12 15:36:41,810 basehttp 73030 136044062181056 "GET /static/images/real_estate.jpg HTTP/1.1" 404 1692
+WARNING django.request 2024-12-12 15:36:41,938 log 73030 136044204787392 Not Found: /app-assets/data/locales/en.json
+WARNING django.server 2024-12-12 15:36:41,938 basehttp 73030 136044204787392 "GET /app-assets/data/locales/en.json HTTP/1.1" 404 2261
+WARNING django.request 2024-12-12 15:36:43,018 log 73030 136044194301632 Not Found: /en/{% static 'app-assets/images/icons/vuejs.svg' %}
+WARNING django.server 2024-12-12 15:36:43,019 basehttp 73030 136044194301632 "GET /en/%7B%%20static%20'app-assets/images/icons/vuejs.svg'%20%%7D HTTP/1.1" 404 36630
+ERROR django.server 2024-12-15 10:23:08,831 basehttp "GET /en/jkl, HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:09,652 basehttp "GET /en/jkl, HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:11,811 basehttp "GET /en/jkl, HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:13,808 basehttp "GET /en/jkl, HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:16,816 basehttp "GET /en/jkl, HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:23,311 basehttp "GET /admin HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:23:24,342 basehttp "GET /admin HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:24:08,395 basehttp "GET /admin HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:27:19,123 basehttp "GET /admin HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:28:07,081 basehttp "GET /en/jklm HTTP/1.1" 500 59
+ERROR django.server 2024-12-15 10:28:08,611 basehttp "GET /en/jklm HTTP/1.1" 500 59

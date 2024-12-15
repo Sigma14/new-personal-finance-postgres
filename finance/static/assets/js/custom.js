@@ -4088,11 +4088,34 @@ $(document).ready(function () {
     });
   });
 
-  // Handle screenshot image upload for feedback form
-  (function () {
+  /*
+   * Helper function to capture screenshot & implement edit by fabric.js
+   */
+
+  function captureScreenshotAndEdit(
+    screenShotButton,
+    uploadScreenShotButton,
+    imageUploadNotification,
+    imageInputID,
+    fileName
+  ) {
     let canvas;
 
-    // function to initialize canvas
+    // Generate file name
+    const generateFileName = () => {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+
+      const period = hours >= 12 ? "pm" : "am"; // Determine AM/PM
+      const formattedHours = (((hours + 11) % 12) + 1).toString(); // Convert to 12-hour format
+
+      return `${fileName}_${year}${month}${day}_${formattedHours}_${minutes}${period}.png`;
+    };
+    // initialize canvas
     function initCanvas(img, containerWidth, containerHeight) {
       const dimensions = calculateCanvasDimensions(containerWidth);
 
@@ -4116,7 +4139,7 @@ $(document).ready(function () {
       ensureModalResponsive($("#snapEditCanvas"));
     }
 
-    // Helper function to calculate canvas dimensions
+    // function to calculate canvas dimensions
     function calculateCanvasDimensions(containerWidth) {
       if (containerWidth > 1200) {
         return { width: 800, height: 500 };
@@ -4127,7 +4150,7 @@ $(document).ready(function () {
       }
     }
 
-    // Helper function to ensure modal is responsive
+    // function to ensure modal is responsive
     function ensureModalResponsive(canvasElement) {
       const modalContent = document.querySelector(
         ".canvasModal .modal-content"
@@ -4136,10 +4159,13 @@ $(document).ready(function () {
       modalContent.style.overflowX = "auto";
     }
 
-    // screenshot event to capture current page's screenshot & edit by fabric.js
-    $("#takeScreenshot").on("click", function () {
+    // Screenshot event to capture current page screenshot
+    screenShotButton.on("click", function () {
+      const ignoreElementIds = ["rightSettingBody", "accSubmitError"];
       html2canvas(document.body, {
-        ignoreElements: (element) => element.id === "rightSettingBody",
+        ignoreElements: (element) => {
+          return ignoreElementIds.includes(element.id);
+        },
         width: window.innerWidth,
         height: window.innerHeight,
       })
@@ -4156,7 +4182,7 @@ $(document).ready(function () {
     });
 
     // upload existing photo for feedback form & edit by fabric.js
-    $("#feedbackImg").on("change", function (event) {
+    uploadScreenShotButton.on("change", function (event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -4213,17 +4239,17 @@ $(document).ready(function () {
         const dataURL = canvas.toDataURL("image/png");
 
         // Convert Base64 string to a File
-        const file = dataURLToFile(dataURL, "edited-image.png");
+        const file = dataURLToFile(dataURL, generateFileName());
 
         // Create a DataTransfer to simulate a FileList
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
 
         // Assign to the input element
-        const fileInput = document.querySelector("#screenshotData");
+        const fileInput = document.querySelector(imageInputID);
         fileInput.files = dataTransfer.files;
 
-        $("#feedbackSnapAdded").removeClass("d-none");
+        imageUploadNotification.removeClass("d-none");
       }
     });
 
@@ -4247,9 +4273,25 @@ $(document).ready(function () {
       });
       modal.show();
     }
+  }
+
+  // Submit feedback form
+  (function () {
+    // capture screenshot and Edit
+    const screenShotButton = $("#takeScreenshot");
+    const uploadScreenShotButton = $("#feedbackImg");
+    const imageUploadNotification = $("#feedbackSnapAdded");
+    const imageInputID = "#screenshotData";
+    const fileName = "feedback_img";
+    captureScreenshotAndEdit(
+      screenShotButton,
+      uploadScreenShotButton,
+      imageUploadNotification,
+      imageInputID,
+      fileName
+    );
 
     // Handle Form submission
-
     $("#feedbackForm").submit(function (e) {
       e.preventDefault();
 
@@ -4286,7 +4328,6 @@ $(document).ready(function () {
       // Form submission with validate data
       if (isValid) {
         const formData = new FormData(this);
-        console.log(formData.get("screenshotData"));
         $.ajax({
           url: $(this).attr("action"),
           method: "POST",
@@ -4295,7 +4336,6 @@ $(document).ready(function () {
           contentType: false,
           enctype: "multipart/form-data",
           success: function (response) {
-            console.log(response);
             if (response.status === "success") {
               $("#feedbackForm")
                 .find(".is-valid, .is-invalid")
@@ -4335,18 +4375,17 @@ $(document).ready(function () {
     });
   })();
 
+  // Handle Notes Here
+  (function () {
+    function renderNotes(notes) {
+      $("#notesContainer").empty();
+      if (notes.length === 0) {
+        $("#notesContainer").append(`<p>No notes found</p>`);
+      }
 
-// Handle Notes Here
- (function () {
-   function renderNotes(notes) {
-     $("#notesContainer").empty();
-     if (notes.length === 0) {
-       $("#notesContainer").append(`<p>No notes found</p>`);
-     }
-
-     notes.forEach((note) => {
-       $("#notesContainer").append(
-         `
+      notes.forEach((note) => {
+        $("#notesContainer").append(
+          `
                 <div class="h-100" id="accParent-${note.id}">
                     <div class="card">
                         <h2 class="mb-0" id="heading-${note.id}">
@@ -4389,185 +4428,184 @@ $(document).ready(function () {
                     </div>
                 </div>
                 `
-       );
-     });
-   }
+        );
+      });
+    }
 
-   function loadNotes() {
-     $.ajax({
-       type: "GET",
-       url: $("#notesContainer").data("url"),
-       dataType: "json",
-       success: function (response) {
-         if (response.success === "true") {
-           if (response.data.length > 0) {
-             renderNotes(response.data);
-           } else renderNotes([]);
-         }
-       },
-     });
-   }
+    function loadNotes() {
+      $.ajax({
+        type: "GET",
+        url: $("#notesContainer").data("url"),
+        dataType: "json",
+        success: function (response) {
+          if (response.success === "true") {
+            if (response.data.length > 0) {
+              renderNotes(response.data);
+            } else renderNotes([]);
+          }
+        },
+      });
+    }
 
-   loadNotes();
+    loadNotes();
 
-   function deleteNote(noteId, noteTitle) {
-     $.ajax({
-       type: "POST",
-       url: $("#createNoteForm").attr("action"),
-       data: {
-         notes_method: "Delete",
-         select_title: noteTitle,
-         csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
-       },
-       success: function (response) {
-         if (response.status === "Deleted Successfully") {
-           Swal.fire({
-             title: "Note deleted successfully!",
-             icon: "success",
-           });
-           loadNotes(); // Reload notes to reflect the deletion
-         } else {
-           Swal.fire({
-             title: response.status,
-             icon: "error",
-           });
-         }
-       },
-       error: function (xhr, status, error) {
-         console.error("Error deleting note:", error);
-         Swal.fire({
-           title: "Error deleting the note.",
-           text: error,
-           icon: "error",
-         });
-       },
-     });
-   }
+    function deleteNote(noteId, noteTitle) {
+      $.ajax({
+        type: "POST",
+        url: $("#createNoteForm").attr("action"),
+        data: {
+          notes_method: "Delete",
+          select_title: noteTitle,
+          csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+        },
+        success: function (response) {
+          if (response.status === "Deleted Successfully") {
+            Swal.fire({
+              title: "Note deleted successfully!",
+              icon: "success",
+            });
+            loadNotes(); // Reload notes to reflect the deletion
+          } else {
+            Swal.fire({
+              title: response.status,
+              icon: "error",
+            });
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("Error deleting note:", error);
+          Swal.fire({
+            title: "Error deleting the note.",
+            text: error,
+            icon: "error",
+          });
+        },
+      });
+    }
 
-   // Create note form submission
-   $("#createNoteForm").submit(function (e) {
-     e.preventDefault(); // Prevent the default form submission behavior
+    // Create note form submission
+    $("#createNoteForm").submit(function (e) {
+      e.preventDefault(); // Prevent the default form submission behavior
 
-     let isValid = true;
-     $(this)
-       .find("input[required], textarea[required]")
-       .each(function () {
-         const $field = $(this);
-         if (!$field.val()) {
-           $field.addClass("is-invalid").removeClass("is-valid");
-           isValid = false;
-         } else {
-           $field.removeClass("is-invalid").addClass("is-valid");
-         }
-       });
+      let isValid = true;
+      $(this)
+        .find("input[required], textarea[required]")
+        .each(function () {
+          const $field = $(this);
+          if (!$field.val()) {
+            $field.addClass("is-invalid").removeClass("is-valid");
+            isValid = false;
+          } else {
+            $field.removeClass("is-invalid").addClass("is-valid");
+          }
+        });
 
-     if (isValid) {
-       const formData = new FormData(this);
-       formData.append("notes_method", "Add");
+      if (isValid) {
+        const formData = new FormData(this);
+        formData.append("notes_method", "Add");
 
-       $.ajax({
-         url: $(this).attr("action"),
-         method: "POST",
-         data: formData,
-         processData: false,
-         contentType: false,
-         success: function (response) {
-           if (response.status === "Added") {
-             Swal.fire({
-               title: "Note added successfully!",
-               icon: "success",
-             });
-             $("#createNoteForm").trigger("reset");
-             $("#createNoteForm input, textarea").removeClass(
-               "is-valid is-invalid"
-             );
-             $("#closeSidebar").click();
-             loadNotes();
-           } else {
-             Swal.fire({
-               title: response.status,
-               icon: "error",
-             });
-           }
-         },
-         error: function (xhr, status, error) {
-           console.error("Error submitting form:", error);
-           Swal.fire({
-             title: "Error submitting the form.",
-             text: error,
-             icon: "error",
-           });
-         },
-       });
-     }
-   });
+        $.ajax({
+          url: $(this).attr("action"),
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.status === "Added") {
+              Swal.fire({
+                title: "Note added successfully!",
+                icon: "success",
+              });
+              $("#createNoteForm").trigger("reset");
+              $("#createNoteForm input, textarea").removeClass(
+                "is-valid is-invalid"
+              );
+              $("#closeSidebar").click();
+              loadNotes();
+            } else {
+              Swal.fire({
+                title: response.status,
+                icon: "error",
+              });
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error("Error submitting form:", error);
+            Swal.fire({
+              title: "Error submitting the form.",
+              text: error,
+              icon: "error",
+            });
+          },
+        });
+      }
+    });
 
-   // Handle delete note button click
-   $("#notesContainer").on("click", ".delete-note-btn", function () {
-     const noteId = $(this).data("id");
-     const noteTitle = $(this).data("title");
-     $("#closeSidebar").click();
-
-     Swal.fire({
-       title: "Are you sure?",
-       text: "This will delete the note permanently!",
-       icon: "warning",
-       showCancelButton: true,
-       confirmButtonText: "Yes, delete it!",
-     }).then((result) => {
-       if (result.isConfirmed) {
-         deleteNote(noteId, noteTitle);
-       }
-     });
-   });
-
-   // Handle edit note button click
-   $("#notesContainer").on("click", ".edit-note-btn", function () {
+    // Handle delete note button click
+    $("#notesContainer").on("click", ".delete-note-btn", function () {
+      const noteId = $(this).data("id");
+      const noteTitle = $(this).data("title");
       $("#closeSidebar").click();
-     const noteTitle = $(this).data("title");
-     const noteNotes = $(this).data("notes");
-     $("#editNoteForm input[name=title]").val(noteTitle);
-     $("#editNoteForm textarea[name=notes]").val(noteNotes);
-     const modal = new bootstrap.Modal($("#editNoteModal").get(0), {
-       backdrop: "static",
-       keyboard: false,
-     });
-     modal.show();
 
-     $("#editNoteForm").submit(function (e) {
-       e.preventDefault();
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This will delete the note permanently!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          deleteNote(noteId, noteTitle);
+        }
+      });
+    });
 
-       const formData = new FormData(this);
-       formData.append("notes_method", "Update");
-       formData.append("select_title", noteTitle);
+    // Handle edit note button click
+    $("#notesContainer").on("click", ".edit-note-btn", function () {
+      $("#closeSidebar").click();
+      const noteTitle = $(this).data("title");
+      const noteNotes = $(this).data("notes");
+      $("#editNoteForm input[name=title]").val(noteTitle);
+      $("#editNoteForm textarea[name=notes]").val(noteNotes);
+      const modal = new bootstrap.Modal($("#editNoteModal").get(0), {
+        backdrop: "static",
+        keyboard: false,
+      });
+      modal.show();
 
-       $.ajax({
-         url: $(this).attr("action"),
-         method: "POST",
-         data: formData,
-         processData: false,
-         contentType: false,
-         success: function (response) {
-           if (response.status === "Updated") {
-             Swal.fire({
-               title: "Note updated successfully!",
-               icon: "success",
-             });
-             modal.hide();
-             loadNotes();
-           } else {
-             Swal.fire({
-               title: response.status,
-               icon: "error",
-             });
-             modal.hide();
-           }
-         },
-       })
-     });
-   });
- })();
+      $("#editNoteForm").submit(function (e) {
+        e.preventDefault();
 
+        const formData = new FormData(this);
+        formData.append("notes_method", "Update");
+        formData.append("select_title", noteTitle);
+
+        $.ajax({
+          url: $(this).attr("action"),
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            if (response.status === "Updated") {
+              Swal.fire({
+                title: "Note updated successfully!",
+                icon: "success",
+              });
+              modal.hide();
+              loadNotes();
+            } else {
+              Swal.fire({
+                title: response.status,
+                icon: "error",
+              });
+              modal.hide();
+            }
+          },
+        });
+      });
+    });
+  })();
 
   // Helper function to render Lessons content
   function renderAccordion(data, curPath) {
@@ -4639,4 +4677,287 @@ $(document).ready(function () {
       $icon.removeClass("rotate-180deg");
     }
   });
+
+  $("#errorLogsTable").DataTable({
+    dom: '<"top"lf>t<"bottom"ip>',
+    processing: true,
+    serverSide: true,
+    order: [[1, "desc"]],
+    pageLength: 10,
+    lengthMenu: [5, 10, 25, 50],
+    responsive: true,
+    ajax: {
+      url: "/en/app-error-report/",
+      type: "GET",
+      data: function (d) {
+        d.datatables = true;
+        d.status = $("#filterByStatus").val();
+      },
+    },
+    columns: [
+      {
+        data: null,
+        orderable: false,
+        render: function (data, type, row, meta) {
+          return `<input type="checkbox" class="error_log_checkbox" value="${row.id}">`;
+        },
+      },
+      { data: "code", orderable: true },
+      { data: "timestamp", orderable: true },
+      { data: "exception_type", orderable: false },
+      { data: "request_path", orderable: false },
+      { data: "error_message", orderable: false },
+      { data: "count", orderable: true },
+      {
+        data: "status",
+        orderable: false,
+        render: function (data) {
+          let statusClass = "";
+          if (data === "open") statusClass = "badge badge-danger";
+          else if (data === "resolved") statusClass = "badge badge-success";
+          else if (data === "skip") statusClass = "badge badge-warning";
+          else statusClass = "badge badge-secondary";
+          return `<span class="${statusClass}">${data}</span>`;
+        },
+      },
+      {
+        data: null,
+        orderable: false,
+        render: function (data, type, row) {
+          // Add an "eye" button for triggering the modal
+          return `
+                    <button type="button" class="btn btn-sm btn-primary view-details-btn" data-id="${row.id}" data-toggle="modal" data-target="#detailsModal">
+                        <i class="fa fa-eye"></i>
+                    </button>`;
+        },
+      },
+    ],
+  });
+
+  // Filter by status event listener
+  $("#filterByStatus").on("change", function () {
+    $("#errorLogsTable").DataTable().ajax.reload();
+  });
+
+  // Handle "View Details" button click
+  $(document).on("click", ".view-details-btn", function () {
+    const rowId = $(this).data("id");
+
+    // Fetch row details via AJAX
+    $.ajax({
+      url: `/en/app-error-report/details/${rowId}/`,
+      type: "GET",
+      success: function (response) {
+        // Populate modal content
+        $("#detailsModal .modal-title").text(
+          `Details for Error #${response.id}`
+        );
+        $("#detailsModal .modal-body").html(`
+                <p><strong>Status Code:</strong> ${response.code}</p>
+                <p><strong>Timestamp:</strong> ${response.timestamp}</p>
+                <p><strong>Error Type:</strong> ${response.exception_type}</p>
+                <p><strong>Request Path:</strong> ${response.request_path}</p>
+                <p><strong>Error Message:</strong> ${response.error_message}</p>
+                <p><strong>Traceback:</strong> ${response.traceback}</p>
+                <p><strong>Count:</strong> ${response.count}</p>
+                <p><strong>Status:</strong> ${response.status}</p>
+            `);
+      },
+      error: function () {
+        $("#detailsModal .modal-body").html(
+          "<p class='text-danger'>Failed to load details. Please try again.</p>"
+        );
+      },
+    });
+  });
+
+  // Handle Error report table action
+  (function () {
+    const allCheckBox = $("#selectAllCheckbox");
+    const actionSelector = $("#actionSelector");
+    const statusSelector = $("#statusSelector");
+    const statusSelectorContainer = $("#statusSelectorContainer");
+    const handleErrorBtn = $("#handleErrorBtn");
+
+    // Handle "Select All" checkbox
+    allCheckBox.on("change", function () {
+      const isChecked = $(this).prop("checked");
+      $(".error_log_checkbox").prop("checked", isChecked);
+    });
+
+    // Update "Select All" checkbox based on individual row selection
+    $("#errorLogsTable").on("change", ".error_log_checkbox", function () {
+      const allCheckboxes = $(".error_log_checkbox").length;
+      const checkedCheckboxes = $(".error_log_checkbox:checked").length;
+      allCheckBox.prop("checked", allCheckboxes === checkedCheckboxes);
+    });
+
+    // Helper function to get selected rows
+    function getSelectedRows() {
+      return $(".error_log_checkbox:checked")
+        .map(function () {
+          return $(this).val();
+        })
+        .get();
+    }
+
+    // Reset all components
+    function resetComponents() {
+      // Clear dropdowns
+      actionSelector.val("").trigger("change");
+      statusSelector.val("").addClass("d-none").trigger("change");
+
+      // Hide and reset the action button
+      handleErrorBtn
+        .addClass("d-none")
+        .removeClass("btn-primary btn-danger")
+        .text("");
+
+      // Uncheck all checkboxes
+      $(".error_log_checkbox").prop("checked", false);
+      allCheckBox.prop("checked", false);
+    }
+
+    // Handle action selection
+    actionSelector.on("change", function () {
+      const selectedAction = $(this).val();
+      if (selectedAction === "delete") {
+        handleErrorBtn
+          .removeClass("d-none btn-primary")
+          .addClass("btn-danger")
+          .text("Delete Selected");
+        statusSelectorContainer.addClass("d-none");
+      } else if (selectedAction === "update_status") {
+        statusSelectorContainer.removeClass("d-none");
+        handleErrorBtn.addClass("d-none");
+        statusSelector.on("change", function () {
+          const selectedStatus = $(this).val();
+          if (selectedStatus === "") {
+            handleErrorBtn.addClass("d-none");
+          } else {
+            handleErrorBtn
+              .addClass("btn-primary")
+              .removeClass("btn-danger d-none")
+              .text("Change Status");
+          }
+        });
+      } else {
+        statusSelectorContainer.addClass("d-none");
+        handleErrorBtn.addClass("d-none");
+      }
+    });
+
+    // Handle button click
+    $(document).on("click", "#handleErrorBtn", function () {
+      const selectedRows = getSelectedRows();
+      const action = actionSelector.val();
+      const selectedStatus = statusSelector.val();
+
+      // Handle validations
+      if (selectedRows.length === 0) {
+        Swal.fire({
+          title: "Please select at least one row",
+          icon: "error",
+          customClass: { confirmButton: "btn btn-danger" },
+          buttonsStyling: false,
+        });
+        return;
+      }
+
+      if (action === "update_status" && selectedStatus === "") {
+        Swal.fire({
+          title: "Please select a status to change",
+          icon: "error",
+          customClass: { confirmButton: "btn btn-danger" },
+          buttonsStyling: false,
+        });
+        return;
+      }
+
+      // AJAX Request
+      $.ajax({
+        type: "POST",
+        url: handleErrorBtn.data("url"),
+        data: JSON.stringify({
+          action: action,
+          selected_ids: selectedRows,
+          status: action === "update_status" ? selectedStatus : undefined,
+          csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+        }),
+        contentType: "application/json",
+        success: function (response) {
+          if (response.status === 200) {
+            Swal.fire({
+              title: response.message,
+              icon: "success",
+              customClass: { confirmButton: "btn btn-primary" },
+              buttonsStyling: false,
+            });
+
+            // Reset components after success
+            resetComponents();
+
+            // Reload the table
+            $("#errorLogsTable").DataTable().ajax.reload(null, false);
+          } else {
+            Swal.fire({
+              title: response.message,
+              icon: "error",
+              customClass: { confirmButton: "btn btn-danger" },
+              buttonsStyling: false,
+            });
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("Error:", error);
+          Swal.fire({
+            title: "An error occurred. Please try again later.",
+            icon: "error",
+            customClass: { confirmButton: "btn btn-danger" },
+            buttonsStyling: false,
+          });
+        },
+      });
+    });
+  })();
+
+  // Fetch Error Logs data
+  function fetchErrorLogs() {
+    const logContainer = $("#log-container");
+    $.ajax({
+      url: logContainer.data("url"),
+      type: "GET",
+      dataType: "json",
+      success: function (response) {
+        logContainer.empty();
+        response.logs.forEach((log) => {
+          // Determine log severity
+          let logClass = "";
+          if (log.includes("WARNING")) {
+            logClass = "log-warning";
+          } else if (log.includes("ERROR")) {
+            logClass = "log-error";
+          } else if (log.includes("CRITICAL")) {
+            logClass = "log-critical";
+          } else {
+            logClass = "log-info"; // Default style for other levels
+          }
+
+          // Append log with corresponding class
+          logContainer.append(`<div class="${logClass}">${log}</div>`);
+        });
+      },
+      error: function (xhr, status, error) {
+        console.error("Error fetching logs:", error);
+        $("#log-container").html(
+          "<div class='text-danger'>Error loading logs.</div>"
+        );
+      },
+    });
+  }
+  // Fetch logs every 5 seconds
+  setInterval(fetchErrorLogs, 5000);
+
+  // Fetch logs on page load
+  fetchErrorLogs();
 });

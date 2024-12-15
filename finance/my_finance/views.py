@@ -1,3 +1,4 @@
+import os
 import ast
 import calendar
 import csv
@@ -16,22 +17,28 @@ import requests
 from dateutil import relativedelta
 from dateutil.relativedelta import relativedelta
 from decouple import config
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.utils.timezone import localtime
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
     HttpResponseRedirect,
     JsonResponse,
+    FileResponse,
+    HttpResponseNotFound
 )
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.staticfiles import finders
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.generic import (
     CreateView,
@@ -144,6 +151,7 @@ from .models import (
     ExpensesDetails,
     Feedback,
     AIChat,
+    AppErrorLog,
     Goal,
     Income,
     IncomeDetail,
@@ -12708,7 +12716,183 @@ def create_feedback(request):
     )
 
 
+class ErrorLogsList(ListView):
+    model = AppErrorLog
+    template_name = 'admin_only/app_error_logs.html'
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.GET.get("datatables"):
+            draw = int(self.request.GET.get("draw", "1"))
+            length = int(self.request.GET.get("length", "10"))
+            start = int(self.request.GET.get("start", "0"))
+            order_column_index = int(self.request.GET.get("order[0][column]", "0"))
+            order_direction = self.request.GET.get("order[0][dir]", "asc")
+            status_filter = self.request.GET.get("status", None)
+            sv = self.request.GET.get("search[value]", None)
+            
+            # Define column mapping for ordering
+            order_columns = ["", "code", "timestamp", "exception_type", "request_path", "error_message", "count", "status", "action"]
+            order_column = order_columns[order_column_index]
+            if order_direction == "desc":
+                order_column = f"-{order_column}"
+
+
+            qs = self.get_queryset().order_by(order_column)
+            # Apply status filter if provided
+            if status_filter:
+                qs = qs.filter(status=status_filter)
+            if sv:
+                qs = qs.filter(
+                    Q(code__icontains=sv)|
+                    Q(request_path__icontains=sv)|
+                    Q(error_message__icontains=sv)|
+                    Q(exception_type__icontains=sv)
+                )
+            filtered_count = qs.count()
+            qs = qs[start:start+length]
+
+            # Serialize response data
+            data = [
+                {
+                    "id": log.id,
+                    "code": log.code,
+                    "timestamp": localtime(log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+                    "exception_type": log.exception_type,
+                    "request_path": log.request_path,
+                    "error_message": log.error_message,
+                    "status": log.status,
+                    "count": log.count,
+                } for log in qs
+            ]
+            return JsonResponse({
+                "draw": draw,
+                "recordsTotal": self.model.objects.count(),
+                "recordsFiltered": filtered_count,
+                "data": data
+            })
+        return super().render_to_response(context, **response_kwargs)
+
+@require_GET
+def error_report_details(request, error_id):
+    # Retrieve the error log or return a 404
+    error_log = get_object_or_404(AppErrorLog, id=error_id)
+    
+    # Define the fields to include in the response
+    data = {
+        "id": error_log.id,
+        "code": error_log.code,
+        "timestamp": localtime(error_log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+        "exception_type": error_log.exception_type,
+        "request_path": error_log.request_path,
+        "error_message": error_log.error_message,
+        "count": error_log.count,
+        "status": error_log.status,
+        "traceback": error_log.traceback
+    }
+    
+    return JsonResponse(data)
+
+@csrf_exempt
+@require_POST
+def error_report_action(request):
+    """
+    Handle delete or update status actions for AppErrorLog.
+    """
+    try:
+        data = json.loads(request.body)
+        action = data.get("action")
+        selected_ids = data.get("selected_ids", [])
+
+        if not selected_ids:
+            return JsonResponse({
+                "status": 400,
+                "message": "No logs selected.",
+                "success": "Error",
+            })
+
+        logs = AppErrorLog.objects.filter(id__in=selected_ids)
+
+        if action == "update_status":
+            new_status = data.get("status")
+            if new_status in [choice[0] for choice in AppErrorLog.StatusChoices.choices]:
+                logs.update(status=new_status)
+                return JsonResponse({
+                    "status": 200,
+                    "message": "Status updated successfully.",
+                    "success": "Success",
+                })
+            return JsonResponse({
+                "status": 400,
+                "message": "Invalid status.",
+                "success": "Error",
+            })
+
+        elif action == "delete":
+            logs.delete()
+            return JsonResponse({
+                "status": 200,
+                "message": "Logs deleted successfully.",
+                "success": "Success",
+            })
+
+        return JsonResponse({
+            "status": 400,
+            "message": "Invalid action.",
+            "success": "Error",
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "status": 500,
+            "message": str(e),
+            "success": "Error",
+        })
+        
+@require_GET
+def fetch_error_logs(request):
+    """
+    - Only GET Method allowed.
+    - Only Admin user allowed.
+    - This view handles fetching latest 50 of error logs data.
+    """
+    
+    log_file_path = settings.LOG_FILE_PATH
+    
+    # Number of lines to fetch from the end of the log file
+    lines_to_fetch = 50
+    try:
+        with open(log_file_path, "r") as log_file:
+            logs = log_file.readlines()[-lines_to_fetch:]
+    except FileNotFoundError:
+        logs = ['Log file not found.']
+    except Exception as e:
+        logs = [f"Error reading log file: {e}"]
+    return JsonResponse({"logs": logs})
+
+
+@require_GET
+def download_log_file(request):
+    """
+    Serve the log file for download.
+    Only available to admin users.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseNotFound("You are not authorized to access this file.")
+
+    log_file_path = settings.LOG_FILE_PATH
+
+    if os.path.exists(log_file_path):
+        return FileResponse(open(log_file_path, 'rb'), as_attachment=True, filename="app_errors.log")
+    else:
+        return HttpResponseNotFound("Log file not found.")
+
+def test_middleware(request):
+    raise ValueError("This is a forced error to test middleware.")
+
+
 # Page Errors
+
+
 def error_404(request, exception):
     data = {"error": "Page Not Found!"}
     return render(request, "error.html", data)
@@ -12727,3 +12911,4 @@ def error_403(request, exception):
 def error_400(request, exception):
     data = {"error": "Bad Request!"}
     return render(request, "error.html", data)
+

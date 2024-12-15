@@ -1,10 +1,12 @@
 # from django.db import models
+from ast import mod
 import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from djongo import models
+from django.utils.timezone import now
 
 from .constants import (
     BUDGET_ACCOUNT_TYPES,
@@ -789,3 +791,33 @@ class Feedback(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+
+class AppErrorLog(models.Model):
+    class StatusChoices(models.TextChoices):
+        RESOLVED = "resolved", "Resolved"
+        OPEN = "open", "Open"
+        SKIP = "skip", "Skip"
+    users = models.ManyToManyField(User, blank=True, related_name="error_logs")
+    timestamp = models.DateTimeField(default=now, db_index=True)
+    exception_type = models.CharField(max_length=255, db_index=True)
+    error_message = models.TextField()
+    traceback = models.TextField()
+    request_path = models.CharField(max_length=255, blank=True, null=True)
+    count = models.PositiveIntegerField(default=1)
+    code = models.IntegerField(null=True, blank=True, db_index=True)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.OPEN,
+        db_index=True,
+    )
+
+    class Meta:
+        verbose_name = "Error Log"
+        verbose_name_plural = "Error Logs"
+        ordering = ["-timestamp"]
+    
+    def __str__(self):
+        return f"[{self.count}] {self.exception_type} ({self.code}): {self.error_message[:50]}"

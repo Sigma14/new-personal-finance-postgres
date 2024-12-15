@@ -31,6 +31,8 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/wizard/bs-stepper.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/custom/style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
         <!-- END: Vendor CSS-->
         <!-- Data Table-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/datatables.min.css' %}"/>
@@ -112,6 +114,9 @@
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'transaction_list' %} active {% endif %}"  href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'real_estate_home' %} active {% endif %}"   href="{% url 'real_estate_home'%}" data-placement="top">Real Estate</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}"  href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'app-error-report' %} active {% endif %}"  href="{% url 'app-error-report' %}" data-placement="top">Admin Report</a></li>
+                    {% endif %}
                 </ul>
                 <ul class="nav navbar-nav align-items-center ml-auto">
                     <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="sun"></i></a></li>
@@ -300,6 +305,9 @@
         {% endif %}
         {% include "./right-sidebar/image_preview_modal.html" %}
         {% include "./right-sidebar/edit_note_modal.html" %}
+        {% if request.user.is_staff %}
+        {% include "./admin_only/error_details_modal.html" %}
+        {% endif %}
         <!--END: Right Sidebar Includes-->
         <!-- BEGIN: Content-->
         {% block content %}
@@ -335,6 +343,8 @@
         <script src="{% static 'app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/extensions/toastr.min.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/forms/form-number-input.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/jquery.dataTables.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.responsive.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/responsive.bootstrap4.js' %}"></script>
         <!-- END: Page Vendor JS-->
@@ -344,6 +354,7 @@
         <!-- END: Theme JS-->
         <!-- BEGIN: Page JS-->
         <script src="{% static '/assets/js/datatables.min.js' %}"></script>
+        <script src="{% static '/app-assets/js/scripts/tables/table-datatables-advanced.js' %}"></script>
         <script src="{% static '/app-assets/js/scripts/pages/app-ecommerce.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/forms/pickers/form-pickers.js' %}"></script>
         <script src="{% static 'assets/js/app-calendars-events.js' %}"></script>

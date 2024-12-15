@@ -1,5 +1,4 @@
 {
-  "reactSnippets.settings.importReactOnTop": false, // Disable import react on top
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.tabSize": 4,
@@ -8,6 +7,9 @@
     "source.organizeImports": "always"
   },
   "[prettier]": {
-   "prettier.tabWidth": 4
+    "prettier.tabWidth": 4
   },
+  "[black]": {
+    "editor.tabSize": 4,
+  }
 }

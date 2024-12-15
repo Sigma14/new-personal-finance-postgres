@@ -317,4 +317,13 @@ urlpatterns = [
     # Endpoint to add or update notes
     path("add-update/notes", add_update_notes, name="add-update-notes"),
     path("get-notes", get_notes, name="get-notes"),
+    # Endpoint to submit error
+    path("test-middleware/", test_middleware, name="test-middleware"),
+    # Enpoint for terminal Logs
+    path("fetch-logs/", fetch_error_logs, name="fetch-error-logs"),
+    path('download-log/', download_log_file, name='download_log'),
+    # Enpoint for error logs from db
+    path("app-error-report/", ErrorLogsList.as_view(), name="app-error-report"),
+    path("app-error-report/details/<int:error_id>/", error_report_details, name="app-error-report-detail"),
+    path("app-error-report/action/", error_report_action, name="app-error-report-action"),
 ]
