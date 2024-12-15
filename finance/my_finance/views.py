@@ -12907,7 +12907,7 @@ def download_log_file(request):
         return HttpResponseNotFound("Log file not found.")
 
 def test_middleware(request):
-    raise ValueError("This is a forced error to test middleware.")
+    return render(request, "admin_only/test.html")
 
 
 # Page Errors
