@@ -22,6 +22,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.utils.timezone import localtime
@@ -12715,8 +12716,14 @@ def create_feedback(request):
         {"message": "Feedback created successfully", "status": "success"}, status=201
     )
 
-
+@method_decorator(login_required, name='dispatch')
 class ErrorLogsList(ListView):
+    """
+    - Only staff user allowed.
+    - This view displays all the error logs.
+    - If there is no params with the url it renders the html file.
+    - If there is a datatables params with the url it returns json response of all the error logs.
+    """
     model = AppErrorLog
     template_name = 'admin_only/app_error_logs.html'
 
@@ -12773,7 +12780,13 @@ class ErrorLogsList(ListView):
         return super().render_to_response(context, **response_kwargs)
 
 @require_GET
+@staff_member_required
 def error_report_details(request, error_id):
+    """
+    - Only GET Method allowed.
+    - Only Admin user allowed.
+    - This view collect id from url and return details of the error log.
+    """
     # Retrieve the error log or return a 404
     error_log = get_object_or_404(AppErrorLog, id=error_id)
     
@@ -12793,10 +12806,15 @@ def error_report_details(request, error_id):
     return JsonResponse(data)
 
 @csrf_exempt
+@staff_member_required
 @require_POST
 def error_report_action(request):
     """
-    Handle delete or update status actions for AppErrorLog.
+    - Only Admin user allowed.
+    - Received 3 data: action, ids & status.
+    - Handle update/delete based on action value.
+    - Handle delete or update status actions for AppErrorLog.
+    - Handles multiple objects/fields update & delete at once.
     """
     try:
         data = json.loads(request.body)
@@ -12849,6 +12867,7 @@ def error_report_action(request):
         })
         
 @require_GET
+@staff_member_required
 def fetch_error_logs(request):
     """
     - Only GET Method allowed.
@@ -12871,6 +12890,7 @@ def fetch_error_logs(request):
 
 
 @require_GET
+@staff_member_required
 def download_log_file(request):
     """
     Serve the log file for download.

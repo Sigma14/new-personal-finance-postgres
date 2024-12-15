@@ -291,6 +291,18 @@
                             {% endfor %}
                         </ul>
                     </li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="d-flex align-items-center" href="#">
+                        <i data-feather="settings"></i>
+                        <span class="menu-title text-truncate" data-i18n="Admin Panel">Admin Panel</span>
+                        </a>
+                        <ul class="menu-content">
+                            <li class="{% if request.resolver_match.view_name == 'app-error-report' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'app-error-report' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="App Error Report">App Error Report</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
