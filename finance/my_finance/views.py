@@ -7846,7 +7846,7 @@ class GoalDelete(LoginRequiredMixin, DeleteView):
 
 
 def account_box(request):
-    context = {"page": "account_box"}
+    context = {"page": "account_box", "tour_api": Tour_APIs["bank_ac_page"]}
     return render(request, "account/account_box.html", context)
 
 
