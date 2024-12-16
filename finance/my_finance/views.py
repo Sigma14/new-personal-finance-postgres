@@ -211,6 +211,9 @@ client = plaid_api.PlaidApi(api_client)
 open_ai_api_key = config("OPEN_AI_KEY")
 ai_client = OpenAI(api_key=open_ai_api_key)
 
+# CSV File links
+Tour_APIs = json.loads(config("TOUR_API"))
+
 
 wordpress_domain = config("WORDPRESS_DOMAIN")
 wordpress_api_key = config("WORDPRESS_API_KEY")
@@ -6815,8 +6818,11 @@ def transaction_list(request):
         )
         select_filter = "All"
 
-    context = transaction_summary(transaction_data, select_filter, user_name)
-    context.update({"page": "transaction_list"})
+    context = transaction_summary(transaction_data, select_filter, user_name )
+    context.update({
+        "page": "transaction_list",
+        "tour_api": Tour_APIs["transactions"]
+    })
     return render(request, "transaction/transaction_list.html", context=context)
 
 

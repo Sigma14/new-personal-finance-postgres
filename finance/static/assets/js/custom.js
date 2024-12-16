@@ -48,10 +48,10 @@ $(document).ready(function () {
       var intVal = function (i) {
         return typeof i === "string"
           ? // Remove any special character except decimal
-            i.replace(/[^\d.-]/g, "") * 1
+          i.replace(/[^\d.-]/g, "") * 1
           : typeof i === "number"
-          ? i
-          : 0;
+            ? i
+            : 0;
       };
 
       // Total over all pages
@@ -356,7 +356,7 @@ $(document).ready(function () {
         csrfmiddlewaretoken: csrftoken,
       },
       dataType: "json",
-      success: function () {},
+      success: function () { },
     });
 
     location.assign("/budget_add/");
@@ -4614,11 +4614,10 @@ $(document).ready(function () {
             <div class="card">
                 <h2 class="mb-0" id="heading-${data.number}">
                     <button 
-                        class="btn acc-custom-btn ${
-                          curPath === data.queryParamValue
-                            ? "btn-outline-primary"
-                            : "btn-outline-secondary"
-                        } btn-block text-left" 
+                        class="btn acc-custom-btn ${curPath === data.queryParamValue
+        ? "btn-outline-primary"
+        : "btn-outline-secondary"
+      } btn-block text-left" 
                         type="button" 
                         data-toggle="collapse" 
                         data-target="#collapse${data.number}" 
@@ -4960,4 +4959,173 @@ $(document).ready(function () {
 
   // Fetch logs on page load
   fetchErrorLogs();
+
+  // Tour
+  (function () {
+    // Select the Transaction Tour Button
+    const transactionTourBtn = $('#transactionTourBtn');
+
+    // Define button classes
+    const BACK_BTN_CLASS = 'btn btn-sm btn-outline-primary';
+    const NEXT_BTN_CLASS = 'btn btn-sm btn-primary btn-next';
+
+    // Define button configurations
+    const buttonsConfig = {
+      skip: {
+        text: 'Skip',
+        classes: BACK_BTN_CLASS,
+        action: function (tour) {
+          tour.cancel();
+        }
+      },
+      back: {
+        text: 'Back',
+        classes: BACK_BTN_CLASS,
+        action: function (tour) {
+          tour.back();
+        }
+      },
+      next: {
+        text: 'Next',
+        classes: NEXT_BTN_CLASS,
+        action: function (tour) {
+          tour.next();
+        }
+      },
+      finish: {
+        text: 'Finish',
+        classes: NEXT_BTN_CLASS,
+        action: function (tour) {
+          tour.complete();
+        }
+      }
+    };
+
+    /**
+     * Adds a step to the Shepherd tour.
+     * @param {Shepherd.Tour} tour - The Shepherd tour instance.
+     * @param {Object} stepData - Data for the step, including Title, Tips, Example Task, Step.
+     * @param {string} position - The position to attach the step ('top', 'right', 'left', 'bottom').
+     * @param {Array} buttons - Array of button configurations for the step.
+     */
+    function addTourStep(tour, stepData, position, buttons) {
+      if (!stepData || !stepData.Title || !stepData.Step) {
+        console.warn('Invalid step data:', stepData);
+        return;
+      }
+
+      tour.addStep({
+        id: stepData.Step,
+        title: stepData.Title,
+        text: `
+                <h5 style="font-weight: bold; color: #7367F0">${stepData.Tips && "Tips:"}</h5>
+                <p>${stepData.Tips || ''}</p>
+                <h5 style="font-weight: bold; color: #7367F0">${stepData["Example Task"] && "Example Task:"}</h5>
+                <p>${stepData["Example Task"] || ''}</p>
+            `,
+        attachTo: {
+          element: `.${stepData.Step}`,
+          on: position
+        },
+        buttons: buttons.map(button => ({
+          text: button.text,
+          classes: button.classes,
+          action: button.action.bind(null, tour)
+        })),
+        scrollTo: true,
+        scrollToHandler: (element) => {
+          const headerOffset = 100; // Adjust based on sticky navbar
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = elementPosition - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        },
+      });
+    }
+
+    function configureTour(tour, data) {
+      data.forEach((stepData, index) => {
+        let position = 'right'; // Default position if not specified
+
+        let buttons = [];
+        if (index === 0) {
+          // First step: Skip and Next
+          buttons.push(buttonsConfig.skip, buttonsConfig.next);
+        } else if (index === data.length - 1) {
+          // Last step: Back and Finish
+          buttons.push(buttonsConfig.back, buttonsConfig.finish);
+        } else {
+          // Middle steps: Back and Next
+          buttons.push(buttonsConfig.back, buttonsConfig.next);
+        }
+
+        if (index === 4 || index === 8) {
+          position = 'bottom';
+        }
+        if (index === 5 || index === 7) {
+          position = 'left';
+        }
+
+        addTourStep(tour, stepData, position, buttons);
+      });
+
+      return tour;
+    }
+
+    function initializeTransactionTour(data) {
+      const tour = new Shepherd.Tour({
+        defaultStepOptions: {
+          classes: 'shadow-md bg-purple-dark',
+          scrollTo: true,
+          cancelIcon: {
+            enabled: true
+          }
+        },
+        useModalOverlay: true
+      });
+
+      configureTour(tour, data);
+      tour.start();
+    }
+
+    function handleTransactionTourClick() {
+      const csvUrl = transactionTourBtn.data('csv');
+      if (!csvUrl) {
+        console.error('CSV URL is not provided.');
+        return;
+      }
+
+      Papa.parse(csvUrl, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        transform: function (value, key) {
+          if (key === "Step") {
+            return value.replace(/\s+/g, '-'); // Replace spaces with hyphens
+          }
+          return value;
+        },
+        complete: function (results) {
+          if (!results.data || !Array.isArray(results.data) || results.data.length === 0) {
+            console.warn('No data found in CSV.');
+            return;
+          }
+
+          initializeTransactionTour(results.data);
+        },
+        error: function (err) {
+          console.error("Error parsing the CSV:", err);
+        }
+      });
+    }
+
+    // Attach event handler if the button exists
+    transactionTourBtn.on('click', handleTransactionTourClick);
+  })();
+
+
+
 });

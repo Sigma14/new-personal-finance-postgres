@@ -1,15 +1,26 @@
 {
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-  "editor.tabSize": 4,
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "always",
-    "source.organizeImports": "always"
-  },
-  "[prettier]": {
-    "prettier.tabWidth": 4
-  },
-  "[black]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
     "editor.tabSize": 4,
-  }
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "always",
+        "source.organizeImports": "always"
+    },
+    "[javascript]": {
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true
+    },
+    "files.autoSave": "afterDelay",
+    "editor.wordWrap": "on",
+    "editor.formatOnSaveMode": "file",
+    "editor.formatOnType": true
 }
