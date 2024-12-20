@@ -2387,6 +2387,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data["categories_name_dumbs"] = json.dumps(TRANSACTION_KEYS[:-1])
         data["categories_value"] = categories_value
         data["selected_budget"] = self.user_budget
+        data["tour_api"] = Tour_APIs["category_page"]
 
         return data
 
