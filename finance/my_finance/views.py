@@ -5741,6 +5741,7 @@ def sample_budget_box(request):
         "budget_graph_currency": "$",
         "translated_data": json.dumps(translated_data),
         "page": "budgets",
+        "tour_api": Tour_APIs["sample_budgets_page"]
     }
     return render(request, "budget/sample_budget_box.html", context=context)
 

@@ -15,7 +15,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">{% trans 'Sample Budgets' %}</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">{% trans 'Sample Budgets' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
@@ -26,6 +26,12 @@
                                 </ol>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="sampleBudgetTourBtn" data-csv="{{tour_api}}">Start Tour</div>
                     </div>
                 </div>
             </div>
@@ -40,7 +46,7 @@
                             <div class="card-datatable table-responsive">
                                 <table class="table">
                                     <thead>
-                                        <tr class="show_bdgt_exp" method_name="expenses_income_cls">
+                                        <tr class="show_bdgt_exp Step-2" method_name="expenses_income_cls">
                                             <th><h5><b>{{ _('Income')}}</b></h5></th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -86,7 +92,7 @@
 
                                                 </th>
                                             </tr>
-                                        <tr class="show_bdgt_exp" method_name="expenses_budgets_cls">
+                                        <tr class="show_bdgt_exp Step-3" method_name="expenses_budgets_cls">
                                             <th><h5><b>{% trans 'Expenses' %}</b></h5></th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -221,7 +227,7 @@
                                                 </th>
                                             </tr>
                                         <tr>
-                                            <th><h5><b>{% trans 'Leftover cash' %}</b></h5></th>
+                                            <th class="Step-4"><h5><b>{% trans 'Leftover cash' %}</b></h5></th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
                                             <th>&nbsp;</th>
@@ -250,7 +256,7 @@
                 </section>
                 <section>
                     <div class="row match-height">
-                        <div class="col-xl-6 col-md-12 col-12">
+                        <div class="col-xl-6 col-md-12 col-12 Step-5">
                             <div class="card">
                                 <div class="card-header">
                                     <div class="card-title"><h5><b>{% trans 'Cash Flow' %}</b></h5> </div>
@@ -260,7 +266,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-6 col-md-12 col-12">
+                        <div class="col-xl-6 col-md-12 col-12 Step-6">
                                     <div class="card">
                                         <div class="card-header">
                                             <div class="card-title"><h5><b>{% trans 'Spending Categories' %}</b></h5> </div>

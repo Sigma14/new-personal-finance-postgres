@@ -5173,6 +5173,30 @@ $(document).ready(function () {
       return tour;
     }
 
+    function configureSampleBudgetTour(tour, data) {
+      data.forEach((stepData, index) => {
+        let position = 'bottom';
+
+        let buttons = [];
+        if (index === 0) {
+          // First step: Skip and Next
+          buttons.push(buttonsConfig.skip, buttonsConfig.next);
+        } else if (index === data.length - 1) {
+          // Last step: Back and Finish
+          buttons.push(buttonsConfig.back, buttonsConfig.finish);
+        } else {
+          // Middle steps: Back and Next
+          buttons.push(buttonsConfig.back, buttonsConfig.next);
+        }
+        // Customize position based on step index
+        if(index==1) position = "right";
+        if (index == 4 || index == 5) position = "top";
+        addTourStep(tour, stepData, position, buttons);
+      });
+
+      return tour;
+    }
+
 
     // Attach event handler
     transactionTourBtn.click(async function () {
@@ -5203,6 +5227,17 @@ $(document).ready(function () {
         const data = await parseCSV(csvUrl);
         const tour = initializeTour();
         configureBillAndSubTour(tour, data).start();
+      } catch (error) {
+        console.error("Failed to start bill and subs tour:", error);
+      }
+    });
+
+    $("#sampleBudgetTourBtn").click(async function () {
+      const csvUrl = $("#sampleBudgetTourBtn").data('csv');
+      try {
+        const data = await parseCSV(csvUrl);
+        const tour = initializeTour();
+        configureSampleBudgetTour(tour, data).start();
       } catch (error) {
         console.error("Failed to start bill and subs tour:", error);
       }
