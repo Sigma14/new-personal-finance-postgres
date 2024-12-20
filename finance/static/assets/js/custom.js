@@ -5052,11 +5052,19 @@ $(document).ready(function () {
       }
     };
 
+    function truncateTitle(title) {
+      if (title.length > 40) {
+        return title.substring(0, 32) + '...';
+      } else {
+        return title;
+      }
+    }
+
     function addTourStep(tour, stepData, position, buttons) {
 
       tour.addStep({
         id: stepData.Step,
-        title: stepData.Title,
+        title: truncateTitle(stepData.Title),
         text: `
         ${stepData.Tips ? `<h5 style="font-weight: bold; color: #7367F0">Tips:</h5>
         <p>${stepData.Tips}</p>` : ''}
@@ -5064,7 +5072,7 @@ $(document).ready(function () {
         <p>${stepData["Example Task"]}</p>` : ''}
       `,
         attachTo: {
-          element: `.${stepData.Step || 'content' }`,
+          element: `.${stepData.Step || 'content'}`,
           on: position
         },
         buttons: buttons.map(button => ({
@@ -5103,12 +5111,37 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
+
         if (index < 3) position = 'right';
         if (index > 5) position = 'top';
 
         addTourStep(tour, stepData, position, buttons);
       });
 
+      return tour;
+    }
+
+    function configureBillAndSubTour(tour, data) {
+
+      data.forEach((stepData, index) => {
+        let position = "right";
+        let buttons = [];
+        if (index === 0) {
+          // First step: Skip and Next
+          buttons.push(buttonsConfig.skip, buttonsConfig.next);
+
+        } else if (index === data.length - 1) {
+          // Last step: Back and Finish
+          buttons.push(buttonsConfig.back, buttonsConfig.finish);
+        } else {
+          // Middle steps: Back and Next
+          buttons.push(buttonsConfig.back, buttonsConfig.next);
+        }
+
+        if (index == 2) position = "top";
+
+        addTourStep(tour, stepData, position, buttons);
+      })
       return tour;
     }
 
@@ -5142,27 +5175,38 @@ $(document).ready(function () {
 
 
     // Attach event handler
-      transactionTourBtn.click(async function startTransactionTour() {
-        const csvUrl = transactionTourBtn.data('csv');
-        try {
-          const data = await parseCSV(csvUrl);
-          const tour = initializeTour();
-          configureTransactionTour(tour, data).start();
-        } catch (error) {
-          console.error("Failed to start transaction tour:", error);
-        }
-      });
+    transactionTourBtn.click(async function () {
+      const csvUrl = transactionTourBtn.data('csv');
+      try {
+        const data = await parseCSV(csvUrl);
+        const tour = initializeTour();
+        configureTransactionTour(tour, data).start();
+      } catch (error) {
+        console.error("Failed to start transaction tour:", error);
+      }
+    });
 
-      bankAcTourBtn.click(async function startBankAccountTour() {
-        const csvUrl = bankAcTourBtn.data('csv');
-        try {
-          const data = await parseCSV(csvUrl);
-          const tour = initializeTour();
-          configureBankAccountTour(tour, data).start();
-        } catch (error) {
-          console.error("Failed to start bank account tour:", error);
-        }
-      });
+    bankAcTourBtn.click(async function () {
+      const csvUrl = bankAcTourBtn.data('csv');
+      try {
+        const data = await parseCSV(csvUrl);
+        const tour = initializeTour();
+        configureBankAccountTour(tour, data).start();
+      } catch (error) {
+        console.error("Failed to start bank account tour:", error);
+      }
+    });
+
+    $("#billAndSubsTourBtn").click(async function () {
+      const csvUrl = $("#billAndSubsTourBtn").data('csv');
+      try {
+        const data = await parseCSV(csvUrl);
+        const tour = initializeTour();
+        configureBillAndSubTour(tour, data).start();
+      } catch (error) {
+        console.error("Failed to start bill and subs tour:", error);
+      }
+    });
 
   })();
 

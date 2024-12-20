@@ -8923,6 +8923,7 @@ def bill_list(request):
         "today_date": today_date,
         "page": "bill_list",
         "selected_budget": user_budget,
+        "tour_api": Tour_APIs["bill_subs_page"],
     }
     return render(request, "bill/bill_list.html", context=context)
 

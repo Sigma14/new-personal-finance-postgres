@@ -12,9 +12,13 @@
                 <div class="content-header-left col-md-12 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">{% trans 'Bills & Subscriptions' %}</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">{% trans 'Bills & Subscriptions' %}</h2>
                             <a href="{% url 'budgets_walk_through' pk=selected_budget.id %}#bill-section" class="btn btn-primary float-right bill-and-subscription-btn"><i
                                 class="fa fa-edit "></i> Edit Bills & Subscriptions</a>
+                                <div class="d-none d-md-flex align-items-center justify-content-end">
+                                    <!--Button for tour-->
+                                    <div class="btn btn-primary tour-btn mr-1" id="billAndSubsTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                                </div>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a> </li>
@@ -69,8 +73,8 @@
                                         <!-- Sidebar -->
                                         <div class="col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column" id="app-calendar-sidebar">
                                             <div class="sidebar-wrapper">
-                                                <div class="card-body d-flex justify-content-center"> <a href="{% url 'bill_add' %}" class="btn btn-primary"> <i class="fa fa-plus"></i> Add Bill</a> </div>
-                                                <div class="card-body pb-0">
+                                                <div class="card-body d-flex justify-content-center "> <a href="{% url 'bill_add' %}" class="btn btn-primary Step-2"> <i class="fa fa-plus"></i> Add Bill</a> </div>
+                                                <div class="card-body pb-0 Step-4">
                                                     <h5 class="section-label mb-1"> <span class="align-middle">Filter</span> </h5>
                                                     <div class="custom-control custom-checkbox mb-1"> <input type="checkbox" class="custom-control-input select-all" id="select-all" checked /> <label class="custom-control-label" for="select-all">View All</label> </div>
                                                     <div class="calendar-events-filter">
@@ -111,8 +115,8 @@
                                         <!-- /Sidebar -->
                                         <!-- Calendar -->
                                         <div class="col position-relative">
-                                            <div class="card shadow-none border-0 mb-0 rounded-0">
-                                                <div class="card-body pb-0">
+                                            <div class="card shadow-none border-0 mb-0 rounded-0 Step-3">
+                                                <div class="card-body pb-0 Step-6">
                                                     <div id="calendar"></div>
                                                 </div>
                                             </div>
@@ -126,7 +130,7 @@
                                 <section style="height:100%;">
                                     <div class="card" style="height:100%;">
                                         <div class="card-body">
-                                            <ul class="nav nav-pills" role="tablist">
+                                            <ul class="nav nav-pills Step-5" role="tablist">
                                                 <li class="nav-item"> <a class="nav-link d-flex align-items-center active" id="calendar_bills_tab" data-toggle="tab" href="#calendar_bills_data" aria-controls="calendar_bills_data" role="tab" aria-selected="false"
                                                     title="The 'Upcoming Bills' table lists all bills that are due soon. This includes details such as the bill name, amount, and due date. It serves as a timely reminder, ensuring you're always prepared for upcoming payments and helping you avoid late fees or service disruptions."> 
                                                     <span class="d-none d-sm-block">Upcoming Bills</span> </a> 
