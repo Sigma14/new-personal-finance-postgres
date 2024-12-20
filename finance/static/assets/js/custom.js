@@ -4066,8 +4066,8 @@ $(document).ready(function () {
 
     // API call to send message
     $.ajax({
-      type: "POST",
-      url: "chats/send-message/",
+      method: "POST",
+      url: $("#sendMessageButton").data("url"),
       data: {
         message: msg,
         csrfmiddlewaretoken,

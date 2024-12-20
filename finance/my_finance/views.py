@@ -12628,6 +12628,7 @@ def send_message_to_ai(request):
     - Only Authenticated user is allowed.
     - This view handles user's chat messages and sends them to OpenAI for AI response.
     - On successful AI response, AIChat database model is used to store data.
+    - Must use openai version 1.39
     """
     try:
         # Ensure the user is authenticated
@@ -12647,14 +12648,13 @@ def send_message_to_ai(request):
                 messages=[
                     {
                         "role": "user",  # Prompt sender type
-                        "content": user_message,  # User message or prompt
+                        "content": user_message,
                     }
                 ],
                 model="gpt-3.5-turbo",  # OpenAI Language Model
             )
-            ai_res = response.choices[0].message["content"]
+            ai_res = response.choices[0].message.content
         except Exception as e:
-            print(e)
             return JsonResponse({"error": "OpenAI request limit exceeded"}, status=400)
 
         # Save the AI response to the database
@@ -12671,6 +12671,7 @@ def send_message_to_ai(request):
 
     except Exception as e:
         return JsonResponse({"error": f"Exception: {str(e)}"}, status=400)
+
 
 
 # Read data from csv
