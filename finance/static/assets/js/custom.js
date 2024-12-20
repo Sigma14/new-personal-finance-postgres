@@ -5053,7 +5053,7 @@ $(document).ready(function () {
     };
 
     function truncateTitle(title) {
-      if (title.length > 40) {
+      if (title.length > 32) {
         return title.substring(0, 32) + '...';
       } else {
         return title;
@@ -5188,7 +5188,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
         // Customize position based on step index
-        if(index==1) position = "right";
+        if (index == 1) position = "right";
         if (index == 4 || index == 5) position = "top";
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5217,7 +5217,32 @@ $(document).ready(function () {
         addTourStep(tour, stepData, position, buttons);
       });
       return tour;
-     }
+    }
+
+    function configureMortgageCalculatorTour(tour, data) {
+      data.forEach((stepData, index) => {
+        let position = 'bottom';
+
+        let buttons = [];
+        if (index === 0) {
+          // First step: Skip and Next
+          buttons.push(buttonsConfig.skip, buttonsConfig.next);
+          position = 'right';
+        } else if (index === data.length - 1) {
+          // Last step: Back and Finish
+          buttons.push(buttonsConfig.back, buttonsConfig.finish);
+          position = "top";
+        } else {
+          // Middle steps: Back and Next
+          buttons.push(buttonsConfig.back, buttonsConfig.next);
+        }
+
+        if(index===1) position = 'bottom';
+        // Customize position based on step index
+        addTourStep(tour, stepData, position, buttons);
+      });
+      return tour;
+    }
 
 
     // Attach event handler
@@ -5271,6 +5296,17 @@ $(document).ready(function () {
         const data = await parseCSV(csvUrl);
         const tour = initializeTour();
         configureDashboardTour(tour, data).start();
+      } catch (error) {
+        console.error("Failed to start bill and subs tour:", error);
+      }
+    });
+
+    $("#mortgageCalculatorTourBtn").click(async function () {
+      const csvUrl = $("#mortgageCalculatorTourBtn").data('csv');
+      try {
+        const data = await parseCSV(csvUrl);
+        const tour = initializeTour();
+        configureMortgageCalculatorTour(tour, data).start();
       } catch (error) {
         console.error("Failed to start bill and subs tour:", error);
       }

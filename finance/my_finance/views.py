@@ -9353,10 +9353,11 @@ def mortgagecalculator(request):
             "mortgage_graph_data": mortgage_graph_data,
             "mortgage_date_data": mortgage_date_data,
             "page": "mortgagecalculator_list",
+            "tour_api": Tour_APIs["mortgage_calculator_page"],
         }
         return render(request, "mortgagecalculator_add.html", context)
 
-    context = {"form": form, "page": "mortgagecalculator_list"}
+    context = {"form": form, "page": "mortgagecalculator_list",  "tour_api": Tour_APIs["mortgage_calculator_page"],}
     return render(request, "mortgagecalculator_add.html", context)
 
 
