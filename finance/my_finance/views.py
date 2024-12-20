@@ -1702,7 +1702,7 @@ def home(request):
         HttpResponse: Rendered HTML response for the home page.
     """
     # trans = translate(language='fr')
-    context = {"page": "home"}
+    context = {"page": "home", "tour_api": Tour_APIs["personal_finance_dashboard"]}
     return render(request, "home.html", context)
 
 
