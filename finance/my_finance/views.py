@@ -3637,6 +3637,7 @@ def budgets_box(request):
         "user_budgets": user_budgets_qs,
         "user_budget_form": form,
         "selected_budget": selected_budget_id,
+        "tour_api": Tour_APIs["budget_page"]
     }
     return render(request, "budget/budget_box.html", context)
 
