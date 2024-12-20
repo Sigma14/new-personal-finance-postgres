@@ -7742,6 +7742,7 @@ class GoalList(LoginRequiredMixin, ListView):
         data["goal_data"] = goal_data
         data["user_budget_qs"] = user_budget_qs
         data["selected_budget"] = self.user_budget
+        data["tour_api"] = Tour_APIs["goals_page"]
         return data
 
 
