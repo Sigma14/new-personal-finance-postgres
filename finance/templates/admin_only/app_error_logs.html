@@ -32,35 +32,48 @@
                                     <h4 class="card-title">Responsive Datatable</h4>
                                 </div>
                                 <div class="card-datatable">
-                                    <div class="row mb-2">
-                                        <div class="col-md-2 col-sm-6 m-1">
+                                    <div class="row g-2 align-items-center m-1">
+                                            <!-- Filter by Status -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
                                             <select id="filterByStatus" class="form-control select">
-                                                <option value="">Filter Data By Status</option>
-                                                <option value="">Default / All</option>
-                                                <option value="open">Open</option>
-                                                <option value="resolved">Resolved</option>
-                                                <option value="skip">Skip</option>
+                                            <option value="">Filter Data By Status</option>
+                                            <option value="">Default / All</option>
+                                            <option value="open">Open</option>
+                                            <option value="resolved">Resolved</option>
+                                            <option value="skip">Skip</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3 col-sm-6 m-1">
+
+                                        <!-- Action Selector -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
                                             <select id="actionSelector" class="form-control select">
-                                                <option value="">Change Status or Delete</option>
-                                                <option value="update_status">Change Status</option>
-                                                <option value="delete">Delete Selected</option>
+                                            <option value="">Change Status or Delete</option>
+                                            <option value="update_status">Change Status</option>
+                                            <option value="delete">Delete Selected</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3 col-sm-6 m-1 d-none" id="statusSelectorContainer">
+
+                                        <!-- Status Selector (hidden by default) -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6 d-none" id="statusSelectorContainer">
                                             <select id="statusSelector" class="form-control select">
-                                                <option value="">Select Status</option>
-                                                <option value="open">Open</option>
-                                                <option value="resolved">Resolved</option>
-                                                <option value="skip">Skip</option>
+                                            <option value="">Select Status</option>
+                                            <option value="open">Open</option>
+                                            <option value="resolved">Resolved</option>
+                                            <option value="skip">Skip</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-1 col-sm-6 m-1" id="actionButtonContainer">
-                                            <button class="btn w-100" id="handleErrorBtn" data-url="{% url 'app-error-report-action' %}"></button>
+
+                                        <!-- Button -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
+                                            <button
+                                            class="btn"
+                                            id="handleErrorBtn"
+                                            data-url="{% url 'app-error-report-action' %}"
+                                            >
+                                            </button>
                                         </div>
                                     </div>
+
                                     
                                     <table class="dt-multilingual table" id="errorLogsTable" data-api="{% url 'app-error-report' %}">
                                         <thead>

@@ -4174,6 +4174,8 @@ $(document).ready(function () {
           img.src = snapshot.toDataURL("image/png");
 
           img.onload = function () {
+            // Clear the canvas, including the background image
+            // clearCanvasAndReset();
             initCanvas(img, window.innerWidth, window.innerHeight);
             showModal();
           };
@@ -4218,16 +4220,26 @@ $(document).ready(function () {
         canvas.freeDrawingBrush.width = 2;
         canvas.freeDrawingBrush.color = "#ff0000";
       }
+
+      const backgroundImage = canvas.backgroundImage;
+      if (backgroundImage) {
+        canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
+      }
     });
 
     // Clear all drawing from canvas
     $("#clearCanvas").click(function () {
+      const backgroundImage = canvas.backgroundImage; // Save the current background image
+
+      // Remove all objects except the background image
       canvas.getObjects().forEach((obj) => {
-        if (obj !== canvas.backgroundImage) {
+        if (obj !== backgroundImage) {
           canvas.remove(obj);
         }
       });
-      canvas.renderAll();
+
+      // Reapply the background image and re-render the canvas
+      canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
     });
 
     // Transfer edited image from canvas-modal to feedback form img field
@@ -4250,6 +4262,8 @@ $(document).ready(function () {
         fileInput.files = dataTransfer.files;
 
         imageUploadNotification.removeClass("d-none");
+        // clear canvas
+        canvas.clear();
       }
     });
 
@@ -4955,7 +4969,9 @@ $(document).ready(function () {
     });
   }
   // Fetch logs every 5 seconds
-  setInterval(fetchErrorLogs, 5000);
+  if (window.location.pathname === '/en/app-error-report/' || window.location.pathname === '/app-error-report') {
+    setInterval(fetchErrorLogs, 5000);
+  }
 
   // Fetch logs on page load
   fetchErrorLogs();
@@ -5237,7 +5253,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5261,7 +5277,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5285,7 +5301,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5309,7 +5325,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5333,7 +5349,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5357,7 +5373,7 @@ $(document).ready(function () {
           buttons.push(buttonsConfig.back, buttonsConfig.next);
         }
 
-        if(index===1) position = 'bottom';
+        if (index === 1) position = 'bottom';
         // Customize position based on step index
         addTourStep(tour, stepData, position, buttons);
       });
@@ -5486,6 +5502,6 @@ $(document).ready(function () {
   })();
 
 
-
+  console.log(window.location.pathname);
 
 });
