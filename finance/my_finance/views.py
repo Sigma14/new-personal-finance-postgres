@@ -5352,6 +5352,7 @@ def compare_different_budget_box(request):
         "user_budget_2": user_bgt2,
         "grouped_data": grouped_data,
         "category_icons": CATEGORY_ICONS,
+        "tour_api": Tour_APIs["compare_budget_page"]
     }
     return render(request, "budget/compare_diff_bgt_box.html", context=context)
 
