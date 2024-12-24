@@ -5713,6 +5713,7 @@ def compare_target_budget_box(request):
         "budget_type": budget_type,
         "page": "budgets",
         "budget_dict": budget_dict,
+        "tour_api": Tour_APIs["compare_target_budget_page"]
     }
     return render(request, "budget/compare_target_box.html", context=context)
 
