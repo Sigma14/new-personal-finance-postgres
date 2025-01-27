@@ -1,8 +1,23 @@
-# DeepSource configuration file
-# Learn how to configure: https://docs.deepsource.com/docs/configuration
 version = 1
-exclude_patterns = ["venv", "node_modules", "bower_components", "out", "bin", "build", "dist"]
-test_patterns = ["**/test_*.py", "**/__tests__/**", "**/*.spec.ts", "**/*.spec.js", "**/*.test.ts", "**/*.test.js"]
+
+test_patterns = ["test.py"]
+
+exclude_patterns = [
+  "migrations/**",
+  "locale/**",
+  "packages/**",
+  "static/**/*.min.js",
+  "static/app-assets/**",
+  "static/assets/css/**",
+  "static/assets/animations/**",
+  "static/assets/scss/**",
+  "static/assets/js/app-calendars-events.js",
+  "static/assets/js/app-calendars.js",
+  "static/Images/**",
+  "templates/**",
+  "media/**",
+  "**/test.py"
+]
 
 [[analyzers]]
 name = "python"
@@ -11,19 +26,16 @@ name = "python"
   runtime_version = "3.x.x"
 
 [[analyzers]]
-name = "sql"
-
-[[analyzers]]
 name = "javascript"
 
   [analyzers.meta]
   environment = ["jquery"]
 
-[[analyzers]]
-name = "secrets"
+[[transformers]]
+name = "prettier"
 
-[[analyzers]]
-name = "docker"
+[[transformers]]
+name = "standardjs"
 
 [[transformers]]
 name = "autopep8"
