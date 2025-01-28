@@ -36,3 +36,16 @@ admin.site.register(StockHoldings)
 admin.site.register(Tag)
 admin.site.register(UserBudgets)
 admin.site.register(MyNotes)
+admin.site.register(AIChat)
+admin.site.register(Feedback)
+
+# Error Log Admin
+@admin.register(AppErrorLog)
+class ErrorLogAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'exception_type', 'code', "status", 'error_message', 'request_path', 'count')
+    search_fields = ('exception_type', 'error_message', 'request_path', 'code', 'users__username')
+    list_filter = ('exception_type', 'code', 'timestamp', 'request_path', 'status')
+    readonly_fields = ('timestamp', 'exception_type', 'error_message', 'traceback', 'request_path', 'code', 'count', 'users')
+
+    def has_add_permission(self, request):
+        return False

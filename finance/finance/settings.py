@@ -55,6 +55,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Customize Middleware
     "my_finance.auto_middleware.AutoMiddleware",
+    # Error Tracking Middleware
+    "my_finance.auto_middleware.AppErrorLogMiddleware",
 ]
 
 ROOT_URLCONF = "finance.urls"
@@ -150,3 +152,74 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+"""
+- Logging Configuration
+    - DEBUG: True
+        - All logs (DEBUG, INFO, WARNING, ERROR, CRITICAL) will appear in the terminal
+    - DEBUG: False
+        - Only WARNING, ERROR, and CRITICAL logs will appear in the terminal
+    - app_errors.log will be saved WARNING & above level logs
+"""
+
+LOG_FILE_PATH = os.path.join(BASE_DIR, "logs", "app_errors.log")
+
+# Ensure the logs directory exists only if not in debug mode
+if not DEBUG:
+    logs_dir = os.path.dirname(LOG_FILE_PATH)
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(message)s"
+        },
+        "simple": {
+            "format": "%(levelname)s %(message)s"
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        # Include the file handler only when DEBUG is False
+        **(
+            {
+                "file": {
+                    "level": "WARNING",
+                    "class": "logging.FileHandler",
+                    "filename": LOG_FILE_PATH,
+                    "formatter": "verbose",
+                }
+            }
+            if not DEBUG
+            else {}
+        ),
+    },
+    "root": {
+        "level": "DEBUG" if DEBUG else "WARNING",
+        "handlers": ["console"] if DEBUG else ["console", "file"],
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"] if DEBUG else ["console", "file"],
+            "level": "DEBUG" if DEBUG else "WARNING",
+            "propagate": False,
+        },
+        "my_finance": {
+            "handlers": ["console"] if DEBUG else ["file"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
+
+
+
+

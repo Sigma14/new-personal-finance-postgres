@@ -1,10 +1,12 @@
 # from django.db import models
+from ast import mod
 import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from djongo import models
+from django.utils.timezone import now
 
 from .constants import (
     BUDGET_ACCOUNT_TYPES,
@@ -750,3 +752,72 @@ class MyNotes(models.Model):
 
     def __str__(self):
         return str(self.title + " " + self.user.username)
+
+
+# Chat Model for chatting with chatgpt
+class AIChat(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aichat_user")
+    message = models.TextField()
+    ai_response = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.message}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+# Feedback model
+class Feedback(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="feedback_user"
+    )
+    feature = models.CharField(max_length=255)
+    issue = models.CharField(max_length=255)
+    screenshot = models.ImageField(
+        upload_to="feedback_screenshots/", null=True, blank=True
+    )
+    description = models.TextField()
+    suggestion = models.TextField()
+    importance = models.CharField(max_length=255)
+    is_reviewed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.issue}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+
+class AppErrorLog(models.Model):
+    class StatusChoices(models.TextChoices):
+        RESOLVED = "resolved", "Resolved"
+        OPEN = "open", "Open"
+        SKIP = "skip", "Skip"
+    users = models.ManyToManyField(User, blank=True, related_name="error_logs")
+    timestamp = models.DateTimeField(default=now, db_index=True)
+    exception_type = models.CharField(max_length=255, db_index=True)
+    error_message = models.TextField()
+    traceback = models.TextField()
+    request_path = models.CharField(max_length=255, blank=True, null=True)
+    count = models.PositiveIntegerField(default=1)
+    code = models.IntegerField(null=True, blank=True, db_index=True)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.OPEN,
+        db_index=True,
+    )
+
+    class Meta:
+        verbose_name = "Error Log"
+        verbose_name_plural = "Error Logs"
+        ordering = ["-timestamp"]
+    
+    def __str__(self):
+        return f"[{self.count}] {self.exception_type} ({self.code}): {self.error_message[:50]}"

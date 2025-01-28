@@ -11,19 +11,27 @@
     <div class="header-navbar-shadow"></div>
     <div class="content-wrapper">
         <div class="content-header row">
-            <div class="content-header-left col-md-9 col-12 mb-2">
+            <div class="content-header-left col-md-9 col-10 mb-2">
                 <div class="row breadcrumbs-top">
                     <div class="col-12">
-                        <h2 class="content-header-title float-left mb-0">Transactions</h2>
+                        <h2 class="content-header-title float-left mb-0 Step-1">Transactions</h2>
+
                         <div class="breadcrumb-wrapper">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
                                 </li>
                                 <li class="breadcrumb-item">Transactions
                                 </li>
+
                             </ol>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="content-header-right col-md-3 col-2 mb-2">
+                <div class="d-none d-md-flex align-items-center justify-content-end">
+                    <!--Button for tour-->
+                    <div class="btn btn-primary tour-btn" id="transactionTourBtn" data-csv="{{tour_api}}">Start Tour</div>
                 </div>
             </div>
         </div>
@@ -49,11 +57,11 @@
                                 <div class="col-sm-40 offset-sm-20">
                                     <h4>Manual Transaction Entry</h4>
                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#add_transaction_account"></i> 
-                                    <a href="{% url 'transaction_add' %}" class="btn btn-primary"><i
+                                    <a href="{% url 'transaction_add' %}" class="btn btn-primary Step-2"><i
                                         class="fa fa-plus"></i> Add Transaction in App</a> <br/><br/>
                                     <h4>Automatic Transaction Entry</h4>
                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#transaction_account"></i> 
-                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#plaid_accounts">
+                                    <button type="button" class="btn btn-success Step-3" data-toggle="modal" data-target="#plaid_accounts">
                                         Link App to Bank account via Plaid Secure Api
                                     </button>
                                 </div>
@@ -68,7 +76,7 @@
                                             <div class="col-md-2">
                                                 <div class="form-group">
                                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#uploadInfo"></i> 
-                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Upload Transaction CSV File</button>
+                                                    <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect Step-4">Upload Transaction CSV File</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -94,7 +102,7 @@
                 <div class="row match-height">
                     <div class="col-12">
                         <div class="card card-congratulation-medal">
-                            <div class="card-body">
+                            <div class="card-body Step-5">
                                 <h4 class="card-title text-center mb-25">
                                     <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#TransactionTabel"></i>                                     
                                     TRANSACTIONS LIST
@@ -116,7 +124,7 @@
                                                 <input type="text" name="end_date" class="form-control flatpickr-basic" value="{{end_date}}"  placeholder="YYYY-MM-DD" required>
                                             </div>
                                         </div>
-                                        <div class="col-md-1" >
+                                        <div class="col-md-1 Step-7" >
                                             <div class="form-group">
                                                 <button type="submit" class="btn btn-primary btn text-nowrap px-2 mt-2 waves-effect">Report</button>
                                             </div>
@@ -149,7 +157,7 @@
                                 {% endif %}
                                 </div>
                                 </div>
-                                <div class="col-md-2" >
+                                <div class="col-md-2 Step-6" >
                                 <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" file_name="my_transaction.csv" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_csv" url="{% url 'download_csv' %}">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                 <button class="btn btn-primary text-nowrap px-2 mt-2 waves-effect download_csv" pdf_title="Transaction List" file_name="my_transaction.pdf" table_heading="{{transaction_key_dumbs}}" table_length="{{transaction_key | length}}" table_id="#transactions" fun_name="download_pdf" url="{% url 'download_pdf' %}">PdF<i data-feather="download" class="avatar-icon"></i></button>
                                 <input type="hidden" id="download_graph_data" data_label="{{transaction_date_data_dumbs}}" graph_type="transaction-bar" data_value="{{debit_graph_data_dumbs}}" credit_value="{{credit_graph_data_dumbs}}">
@@ -162,7 +170,7 @@
                                                 {% for name in transaction_key %}
                                                 <th>{{name}}</th>
                                                 {% endfor %}
-                                                <th>Actions</th>
+                                                <th class="Step-8">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -293,7 +301,7 @@
                                 <div class="col-12">
                                     <div class="card">
                                         <div class="card-body">
-                                            <div id="transaction-chart"></div>
+                                            <div id="transaction-chart" class="Step-9"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -708,4 +716,7 @@
         </div>
     </div>
 </div>
+
+
+
 {% endblock content%}

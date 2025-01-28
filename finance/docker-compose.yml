@@ -6,15 +6,21 @@ services:
     command: python manage.py runserver 0.0.0.0:8072 --insecure
     ports:
       - "8072:8072"
+    env_file:
+      - ./.env
     environment:
       - DEBUG=1
       - NOSQL_ENGINE=djongo
       - NOSQL_NAME=personal_finance
       - NOSQL_HOST=mongodb
       - NOSQL_ENFORCE_SCHEMA=False
+    volumes:
+      - .:/finance  # Mounts the current directory to the container's /finance directory
+      - ./static:/finance/static  # Mounts static files directory
     depends_on:
-    - mongodb
+      - mongodb
     restart: unless-stopped
+
   mongodb:
     image: mongo
     ports:

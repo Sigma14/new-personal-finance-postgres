@@ -10,7 +10,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Mortgage Calculator</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">Mortgage Calculator</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -21,6 +21,13 @@
                                 </ol>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="mortgageCalculatorTourBtn" data-csv="{{tour_api}}">Start Tour</div>
                     </div>
                 </div>
             </div>
@@ -54,7 +61,7 @@
             </section>
             <div class="card">
                 <div class="card-body">
-                    <form class="form form-horizontal" method="post">
+                    <form class="form form-horizontal Step-2" method="post">
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-12">
@@ -106,7 +113,7 @@
                                         </div>
                                     </div>
                                     <div class="col-1" style="padding: 0px;">
-                                        <div class="input-group">
+                                        <div class="input-group Step-8">
                                             <input type="number" id="down_pay_per" class="touchspin-icon" method_name="worst_case" value="10" data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success"/>
                                                 <strong class="">%</strong>
                                         </div>
@@ -199,8 +206,8 @@
                                 </div>
                             </div>
                             <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary mr-1">Calculate</button>
-                                <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                <button type="submit" class="btn btn-primary mr-1 Step-3">Calculate</button>
+                                <button type="reset" class="btn btn-outline-secondary Step-3">Reset</button>
                             </div>
                         </div>
                     </form>
@@ -209,7 +216,7 @@
             {% if data %}
             <section>
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 Step-4">
                         <div class="card card-statistics">
                             <div class="card-header" style="padding-bottom:0px;">
                                 <div class="col-12" style="padding-left:0px;">
@@ -396,7 +403,7 @@
             <!-- Responsive Datatable -->
             <section id="responsive-datatable">
                                     <div class="row match-height">
-                                        <div class="col-12">
+                                        <div class="col-12 Step-5">
                                             <div class="card">
                                                 <div class="download_csv_form"></div>
                                                 <div class="card-header" style="padding-bottom:0px;">
@@ -414,7 +421,7 @@
                                                         </div>
                                                     </div>
                                                     </div>
-                                                    <div class="col-1">
+                                                    <div class="col-1 Step-6">
                                                         <button class="btn btn-primary download_csv" file_name="mortgage_calculation.csv" table_heading="{{mortgage_key_dumbs}}" table_length="{{mortgage_key | length}}" table_id="#mortgage" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                                     </div>
                                                 </div>
@@ -444,7 +451,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12">
+                                        <div class="col-12 Step-7">
                                             <div class="card">
                                                 <div class="card-header" style="">
                                                     <div class="col-12" style="padding-left:0px;">

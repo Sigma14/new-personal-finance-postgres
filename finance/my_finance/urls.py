@@ -5,6 +5,12 @@ from .views import *
 urlpatterns = [
     # Home url:-
     path("", home, name="home"),
+    # Right sidebar urls:-
+    path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
+    path("chats/load-messages/", load_ai_chat, name="load_ai_chats"),
+    path("documentation/", read_documentation_csv, name="documentation"),
+    path("feedback/", create_feedback, name="create-feedback"),
+    # Real estate urls
     path("real-estate-home", real_estate_home, name="real_estate_home"),
     path("create_link_token", create_link_token, name="create-link-token"),
     path("get_access_token", get_access_token, name="get-access-token"),
@@ -45,7 +51,6 @@ urlpatterns = [
     path("budget_add/", BudgetAdd.as_view(), name="budget_add"),
     path("budget_update/<int:pk>", budget_update, name="budget_update"),
     path("budget_delete/<int:pk>", BudgetDelete.as_view(), name="budget_delete"),
-    path("budget/default/", set_default_budget, name="default_budget"),
     path(
         "budgets/walk_through/<int:pk>",
         budgets_walk_through,
@@ -72,7 +77,7 @@ urlpatterns = [
         name="budgets_goals_walk_through",
     ),
     path("create_user_budget/", UserBudgetAdd.as_view(), name="create_user_budget"),
-    path('user_budget_update/<int:pk>', user_budget_update, name='update_user_budget'),
+    path("user_budget_update/<int:pk>", user_budget_update, name="update_user_budget"),
     # Template Budget urls :-
     path("template_budget_list/", template_budget_list, name="template_budget_list"),
     # path('template_budget_detail/<int:pk>', template_budget_details, name='template_budget_detail'),
@@ -309,7 +314,16 @@ urlpatterns = [
     path("download/csv", download_csv, name="download_csv"),
     path("download/rental_pdf", download_rental_pdf, name="download_rental_pdf"),
     path("process_image", process_image, name="property_checkout"),
-
     # Endpoint to add or update notes
     path("add-update/notes", add_update_notes, name="add-update-notes"),
+    path("get-notes", get_notes, name="get-notes"),
+    # Endpoint to submit error
+    path("test-middleware/", test_middleware, name="test-middleware"),
+    # Enpoint for terminal Logs
+    path("fetch-logs/", fetch_error_logs, name="fetch-error-logs"),
+    path('download-log/', download_log_file, name='download_log'),
+    # Enpoint for error logs from db
+    path("app-error-report/", ErrorLogsList.as_view(), name="app-error-report"),
+    path("app-error-report/details/<int:error_id>/", error_report_details, name="app-error-report-detail"),
+    path("app-error-report/action/", error_report_action, name="app-error-report-action"),
 ]

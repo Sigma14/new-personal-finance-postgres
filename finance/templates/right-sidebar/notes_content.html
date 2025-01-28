@@ -1,0 +1,83 @@
+<!--Create a Note-->
+<div class="h-100" id="accCreateNote">
+    <div class="card">
+        <h2 class="mb-0" id="accCreateNoteHeading">
+            <button
+                class="btn acc-custom-btn btn-outline-primary btn-block text-left"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseCreateNote"
+                aria-expanded="true"
+                aria-controls="collapse"
+            >
+                <div>
+                    <span class="float-left">Create A New Note</span>
+                    <span class="float-right acc-arrow-icon text-primary">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-caret-down-fill"
+                            viewBox="0 0 16 16"
+                        >
+                            <path
+                                d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"
+                            />
+                        </svg>
+                    </span>
+                </div>
+            </button>
+        </h2>
+
+        <div
+            id="collapseCreateNote"
+            class="collapse p-1 pb-0 mt-1 border rounded-sm"
+            aria-labelledby="accCreateNoteHeading"
+            data-parent="#accCreateNote"
+        >
+            <div class="card text-white accordion-card-body">
+                <form
+                    id="createNoteForm"
+                    action="{% url 'add-update-notes' %}"
+                    method="post"
+                    novalidate
+                >
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter your note's title..."
+                            name="title"
+                            required
+                        />
+                        <div class="invalid-feedback">
+                            Please provide a title.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter note description"
+                            name="notes"
+                            required
+                        ></textarea>
+                        <div class="invalid-feedback">
+                            Please provide a description.
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="h3 text-center mb-2">Your Notes</h3>
+
+<div class="" id="notesContainer" data-url="{% url 'get-notes' %}">
+
+</div>
+

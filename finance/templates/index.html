@@ -31,6 +31,9 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/wizard/bs-stepper.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/custom/style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/shepherd.min.css' %}">
         <!-- END: Vendor CSS-->
         <!-- Data Table-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/datatables.min.css' %}"/>
@@ -47,6 +50,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/core/menu/menu-types/vertical-menu.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/charts/chart-apex.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-toastr.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-tour.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-ecommerce.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/pickers/form-flat-pickr.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/pickers/form-pickadate.css' %}">
@@ -59,11 +63,11 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-number-input.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/katex.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/monokai-sublime.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/editors/quill/quill.snow.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/form-quill-editor.css' %}">
         <!-- END: Page CSS-->
+         <!--HTML2Canvs-->
+        <script src="{% static 'assets/js/html2canvas.min.js' %}"></script>
+        <!--Fabric JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.js"></script>
         <!-- BEGIN: Custom CSS-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
@@ -112,15 +116,13 @@
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'transaction_list' %} active {% endif %}"  href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'real_estate_home' %} active {% endif %}"   href="{% url 'real_estate_home'%}" data-placement="top">Real Estate</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}"  href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'app-error-report' %} active {% endif %}"  href="{% url 'app-error-report' %}" data-placement="top">Admin Report</a></li>
+                    {% endif %}
                 </ul>
                 <ul class="nav navbar-nav align-items-center ml-auto">
                     <li class="nav-item d-none d-lg-block"><a class="nav-link nav-link-style"><i class="ficon" data-feather="sun"></i></a></li>
                     {% if user.is_authenticated %}
-                    <li class="nav-item d-none d-lg-block">
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#new-task-modal" data-placement="top" title="Add Notes">
-                        <i class="ficon" data-feather="file-text"></i>
-                        </a>
-                    </li>
                     <li class="nav-item dropdown dropdown-user">
                         <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="javascript:void(0);" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="user-nav d-sm-flex d-none"><span class="user-name font-weight-bolder">Hi,</span><span class="user-status">{{user.first_name}}</span></div>
@@ -138,90 +140,6 @@
                 </ul>
             </div>
         </nav>
-        <!-- ADD NOTES Right Sidebar starts -->
-        <div class="modal modal-slide-in sidebar-todo-modal fade" id="new-task-modal">
-            <div class="modal-dialog sidebar-lg">
-                <div class="modal-content p-0">
-                    <form>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
-                        <div class="modal-header align-items-center mb-1">
-                            <h5 class="modal-title">{% trans 'NOTES' %}</h5>
-                        </div>
-                        <div class="modal-body flex-grow-1 pb-sm-0 pb-3">
-                            <div class="action-tags">
-                                <ul class="nav nav-pills">
-                                    {% if note_title %}
-                                    <li class="nav-item">
-                                        <a class="nav-link active" id="all_notes_tab" data-toggle="pill" href="#all_notes_data" aria-expanded="false">
-                                        {% trans 'My Notes' %}
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="new_notes_tab" data-toggle="pill" href="#new_notes_data" aria-expanded="false">
-                                        {% trans 'New Notes' %}
-                                        </a>
-                                    </li>
-                                    {% else %}
-                                    <li class="nav-item">
-                                        <a class="nav-link initial_notes" id="all_notes_tab" data-toggle="pill" href="#all_notes_data" aria-expanded="false">
-                                        {{_('My Notes')}}
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link active add_stock_note" id="new_notes_tab" data-toggle="pill" href="#new_notes_data" aria-expanded="false">
-                                        {{_('New Notes')}}
-                                        </a>
-                                    </li>
-                                    {% endif %}
-                                </ul>
-                                {% if note_title %}
-                                <div class="form-group" id="my_notes_list">
-                                    <label class="form-label">{% trans 'Notes List' %} </label>
-                                    <select class="form-control" name="select_note" id="select_notes">
-                                        {% for data in user_notes %}
-                                        <option>{{data.title}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                {% endif %}
-                                <div class="form-group" id="my_notes_list"></div>
-                                <div class="form-group">
-                                    <label class="form-label">{% trans 'Title' %}</label>
-                                    {% if note_title %}
-                                    <input type="text" id="note_title" value="{{note_title}}" class="form-control" placeholder="Title" required/>
-                                    {% else %}
-                                    <input type="text" id="note_title" class="form-control" placeholder="Title" required />
-                                    {% endif %}
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">{% trans 'Notes' %}</label>
-                                    <div id="task-desc" style="height:400px;" class="border-bottom-0" data-placeholder="Write Your Notes"></div>
-                                    <div class="d-flex justify-content-end desc-toolbar border-top-0" id="text-editor-area">
-                                        <span class="ql-formats mr-0">
-                                        <button class="ql-bold"></button>
-                                        <button class="ql-italic"></button>
-                                        <button class="ql-underline"></button>
-                                        <button class="ql-align"></button>
-                                        <button class="ql-link"></button>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="form-group my-1">
-                                    {% if note_title %}
-                                    <button type="button" url="{% url 'add-update-notes' %}" id="submit_note_btn" class="btn btn-primary add-update-user-notes">{% trans 'Update' %}</button>
-                                    <button type="button" url="{% url 'add-update-notes' %}" class="btn btn-danger delete_notes" data-dismiss="modal">{% trans 'Delete' %}</button>
-                                    {% else %}
-                                    <button type="button" url="{% url 'add-update-notes' %}" id="submit_note_btn" class="btn btn-primary add-update-user-notes">{% trans 'Add' %}</button>
-                                    <button type="button" url="{% url 'add-update-notes' %}" class="btn btn-danger delete_notes" id="initial_delete" data-dismiss="modal">{% trans 'Delete' %}</button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!--  ADD NOTES Right Sidebar ends -->
         <!-- BEGIN: Main Menu-->
         <div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
             <div class="navbar-header">
@@ -348,7 +266,8 @@
                         <ul class="menu-content">
                             <li class="{% if request.resolver_match.view_name == 'mortgagecalculator_list' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'mortgagecalculator_list' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Mortgage Calculator">Mortgage Calculator</span></a>
                             </li>
-
+                            <li class="{% if request.resolver_match.view_name == 'future_net_worth_calculator' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'future_net_worth_calculator' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Future Net Worth Calculator">Future Net Worth Calculator</span></a>
+                            </li>
                         </ul>
                     </li>
                     <li class=" nav-item  {% if request.resolver_match.view_name == 'stock_holdings' %}active{% endif %}">
@@ -374,15 +293,18 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    <li class=" nav-item">
-                        <a class="d-flex align-items-center" href="#"><i class="fa fa-lock fa-1"></i><span class="menu-title text-truncate" data-i18n="Admin Pages">Admin Pages</span></a>
-                        {% if user.is_superuser %}
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="d-flex align-items-center" href="#">
+                        <i data-feather="settings"></i>
+                        <span class="menu-title text-truncate" data-i18n="Admin Panel">Admin Panel</span>
+                        </a>
                         <ul class="menu-content">
-                            <li class="{% if request.resolver_match.view_name == 'future_net_worth_calculator' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'future_net_worth_calculator' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="Future Net Worth Calculator">Future Net Worth Calculator</span></a>
+                            <li class="{% if request.resolver_match.view_name == 'app-error-report' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'app-error-report' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="App Error Report">App Error Report</span></a>
                             </li>
                         </ul>
-                        {% endif %}
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -390,6 +312,17 @@
         <div class='my-loader'> 
             <img src="{% static 'assets/animations/loading_small.gif' %}" alt="Loading..." />
         </div>
+        <!--START: Right Sidebar Includes-->
+        {% if request.user.is_authenticated %}
+        {% include "./right-sidebar/sidebar_toggler.html" %}
+        {% include "./right-sidebar/sidebar_body.html" %}
+        {% endif %}
+        {% include "./right-sidebar/image_preview_modal.html" %}
+        {% include "./right-sidebar/edit_note_modal.html" %}
+        {% if request.user.is_staff %}
+        {% include "./admin_only/error_details_modal.html" %}
+        {% endif %}
+        <!--END: Right Sidebar Includes-->
         <!-- BEGIN: Content-->
         {% block content %}
         {% endblock content %}
@@ -424,11 +357,11 @@
         <script src="{% static 'app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/extensions/toastr.min.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/forms/form-number-input.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/jquery.dataTables.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.responsive.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/responsive.bootstrap4.js' %}"></script>
-        <script src="{% static 'app-assets/vendors/js/editors/quill/katex.min.js' %}"></script>
-        <script src="{% static 'app-assets/vendors/js/editors/quill/highlight.min.js' %}"></script>
-        <script src="{% static 'app-assets/vendors/js/editors/quill/quill.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/extensions/shepherd.min.js' %}"></script>
         <!-- END: Page Vendor JS-->
         <!-- BEGIN: Theme JS-->
         <script src="{% static '/app-assets/js/core/app-menu.js' %}"></script>
@@ -436,6 +369,8 @@
         <!-- END: Theme JS-->
         <!-- BEGIN: Page JS-->
         <script src="{% static '/assets/js/datatables.min.js' %}"></script>
+        <script src="{% static '/assets/js/papaparse.min.js' %}"></script>
+        <script src="{% static '/app-assets/js/scripts/tables/table-datatables-advanced.js' %}"></script>
         <script src="{% static '/app-assets/js/scripts/pages/app-ecommerce.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/forms/pickers/form-pickers.js' %}"></script>
         <script src="{% static 'assets/js/app-calendars-events.js' %}"></script>
@@ -447,11 +382,10 @@
         <script src="{% static 'app-assets/js/scripts/pages/app-user-edit.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-navs.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-collapse.js' %}"></script>
-        <script src="{% static 'app-assets/js/scripts/pages/app-todo.js' %}"></script>
+        <script src="{% static 'app-assets/js/scripts/extensions/ext-component-tour.js' %}"></script>
         <!-- END: Page JS-->
         <script src="{% static 'assets/js/line-graph.js' %}"></script>
         <script src="{% static 'assets/js/custom.js' %}"></script>
-        <script src="{% static 'assets/js/notes.js' %}"></script>
         <script src="{% static 'assets/js/pie_graphs.js' %}"></script>
         <script src="{% static 'assets/js/diversification_tree.js' %}"></script>
         <script src="{% static 'assets/js/loader.js' %}"></script>
@@ -491,7 +425,6 @@
         <script>CategorySpentChart({{ projection_key | safe }}, {{ return_investment_data | safe}}, "#investment-return-bar");</script>
         <script>CategorySpentChart({{ projection_key | safe }}, {{ property_expense_data | safe}}, "#expense-bar");</script>
         <script>showIndustryGraph({{industry_lables | safe}}, {{industry_data | safe}});</script>
-        <script>AddNotes({{note_desc | safe}});</script>
         <script>showStockAmount({{stocks_amount | safe}});</script>
         <script>portfolioWeights({{code_list | safe}}, {{weight1 | safe}}, {{weight2 | safe}});</script>
         <script>PortfolioValueChart( {{ candle_graph_data | safe }}, {{ candle_graph_data_id | safe }});</script>

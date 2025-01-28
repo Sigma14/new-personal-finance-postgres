@@ -14,7 +14,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Compare 2 different Budgets</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">Compare 2 different Budgets</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -27,6 +27,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="compareBudgetTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                    </div>
+                </div>
+
             </div>
             {% if no_budgets == True %}
                         <div class="col-sm-40 offset-sm-20">
@@ -60,7 +67,7 @@
 <!--                                                </div>-->
 <!--                                            </div>-->
 
-                                            <div class="col-md-3">
+                                            <div class="col-md-3 Step-2">
                                                 <div class="dropdown" style="padding-right:1rem;">
                                                     <label> Budget 1</label>
 
@@ -76,7 +83,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-3 Step-2">
                                                 <div class="dropdown" style="padding-right:1rem;">
                                                     <label> Budget 2</label>
                                                     <select class="form-control" id="budget_2"  name="user_budget2" style="width:200px;">
@@ -90,7 +97,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-3 Step-3">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
                                                     <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#CompareModel"></i> Budget Categories</label>
                                                     <select class="select2 form-control" name="budget2_name" multiple required>
@@ -104,7 +111,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-3 Step-4">
                                                 <div class="form-group select_exp_budget" style="{% if budget_type == 'Incomes' %}display:None;{% endif %}">
                                                     <label><i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#MonthSelect"></i> Select Month</label>
                                                     <select class="form-control" name="select_period" required>
@@ -352,12 +359,12 @@
                     <div class="card">
                         <div class="card-body">
                             <ul class="nav nav-pills" role="tablist">
-                                <li class="nav-item">
+                                <li class="nav-item Step-5">
                                     <a class="nav-link d-flex align-items-center active" id="expense_diff_tab" data-toggle="tab" href="#expense_diff_data" aria-controls="expense_diff_data" role="tab" aria-selected="false">
                                         <span class="d-none d-sm-block">Expense Comparison</span>
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item Step-6">
                                     <a class="nav-link d-flex align-items-center" id="income_diff_tab" data-toggle="tab" href="#income_diff_data" aria-controls="income_diff_data" role="tab" aria-selected="false">
                                         <span class="d-none d-sm-block">Income Comparison</span>
                                     </a>
@@ -396,7 +403,7 @@
                                         </div>
                                     </div>
                                     <!--END: Info card-->
-                                    <div class="row match-height">
+                                    <div class="row match-height Step-6">
                                         <div class="col-xl-6 col-md-12 col-12">
                                             <div class="card">
                                             <div class="card-body">

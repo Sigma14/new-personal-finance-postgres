@@ -50,7 +50,7 @@ def user_notes(request):
             "note_title": note_title,
             "note_desc": note_desc,
             "user_notes": user_note,
-            "today_date": str(current_date)
+            "today_date": str(current_date),
         }
         return context
 
@@ -58,8 +58,5 @@ def user_notes(request):
         note_title = False
         note_desc = ""
         print("NOTES NOT AVAILABLE")
-        context = {
-            "note_title": note_title,
-            "note_desc": note_desc
-        }
+        context = {"note_title": note_title, "note_desc": note_desc}
         return context
