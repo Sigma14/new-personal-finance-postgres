@@ -1,4 +1,36 @@
-version: "3.9"
+# version: '3.7'
+
+# services:
+#   dashboard:
+#     build: .
+#     command: python manage.py runserver 0.0.0.0:8072 --insecure
+#     ports:
+#       - "8072:8072"
+#     env_file:
+#       - ./.env
+#     environment:
+#       - DEBUG=1
+#       - NOSQL_ENGINE=djongo
+#       - NOSQL_NAME=personal_finance
+#       - NOSQL_HOST=mongodb
+#       - NOSQL_ENFORCE_SCHEMA=False
+#     volumes:
+#       - .:/finance  # Mounts the current directory to the container's /finance directory
+#       - ./static:/finance/static  # Mounts static files directory
+#     depends_on:
+#       - mongodb
+#     restart: unless-stopped
+
+#   mongodb:
+#     image: mongo
+#     ports:
+#       - 27019:27019
+#     restart: unless-stopped
+
+# volumes:
+#   postgres_data:
+
+# version: '3.7'
 
 services:
   dashboard:
@@ -7,7 +39,7 @@ services:
     ports:
       - "8072:8072"
     env_file:
-      - .env
+      - ./.env
     environment:
       - DEBUG=1
       - SQL_ENGINE=django.db.backends.postgresql
@@ -20,12 +52,11 @@ services:
       - .:/finance  # Mounts the current directory to the container's /finance directory
       - ./static:/finance/static  # Mounts static files directory
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     restart: unless-stopped
 
   postgres:
-    image: postgres:16
+    image: postgres:latest
     container_name: finance_postgres
     restart: always
     environment:
@@ -36,11 +67,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U your_user -d personal_finance"]
-      interval: 10s
-      retries: 5
-      timeout: 5s
 
 volumes:
   postgres_data:

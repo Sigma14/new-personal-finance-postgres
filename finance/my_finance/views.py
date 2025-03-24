@@ -1,3 +1,4 @@
+import os
 import ast
 import calendar
 import csv
@@ -7,6 +8,7 @@ import time
 from collections import OrderedDict
 from io import BytesIO
 from itertools import chain
+from openai import OpenAI
 
 import pandas as pd
 import plaid
@@ -15,20 +17,29 @@ import requests
 from dateutil import relativedelta
 from dateutil.relativedelta import relativedelta
 from decouple import config
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.utils.timezone import localtime
 from django.http import (
     HttpResponse,
     HttpResponseNotAllowed,
     HttpResponseRedirect,
     JsonResponse,
+    FileResponse,
+    HttpResponseNotFound
 )
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST
+from django.contrib.staticfiles import finders
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.generic import (
     CreateView,
@@ -139,10 +150,14 @@ from .models import (
     ClosingCostDetails,
     Expenses,
     ExpensesDetails,
+    Feedback,
+    AIChat,
+    AppErrorLog,
     Goal,
     Income,
     IncomeDetail,
     MortgageDetails,
+    MyNotes,
     PlaidItem,
     Property,
     PropertyExpense,
@@ -179,6 +194,20 @@ from .sample_constants import (
     SAMPLE_RETURN_ON_INVESTMENT_DATA,
 )
 
+
+import bleach
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from axes.decorators import axes_dispatch
+from axes.utils import reset_request
+from django.urls import reverse
+from rest_framework_simplejwt.tokens import RefreshToken
+import requests
+import logging
+import json
+
 # Move these dictionaries and lists to constant.py
 today_date = datetime.date.today()
 
@@ -191,6 +220,13 @@ configuration = plaid.Configuration(
 )
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
+
+# open ai
+open_ai_api_key = config("OPEN_AI_KEY")
+ai_client = OpenAI(api_key=open_ai_api_key)
+
+# CSV File links
+Tour_APIs = json.loads(config("TOUR_API"))
 
 
 wordpress_domain = config("WORDPRESS_DOMAIN")
@@ -1358,7 +1394,9 @@ def multi_acc_chart(
     # Initialize balance for dates not in amount_date_dict
     amount_constant = acc_available_balance
     for date_value in account_date_list:
-        check_date = datetime.datetime.strptime(date_value, DateFormats.YYYY_MM_DD.value).date()
+        check_date = datetime.datetime.strptime(
+            date_value, DateFormats.YYYY_MM_DD.value
+        ).date()
         if date_value in amount_date_dict:
             account_transaction_value.append(amount_date_dict[date_value])
             amount_constant = amount_date_dict[date_value]
@@ -1678,7 +1716,7 @@ def home(request):
         HttpResponse: Rendered HTML response for the home page.
     """
     # trans = translate(language='fr')
-    context = {"page": "home"}
+    context = {"page": "home", "tour_api": Tour_APIs["personal_finance_dashboard"]}
     return render(request, "home.html", context)
 
 
@@ -2363,6 +2401,7 @@ class CategoryList(LoginRequiredMixin, ListView):
         data["categories_name_dumbs"] = json.dumps(TRANSACTION_KEYS[:-1])
         data["categories_value"] = categories_value
         data["selected_budget"] = self.user_budget
+        data["tour_api"] = Tour_APIs["category_page"]
 
         return data
 
@@ -2846,128 +2885,447 @@ def subcategory_budget(request):
 #         return render(request, "login_page.html", context=context)
 
 
+# In an api_views.py file within your app
+class ProtectedResourceView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        An example view that requires JWT authentication.
+        """
+        return Response({
+            'message': 'You have access to this protected resource',
+            'user': request.user.username
+        })
+
+logger = logging.getLogger('my_finance')
+
+@axes_dispatch
 def user_login(request):
     """
-    Handles user login, including authentication via Django and JWT,
-    as well as membership verification.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: The rendered login page or a redirect to the
-        target page after successful login.
+    Handles user login, including authentication via Django and JWT from WordPress,
+    along with generating JWT tokens for the session.
     """
-    # Initialize context with page identifier
     context = {"page": "login_page"}
-
+    
     if request.method == "POST":
-        # Retrieve username and password from POST data
-        username = request.POST["register-username"]
-        user_password = request.POST["register-password"]
-        check_jwt_authentication = False
-        check_user_membership = False
-
-        try:
-            # Attempt to authenticate as a superuser
-            user = authenticate(username=username, password=user_password)
-            if user.is_superuser:
-                login(request, user)
-                try:
-                    redirect_url = request.POST["redirect_url"]
-                    return redirect(redirect_url)  # Redirect to specified URL if available
-                # To-Do  Remove bare except
-                except:
-                    # If no redirect URL is provided, render the home page
-                    return render(request, "home.html", context=context)
-
-        except Exception as e:
-            # Handle exceptions during superuser check
-            print("admin check===>", e)
-            pass
-
-        # Create User JWT Token
-        token_url = f"{wordpress_domain}/wp-json/api/v1/token"
-        token_data = {"username": username, "password": user_password}
-        token_response = requests.post(token_url, json=token_data)
-        if token_response.status_code == 200:
-            token_response = token_response.json()
-            if "jwt_token" in token_response:
-                jwt_token = token_response["jwt_token"]
-                check_jwt_authentication = True
-
-        if check_jwt_authentication:
+        username = request.POST.get("register-username")
+        user_password = request.POST.get("register-password")
+        
+        # Get redirect URL from POST data, defaulting to 'home' if not provided
+        redirect_url = request.POST.get("redirect_url", "")
+        
+        # If redirect_url is empty or invalid, use 'home' as a default
+        if not redirect_url:
+            redirect_url = "home"
+        
+        # Step 1: Try Django authentication first
+        user = authenticate(request=request, username=username, password=user_password)
+        
+        # For superusers, proceed with standard Django login
+        if user and user.is_superuser:
+            login(request, user)
+            reset_request(request)  # Reset Axes counters on successful login
+            return redirect(redirect_url)
+        
+        # Step 2: If Django authentication fails for non-superusers, try WordPress JWT
+        if not user:
             try:
-                # Get user info
+                # Handle JWT authentication from WordPress
+                token_url = f"{wordpress_domain}/wp-json/api/v1/token"
+                token_data = {"username": username, "password": user_password}
+                
+                token_response = requests.post(token_url, json=token_data, timeout=10)
+                token_response.raise_for_status()
+                token_data = token_response.json()
+                
+                if "jwt_token" not in token_data:
+                    # Authentication failed - log this failure
+                    context["login_error"] = "Invalid credentials"
+                    return render(request, "login_page.html", context=context)
+                
+                jwt_token = token_data["jwt_token"]
+                
+                # Step 3: Membership verification
                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
                 headers = {"Authorization": f"Bearer {jwt_token}"}
-                user_info_response = requests.get(user_info_url, headers=headers)
+                user_info_response = requests.get(user_info_url, headers=headers, timeout=10)
                 user_info = user_info_response.json()
+                
+                if 'id' not in user_info:
+                    # Failed to get user info
+                    context["login_error"] = "Failed to retrieve user information"
+                    return render(request, "login_page.html", context=context)
+                
                 user_id = user_info["id"]
-                print("user_info===============>", user_info)
-
-                # get user plan
+                
+                # Check membership plan
                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
-                plan_response = requests.get(plan_url).json()["response"]
-                user_plan_id = list(plan_response.keys())[0]
-                print("user_plan_id=========>", user_plan_id)
-
-                # Verify User Membership
+                plan_response = requests.get(plan_url, timeout=10).json()
+                
+                if "response" not in plan_response or not plan_response["response"]:
+                    context["login_error"] = "No membership plan found"
+                    return render(request, "login_page.html", context=context)
+                
+                user_plan_id = list(plan_response["response"].keys())[0]
+                
+                # Verify membership level
                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
-                verify_user_response = requests.get(verify_user_url)
-                if verify_user_response.status_code == 200:
-                    verify_user_data = verify_user_response.json()
-                    if verify_user_data["response"] == 1:
-                        check_user_membership = True
-            except Exception as e:
-                # Handle exceptions during membership verification
-                print("user membership exception===========>", e)
-                check_user_membership = False
-
-        if not check_user_membership:
-            context["login_error"] = "you don't have membership subscription"
-            return render(request, "login_page.html", context=context)
-
-        if check_jwt_authentication and check_user_membership:
-            try:
-                # Attempt to get the user from the database and update the password
-                user = User.objects.get(id=user_id)
-                user.set_password(user_password)
-                user.save()
-            # To-Do  Remove bare except / get or create
-            except:
-                # If user doesn't exist, create a new user
-                user = User()
-                user.id = user_id
-                user.username = username
-                user.email = ""
-                user.first_name = user_info["name"]
-                user.is_active = True
-                user.set_password(user_password)
-                user.save()
-
-            # Authenticate and log in the user
-            user = authenticate(username=username, password=user_password)
-            if user:
-                login(request, user)
+                verify_user_response = requests.get(verify_user_url, timeout=10)
+                verify_user_response.raise_for_status()
+                
+                verify_user_data = verify_user_response.json()
+                if verify_user_data.get("response") != 1:
+                    context["login_error"] = "You don't have a valid membership subscription"
+                    return render(request, "login_page.html", context=context)
+                
+                # Create or update user in Django
                 try:
-                    redirect_url = request.POST["redirect_url"]
-                    return redirect(redirect_url)  # Redirect to specified URL if available
-                # To-Do  Remove bare except
-                except:
-                    return render(request, "home.html", context=context)
+                    django_user = User.objects.get(id=user_id)
+                    django_user.set_password(user_password)  # Update password if needed
+                    django_user.save()
+                except User.DoesNotExist:
+                    django_user = User(
+                        id=user_id,
+                        username=username,
+                        email=user_info.get("email", ""),
+                        first_name=user_info.get("name", "")
+                    )
+                    django_user.set_password(user_password)
+                    django_user.save()
+                
+                # If we get here, authentication was successful, so reset Axes counters
+                reset_request(request)
+                
+                # Log the user in
+                login(request, django_user)
+                
+                # Generate JWT tokens for the session
+                refresh = RefreshToken.for_user(django_user)
+                access_token = str(refresh.access_token)
+                refresh_token = str(refresh)
+                
+                # Store tokens in secure, HTTP-only cookies
+                response = redirect(redirect_url)
+                
+                # Set access and refresh tokens as HTTP-only cookies
+                response.set_cookie(
+                    'access_token',
+                    access_token,
+                    max_age=15 * 60,  # 15 minutes in seconds
+                    httponly=True,
+                    secure=True,
+                    samesite='Strict'
+                )
+                
+                response.set_cookie(
+                    'refresh_token',
+                    refresh_token,
+                    max_age=24 * 60 * 60,  # 1 day in seconds
+                    httponly=True,
+                    secure=True,
+                    samesite='Strict'
+                )
+                
+                # Redirect to the target URL
+                return response
+                
+            except requests.exceptions.RequestException as e:
+                logger.error(f"API request error during login: {str(e)}")
+                context["login_error"] = f"Error during login: {str(e)}"
+                return render(request, "login_page.html", context=context)
+            except Exception as e:
+                logger.error(f"Unexpected error during login: {str(e)}")
+                context["login_error"] = f"An unexpected error occurred: {str(e)}"
+                return render(request, "login_page.html", context=context)
+        
+        # If Django authentication was successful for non-superusers
+        login(request, user)
+        
+        # Reset Axes counters
+        reset_request(request)
+        
+        # Generate JWT tokens for the session
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        
+        # Set cookies with the tokens
+        response = redirect(redirect_url)
+        response.set_cookie(
+            'access_token',
+            access_token,
+            max_age=15 * 60,  # 15 minutes
+            httponly=True,
+            secure=True,
+            samesite='Strict'
+        )
+        response.set_cookie(
+            'refresh_token',
+            refresh_token,
+            max_age=24 * 60 * 60,  # 1 day
+            httponly=True,
+            secure=True,
+            samesite='Strict'
+        )
+        
+        # Redirect after successful login
+        return response
+    
+    # GET request - just show the login form
+    next_url = request.GET.get("next", "")
+    context["redirect_url"] = next_url
+    return render(request, "login_page.html", context=context)
 
-        context["login_error"] = "Username and Password Incorrect"
-        return render(request, "login_page.html", context=context)
 
-    else:
-        try:
-            context["redirect_url"] = request.GET["next"]
-        except Exception as e:
-            print("Error: ", e)
-            pass
 
-        return render(request, "login_page.html")
+# from axes.decorators import axes_dispatch
+# from axes.utils import reset_request
+# from django.contrib.auth import authenticate, login
+# from django.contrib.auth.models import User
+# from django.shortcuts import render, redirect
+# from django.urls import reverse
+# import requests
+# import logging
+
+# logger = logging.getLogger('my_finance')
+
+# @axes_dispatch
+# def user_login(request):
+#     """
+#     Handles user login, including authentication via Django and JWT,
+#     as well as membership verification.
+#     """
+#     context = {"page": "login_page"}
+#     if request.method == "POST":
+#         username = request.POST.get("register-username")
+#         user_password = request.POST.get("register-password")
+        
+#         # Get redirect URL from POST data, defaulting to 'home' if not provided
+#         redirect_url = request.POST.get("redirect_url", "")
+        
+#         # If redirect_url is empty or invalid, use 'home' as a default
+#         if not redirect_url:
+#             redirect_url = "home"
+        
+#         # Step 1: First try Django authentication
+#         user = authenticate(request=request, username=username, password=user_password)
+        
+#         # For superusers, proceed with standard Django login
+#         if user and user.is_superuser:
+#             login(request, user)
+#             return redirect(redirect_url)
+        
+#         # If Django authentication fails for non-superusers, try WordPress JWT
+#         if not user:
+#             try:
+#                 # Handle JWT authentication from WordPress
+#                 token_url = f"{wordpress_domain}/wp-json/api/v1/token"
+#                 token_data = {"username": username, "password": user_password}
+                
+#                 token_response = requests.post(token_url, json=token_data, timeout=10)
+#                 token_response.raise_for_status()
+#                 token_data = token_response.json()
+                
+#                 if "jwt_token" not in token_data:
+#                     # Authentication failed - this will be logged by Axes
+#                     context["login_error"] = "Invalid credentials"
+#                     return render(request, "login_page.html", context=context)
+                
+#                 jwt_token = token_data["jwt_token"]
+                
+#                 # Membership verification
+#                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
+#                 headers = {"Authorization": f"Bearer {jwt_token}"}
+#                 user_info_response = requests.get(user_info_url, headers=headers, timeout=10)
+#                 user_info = user_info_response.json()
+                
+#                 if 'id' not in user_info:
+#                     # Failed to get user info
+#                     context["login_error"] = "Failed to retrieve user information"
+#                     return render(request, "login_page.html", context=context)
+                
+#                 user_id = user_info["id"]
+                
+#                 # Check membership plan
+#                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
+#                 plan_response = requests.get(plan_url, timeout=10).json()
+                
+#                 if "response" not in plan_response or not plan_response["response"]:
+#                     context["login_error"] = "No membership plan found"
+#                     return render(request, "login_page.html", context=context)
+                
+#                 user_plan_id = list(plan_response["response"].keys())[0]
+                
+#                 # Verify membership
+#                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
+#                 verify_user_response = requests.get(verify_user_url, timeout=10)
+#                 verify_user_response.raise_for_status()
+                
+#                 verify_user_data = verify_user_response.json()
+#                 if verify_user_data.get("response") != 1:
+#                     context["login_error"] = "You don't have a valid membership subscription"
+#                     return render(request, "login_page.html", context=context)
+                
+#                 # Create or update user in Django
+#                 try:
+#                     django_user = User.objects.get(id=user_id)
+#                     django_user.set_password(user_password)
+#                     django_user.save()
+#                 except User.DoesNotExist:
+#                     django_user = User(
+#                         id=user_id,
+#                         username=username,
+#                         email=user_info.get("email", ""),
+#                         first_name=user_info.get("name", "")
+#                     )
+#                     django_user.set_password(user_password)
+#                     django_user.save()
+                
+#                 # If we get here, authentication was successful, so reset Axes counters
+#                 reset_request(request)
+                
+#                 # Log the user in
+#                 login(request, django_user)
+                
+#                 # Use reverse to check URL validity before redirecting
+#                 try:
+#                     # Check if it's a named URL pattern
+#                     reverse(redirect_url)
+#                     return redirect(redirect_url)
+#                 except:
+#                     # If it's not a named URL pattern, check if it's a direct URL path
+#                     if redirect_url.startswith('/'):
+#                         return redirect(redirect_url)
+#                     else:
+#                         # Fall back to the home page
+#                         return redirect('home')
+                
+#             except requests.exceptions.RequestException as e:
+#                 logger.error(f"API request error during login: {str(e)}")
+#                 context["login_error"] = f"Error during login: {str(e)}"
+#                 return render(request, "login_page.html", context=context)
+#             except Exception as e:
+#                 logger.error(f"Unexpected error during login: {str(e)}")
+#                 context["login_error"] = f"An unexpected error occurred: {str(e)}"
+#                 return render(request, "login_page.html", context=context)
+        
+#         # If we get here, Django authentication was successful
+#         login(request, user)
+        
+#         # Use reverse to check URL validity before redirecting
+#         try:
+#             # Check if it's a named URL pattern
+#             reverse(redirect_url)
+#             return redirect(redirect_url)
+#         except:
+#             # If it's not a named URL pattern, check if it's a direct URL path
+#             if redirect_url.startswith('/'):
+#                 return redirect(redirect_url)
+#             else:
+#                 # Fall back to the home page
+#                 return redirect('home')
+    
+#     # GET request - just show the login form
+#     next_url = request.GET.get("next", "")
+#     context["redirect_url"] = next_url
+#     return render(request, "login_page.html", context=context)
+
+
+# from axes.decorators import axes_dispatch
+# from axes.models import AccessAttempt
+# from django.contrib.auth import authenticate, login
+# from django.shortcuts import render, redirect
+# import requests
+
+# @axes_dispatch
+# def user_login(request):
+#     """
+#     Handles user login, including authentication via Django and JWT,
+#     as well as membership verification.
+#     """
+#     context = {"page": "login_page"}
+
+#     if request.method == "POST":
+#         username = request.POST.get("register-username")
+#         user_password = request.POST.get("register-password")
+#         check_jwt_authentication = False
+#         check_user_membership = False
+
+#         try:
+#             # Authenticate the user and pass the request object to authenticate
+#             user = authenticate(request=request, username=username, password=user_password)
+#             if user:
+#                 if user.is_superuser:
+#                     login(request, user)
+#                     redirect_url = request.POST.get("redirect_url")
+#                     return redirect(redirect_url if redirect_url else "home")
+#             else:
+#                 context["login_error"] = "Invalid credentials"
+#                 return render(request, "login_page.html", context=context)
+#         except Exception as e:
+#             context["login_error"] = f"Authentication error: {e}"
+#             return render(request, "login_page.html", context=context)
+
+#         # Handle JWT authentication from WordPress
+#         token_url = f"{wordpress_domain}/wp-json/api/v1/token"
+#         token_data = {"username": username, "password": user_password}
+#         try:
+#             token_response = requests.post(token_url, json=token_data)
+#             token_response.raise_for_status()  # Raises HTTPError for bad responses
+#             token_data = token_response.json()
+#             if "jwt_token" in token_data:
+#                 jwt_token = token_data["jwt_token"]
+#                 check_jwt_authentication = True
+#         except requests.exceptions.RequestException as e:
+#             context["login_error"] = f"Error while fetching token: {e}"
+#             return render(request, "login_page.html", context=context)
+
+#         # Membership verification
+#         if check_jwt_authentication:
+#             try:
+#                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
+#                 headers = {"Authorization": f"Bearer {jwt_token}"}
+#                 user_info_response = requests.get(user_info_url, headers=headers)
+#                 user_info = user_info_response.json()
+#                 user_id = user_info["id"]
+
+#                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
+#                 plan_response = requests.get(plan_url).json()["response"]
+#                 user_plan_id = list(plan_response.keys())[0]
+
+#                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
+#                 verify_user_response = requests.get(verify_user_url)
+#                 if verify_user_response.status_code == 200:
+#                     verify_user_data = verify_user_response.json()
+#                     if verify_user_data["response"] == 1:
+#                         check_user_membership = True
+#             except requests.exceptions.RequestException as e:
+#                 context["login_error"] = f"Error during membership verification: {e}"
+#                 return render(request, "login_page.html", context=context)
+
+#         if not check_user_membership:
+#             context["login_error"] = "You don't have a membership subscription."
+#             return render(request, "login_page.html", context=context)
+
+#         if check_jwt_authentication and check_user_membership:
+#             try:
+#                 user = User.objects.get(id=user_id)
+#                 user.set_password(user_password)
+#                 user.save()
+#             except User.DoesNotExist:
+#                 user = User(id=user_id, username=username, email="", first_name=user_info["name"])
+#                 user.set_password(user_password)
+#                 user.save()
+
+#             login(request, user)
+#             redirect_url = request.POST.get("redirect_url")
+#             return redirect(redirect_url if redirect_url else "home")
+
+#     else:
+#         context["redirect_url"] = request.GET.get("next", "")
+#         return render(request, "login_page.html", context=context)
+
 
 
 @login_required(login_url="/login")
@@ -3591,6 +3949,10 @@ def budgets_box(request):
     """
     user_name = request.user
 
+    selected_budget_id = request.session.get("default_budget_id", None)
+    if selected_budget_id:
+        selected_budget_id = int(selected_budget_id)
+
     # Fetch the existing user budgets
     user_budgets_qs = UserBudgets.objects.filter(user=user_name)
     budgets_qs = Budget.objects.filter(user=request.user)
@@ -3604,6 +3966,8 @@ def budgets_box(request):
         "budgets_list": budgets,
         "user_budgets": user_budgets_qs,
         "user_budget_form": form,
+        "selected_budget": selected_budget_id,
+        "tour_api": Tour_APIs["budget_page"]
     }
     return render(request, "budget/budget_box.html", context)
 
@@ -3653,7 +4017,9 @@ def budgets_walk_through(request, pk):
             return redirect("/budgets/current")
 
         # Process dates and budget period
-        budget_start_date = datetime.datetime.strptime(budget_start_date, DateFormats.YYYY_MM_DD.value)
+        budget_start_date = datetime.datetime.strptime(
+            budget_start_date, DateFormats.YYYY_MM_DD.value
+        )
         start_month_date, end_month_date = start_end_date(
             budget_start_date.date(), BudgetPeriods.MONTHLY.value
         )
@@ -3961,7 +4327,9 @@ def budgets_income_walk_through(request):
 
         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
         if budget_exp_amount == 0:
-            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+            return JsonResponse(
+                {"status": "false", "message": "Budget amount cannot be 0"}
+            )
 
         # check subcategory exist or not
         try:
@@ -4127,7 +4495,9 @@ def budgets_expenses_walk_through(request):
 
         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
         if budget_exp_amount == 0:
-            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+            return JsonResponse(
+                {"status": "false", "message": "Budget amount cannot be 0"}
+            )
 
         # check subcategory exist or not
         try:
@@ -4370,7 +4740,9 @@ def budgets_non_monthly_expenses_walk_through(request):
 
         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
         if budget_exp_amount == 0:
-            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+            return JsonResponse(
+                {"status": "false", "message": "Budget amount cannot be 0"}
+            )
 
         # check subcategory exist or not
         try:
@@ -4622,7 +4994,9 @@ def budgets_goals_walk_through(request):
 
         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
         if budget_exp_amount == 0:
-            return JsonResponse({"status": "false", "message": "Budget amount cannot be 0"})
+            return JsonResponse(
+                {"status": "false", "message": "Budget amount cannot be 0"}
+            )
 
         # check subcategory exist or not
         try:
@@ -5032,6 +5406,9 @@ def compare_different_budget_box(request):
     user_name = request.user
     budget_graph_currency = "$"
     budget_type = "Expenses"
+    no_budgets = True
+    # Fetch all the user budgets
+    user_budgets = UserBudgets.objects.filter(user=user_name)
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
     )
@@ -5046,6 +5423,7 @@ def compare_different_budget_box(request):
     total_budget_count = len(budgets)
     budget1_names = []
     budget2_names = []
+    list_of_months = []
     spending_amount_bgt1 = 0
     spending_amount_bgt2 = 0
     earned_amount_bgt1 = 0
@@ -5073,8 +5451,14 @@ def compare_different_budget_box(request):
             budget2_names = budgets[split_budgets_count:total_budget_count]
         else:
             list_of_months = []
+    user_bgt1 = user_bgt2 = None
+
     if request.method == "POST":
         month_name = "01-" + request.POST["select_period"]
+        user_bgt1 = request.POST.get("user_budget1")
+        user_bgt2 = request.POST.get("user_budget2")
+        if user_bgt1 and user_bgt2:
+            user_bgt1, user_bgt2 = int(user_bgt1), int(user_bgt2)
         budget1_names = request.POST.getlist("budget1_name")
         budget2_names = request.POST.getlist("budget2_name")
         date_value = datetime.datetime.strptime(
@@ -5084,12 +5468,16 @@ def compare_different_budget_box(request):
             date_value, DateFormats.MON_YYYY.value
         )
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+        user_bgt_obj1 = UserBudgets.objects.get(pk=user_bgt1)
+        user_bgt_obj2 = UserBudgets.objects.get(pk=user_bgt2)
+
     else:
         date_value = datetime.datetime.today().date()
         current_month = datetime.datetime.strftime(
             date_value, DateFormats.MON_YYYY.value
         )
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+        user_bgt_obj1 = user_bgt_obj2 = None
 
     transaction_data_dict1 = {}
     transaction_data_dict2 = {}
@@ -5106,118 +5494,160 @@ def compare_different_budget_box(request):
     expense_bgt1_names = []
     expense_bgt2_names = []
 
-    (
-        budget1_bar_value,
-        budget1_graph_value,
-        budget1_income_graph_value,
-        budget1_income_bar_value,
-        expense_bgt1_names,
-        income_bgt1_names,
-        transaction_data_dict1,
-        spending_amount_bgt1,
-        earned_amount_bgt1,
-    ) = get_cmp_diff_data(
-        budget1_names,
-        user_name,
-        start_date,
-        end_date,
-        budget1_bar_value,
-        budget1_graph_value,
-        transaction_data_dict1,
-        budget1_income_graph_value,
-        budget1_income_bar_value,
-        expense_bgt1_names,
-        income_bgt1_names,
-        spending_amount_bgt1,
-        earned_amount_bgt1,
-    )
+    if user_bgt_obj1 and user_bgt_obj2:
+        (
+            budget1_bar_value,
+            budget1_graph_value,
+            budget1_income_graph_value,
+            budget1_income_bar_value,
+            expense_bgt1_names,
+            income_bgt1_names,
+            transaction_data_dict1,
+            spending_amount_bgt1,
+            earned_amount_bgt1,
+        ) = get_cmp_diff_data(
+            budget2_names,
+            user_name,
+            start_date,
+            end_date,
+            budget1_bar_value,
+            budget1_graph_value,
+            transaction_data_dict1,
+            budget1_income_graph_value,
+            budget1_income_bar_value,
+            expense_bgt1_names,
+            income_bgt1_names,
+            spending_amount_bgt1,
+            earned_amount_bgt1,
+            user_bgt_obj1,
+        )
 
-    (
-        budget2_bar_value,
-        budget2_graph_value,
-        budget2_income_graph_value,
-        budget2_income_bar_value,
-        expense_bgt2_names,
-        income_bgt2_names,
-        transaction_data_dict2,
-        spending_amount_bgt2,
-        earned_amount_bgt2,
-    ) = get_cmp_diff_data(
-        budget2_names,
-        user_name,
-        start_date,
-        end_date,
-        budget2_bar_value,
-        budget2_graph_value,
-        transaction_data_dict2,
-        budget2_income_graph_value,
-        budget2_income_bar_value,
-        expense_bgt2_names,
-        income_bgt2_names,
-        spending_amount_bgt2,
-        earned_amount_bgt2,
-    )
+        (
+            budget2_bar_value,
+            budget2_graph_value,
+            budget2_income_graph_value,
+            budget2_income_bar_value,
+            expense_bgt2_names,
+            income_bgt2_names,
+            transaction_data_dict2,
+            spending_amount_bgt2,
+            earned_amount_bgt2,
+        ) = get_cmp_diff_data(
+            budget2_names,
+            user_name,
+            start_date,
+            end_date,
+            budget2_bar_value,
+            budget2_graph_value,
+            transaction_data_dict2,
+            budget2_income_graph_value,
+            budget2_income_bar_value,
+            expense_bgt2_names,
+            income_bgt2_names,
+            spending_amount_bgt2,
+            earned_amount_bgt2,
+            user_bgt_obj2,
+        )
 
-    # Fetch all bills and budgets
-    budget_details = Budget.objects.filter(
-        user=user_name, start_date=start_date, end_date=end_date
-    )
-    bill_details = Bill.objects.filter(
-        user=user_name, date__range=(start_date, end_date)
-    )
-    budget_dict = {}
+    else:
+        (
+            budget1_bar_value,
+            budget1_graph_value,
+            budget1_income_graph_value,
+            budget1_income_bar_value,
+            expense_bgt1_names,
+            income_bgt1_names,
+            transaction_data_dict1,
+            spending_amount_bgt1,
+            earned_amount_bgt1,
+        ) = get_cmp_diff_data(
+            budget2_names,
+            user_name,
+            start_date,
+            end_date,
+            budget1_bar_value,
+            budget1_graph_value,
+            transaction_data_dict1,
+            budget1_income_graph_value,
+            budget1_income_bar_value,
+            expense_bgt1_names,
+            income_bgt1_names,
+            spending_amount_bgt1,
+            earned_amount_bgt1,
+        )
 
-    # Update Bill and Budget Budgetted amount and Spent amount to budget_dict
-    for i in bill_details:
-        if i.label in budget1_names:
-            budget_dict.update(
+        (
+            budget2_bar_value,
+            budget2_graph_value,
+            budget2_income_graph_value,
+            budget2_income_bar_value,
+            expense_bgt2_names,
+            income_bgt2_names,
+            transaction_data_dict2,
+            spending_amount_bgt2,
+            earned_amount_bgt2,
+        ) = get_cmp_diff_data(
+            budget2_names,
+            user_name,
+            start_date,
+            end_date,
+            budget2_bar_value,
+            budget2_graph_value,
+            transaction_data_dict2,
+            budget2_income_graph_value,
+            budget2_income_bar_value,
+            expense_bgt2_names,
+            income_bgt2_names,
+            spending_amount_bgt2,
+            earned_amount_bgt2,
+        )
+
+    # Initialize a dictionary to group by category
+    grouped_data = {}
+
+    # Process transaction_data1 and group by category
+    for name, data in transaction_data_dict1.items():
+        category = data[0][2]  # Get the category
+        amount = data[0][1]  # Get the amount
+        if category not in grouped_data:
+            grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
+        grouped_data[category]["items"].append(
+            {
+                "name": name,
+                "amount1": amount,
+                "amount2": 0,  # Will fill this later with transaction_data2
+            }
+        )
+        grouped_data[category]["total1"] += amount
+
+    # Process transaction_data2 and update grouped data
+    for name, data in transaction_data_dict2.items():
+        category = data[0][2]
+        amount = data[0][1]
+        if category not in grouped_data:
+            grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
+        # Check if the item already exists in transaction_data1
+        existing_item = next(
+            (item for item in grouped_data[category]["items"] if item["name"] == name),
+            None,
+        )
+        if existing_item:
+            existing_item["amount2"] = amount
+        else:
+            grouped_data[category]["items"].append(
                 {
-                    i.label: [
-                        float(i.amount),
-                        float(i.amount) - float(i.remaining_amount),
-                        i.remaining_amount,
-                    ]
+                    "name": name,
+                    "amount1": 0,  # Not in transaction_data1
+                    "amount2": amount,
                 }
             )
-        if i.label in budget2_names:
-            budget_dict.update(
-                {
-                    i.label: [
-                        float(i.amount),
-                        float(i.amount) - float(i.remaining_amount),
-                        i.remaining_amount,
-                    ]
-                }
-            )
-
-    for i in budget_details:
-        if i.name in budget1_names:
-            budget_dict.update(
-                {
-                    i.name: [
-                        float(i.initial_amount),
-                        i.budget_spent,
-                        float(i.initial_amount) - float(i.budget_spent),
-                    ]
-                }
-            )
-        if i.name in budget2_names:
-            budget_dict.update(
-                {
-                    i.name: [
-                        float(i.initial_amount),
-                        i.budget_spent,
-                        float(i.initial_amount) - float(i.budget_spent),
-                    ]
-                }
-            )
-
+        grouped_data[category]["total2"] += amount
     context = {
+        "user_budgets": user_budgets,
         "budgets": budgets,
         "list_of_months": list_of_months,
         "budget1_names": budget1_names,
         "budget2_names": budget2_names,
-        "budget_dict": budget_dict,
         "current_month": current_month,
         "total_spent_amount_bgt1": spending_amount_bgt1,
         "total_spent_amount_bgt2": spending_amount_bgt2,
@@ -5249,8 +5679,238 @@ def compare_different_budget_box(request):
         "budget_type": budget_type,
         "page": "budgets",
         "no_budgets": no_budgets,
+        "user_budget_1": user_bgt1,
+        "user_budget_2": user_bgt2,
+        "grouped_data": grouped_data,
+        "category_icons": CATEGORY_ICONS,
+        "tour_api": Tour_APIs["compare_budget_page"]
     }
     return render(request, "budget/compare_diff_bgt_box.html", context=context)
+
+
+# def compare_different_budget_box(request):
+#     user_name = request.user
+#     budget_graph_currency = "$"
+#     budget_type = "Expenses"
+#     budgets_qs = Budget.objects.filter(user=user_name).exclude(
+#         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
+#     )
+#     bill_qs = Bill.objects.filter(user=user_name)
+#     if budgets_qs:
+#         budget_graph_currency = budgets_qs[0].currency
+#     if bill_qs:
+#         budget_graph_currency = bill_qs[0].currency
+#     budgets = list(budgets_qs.values_list("name", flat=True).distinct())
+#     bill_budgets = list(bill_qs.values_list("label", flat=True).distinct())
+#     budgets += bill_budgets
+#     total_budget_count = len(budgets)
+#     budget1_names = []
+#     budget2_names = []
+#     spending_amount_bgt1 = 0
+#     spending_amount_bgt2 = 0
+#     earned_amount_bgt1 = 0
+#     earned_amount_bgt2 = 0
+#     if budgets:
+#         earliest = Budget.objects.filter(
+#             user=user_name, start_date__isnull=False
+#         ).order_by("start_date")
+#         no_budgets = not bool(earliest)
+#         if no_budgets == False:
+#             start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+#             list_of_months = list(
+#                 OrderedDict(
+#                     (
+#                         (start + datetime.timedelta(_)).strftime(
+#                             DateFormats.MON_YYYY.value
+#                         ),
+#                         None,
+#                     )
+#                     for _ in range((end - start).days + 1)
+#                 ).keys()
+#             )
+#             split_budgets_count = int(total_budget_count / 2)
+#             budget1_names = budgets[0:split_budgets_count]
+#             budget2_names = budgets[split_budgets_count:total_budget_count]
+#         else:
+#             list_of_months = []
+#     if request.method == "POST":
+#         month_name = "01-" + request.POST["select_period"]
+#         budget1_names = request.POST.getlist("budget1_name")
+#         budget2_names = request.POST.getlist("budget2_name")
+#         date_value = datetime.datetime.strptime(
+#             month_name, DateFormats.DD_MON_YYYY.value
+#         ).date()
+#         current_month = datetime.datetime.strftime(
+#             date_value, DateFormats.MON_YYYY.value
+#         )
+#         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+#     else:
+#         date_value = datetime.datetime.today().date()
+#         current_month = datetime.datetime.strftime(
+#             date_value, DateFormats.MON_YYYY.value
+#         )
+#         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+#
+#     transaction_data_dict1 = {}
+#     transaction_data_dict2 = {}
+#     budget1_graph_value = []
+#     budget1_bar_value = [{"name": "Spent", "data": []}]
+#     budget2_graph_value = []
+#     budget2_bar_value = [{"name": "Spent", "data": []}]
+#     budget1_income_graph_value = []
+#     budget1_income_bar_value = [{"name": "Earned", "data": []}]
+#     budget2_income_graph_value = []
+#     budget2_income_bar_value = [{"name": "Earned", "data": []}]
+#     income_bgt1_names = []
+#     income_bgt2_names = []
+#     expense_bgt1_names = []
+#     expense_bgt2_names = []
+#
+#     (
+#         budget1_bar_value,
+#         budget1_graph_value,
+#         budget1_income_graph_value,
+#         budget1_income_bar_value,
+#         expense_bgt1_names,
+#         income_bgt1_names,
+#         transaction_data_dict1,
+#         spending_amount_bgt1,
+#         earned_amount_bgt1,
+#     ) = get_cmp_diff_data(
+#         budget1_names,
+#         user_name,
+#         start_date,
+#         end_date,
+#         budget1_bar_value,
+#         budget1_graph_value,
+#         transaction_data_dict1,
+#         budget1_income_graph_value,
+#         budget1_income_bar_value,
+#         expense_bgt1_names,
+#         income_bgt1_names,
+#         spending_amount_bgt1,
+#         earned_amount_bgt1,
+#     )
+#
+#     (
+#         budget2_bar_value,
+#         budget2_graph_value,
+#         budget2_income_graph_value,
+#         budget2_income_bar_value,
+#         expense_bgt2_names,
+#         income_bgt2_names,
+#         transaction_data_dict2,
+#         spending_amount_bgt2,
+#         earned_amount_bgt2,
+#     ) = get_cmp_diff_data(
+#         budget2_names,
+#         user_name,
+#         start_date,
+#         end_date,
+#         budget2_bar_value,
+#         budget2_graph_value,
+#         transaction_data_dict2,
+#         budget2_income_graph_value,
+#         budget2_income_bar_value,
+#         expense_bgt2_names,
+#         income_bgt2_names,
+#         spending_amount_bgt2,
+#         earned_amount_bgt2,
+#     )
+#
+#     # Fetch all bills and budgets
+#     budget_details = Budget.objects.filter(
+#         user=user_name, start_date=start_date, end_date=end_date
+#     )
+#     bill_details = Bill.objects.filter(
+#         user=user_name, date__range=(start_date, end_date)
+#     )
+#     budget_dict = {}
+#
+#     # Update Bill and Budget Budgetted amount and Spent amount to budget_dict
+#     for i in bill_details:
+#         if i.label in budget1_names:
+#             budget_dict.update(
+#                 {
+#                     i.label: [
+#                         float(i.amount),
+#                         float(i.amount) - float(i.remaining_amount),
+#                         i.remaining_amount,
+#                     ]
+#                 }
+#             )
+#         if i.label in budget2_names:
+#             budget_dict.update(
+#                 {
+#                     i.label: [
+#                         float(i.amount),
+#                         float(i.amount) - float(i.remaining_amount),
+#                         i.remaining_amount,
+#                     ]
+#                 }
+#             )
+#
+#     for i in budget_details:
+#         if i.name in budget1_names:
+#             budget_dict.update(
+#                 {
+#                     i.name: [
+#                         float(i.initial_amount),
+#                         i.budget_spent,
+#                         float(i.initial_amount) - float(i.budget_spent),
+#                     ]
+#                 }
+#             )
+#         if i.name in budget2_names:
+#             budget_dict.update(
+#                 {
+#                     i.name: [
+#                         float(i.initial_amount),
+#                         i.budget_spent,
+#                         float(i.initial_amount) - float(i.budget_spent),
+#                     ]
+#                 }
+#             )
+#
+#     context = {
+#         "budgets": budgets,
+#         "list_of_months": list_of_months,
+#         "budget1_names": budget1_names,
+#         "budget2_names": budget2_names,
+#         "budget_dict": budget_dict,
+#         "current_month": current_month,
+#         "total_spent_amount_bgt1": spending_amount_bgt1,
+#         "total_spent_amount_bgt2": spending_amount_bgt2,
+#         "total_earn_amount_bgt1": earned_amount_bgt1,
+#         "total_earn_amount_bgt2": earned_amount_bgt2,
+#         "transaction_data1": transaction_data_dict1,
+#         "transaction_data2": transaction_data_dict2,
+#         "budget_graph_currency": budget_graph_currency,
+#         "budget_names": expense_bgt1_names,
+#         "budget_graph_value": budget1_graph_value,
+#         "budget_graph_data": budget1_bar_value,
+#         "budget_graph_id": "#total_budget",
+#         "budget_bar_id": "#budgets-bar",
+#         "budget_names2": expense_bgt2_names,
+#         "budget_graph_value2": budget2_graph_value,
+#         "budget_graph_data2": budget2_bar_value,
+#         "budget_graph_id2": "#total_budget2",
+#         "budget_bar_id2": "#budgets-bar2",
+#         "budget_income_names": income_bgt1_names,
+#         "budget_income_graph_value": budget1_income_graph_value,
+#         "budget_income_graph_data": budget1_income_bar_value,
+#         "budget_income_graph_id": "#total_income_budget",
+#         "budget_income_bar_id": "#income-budgets-bar",
+#         "budget_income_names2": income_bgt2_names,
+#         "budget_income_graph_value2": budget2_income_graph_value,
+#         "budget_income_graph_data2": budget2_income_bar_value,
+#         "budget_income_graph_id2": "#total_income_budget2",
+#         "budget_income_bar_id2": "#income-budgets-bar2",
+#         "budget_type": budget_type,
+#         "page": "budgets",
+#         "no_budgets": no_budgets,
+#     }
+#     return render(request, "budget/compare_diff_bgt_box.html", context=context)
 
 
 @login_required(login_url="/login")
@@ -5258,6 +5918,7 @@ def compare_target_budget_box(request):
     user_name = request.user
     budget_graph_currency = "$"
     budget_type = "Expenses"
+    list_of_months = []
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
     )
@@ -5381,6 +6042,7 @@ def compare_target_budget_box(request):
         "budget_type": budget_type,
         "page": "budgets",
         "budget_dict": budget_dict,
+        "tour_api": Tour_APIs["compare_target_budget_page"]
     }
     return render(request, "budget/compare_target_box.html", context=context)
 
@@ -5412,8 +6074,34 @@ def sample_budget_box(request):
         "budget_graph_currency": "$",
         "translated_data": json.dumps(translated_data),
         "page": "budgets",
+        "tour_api": Tour_APIs["sample_budgets_page"]
     }
     return render(request, "budget/sample_budget_box.html", context=context)
+
+
+@login_required(login_url="/login")
+def set_default_budget(request):
+    """
+    Sets the default budget in the session based on user selection in POST data.
+    If 'user_budget' is 'No', the session budget is removed. Otherwise, the
+    selected budget is stored.
+
+    Args:
+        request: HttpRequest object containing POST data.
+
+    Returns:
+        HttpResponse: Redirects to the 'budgets' view.
+    """
+
+    if request.POST:
+        user_budget = request.POST.get("user_budget")
+        if user_budget != "No":
+            # Store the selected budget in the session
+            request.session["default_budget_id"] = user_budget
+        else:
+            # Delete the session
+            request.session.pop("default_budget_id", None)
+        return redirect("budgets")
 
 
 @login_required(login_url="/login")
@@ -5438,7 +6126,9 @@ def budget_details(request, pk):
     if request.method == "POST":
         start_date = request.POST["start_date"]
         end_date = request.POST["end_date"]
-        transaction_data = Transaction.objects.filter(user=user_name, budgets=budget_obj,
+        transaction_data = Transaction.objects.filter(
+            user=user_name,
+            budgets=budget_obj,
             categories=budget_obj.category,
             transaction_date__range=(start_date, end_date),
         ).order_by("transaction_date")
@@ -5575,7 +6265,9 @@ def user_budget_update(request, pk):
 
             # Check if the name is already used or not
             if UserBudgets.objects.filter(user=request.user, name=name).exists():
-                return JsonResponse({"status": "false", "message": "Name already exist"})
+                return JsonResponse(
+                    {"status": "false", "message": "Name already exist"}
+                )
 
             user_budget.name = name
             user_budget.save()
@@ -5638,7 +6330,9 @@ class BudgetAdd(LoginRequiredMixin, CreateView):
         budget_currency = form.cleaned_data["currency"]
         budget_auto = form.cleaned_data["auto_budget"]
         budget_start_date = self.request.POST["budget_date"]
-        budget_start_date = datetime.datetime.strptime(budget_start_date, DateFormats.YYYY_MM_DD.value)
+        budget_start_date = datetime.datetime.strptime(
+            budget_start_date, DateFormats.YYYY_MM_DD.value
+        )
         start_month_date, end_month_date = start_end_date(
             budget_start_date.date(), BudgetPeriods.MONTHLY.value
         )
@@ -5719,7 +6413,9 @@ def budget_update(request, pk):
         try:
             budget_period = request.POST["budget_period"]
             budget_date = request.POST["budget_date"]
-            budget_date = datetime.datetime.strptime(budget_date, DateFormats.YYYY_MM_DD.value).date()
+            budget_date = datetime.datetime.strptime(
+                budget_date, DateFormats.YYYY_MM_DD.value
+            ).date()
         # To-Do  Remove bare except
         except:
             budget_period = old_budget_period
@@ -6456,8 +7152,11 @@ def transaction_list(request):
         )
         select_filter = "All"
 
-    context = transaction_summary(transaction_data, select_filter, user_name)
-    context.update({"page": "transaction_list"})
+    context = transaction_summary(transaction_data, select_filter, user_name )
+    context.update({
+        "page": "transaction_list",
+        "tour_api": Tour_APIs["transactions"]
+    })
     return render(request, "transaction/transaction_list.html", context=context)
 
 
@@ -6470,8 +7169,12 @@ def transaction_report(request):
         start_date = request.POST["start_date"]
         end_date = request.POST["end_date"]
         tags_data = ast.literal_eval(tags_data)
-        start_date = datetime.datetime.strptime(start_date, DateFormats.YYYY_MM_DD.value).date()
-        end_date = datetime.datetime.strptime(end_date, DateFormats.YYYY_MM_DD.value).date()
+        start_date = datetime.datetime.strptime(
+            start_date, DateFormats.YYYY_MM_DD.value
+        ).date()
+        end_date = datetime.datetime.strptime(
+            end_date, DateFormats.YYYY_MM_DD.value
+        ).date()
         if tag_name != "All":
             transaction_data = Transaction.objects.filter(
                 user=user_name,
@@ -6487,8 +7190,12 @@ def transaction_report(request):
         start_date = request.GET["start_date"]
         end_date = request.GET["end_date"]
         if start_date != "" and end_date != "":
-            start_date = datetime.datetime.strptime(start_date, DateFormats.YYYY_MM_DD.value).date()
-            end_date = datetime.datetime.strptime(end_date, DateFormats.YYYY_MM_DD.value).date()
+            start_date = datetime.datetime.strptime(
+                start_date, DateFormats.YYYY_MM_DD.value
+            ).date()
+            end_date = datetime.datetime.strptime(
+                end_date, DateFormats.YYYY_MM_DD.value
+            ).date()
             transaction_data = Transaction.objects.filter(
                 user=user_name, transaction_date__range=(start_date, end_date)
             ).order_by("transaction_date")
@@ -7247,7 +7954,9 @@ def goal_obj_save(request, goal_obj, user_name, fun_name=None):
                     category=category_obj, name=sub_category_name
                 )
             else:
-                goal = Goal.objects.filter(user_budget=user_budget, label=sub_category[0])
+                goal = Goal.objects.filter(
+                    user_budget=user_budget, label=sub_category[0]
+                )
                 if goal:
                     return_data["error"] = "Name is already exist"
                     return return_data
@@ -7317,17 +8026,17 @@ class GoalList(LoginRequiredMixin, ListView):
         """
         Handles POST request
         """
-        if request.method == 'POST':
+        if request.method == "POST":
             self.object_list = self.get_queryset()
-            user_budget_id = self.request.POST.get('user_budget')
+            user_budget_id = self.request.POST.get("user_budget")
             if user_budget_id:
                 self.user_budget = UserBudgets.objects.get(
-                    user=request.user,
-                    pk=user_budget_id)
+                    user=request.user, pk=user_budget_id
+                )
 
             return self.render_to_response(self.get_context_data())
         else:
-            return HttpResponseNotAllowed(['POST'])
+            return HttpResponseNotAllowed(["POST"])
 
     def get(self, request, *args, **kwargs):
         """
@@ -7336,9 +8045,21 @@ class GoalList(LoginRequiredMixin, ListView):
 
         self.object_list = self.get_queryset()
         # self.date_value = datetime.datetime.today().date()
-        self.user_budget = UserBudgets.objects.filter(
-            user=self.request.user
-        ).first()
+
+        # Fetch the Default budget id if available, if not fetch the \
+        # first user budget
+        selected_budget_id = request.session.get("default_budget_id")
+        if selected_budget_id:
+            try:
+                self.user_budget = UserBudgets.objects.get(
+                    user=request.user, pk=int(selected_budget_id)
+                )
+            except UserBudgets.DoesNotExist:
+                self.user_budget = UserBudgets.objects.filter(user=request.user).first()
+        else:
+            self.user_budget = UserBudgets.objects.filter(
+                user=self.request.user
+            ).first()
 
         return self.render_to_response(self.get_context_data())
 
@@ -7352,8 +8073,9 @@ class GoalList(LoginRequiredMixin, ListView):
         data["fund_key"] = FUND_KEYS
         data["fund_value"] = fund_value
         data["goal_data"] = goal_data
-        data['user_budget_qs'] = user_budget_qs
-        data['selected_budget'] = self.user_budget
+        data["user_budget_qs"] = user_budget_qs
+        data["selected_budget"] = self.user_budget
+        data["tour_api"] = Tour_APIs["goals_page"]
         return data
 
 
@@ -7406,7 +8128,7 @@ def goal_add(request):
         "goal_category": sub_obj,
         "page": "goal_add",
         "category_icons": CATEGORY_ICONS,
-        "budget_qs": budget_qs
+        "budget_qs": budget_qs,
     }
 
     if error:
@@ -7438,7 +8160,7 @@ def goal_update(request, pk):
         "account_data": account_data,
         "goal_data": goal_data,
         "goal_category": SubCategory.objects.filter(category=category_obj),
-        "budget_qs": budget_qs
+        "budget_qs": budget_qs,
     }
     if error:
         context["error"] = error
@@ -7459,7 +8181,7 @@ class GoalDelete(LoginRequiredMixin, DeleteView):
 
 
 def account_box(request):
-    context = {"page": "account_box"}
+    context = {"page": "account_box", "tour_api": Tour_APIs["bank_ac_page"]}
     return render(request, "account/account_box.html", context)
 
 
@@ -8477,11 +9199,25 @@ def bill_pay(request, pk):
 @login_required(login_url="/login")
 def bill_list(request):
     user_name = request.user
+    selected_budget_id = request.session.get("default_budget_id", None)
+
     user_budget_qs = UserBudgets.objects.filter(user=request.user)
+    user_budget = None
+
+    # Fetch the user budget from POST request
     if "user_budget" in request.POST:
         user_budget_id = request.POST.get("user_budget")
         user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
-    else:
+
+    # If session data available, fetch the default budget object
+    if user_budget is None and selected_budget_id:
+        user_budget = UserBudgets.objects.get(
+            user=user_name, pk=int(selected_budget_id)
+        )
+
+    # If neither session is availabe nor the POST data, fetch \
+    # first budget object
+    if user_budget is None:
         user_budget = UserBudgets.objects.filter(user=user_name).first()
 
     bill_list_data = BillDetail.objects.filter(
@@ -8522,6 +9258,7 @@ def bill_list(request):
         "today_date": today_date,
         "page": "bill_list",
         "selected_budget": user_budget,
+        "tour_api": Tour_APIs["bill_subs_page"],
     }
     return render(request, "bill/bill_list.html", context=context)
 
@@ -8638,8 +9375,10 @@ def bill_walk_through(request):
 
         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
         if bill_exp_amount == 0:
-            return JsonResponse({"status": "false", "message": "Bill amount cannot be 0"})
-        
+            return JsonResponse(
+                {"status": "false", "message": "Bill amount cannot be 0"}
+            )
+
         # check subcategory exist or not
         try:
             sub_cat_obj = SubCategory.objects.get(
@@ -8660,7 +9399,9 @@ def bill_walk_through(request):
 
         if bill_id == "false":
             if bill_date:
-                bill_date = datetime.datetime.strptime(bill_date, DateFormats.YYYY_MM_DD.value)
+                bill_date = datetime.datetime.strptime(
+                    bill_date, DateFormats.YYYY_MM_DD.value
+                )
             else:
                 bill_date = datetime.datetime.today().date()
             bill_date, end_month_date = start_end_date(
@@ -8812,7 +9553,9 @@ def bill_update(request, pk):
                 bill_obj.save()
                 return redirect(f"/bill_detail/{pk}")
         else:
-            bill_date = datetime.datetime.strptime(str(bill_date), DateFormats.YYYY_MM_DD.value).date()
+            bill_date = datetime.datetime.strptime(
+                str(bill_date), DateFormats.YYYY_MM_DD.value
+            ).date()
             if bill_date != bill_obj.date:
                 check_bill_obj = Bill.objects.filter(
                     user=request.user, label=label, account=account_obj, date=bill_date
@@ -8944,10 +9687,11 @@ def mortgagecalculator(request):
             "mortgage_graph_data": mortgage_graph_data,
             "mortgage_date_data": mortgage_date_data,
             "page": "mortgagecalculator_list",
+            "tour_api": Tour_APIs["mortgage_calculator_page"],
         }
         return render(request, "mortgagecalculator_add.html", context)
 
-    context = {"form": form, "page": "mortgagecalculator_list"}
+    context = {"form": form, "page": "mortgagecalculator_list",  "tour_api": Tour_APIs["mortgage_calculator_page"],}
     return render(request, "mortgagecalculator_add.html", context)
 
 
@@ -12072,6 +12816,444 @@ def rental_property_sample_page(request):
     return render(request, "rental_prop_sample_page.html", context=context)
 
 
+def add_update_notes(request):
+    """
+    Handles adding, updating, and deleting user notes via AJAX POST requests.
+
+    Args:
+        request (HttpRequest): The incoming HTTP request.
+
+    Returns:
+        JsonResponse: JSON containing the operation status and updated note list.
+    """
+
+    if request.method == "POST" and request.is_ajax():
+        user = request.user
+        title = request.POST.get("title", "").strip()
+        notes = request.POST.get("notes", "").strip()
+        notes_method = request.POST.get("notes_method", "").strip()
+        select_title = request.POST.get("select_title", "").strip().title()
+
+        result = {}
+        notes_check = MyNotes.objects.filter(user=user, title=title).exists()
+
+        if notes_method == "Update":
+            if select_title == title:
+                # Update existing note with the same title
+                notes_obj = MyNotes.objects.get(user=user, title=title)
+                notes_obj.title = title
+                notes_obj.notes = notes
+                notes_obj.save()
+                result = {"status": "Updated"}
+            else:
+                # Check if a note with the new title already exists
+                if notes_check:
+                    result = {"status": "This Title Named Note Already Exists!!"}
+                else:
+                    # Update note with a different title
+                    notes_obj = MyNotes.objects.get(user=user, title=select_title)
+                    notes_obj.title = title
+                    notes_obj.notes = notes
+                    notes_obj.save()
+                    result = {"status": "Updated"}
+
+        elif notes_method == "Delete":
+            # Delete the specified note
+            notes_obj = MyNotes.objects.get(user=user, title=select_title)
+            notes_obj.delete()
+            result = {"status": "Deleted Successfully"}
+
+        elif notes_method == "Add":
+            if notes_check:
+                result = {"status": "This Title Named Note Already Exists!!"}
+            else:
+                # Add a new note
+                notes_obj = MyNotes()
+                notes_obj.user = user
+                notes_obj.title = title.title()
+                notes_obj.notes = notes
+                notes_obj.save()
+                result = {"status": "Added"}
+
+        # Retrieve and return the updated list of user notes
+        user_notes = MyNotes.objects.filter(user=user)
+        notes_list = [[data.title, data.notes] for data in user_notes]
+
+        result["user_notes"] = notes_list
+        print("Notes list", notes_list)
+        return JsonResponse(result)
+    else:
+        # Retrieve and return the updated list of user notes
+        user_notes = MyNotes.objects.filter(user=request.user)
+        notes_list = [[data.title, data.notes] for data in user_notes]
+        result = {}
+        result["user_notes"] = notes_list
+
+        return JsonResponse(result)
+
+
+# Right Sidebar Views
+@login_required
+@require_GET
+def get_notes(request):
+    try:
+        print("working get notes")
+        user = request.user
+        notes = MyNotes.objects.filter(user=user).order_by("-id")
+        data = [
+            {
+                "id": note.id,
+                "title": note.title,
+                "notes": note.notes,
+                "added_on": note.added_on,
+            }
+            for note in notes
+        ]
+        return JsonResponse({"data": data, "success": "true"})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": "Bad Request", "success": "false"})
+
+
+@login_required(login_url="/login")
+@require_GET
+def load_ai_chat(request):
+    """
+    - Only GET method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handled user's previous chats as chat history.
+    - A pagination system has added to reduce load in db.
+    - Each page includes 5 pair of messages means 5 objects from database.
+    - Works on AIChat database model.
+    """
+    user = request.user
+    page = int(request.GET.get("page", 1))
+    page_size = 5
+
+    start = (page - 1) * page_size
+    end = page * page_size
+
+    messages = AIChat.objects.filter(user=user).order_by("-id")[start:end]
+
+    messages_data = [
+        {
+            "id": message.id,
+            "ai_msg": message.ai_response,
+            "user_msg": message.message,
+            "timestamp": message.created_at,
+        }
+        for message in messages
+    ]
+
+    has_more = AIChat.objects.filter(user=user).count() > end
+
+    return JsonResponse({"messages": messages_data, "has_more": has_more})
+
+
+@login_required(login_url="/login")
+@require_POST
+def send_message_to_ai(request):
+    """
+    - Only POST method is allowed.
+    - Only Authenticated user is allowed.
+    - This view handles user's chat messages and sends them to OpenAI for AI response.
+    - On successful AI response, AIChat database model is used to store data.
+    - Must use openai version 1.39
+    """
+    try:
+        # Ensure the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "User not authenticated"}, status=401)
+
+        # Get the user message
+        user_message = request.POST.get("message", "").strip()
+
+        # Validate the user message
+        if not user_message:
+            return JsonResponse({"error": "Message is required"}, status=400)
+
+        # Send the message to OpenAI
+        try:
+            response = ai_client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",  # Prompt sender type
+                        "content": user_message,
+                    }
+                ],
+                model="gpt-3.5-turbo",  # OpenAI Language Model
+            )
+            ai_res = response.choices[0].message.content
+        except Exception as e:
+            return JsonResponse({"error": "OpenAI request limit exceeded"}, status=400)
+
+        # Save the AI response to the database
+        instance = AIChat.objects.create(
+            user=request.user, message=user_message, ai_response=ai_res
+        )
+
+        return JsonResponse(
+            {"usr_msg": instance.message, "ai_res": instance.ai_response}, status=200
+        )
+
+    except KeyError as e:
+        return JsonResponse({"error": f"KeyError: {str(e)}"}, status=400)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Exception: {str(e)}"}, status=400)
+
+
+
+# Read data from csv
+@require_GET
+def read_documentation_csv(request):
+    """
+    - Only get message allowed.
+    - This view reads a CSV file & convert the data into python dictionary.
+    - On successful conversion, it sends data as json response.
+    - CSV file should be located at "documentation/lesson.csv".
+    - On file change, have to change find() arguments.
+    """
+    try:
+        file_path = finders.find("documentation/lesson.csv")
+    except Exception:
+        return JsonResponse({"error": "File not found"}, status=404)
+
+    with open(file_path, mode="r", encoding="utf-8") as file:
+        csv_reader = csv.DictReader(file)  # Use DictReader for better structure
+        data = [row for row in csv_reader]  # Convert rows into a list of dictionaries
+
+    return JsonResponse({"data": data, "status": "success"}, safe=False)
+
+
+# Create a feedback
+@login_required(login_url="/login")
+@require_POST
+def create_feedback(request):
+    """
+    - Only POST method allowed.
+    - Only Authenticated user allowed.
+    - This view handled user feedback request data.
+    - All fields are required except screenshot.
+    - On successful creation, Feedback database model is used to store data.
+    """
+    user = request.user
+    feature = request.POST.get("feedbackFeature")
+    issue = request.POST.get("feedback_issue")
+    screenshot = request.FILES.get("screenshotData")
+    description = request.POST.get("feedbackDetails")
+    suggestion = request.POST.get("featureSuggestions")
+    importance = request.POST.get("feedback_priority")
+    try:
+        Feedback.objects.create(
+            user=user,
+            feature=feature,
+            issue=issue,
+            screenshot=screenshot,
+            description=description,
+            suggestion=suggestion,
+            importance=importance,
+        )
+    except:
+        return JsonResponse({"error": "Failed to create feedback"}, status=400)
+    return JsonResponse(
+        {"message": "Feedback created successfully", "status": "success"}, status=201
+    )
+
+@method_decorator(login_required, name='dispatch')
+class ErrorLogsList(ListView):
+    """
+    - Only staff user allowed.
+    - This view displays all the error logs.
+    - If there is no params with the url it renders the html file.
+    - If there is a datatables params with the url it returns json response of all the error logs.
+    """
+    model = AppErrorLog
+    template_name = 'admin_only/app_error_logs.html'
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.GET.get("datatables"):
+            draw = int(self.request.GET.get("draw", "1"))
+            length = int(self.request.GET.get("length", "10"))
+            start = int(self.request.GET.get("start", "0"))
+            order_column_index = int(self.request.GET.get("order[0][column]", "0"))
+            order_direction = self.request.GET.get("order[0][dir]", "asc")
+            status_filter = self.request.GET.get("status", None)
+            sv = self.request.GET.get("search[value]", None)
+            
+            # Define column mapping for ordering
+            order_columns = ["", "code", "timestamp", "exception_type", "request_path", "error_message", "count", "status", "action"]
+            order_column = order_columns[order_column_index]
+            if order_direction == "desc":
+                order_column = f"-{order_column}"
+
+
+            qs = self.get_queryset().order_by(order_column)
+            # Apply status filter if provided
+            if status_filter:
+                qs = qs.filter(status=status_filter)
+            if sv:
+                qs = qs.filter(
+                    Q(code__icontains=sv)|
+                    Q(request_path__icontains=sv)|
+                    Q(error_message__icontains=sv)|
+                    Q(exception_type__icontains=sv)
+                )
+            filtered_count = qs.count()
+            qs = qs[start:start+length]
+
+            # Serialize response data
+            data = [
+                {
+                    "id": log.id,
+                    "code": log.code,
+                    "timestamp": localtime(log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+                    "exception_type": log.exception_type,
+                    "request_path": log.request_path,
+                    "error_message": log.error_message,
+                    "status": log.status,
+                    "count": log.count,
+                } for log in qs
+            ]
+            return JsonResponse({
+                "draw": draw,
+                "recordsTotal": self.model.objects.count(),
+                "recordsFiltered": filtered_count,
+                "data": data
+            })
+        return super().render_to_response(context, **response_kwargs)
+
+@require_GET
+@staff_member_required
+def error_report_details(request, error_id):
+    """
+    - Only GET Method allowed.
+    - Only Admin user allowed.
+    - This view collect id from url and return details of the error log.
+    """
+    # Retrieve the error log or return a 404
+    error_log = get_object_or_404(AppErrorLog, id=error_id)
+    
+    # Define the fields to include in the response
+    data = {
+        "id": error_log.id,
+        "code": error_log.code,
+        "timestamp": localtime(error_log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+        "exception_type": error_log.exception_type,
+        "request_path": error_log.request_path,
+        "error_message": error_log.error_message,
+        "count": error_log.count,
+        "status": error_log.status,
+        "traceback": error_log.traceback
+    }
+    
+    return JsonResponse(data)
+
+@csrf_exempt
+@staff_member_required
+@require_POST
+def error_report_action(request):
+    """
+    - Only Admin user allowed.
+    - Received 3 data: action, ids & status.
+    - Handle update/delete based on action value.
+    - Handle delete or update status actions for AppErrorLog.
+    - Handles multiple objects/fields update & delete at once.
+    """
+    try:
+        data = json.loads(request.body)
+        action = data.get("action")
+        selected_ids = data.get("selected_ids", [])
+
+        if not selected_ids:
+            return JsonResponse({
+                "status": 400,
+                "message": "No logs selected.",
+                "success": "Error",
+            })
+
+        logs = AppErrorLog.objects.filter(id__in=selected_ids)
+
+        if action == "update_status":
+            new_status = data.get("status")
+            if new_status in [choice[0] for choice in AppErrorLog.StatusChoices.choices]:
+                logs.update(status=new_status)
+                return JsonResponse({
+                    "status": 200,
+                    "message": "Status updated successfully.",
+                    "success": "Success",
+                })
+            return JsonResponse({
+                "status": 400,
+                "message": "Invalid status.",
+                "success": "Error",
+            })
+
+        elif action == "delete":
+            logs.delete()
+            return JsonResponse({
+                "status": 200,
+                "message": "Logs deleted successfully.",
+                "success": "Success",
+            })
+
+        return JsonResponse({
+            "status": 400,
+            "message": "Invalid action.",
+            "success": "Error",
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "status": 500,
+            "message": str(e),
+            "success": "Error",
+        })
+        
+@require_GET
+@staff_member_required
+def fetch_error_logs(request):
+    """
+    - Only GET Method allowed.
+    - Only Admin user allowed.
+    - This view handles fetching latest 50 of error logs data.
+    """
+    
+    log_file_path = settings.LOG_FILE_PATH
+    
+    # Number of lines to fetch from the end of the log file
+    lines_to_fetch = 50
+    try:
+        with open(log_file_path, "r") as log_file:
+            logs = log_file.readlines()[-lines_to_fetch:]
+    except FileNotFoundError:
+        logs = ['Log file not found.']
+    except Exception as e:
+        logs = [f"Error reading log file: {e}"]
+    return JsonResponse({"logs": logs})
+
+
+@require_GET
+@staff_member_required
+def download_log_file(request):
+    """
+    Serve the log file for download.
+    Only available to admin users.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseNotFound("You are not authorized to access this file.")
+
+    log_file_path = settings.LOG_FILE_PATH
+
+    if os.path.exists(log_file_path):
+        return FileResponse(open(log_file_path, 'rb'), as_attachment=True, filename="app_errors.log")
+    else:
+        return HttpResponseNotFound("Log file not found.")
+
+def test_middleware(request):
+    raise ValueError("A forced Error to test error middleware & error log functionalities.")
+
+
 # Page Errors
 
 
@@ -12093,3 +13275,4 @@ def error_403(request, exception):
 def error_400(request, exception):
     data = {"error": "Bad Request!"}
     return render(request, "error.html", data)
+

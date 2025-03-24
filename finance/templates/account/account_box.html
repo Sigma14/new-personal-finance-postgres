@@ -14,7 +14,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Accounts | Bank accounts</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">Accounts | Bank accounts</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -26,17 +26,22 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="bankAcTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                    </div>
+                </div>
             <div class="content-body" float="left">
                 <div class="col-sm-40 offset-sm-20">
-                    <a href="{% url 'account_add' %}" class="btn btn-primary" style="margin-right: 10px;"><i class="fa fa-plus"></i> Add Account</a>
-                    <button class="btn btn-success" id="link-button"><i class="fa fa-plus" title="linked our account"></i> Link Account</button>
+                    <a href="{% url 'account_add' %}" class="btn btn-primary Step-2" style="margin-right: 10px;"><i class="fa fa-plus"></i> Add Account</a>
+                    <button class="btn btn-success Step-3" id="link-button"><i class="fa fa-plus" title="linked our account"></i> Link Account</button>
                 </div>
                 <br/>
                 <section id="stocks_grid_view" class="grid-view">
                     <div class="content-body">
                         <div class="row match-height">
-                            <div class="col-4">
+                            <div class="col-4 Step-4">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">
@@ -52,7 +57,7 @@
                                 </div>
                             </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-4 Step-5">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">
@@ -69,7 +74,7 @@
                                 </div>
                             </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-4 Step-6">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">
@@ -83,7 +88,7 @@
                                 </div>
                             </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-4 Step-7">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">
@@ -97,7 +102,7 @@
                                 </div>
                             </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-4 Step-8">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">
@@ -110,7 +115,7 @@
                                     </div>
                                 </div>
                             </div>
-                            </div><div class="col-4">
+                            </div><div class="col-4 Step-9">
                                 <div class="card ecommerce-card">
                                 <div class="card-body">
                                     <div class="item-name" style="display: flex; align-items: center;justify-content: center;">

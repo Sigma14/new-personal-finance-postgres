@@ -1,9 +1,13 @@
 # from django.db import models
+from ast import mod
+import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
-from djongo import models
+# from djongo import models
+from django.db import models
+from django.utils.timezone import now
 
 from .constants import (
     BUDGET_ACCOUNT_TYPES,
@@ -22,8 +26,8 @@ from .constants import (
 class UserBudgets(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.name)
@@ -53,14 +57,14 @@ class Property(models.Model):
     city = models.CharField(max_length=255, blank=True, null=True)
     state = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
-    unit_details = models.CharField(max_length=100**6, blank=True, null=True)
+    unit_details = models.CharField(max_length=500, blank=True, null=True)
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
     value = models.CharField(max_length=255, blank=True, null=True)
-    include_net_worth = models.BooleanField(default=False, blank=True, null=True)
+    include_net_worth = models.BooleanField(default=False)
     units_no = models.CharField(max_length=255, blank=True, null=True)
-    total_monthly_rent = models.CharField(max_length=255, blank=True, null=True)
+    total_monthly_rent = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     total_tenants = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -80,19 +84,19 @@ class PropertyRentalInfo(models.Model):
     rental_term = models.CharField(max_length=255, blank=True, null=True)
     rental_start_date = models.DateField(blank=True, null=True)
     rental_end_date = models.DateField(blank=True, null=True)
-    deposit_amount = models.CharField(max_length=255, blank=True, null=True)
+    deposit_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     deposit_due_date = models.DateField(blank=True, null=True)
     deposit_check = models.CharField(max_length=255, blank=True, null=True)
-    rent_amount = models.CharField(max_length=255, blank=True, null=True)
-    rent_due_every_month = models.CharField(max_length=255, blank=True, null=True)
+    rent_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    rent_due_every_month = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     rent_due_date = models.DateField(blank=True, null=True)
-    rental_summary = models.CharField(max_length=100**100, blank=True, null=True)
+    rental_summary = models.CharField(max_length=500, blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)
     mobile_number = models.CharField(max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(
@@ -116,15 +120,15 @@ class PropertyInvoice(models.Model):
     item_type = models.CharField(max_length=255, blank=True, null=True)
     item_description = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.CharField(max_length=255, blank=True, null=True)
-    item_amount = models.CharField(max_length=255, blank=True, null=True)
+    item_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     already_paid = models.CharField(max_length=255, blank=True, null=True)
-    balance_due = models.CharField(max_length=255, blank=True, null=True)
+    balance_due = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     invoice_due_date = models.DateField(blank=True, null=True)
     invoice_paid_date = models.DateField(blank=True, null=True)
     invoice_status = models.CharField(max_length=255, blank=True, null=True)
     record_payment = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(
@@ -154,8 +158,8 @@ class PropertyMaintenance(models.Model):
     status = models.CharField(
         max_length=10, choices=MAINTENANCE_STATUS, blank=True, null=True
     )
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(
@@ -178,9 +182,10 @@ class PropertyExpense(models.Model):
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
-    amount = models.CharField(max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+    # amount = models.DecimalField(max_length=255, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(
@@ -242,16 +247,16 @@ class TemplateBudget(models.Model):
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
-    initial_amount = models.CharField(max_length=15, blank=True, null=True)
-    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
+    initial_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
     budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
-    auto_budget = models.BooleanField(default=True, blank=True, null=True)
-    auto_pay = models.BooleanField(default=True, blank=True, null=True)
+    auto_budget = models.BooleanField(default=True)
+    auto_pay = models.BooleanField(default=True)
     budget_period = models.CharField(
         max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
     )
-    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    budget_status = models.BooleanField(default=False)
     budget_start_date = models.DateField(blank=True, null=True)
     created_at = models.DateField(blank=True, null=True)
     ended_at = models.DateField(blank=True, null=True)
@@ -277,14 +282,14 @@ class Account(models.Model):
     account_type = models.CharField(
         max_length=50, choices=BUDGET_ACCOUNT_TYPES, blank=True, null=True
     )
-    balance = models.CharField(max_length=10, blank=True, null=True)
-    available_balance = models.CharField(max_length=10, blank=True, null=True)
-    lock_amount = models.CharField(max_length=10, blank=True, null=True)
+    balance = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    available_balance = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    lock_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
     interest_rate = models.FloatField(verbose_name="Interest rate", default=0.00)
-    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
+    include_net_worth = models.BooleanField(default=True)
     liability_type = models.CharField(
         max_length=10, choices=MORTGAGE_TYPES, blank=True, null=True
     )
@@ -320,13 +325,13 @@ class BillDetail(models.Model):
         blank=True,
         null=True,
     )
-    amount = models.CharField(max_length=50)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     date = models.DateField()
     frequency = models.CharField(
         max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
     )
-    auto_bill = models.BooleanField(default=False, blank=True, null=True)
-    auto_pay = models.BooleanField(default=False, blank=True, null=True)
+    auto_bill = models.BooleanField(default=False)
+    auto_pay = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -348,8 +353,8 @@ class Bill(models.Model):
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
-    amount = models.CharField(max_length=50)
-    remaining_amount = models.CharField(max_length=50)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    remaining_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     date = models.DateField()
     bill_details = models.ForeignKey(
         BillDetail,
@@ -362,8 +367,8 @@ class Bill(models.Model):
     frequency = models.CharField(
         max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
     )
-    auto_bill = models.BooleanField(default=False, blank=True, null=True)
-    auto_pay = models.BooleanField(default=False, blank=True, null=True)
+    auto_bill = models.BooleanField(default=False)
+    auto_pay = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -393,16 +398,16 @@ class Budget(models.Model):
         blank=True,
         null=True,
     )
-    initial_amount = models.CharField(max_length=15, blank=True, null=True)
-    amount = models.CharField(max_length=15, default=0, blank=True, null=True)
-    budget_spent = models.CharField(max_length=15, default=0, blank=True, null=True)
-    budget_left = models.CharField(max_length=15, default=0, blank=True, null=True)
-    auto_budget = models.BooleanField(default=True, blank=True, null=True)
-    auto_pay = models.BooleanField(default=True, blank=True, null=True)
+    initial_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    budget_spent = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    budget_left = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    auto_budget = models.BooleanField(default=True)
+    auto_pay = models.BooleanField(default=True)
     budget_period = models.CharField(
         max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
     )
-    budget_status = models.BooleanField(default=False, blank=True, null=True)
+    budget_status = models.BooleanField(default=False)
     budget_start_date = models.DateField(blank=True, null=True)
     created_at = models.DateField(blank=True, null=True)
     ended_at = models.DateField(blank=True, null=True)
@@ -482,14 +487,14 @@ class ClosingCostDetails(models.Model):
     appraisal_fee = models.CharField(max_length=30)
     appliances = models.CharField(max_length=30)
     renovation_cost = models.CharField(max_length=30)
-    others_cost = models.CharField(max_length=10000000)
+    others_cost = models.CharField(max_length=500)
     total_investment = models.CharField(max_length=30, blank=True, null=True)
 
 
 class RevenuesDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rev_user")
     unit_1 = models.CharField(max_length=30)
-    others_revenue_cost = models.CharField(max_length=1000000000)
+    others_revenue_cost = models.CharField(max_length=500)
     total_revenue = models.CharField(max_length=30)
     rent_increase_assumption = models.CharField(max_length=30)
 
@@ -505,11 +510,11 @@ class ExpensesDetails(models.Model):
     gas = models.CharField(max_length=30)
     electricity = models.CharField(max_length=30)
     water_heater_rental = models.CharField(max_length=30)
-    other_utilities = models.CharField(max_length=1000000000)
+    other_utilities = models.CharField(max_length=500)
     management_fee = models.CharField(max_length=30)
     vacancy = models.CharField(max_length=30)
     capital_expenditure = models.CharField(max_length=30)
-    other_expenses = models.CharField(max_length=1000000000)
+    other_expenses = models.CharField(max_length=500)
     total_expenses = models.CharField(max_length=30)
     inflation_assumption = models.CharField(max_length=30)
     appreciation_assumption = models.CharField(max_length=30)
@@ -519,24 +524,24 @@ class CapexBudgetDetails(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="capex_budget_user"
     )
-    roof = models.CharField(max_length=1000000000, blank=True, null=True)
-    water_heater = models.CharField(max_length=1000000000, blank=True, null=True)
-    all_appliances = models.CharField(max_length=1000000000, blank=True, null=True)
-    bathroom_fixtures = models.CharField(max_length=1000000000, blank=True, null=True)
-    drive_way = models.CharField(max_length=1000000000, blank=True, null=True)
-    furnance = models.CharField(max_length=1000000000, blank=True, null=True)
-    air_conditioner = models.CharField(max_length=1000000000, blank=True, null=True)
-    flooring = models.CharField(max_length=1000000000, blank=True, null=True)
-    plumbing = models.CharField(max_length=1000000000, blank=True, null=True)
-    electrical = models.CharField(max_length=1000000000, blank=True, null=True)
-    windows = models.CharField(max_length=1000000000, blank=True, null=True)
-    paint = models.CharField(max_length=1000000000, blank=True, null=True)
-    kitchen = models.CharField(max_length=1000000000, blank=True, null=True)
-    structure = models.CharField(max_length=1000000000, blank=True, null=True)
-    components = models.CharField(max_length=1000000000, blank=True, null=True)
-    landscaping = models.CharField(max_length=1000000000, blank=True, null=True)
+    roof = models.CharField(max_length=500, blank=True, null=True)
+    water_heater = models.CharField(max_length=500, blank=True, null=True)
+    all_appliances = models.CharField(max_length=500, blank=True, null=True)
+    bathroom_fixtures = models.CharField(max_length=500, blank=True, null=True)
+    drive_way = models.CharField(max_length=500, blank=True, null=True)
+    furnance = models.CharField(max_length=500, blank=True, null=True)
+    air_conditioner = models.CharField(max_length=500, blank=True, null=True)
+    flooring = models.CharField(max_length=500, blank=True, null=True)
+    plumbing = models.CharField(max_length=500, blank=True, null=True)
+    electrical = models.CharField(max_length=500, blank=True, null=True)
+    windows = models.CharField(max_length=500, blank=True, null=True)
+    paint = models.CharField(max_length=500, blank=True, null=True)
+    kitchen = models.CharField(max_length=500, blank=True, null=True)
+    structure = models.CharField(max_length=500, blank=True, null=True)
+    components = models.CharField(max_length=500, blank=True, null=True)
+    landscaping = models.CharField(max_length=500, blank=True, null=True)
     other_budgets = models.CharField(
-        max_length=10000000000000000, blank=True, null=True
+        max_length=500, blank=True, null=True
     )
     total_budget_cost = models.CharField(max_length=30, blank=True, null=True)
 
@@ -570,8 +575,8 @@ class RentalPropertyModel(models.Model):
     capex_budget_details = models.ForeignKey(
         CapexBudgetDetails, on_delete=models.CASCADE, related_name="capex_budget"
     )
-    investor_details = models.CharField(max_length=1000000000, blank=True, null=True)
-    include_net_worth = models.BooleanField(default=True, blank=True, null=True)
+    investor_details = models.CharField(max_length=500, blank=True, null=True)
+    include_net_worth = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -592,14 +597,14 @@ class Transaction(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="transaction_user"
     )
-    amount = models.CharField(max_length=255)
-    remaining_amount = models.CharField(max_length=10)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    remaining_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     transaction_date = models.DateField(blank=True, null=True)
     categories = models.ForeignKey(
         SubCategory, on_delete=models.CASCADE, null=True, blank=True
     )
     split_transactions = models.CharField(max_length=255, blank=True, null=True)
-    original_amount = models.CharField(max_length=255, blank=True, null=True)
+    original_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
     payee = models.CharField(max_length=25)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -653,14 +658,14 @@ class Income(models.Model):
         blank=True,
         null=True,
     )
-    income_amount = models.CharField(max_length=50)
+    income_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     income_date = models.DateField()
-    auto_income = models.BooleanField(default=False, blank=True, null=True)
+    auto_income = models.BooleanField(default=False)
     frequency = models.CharField(
         max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
     )
-    auto_credit = models.BooleanField(default=False, blank=True, null=True)
-    primary = models.BooleanField(default=False, blank=True, null=True)
+    auto_credit = models.BooleanField(default=False)
+    primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -676,10 +681,10 @@ class IncomeDetail(models.Model):
         blank=True,
         null=True,
     )
-    income_amount = models.CharField(max_length=50)
+    income_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     income_date = models.DateField(blank=True, null=True)
     income = models.ForeignKey(Income, on_delete=models.CASCADE)
-    credited = models.BooleanField(default=False, blank=True, null=True)
+    credited = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -697,9 +702,9 @@ class Revenues(models.Model):
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
-    amount = models.CharField(max_length=20)
-    primary = models.BooleanField(default=False, blank=True, null=True)
-    non_primary = models.BooleanField(default=False, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    primary = models.BooleanField(default=False)
+    non_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -717,7 +722,7 @@ class Expenses(models.Model):
     currency = models.CharField(
         max_length=10, choices=CURRENCIES, blank=True, null=True
     )
-    amount = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -739,3 +744,82 @@ class StockHoldings(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class MyNotes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    notes = models.TextField()
+    added_on = models.DateField(default=datetime.date.today)
+
+    def __str__(self):
+        return str(self.title + " " + self.user.username)
+
+
+# Chat Model for chatting with chatgpt
+class AIChat(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aichat_user")
+    message = models.TextField()
+    ai_response = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.message}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+# Feedback model
+class Feedback(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="feedback_user"
+    )
+    feature = models.CharField(max_length=255)
+    issue = models.CharField(max_length=255)
+    screenshot = models.ImageField(
+        upload_to="feedback_screenshots/", null=True, blank=True
+    )
+    description = models.TextField()
+    suggestion = models.TextField()
+    importance = models.CharField(max_length=255)
+    is_reviewed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.issue}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+
+class AppErrorLog(models.Model):
+    class StatusChoices(models.TextChoices):
+        RESOLVED = "resolved", "Resolved"
+        OPEN = "open", "Open"
+        SKIP = "skip", "Skip"
+    users = models.ManyToManyField(User, blank=True, related_name="error_logs")
+    timestamp = models.DateTimeField(default=now, db_index=True)
+    exception_type = models.CharField(max_length=255, db_index=True)
+    error_message = models.TextField()
+    traceback = models.TextField()
+    request_path = models.CharField(max_length=255, blank=True, null=True)
+    count = models.PositiveIntegerField(default=1)
+    code = models.IntegerField(null=True, blank=True, db_index=True)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.OPEN,
+        db_index=True,
+    )
+
+    class Meta:
+        verbose_name = "Error Log"
+        verbose_name_plural = "Error Logs"
+        ordering = ["-timestamp"]
+    
+    def __str__(self):
+        return f"[{self.count}] {self.exception_type} ({self.code}): {self.error_message[:50]}"

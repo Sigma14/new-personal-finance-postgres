@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import os
 from pathlib import Path
-
+from datetime import timedelta
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 
-mongodb_host = os.environ.get("NOSQL_HOST") or "localhost"
+
+# mongodb_host = os.environ.get("NOSQL_HOST") or "localhost"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,9 +41,12 @@ INSTALLED_APPS = [
     # apps
     "my_finance",
     "mathfilters",
+    "axes",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    'rest_framework_simplejwt.token_blacklist',
+
 ]
-
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -55,6 +58,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Customize Middleware
     "my_finance.auto_middleware.AutoMiddleware",
+    # Error Tracking Middleware
+    "my_finance.auto_middleware.AppErrorLogMiddleware",
+    # JWT Cookie Middleware should be after auth middleware
+    'my_finance.middleware.JWTCookieMiddleware',
+    #DJANGO AXES MIDDLEWARE
+    "axes.middleware.AxesMiddleware", 
 ]
 
 ROOT_URLCONF = "finance.urls"
@@ -73,6 +82,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "my_finance.context_processors.user_category",
+                "my_finance.context_processors.user_notes",
             ],
         },
     },
@@ -84,16 +94,41 @@ stock_app_url = "http://vuexy.myds.me:8071"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": os.environ.get("NOSQL_ENGINE", "djongo"),
+#         "NAME": os.environ.get("NOSQL_NAME", "personal_finance"),
+#         "HOST": mongodb_host,
+#         "ENFORCE_SCHEMA": os.environ.get("NOSQL_ENFORCE_SCHEMA", True),
+#     }
+# }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('SQL_DB_NAME'),
+#         'USER': os.getenv('SQL_USER'),
+#         'PASSWORD': os.getenv('SQL_PASSWORD'),
+#         'HOST': os.getenv('SQL_HOST'),  # should be "postgres" in docker-compose
+#         'PORT': os.getenv('SQL_PORT', '5432'),
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("NOSQL_ENGINE", "djongo"),
-        "NAME": os.environ.get("NOSQL_NAME", "personal_finance"),
-        "HOST": mongodb_host,
-        "ENFORCE_SCHEMA": os.environ.get("NOSQL_ENFORCE_SCHEMA", True),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('SQL_DB_NAME'),
+        'USER': 'postgres',
+        'USER': config('SQL_USER'),
+        'PASSWORD': config('SQL_PASSWORD'),
+        'HOST': config('SQL_HOST'), 
+        'PORT': config('SQL_PORT', '5432'),
     }
 }
 
 
+TIME_ZONE = "UTC"
+# USE_TZ = True
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -118,13 +153,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+
 
 
 LOCALE_PATHS = [
@@ -149,3 +184,156 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+"""
+- Logging Configuration
+    - DEBUG: True
+        - All logs (DEBUG, INFO, WARNING, ERROR, CRITICAL) will appear in the terminal
+    - DEBUG: False
+        - Only WARNING, ERROR, and CRITICAL logs will appear in the terminal
+    - app_errors.log will be saved WARNING & above level logs
+"""
+
+LOG_FILE_PATH = os.path.join(BASE_DIR, "logs", "app_errors.log")
+
+# Ensure the logs directory exists only if not in debug mode
+if not DEBUG:
+    logs_dir = os.path.dirname(LOG_FILE_PATH)
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(message)s"
+        },
+        "simple": {
+            "format": "%(levelname)s %(message)s"
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        # Include the file handler only when DEBUG is False
+        **(
+            {
+                "file": {
+                    "level": "WARNING",
+                    "class": "logging.FileHandler",
+                    "filename": LOG_FILE_PATH,
+                    "formatter": "verbose",
+                }
+            }
+            if not DEBUG
+            else {}
+        ),
+    },
+    "root": {
+        "level": "DEBUG" if DEBUG else "WARNING",
+        "handlers": ["console"] if DEBUG else ["console", "file"],
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"] if DEBUG else ["console", "file"],
+            "level": "DEBUG" if DEBUG else "WARNING",
+            "propagate": False,
+        },
+        "my_finance": {
+            "handlers": ["console"] if DEBUG else ["file"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Keep the default auth backend
+    'axes.backends.AxesBackend',  # Use this for Axes logging
+)
+
+# DRF Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT Authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Only authenticated users
+    ],
+}
+
+
+# JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME', default=15, cast=int)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('REFRESH_TOKEN_LIFETIME', default=1, cast=int)),
+    'ROTATE_REFRESH_TOKENS': config('ROTATE_REFRESH_TOKENS', default=True, cast=bool),
+    'BLACKLIST_AFTER_ROTATION': config('BLACKLIST_AFTER_ROTATION', default=True, cast=bool),
+    'ALGORITHM': config('JWT_ALGORITHM', default='HS256'),
+    'SIGNING_KEY': config('SECRET_KEY'),  # Make sure SECRET_KEY is also in .env file
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+
+# Configure secure cookies and session settings
+# SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE')  # Send cookies only via HTTPS
+# SESSION_COOKIE_HTTPONLY = config('SESSION_COOKIE_HTTPONLY')  # Make cookies inaccessible to JavaScript
+# SESSION_COOKIE_SAMESITE = config('SESSION_COOKIE_SAMESITE')  # Restrict cookies to same-site requests
+# CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE')  # Send CSRF cookies only via HTTPS
+# CSRF_COOKIE_HTTPONLY = config('CSRF_COOKIE_HTTPONLY')  # Make CSRF cookies inaccessible to JavaScript
+# CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE')  # Restrict CSRF cookies to same-site requests
+
+# Secure cookies (only enabled in production)
+SESSION_COOKIE_SECURE = not DEBUG and config('SESSION_COOKIE_SECURE', default=True)  # Send cookies only via HTTPS
+SESSION_COOKIE_HTTPONLY = config('SESSION_COOKIE_HTTPONLY', default=True)  # Always enabled for security
+SESSION_COOKIE_SAMESITE = config('SESSION_COOKIE_SAMESITE', default='Lax')  # Default to Lax
+
+CSRF_COOKIE_SECURE = not DEBUG and config('CSRF_COOKIE_SECURE', default=True)  # Send CSRF cookies only via HTTPS
+CSRF_COOKIE_HTTPONLY = config('CSRF_COOKIE_HTTPONLY', default=True)  # Always enabled for security
+CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', default='Strict')  # Default to Strict
+
+# Optional: Set SESSION_ENGINE to use database or cache-based sessions for better security
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Database-backed sessions
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if not DEBUG else None
+
+# Security settings
+# Secure settings (only enabled in production)
+# Clickjacking Protection (Prevents embedding in iframes)
+X_FRAME_OPTIONS = "DENY"
+SECURE_BROWSER_XSS_FILTER = not DEBUG and config('SECURE_BROWSER_XSS_FILTER', default=True)
+# Prevents MIME-type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = not DEBUG and config('SECURE_CONTENT_TYPE_NOSNIFF', default=True)
+SECURE_SSL_REDIRECT = not DEBUG and config('SECURE_SSL_REDIRECT', default=True)
+SECURE_HSTS_SECONDS = not DEBUG and config('SECURE_HSTS_SECONDS', default=3600)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG and config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
+SECURE_HSTS_PRELOAD = not DEBUG and config('SECURE_HSTS_PRELOAD', default=True)
+
+
+# Axes Configuration
+AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=3, cast=int)
+AXES_COOLOFF_TIME = timedelta(minutes=config('AXES_COOLOFF_TIME', default=15, cast=int))
+AXES_LOCKOUT_URL = config('AXES_LOCKOUT_URL', default='/locked/')
+AXES_ENABLED = config('AXES_ENABLED', default=True, cast=bool)
+AXES_HANDLER = config('AXES_HANDLER', default='axes.handlers.database.AxesDatabaseHandler')
+AXES_VERBOSE = config('AXES_VERBOSE', default=True, cast=bool)
+AXES_RESET_ON_SUCCESS = config('AXES_RESET_ON_SUCCESS', default=True, cast=bool)
+
+
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+

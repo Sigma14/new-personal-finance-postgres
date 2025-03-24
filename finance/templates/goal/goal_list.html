@@ -15,7 +15,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12">
-                            <h2 class="content-header-title float-left mb-0">Goals</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">Goals</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
@@ -25,6 +25,13 @@
                                 </ol>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="goalTourBtn" data-csv="{{tour_api}}">Start Tour</div>
                     </div>
                 </div>
             </div>
@@ -56,7 +63,7 @@
                 <br/>
                 <div class="row d-flex justify-content-between">
                     <div style="margin-left:1rem;">
-                        <a href="{% url 'goal_add' %}" class="btn btn-primary"><i
+                        <a href="{% url 'goal_add' %}" class="btn btn-primary Step-2"><i
                                 class="fa fa-plus"></i> Add Goal</a>
                     </div>
                     <!-- User Budget dropdown -->
@@ -124,7 +131,7 @@
                                             </div>
                                               
                                         <h4 style="float: right;">
-                                            <div class="col-sm-40 offset-sm-20">
+                                            <div class="col-sm-40 offset-sm-20 Step-3">
                                                 <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
                                                 data-feather="edit-2"></i>&nbsp;Edit</a>
                                                 <button type="button" del_method="Goals" delete_name="{{ object.label.name }} Goal" url="{% url 'goal_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
@@ -148,14 +155,14 @@
                                     <div class="card-header border-bottom">
                                         <div class="col-sm-40 offset-sm-20">
                                             <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundAddInfo"></i> 
-                                            <a href="{% url 'fund_accounts' %}" class="btn btn-primary"><i
+                                            <a href="{% url 'fund_accounts' %}" class="btn btn-primary Step-6"><i
                                                     class="fa fa-plus"></i> Add Fund</a>
                                         </div>
-                                        <h4 class="card-title mb-25">
+                                        <h4 class="card-title mb-25 Step-5">
                                             <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundListInfo"></i> 
                                             Fund List
                                         </h4>
-                                        <button class="btn btn-primary download_csv" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                        <button class="btn btn-primary download_csv Step-8" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
                                     </div>
                                     <div class="card-datatable">
                                         <table class="dt-row-grouping table" id="budgets">
@@ -176,8 +183,8 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="font-weight-bolder mr-1">
-                                                            <p class="dropdown-item fund_overtime" data-toggle="modal" data-target="#edit">Show
+                                                        <span class="font-weight-bolder mr-1 Step-7">
+                                                            <p class="dropdown-item fund_overtime " data-toggle="modal" data-target="#edit">Show
                                                             </p>
                                                         </span>
                                                     </div>

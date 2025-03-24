@@ -16,7 +16,7 @@
                 <div class="content-header-left col-md-9 col-12 mb-2">
                     <div class="row breadcrumbs-top">
                         <div class="col-12"> 
-                            <h2 class="content-header-title float-left mb-0">{% trans 'Budgets' %}</h2>
+                            <h2 class="content-header-title float-left mb-0 Step-1">{% trans 'Budgets' %}</h2>
                             <div class="breadcrumb-wrapper">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{% url 'home' %}">{% trans 'Home' %}</a>
@@ -26,6 +26,13 @@
                                 </ol>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="budgetTourBtn" data-csv="{{tour_api}}">Start Tour</div>
                     </div>
                 </div>
             </div>
@@ -63,7 +70,7 @@
                     </div> -->
                     <div class="row" style="padding-top:20px;" >
                         <div class="col">
-                            <a href="#" class="btn btn-primary add-user-bgt"  data-placement="top"  data-toggle="modal" data-target="#userBudgetFormModal"><i
+                            <a href="#" class="btn btn-primary add-user-bgt Step-2"  data-placement="top"  data-toggle="modal" data-target="#userBudgetFormModal"><i
                                                 class="fa fa-plus"></i> {% trans "Create Budget" %}</a>
                         </div>
                         <div class="dropdown" style="padding-right:1rem;">
@@ -128,9 +135,9 @@
                             </div>
                         </div> -->
                         <div class="col-md-6">
-                            <div class="card ecommerce-card">
+                            <div class="card ecommerce-card Step-3">
                                 <div class="card-body">
-                                    <div class="item-name" style="text-align:center;">
+                                    <div class="item-name " style="text-align:center;">
                                         <a href="{% url 'compare-different-budgets' %}">Compare 2 different budgets</a>
                                     </div>
                                     <div class="item-name">
@@ -140,7 +147,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card ecommerce-card">
+                            <div class="card ecommerce-card Step-5">
                                 <div class="card-body">
                                     <div class="item-name" style="text-align:center;">
                                         <a href="{% url 'compare-target-budgets' %}">{% trans "Compare Budget" %}</a>
@@ -171,7 +178,7 @@
                     </div> -->
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="card ecommerce-card">
+                            <div class="card ecommerce-card Step-4">
                                 <div class="card-body">
                                     <div class="item-name" style="text-align:center;">
                                         <a href="{% url 'sample-budgets' %}">{{_('Sample Budget')}}</a>

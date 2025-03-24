@@ -1,10 +1,23 @@
 from django.urls import path
-
 from .views import *
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
+
+def lockout_view(request):
+    return render(request, 'lockout.html')
 
 urlpatterns = [
     # Home url:-
     path("", home, name="home"),
+    # Right sidebar urls:-
+    path("chats/send-message/", send_message_to_ai, name="send_message_to_ai"),
+    path("chats/load-messages/", load_ai_chat, name="load_ai_chats"),
+    path("documentation/", read_documentation_csv, name="documentation"),
+    path("feedback/", create_feedback, name="create-feedback"),
+    # Real estate urls
     path("real-estate-home", real_estate_home, name="real_estate_home"),
     path("create_link_token", create_link_token, name="create-link-token"),
     path("get_access_token", get_access_token, name="get-access-token"),
@@ -71,7 +84,7 @@ urlpatterns = [
         name="budgets_goals_walk_through",
     ),
     path("create_user_budget/", UserBudgetAdd.as_view(), name="create_user_budget"),
-    path('user_budget_update/<int:pk>', user_budget_update, name='update_user_budget'),
+    path("user_budget_update/<int:pk>", user_budget_update, name="update_user_budget"),
     # Template Budget urls :-
     path("template_budget_list/", template_budget_list, name="template_budget_list"),
     # path('template_budget_detail/<int:pk>', template_budget_details, name='template_budget_detail'),
@@ -291,8 +304,21 @@ urlpatterns = [
         rental_property_sample_page,
         name="rental_property_sample_page",
     ),
+    
+    # AXES
+    path('locked/', lockout_view, name='locked'),
+
+    # JWT authentication endpoints
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+
     path("login", user_login, name="user_login"),
     path("logout", user_logout, name="user_logout"),
+
+
+    
     path("net_worth", net_worth, name="net_worth"),
     # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
     # path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),
@@ -308,4 +334,16 @@ urlpatterns = [
     path("download/csv", download_csv, name="download_csv"),
     path("download/rental_pdf", download_rental_pdf, name="download_rental_pdf"),
     path("process_image", process_image, name="property_checkout"),
+    # Endpoint to add or update notes
+    path("add-update/notes", add_update_notes, name="add-update-notes"),
+    path("get-notes", get_notes, name="get-notes"),
+    # Endpoint to submit error
+    path("test-middleware/", test_middleware, name="test-middleware"),
+    # Enpoint for terminal Logs
+    path("fetch-logs/", fetch_error_logs, name="fetch-error-logs"),
+    path('download-log/', download_log_file, name='download_log'),
+    # Enpoint for error logs from db
+    path("app-error-report/", ErrorLogsList.as_view(), name="app-error-report"),
+    path("app-error-report/details/<int:error_id>/", error_report_details, name="app-error-report-detail"),
+    path("app-error-report/action/", error_report_action, name="app-error-report-action"),
 ]

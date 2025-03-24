@@ -20,14 +20,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                <div class="d-none d-md-flex align-items-center justify-content-end">
+                    <!--Button for tour-->
+                    <div class="btn btn-primary tour-btn" id="dashboardTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                </div>
+            </div>
             </div>
             <div class="content-body">
-                <section id="default-breadcrumb">
+                <section id="default-breadcrumb" >
                     <div class="row">
-                        <div class="col-sm-12">
+                        <div class="col-sm-12 Step-1">
                             <div class="card">
                                 <div class="card-header">
-                                    <p class="card-text"><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> Welcome to your one-stop solution for all things money-related! Our app is designed to help you understand, manage, and grow your finances, all in a user-friendly way. Whether you're looking to get a quick snapshot of your financial health, plan your spending, keep track of bills, or even save for your future dreams, we've got you covered. </small><small class="see_more_summary" style="display:None; font-size:14px;">  The app is laid out in easy-to-navigate boxes—each taking you to a specific feature like your Dashboard, Budget, Bills, and more. To start, simply click on any of the boxes to dive into the page you need. It's financial management made simple and effective, tailored just for you.   </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
+                                    <p class="card-text"><strong style="font-size:18px;">{% trans "Personal Finance" %} </strong><small style="font-size:14px;"> {% trans "Welcome to your one-stop solution for all things money-related! Our app is designed to help you understand, manage, and grow your finances, all in a user-friendly way. Whether you're looking to get a quick snapshot of your financial health, plan your spending, keep track of bills, or even save for your future dreams, we've got you covered." %} </small><small class="see_more_summary" style="display:None; font-size:14px;">  {% trans "The app is laid out in easy-to-navigate boxes—each taking you to a specific feature like your Dashboard, Budget, Bills, and more. To start, simply click on any of the boxes to dive into the page you need. It's financial management made simple and effective, tailored just for you." %}   </small><small class="text-primary table-hover more_button" style="font-size:14px;">{% trans 'More..' %}</small></p>
                                 </div>
                             </div>
                         </div>
@@ -49,7 +55,7 @@
 <!--                            </div>-->
 <!--                        </div>-->
 <!--                    </div>-->
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-2">
                         <div class="item-img text-center">
                             <a href="{% url 'budgets' %}">
                                 <img src="{% static 'images/budget.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -64,7 +70,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-3">
                         <div class="item-img text-center">
                             <a href="{% url 'bill_list' %}">
                                 <img src="{% static 'images/bills.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -79,7 +85,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-4">
                         <div class="item-img text-center">
                             <a href="{% url 'category_list' %}">
                                 <img src="{% static 'images/category.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -95,7 +101,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-5">
                         <div class="item-img text-center">
                             <a href="{% url 'account_box' %}">
                                 <img src="{% static 'images/account.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -110,7 +116,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-6">
                         <div class="item-img text-center">
                             <a href="{% url 'transaction_list' %}">
                                 <img src="{% static 'images/transaction.jpeg' %}" class="img-fluid" alt="img-placeholder" />
@@ -125,7 +131,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-7">
                         <div class="item-img text-center">
                             <a href="{% url 'goal_list' %}">
                                 <img src="{% static 'images/goals.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -140,7 +146,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-8">
                         <div class="item-img text-center">
                             <a href="{% url 'mortgagecalculator_list' %}">
                                 <img src="{% static 'images/calculator.jpg' %}" class="img-fluid" alt="img-placeholder" />
@@ -155,7 +161,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card ecommerce-card">
+                    <div class="card ecommerce-card Step-9">
                         <div class="item-img text-center">
                             <a href="{% url 'real_estate_home' %}">
                                 <img src="{% static 'images/real_estate.jpg' %}" class="img-fluid" alt="img-placeholder" />
