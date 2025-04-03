@@ -29,6 +29,7 @@ from .models import (
     Transaction,
     UserBudgets,
 )
+import bleach
 
 
 class UserBudgetsForm(forms.ModelForm):
@@ -94,6 +95,47 @@ class LoginForm(forms.Form):
         return super(LoginForm, self).clean()
 
 
+# class MaintenanceForm(forms.ModelForm):
+#     category = forms.CharField(
+#         widget=forms.Select(
+#             choices=MAINTENANCE_CATEGORY, attrs={"class": "form-control"}
+#         ),
+#         required=True,
+#     )
+#     unit_name = forms.CharField(
+#         widget=forms.TextInput(attrs={"class": "form-control"}), required=True
+#     )
+#     tenant_name = forms.CharField(
+#         widget=forms.TextInput(attrs={"class": "form-control"}), required=True
+#     )
+#     name = forms.CharField(
+#         widget=forms.TextInput(attrs={"class": "form-control"}), required=True
+#     )
+#     description = forms.CharField(
+#         widget=forms.Textarea(attrs={"class": "form-control"}), required=True
+#     )
+#     status = forms.CharField(
+#         widget=forms.Select(
+#             choices=MAINTENANCE_STATUS, attrs={"class": "form-control"}
+#         ),
+#         required=True,
+#     )
+
+#     def __init__(self, *args, **kwargs):
+#         self.request = kwargs.pop("request")
+#         user_name = self.request.user
+#         super(MaintenanceForm, self).__init__(*args, **kwargs)
+#         self.fields["property_details"] = forms.ModelChoiceField(
+#             queryset=Property.objects.filter(user=user_name),
+#             empty_label="Select Property",
+#             widget=forms.Select(attrs={"class": "form-control select_property"}),
+#             required=True,
+#         )
+
+#     class Meta:
+#         model = PropertyMaintenance
+#         exclude = ("user", "created_at", "updated_at")
+
 class MaintenanceForm(forms.ModelForm):
     category = forms.CharField(
         widget=forms.Select(
@@ -119,6 +161,12 @@ class MaintenanceForm(forms.ModelForm):
         ),
         required=True,
     )
+
+    def clean_description(self):
+        description = self.cleaned_data.get("description")
+        # Sanitize the description to remove any unsafe HTML or JavaScript
+        sanitized_description = bleach.clean(description)
+        return sanitized_description
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")

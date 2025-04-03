@@ -118,7 +118,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('SQL_DB_NAME'),
-        'USER': 'postgres',
         'USER': config('SQL_USER'),
         'PASSWORD': config('SQL_PASSWORD'),
         'HOST': config('SQL_HOST'), 
@@ -304,7 +303,7 @@ CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', default='Strict')  # Defau
 # Optional: Set SESSION_ENGINE to use database or cache-based sessions for better security
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Database-backed sessions
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if not DEBUG else None
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if not DEBUG else None
 
 # Security settings
 # Secure settings (only enabled in production)
