@@ -4100,29 +4100,44 @@ $(document).ready(function () {
     fileName
   ) {
     let canvas;
+    let img; // Store the original image reference
+    let currentMode = null;
+    let existingObjects = []; // To store non-image objects between modes
 
     // Generate file name
     const generateFileName = () => {
       const date = new Date();
       const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
       const hours = date.getHours();
       const minutes = date.getMinutes().toString().padStart(2, "0");
 
-      const period = hours >= 12 ? "pm" : "am"; // Determine AM/PM
-      const formattedHours = (((hours + 11) % 12) + 1).toString(); // Convert to 12-hour format
+      const period = hours >= 12 ? "pm" : "am";
+      const formattedHours = (((hours + 11) % 12) + 1).toString();
 
       return `${fileName}_${year}${month}${day}_${formattedHours}_${minutes}${period}.png`;
     };
-    // initialize canvas
-    function initCanvas(img, containerWidth, containerHeight) {
+
+    // Initialize canvas
+    function initCanvas(image, containerWidth, containerHeight) {
+      img = image;
       const dimensions = calculateCanvasDimensions(containerWidth);
+      const canvasEl = document.getElementById('snapEditCanvas');
 
-      $("#snapEditCanvas").width = dimensions.width;
-      $("#snapEditCanvas").height = dimensions.height;
+      if (canvas) {
+        canvas.dispose();
+      }
 
-      canvas = new fabric.Canvas("snapEditCanvas");
+      canvasEl.width = dimensions.width;
+      canvasEl.height = dimensions.height;
+
+      canvas = new fabric.Canvas(canvasEl, {
+        preserveObjectStacking: true,
+        selection: true,
+        defaultCursor: 'default',
+        backgroundColor: '#f8f9fa'
+      });
 
       const fabricImage = new fabric.Image(img, {
         left: 0,
@@ -4130,70 +4145,238 @@ $(document).ready(function () {
         selectable: false,
         scaleX: dimensions.width / img.width,
         scaleY: dimensions.height / img.height,
+        originX: 'left',
+        originY: 'top'
       });
 
-      canvas.setWidth(dimensions.width);
-      canvas.setHeight(dimensions.height);
-      canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+      canvas.setBackgroundImage(fabricImage, function () {
+        // Restore existing objects (like textboxes)
+        existingObjects.forEach(obj => canvas.add(obj));
+        canvas.renderAll();
+        setupTextEditing();
+      });
 
-      ensureModalResponsive($("#snapEditCanvas"));
-    }
+      // Enable draw mode by default
+      setTimeout(() => {
+        setMode('draw');
+      }, 100);
 
-    // function to calculate canvas dimensions
-    function calculateCanvasDimensions(containerWidth) {
-      if (containerWidth > 1200) {
-        return { width: 800, height: 500 };
-      } else if (containerWidth > 768) {
-        return { width: 600, height: 400 };
-      } else {
-        return { width: 500, height: 350 };
+      // Add keyboard event listener for Delete key
+      canvas.on('selection:created', handleSelection);
+      canvas.on('selection:cleared', handleSelection);
+      canvas.on('object:removed', handleSelection);
+
+      function handleSelection() {
+        if (canvas.getActiveObject()) {
+          $(document).on("keydown.delete", function (e) {
+            if (e.key === "Delete") {
+              e.preventDefault(); // Prevent scrolling
+              const activeObjects = canvas.getActiveObjects();
+
+              activeObjects.forEach((obj) => {
+                canvas.remove(obj);
+                existingObjects = existingObjects.filter((o) => o !== obj);
+              });
+
+              canvas.discardActiveObject().renderAll();
+              $(document).off("keydown.delete"); // Remove the handler after deletion
+            }
+          });
+        } else {
+          $(document).off("keydown.delete");
+        }
       }
     }
 
-    // function to ensure modal is responsive
-    function ensureModalResponsive(canvasElement) {
-      const modalContent = document.querySelector(
-        ".canvasModal .modal-content"
-      );
-      modalContent.style.maxWidth = `${canvasElement.width + 40}px`;
-      modalContent.style.overflowX = "auto";
+    // Mode management function
+    function setMode(newMode) {
+      // Exit current mode
+      switch (currentMode) {
+        case 'draw':
+          canvas.isDrawingMode = false;
+          $("#enableDrawing").removeClass("btn-danger").addClass("btn-outline-success");
+          break;
+        case 'text':
+          // No specific cleanup needed for text mode, but store current text objects
+          existingObjects = canvas.getObjects().filter(obj => obj.type === 'i-text');
+          break;
+        case 'blackbox':
+        case 'whitebox':
+          existingObjects = canvas.getObjects().filter(obj => obj.type === 'rect');
+          break;
+      }
+
+      // Enter new mode
+      switch (newMode) {
+        case 'draw':
+          canvas.isDrawingMode = true;
+          canvas.freeDrawingBrush.width = 2;
+          canvas.freeDrawingBrush.color = $("#textColor").val();
+          $("#enableDrawing").removeClass("btn-outline-success").addClass("btn-danger");
+          break;
+        case 'text':
+          //  Do not add a new text box every time.
+          if (currentMode !== 'text') { // Only add if not already in text mode
+            const text = new fabric.IText('Click to edit', {
+              left: 50,
+              top: 50,
+              fontFamily: 'Arial',
+              fill: $('#textColor').val(),
+              fontSize: parseInt($('#textSize').val()),
+              hasControls: true,
+              padding: 10,
+              editable: true,
+              borderColor: '#4285f4',
+              cornerColor: '#4285f4',
+              cornerSize: 10,
+              transparentCorners: false
+            });
+            canvas.add(text);
+            canvas.setActiveObject(text);
+            setTimeout(() => {
+              text.enterEditing();
+              text.selectAll();
+              const textarea = text.hiddenTextarea;
+              if (textarea) {
+                textarea.focus();
+                $(textarea).on('keydown', function (e) {
+                  e.stopPropagation();
+                });
+              }
+            }, 100);
+          }
+          break;
+        case 'blackbox':
+          addBox('#000000');
+          break;
+        case 'whitebox':
+          addBox('#ffffff');
+          break;
+
+        case 'selection':
+          canvas.isDrawingMode = false;
+          canvas.selection = true;
+          canvas.getObjects().forEach(obj => obj.selectable = true);
+          break;
+      }
+
+      currentMode = newMode;
+
+      // Update button states
+      updateButtonStates();
     }
 
-    // Screenshot event to capture current page screenshot
+    function updateButtonStates() {
+      $("#enableSelection, #enableDrawing, #addText, #addBlackBox, #addWhiteBox").removeClass("active");
+      if (currentMode === 'draw') {
+        $("#enableDrawing").addClass("active");
+      } else if (currentMode === 'text') {
+        $("#addText").addClass("active");
+      } else if (currentMode === 'blackbox') {
+        $("#addBlackBox").addClass("active");
+      } else if (currentMode === 'whitebox') {
+        $("#addWhiteBox").addClass("active");
+      }
+    }
+
+    $("#enableSelection").click(function () {
+      setMode('selection');
+    });
+
+
+    function setupTextEditing() {
+      // Fix for text editing in Bootstrap modal
+      canvas.on('text:editing:entered', function (options) {
+        $('.canvas-container').css('z-index', '1051');
+        const text = options.target;
+        const textarea = text.hiddenTextarea;
+
+        if (textarea) {
+          // Prevent event bubbling
+          $(textarea).off('keydown').on('keydown', function (e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+          });
+
+          // Ensure focus
+          setTimeout(() => {
+            textarea.focus();
+          }, 50);
+        }
+      });
+
+      canvas.on('text:editing:exited', function () {
+        $('.canvas-container').css('z-index', '');
+      });
+    }
+
+    // Calculate canvas dimensions
+    function calculateCanvasDimensions(containerWidth) {
+      const maxWidth = Math.min(containerWidth - 40, img.width);
+      const maxHeight = Math.min(window.innerHeight - 200, img.height);
+
+      const aspectRatio = img.width / img.height;
+
+      let width = maxWidth;
+      let height = width / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+
+      return { width, height };
+    }
+
+    // Show modal
+    function showModal() {
+      const modal = new bootstrap.Modal(document.getElementById('editorModal'), {
+        backdrop: "static",
+        keyboard: true,
+        focus: false
+      });
+      modal.show();
+
+      // Prevent Bootstrap from interfering with text editing
+      $(document).on('focusin', function (e) {
+        if ($(e.target).closest('.canvas-container').length &&
+          $(e.target).is('textarea.fabric-textarea')) {
+          e.stopPropagation();
+        }
+      });
+    }
+
+    // Event handlers
     screenShotButton.on("click", function () {
       const ignoreElementIds = ["rightSettingBody", "accSubmitError"];
       html2canvas(document.body, {
-        ignoreElements: (element) => {
-          return ignoreElementIds.includes(element.id);
-        },
+        ignoreElements: (element) => ignoreElementIds.includes(element.id),
         width: window.innerWidth,
         height: window.innerHeight,
-      })
-        .then((snapshot) => {
-          const img = new Image();
-          img.src = snapshot.toDataURL("image/png");
+        scale: 1,
+        logging: false,
+        useCORS: true
+      }).then((snapshot) => {
+        const image = new Image();
+        image.src = snapshot.toDataURL("image/png");
 
-          img.onload = function () {
-            // Clear the canvas, including the background image
-            // clearCanvasAndReset();
-            initCanvas(img, window.innerWidth, window.innerHeight);
-            showModal();
-          };
-        })
-        .catch((error) => console.error("Error taking screenshot:", error));
+        image.onload = function () {
+          initCanvas(image, window.innerWidth, window.innerHeight);
+          showModal();
+        };
+      }).catch(console.error);
     });
 
-    // upload existing photo for feedback form & edit by fabric.js
     uploadScreenShotButton.on("change", function (event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          const img = new Image();
-          img.src = e.target.result;
+          const image = new Image();
+          image.src = e.target.result;
 
-          img.onload = function () {
-            initCanvas(img, window.innerWidth, window.innerHeight);
+          image.onload = function () {
+            initCanvas(image, window.innerWidth, window.innerHeight);
             showModal();
           };
         };
@@ -4201,73 +4384,102 @@ $(document).ready(function () {
       }
     });
 
-    // Download button event to download edited image
     $("#downloadEditedImage").click(function () {
       const editedImage = canvas.toDataURL("image/png");
-
       const link = document.createElement("a");
       link.href = editedImage;
-      link.download = "edited-screenshot.png";
+      link.download = generateFileName();
       link.click();
     });
 
-    // Toggle the drawing mode on the Fabric.js canvas
     $("#enableDrawing").click(function () {
-      canvas.isDrawingMode = !canvas.isDrawingMode;
-      $(this).toggleClass("btn-outline-success btn-outline-danger");
-
-      if (canvas.isDrawingMode) {
-        canvas.freeDrawingBrush.width = 2;
-        canvas.freeDrawingBrush.color = "#ff0000";
-      }
-
-      const backgroundImage = canvas.backgroundImage;
-      if (backgroundImage) {
-        canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
-      }
+      setMode('draw');
     });
 
-    // Clear all drawing from canvas
     $("#clearCanvas").click(function () {
-      const backgroundImage = canvas.backgroundImage; // Save the current background image
-
-      // Remove all objects except the background image
+      const backgroundImage = canvas.backgroundImage;
       canvas.getObjects().forEach((obj) => {
         if (obj !== backgroundImage) {
           canvas.remove(obj);
         }
       });
-
-      // Reapply the background image and re-render the canvas
-      canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
+      existingObjects = []; // Clear stored objects as well
+      canvas.renderAll();
     });
 
-    // Transfer edited image from canvas-modal to feedback form img field
-    $("#saveEditedImage").click(function () {
-      // Get the canvas element
-      // Ensure the canvas exists
-      if (canvas) {
-        // Convert canvas to a Base64 string
-        const dataURL = canvas.toDataURL("image/png");
+    $("#addText").click(function () {
+      setMode('text');
+    });
 
-        // Convert Base64 string to a File
+    $("#textColor").change(function () {
+      const activeObject = canvas.getActiveObject();
+      if (activeObject?.type === 'i-text') {
+        activeObject.set('fill', $(this).val());
+        canvas.renderAll();
+      }
+      if (currentMode === "draw") {
+        canvas.freeDrawingBrush.color = $(this).val();
+      }
+    });
+
+    $("#textSize").change(function () {
+      const activeObject = canvas.getActiveObject();
+      if (activeObject?.type === 'i-text') {
+        activeObject.set('fontSize', parseInt($(this).val()));
+        canvas.renderAll();
+      }
+    });
+
+    $("#addBlackBox").click(function () {
+      setMode('blackbox');
+    });
+
+    $("#addWhiteBox").click(function () {
+      setMode('whitebox');
+    });
+
+    function addBox(color) {
+      const box = new fabric.Rect({
+        left: 50,
+        top: 50,
+        width: 100,
+        height: 50,
+        fill: color,
+        stroke: '#000000',
+        strokeWidth: 1,
+        selectable: true,
+        hasControls: true
+      });
+      canvas.add(box);
+      canvas.setActiveObject(box);
+    }
+
+    $("#closeEditorModal").click(function () {
+      $('#editorModal').removeClass('show').css('display', 'none');
+      $('.modal-backdrop').remove();
+    });
+
+    $("#saveEditedImage").click(function () {
+      if (canvas) {
+        const dataURL = canvas.toDataURL("image/png");
         const file = dataURLToFile(dataURL, generateFileName());
 
-        // Create a DataTransfer to simulate a FileList
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
 
-        // Assign to the input element
         const fileInput = document.querySelector(imageInputID);
         fileInput.files = dataTransfer.files;
 
         imageUploadNotification.removeClass("d-none");
-        // clear canvas
+        $('#editorModal').removeClass('show').css('display', 'none');
+        $('.modal-backdrop').remove();
         canvas.clear();
+        existingObjects = []; // Clear stored objects
+
+
       }
     });
 
-    // Helper function to convert Base64 to File
     function dataURLToFile(dataURL, filename) {
       const arr = dataURL.split(",");
       const mime = arr[0].match(/:(.*?);/)[1];
@@ -4278,16 +4490,32 @@ $(document).ready(function () {
       }
       return new File([new Uint8Array(array)], filename, { type: mime });
     }
-
-    // display bootstrap modal dialog
-    function showModal() {
-      const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
-        backdrop: "static",
-        keyboard: false,
-      });
-      modal.show();
-    }
+    updateButtonStates();
   }
+
+
+
+  // Initialize when DOM is ready
+  $(document).ready(function () {
+    // Make sure all required libraries are loaded
+    if (typeof fabric !== 'undefined' && typeof html2canvas !== 'undefined' && typeof bootstrap !== 'undefined') {
+      const screenShotButton = $("#takeScreenshot");
+      const uploadScreenShotButton = $("#feedbackImg");
+      const imageUploadNotification = $("#feedbackSnapAdded");
+      const imageInputID = "#screenshotData";
+      const fileName = "feedback_img";
+
+      captureScreenshotAndEdit(
+        screenShotButton,
+        uploadScreenShotButton,
+        imageUploadNotification,
+        imageInputID,
+        fileName
+      );
+    } else {
+      console.error("Required libraries not loaded");
+    }
+  });
 
   // Submit feedback form
   (function () {
