@@ -12827,7 +12827,7 @@ def add_update_notes(request):
         JsonResponse: JSON containing the operation status and updated note list.
     """
 
-    if request.method == "POST" and request.is_ajax():
+    if request.method == "POST":
         user = request.user
         title = request.POST.get("title", "").strip()
         notes = request.POST.get("notes", "").strip()
