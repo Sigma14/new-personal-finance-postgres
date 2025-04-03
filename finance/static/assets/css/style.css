@@ -315,12 +315,13 @@ input[type="file"]::file-selector-button:hover {
 
 /* Feedback */
 
-.modal-lg {
+.modal-xl {
   max-width: 90%;
   width: auto !important;
 }
 
 .modal-body {
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

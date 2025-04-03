@@ -4103,6 +4103,7 @@ $(document).ready(function () {
     let img; // Store the original image reference
     let currentMode = null;
     let existingObjects = []; // To store non-image objects between modes
+    let textBoxCounter = 0; // Track number of text boxes added
 
     // Generate file name
     const generateFileName = () => {
@@ -4197,8 +4198,7 @@ $(document).ready(function () {
           $("#enableDrawing").removeClass("btn-danger").addClass("btn-outline-success");
           break;
         case 'text':
-          // No specific cleanup needed for text mode, but store current text objects
-          existingObjects = canvas.getObjects().filter(obj => obj.type === 'i-text');
+          // No specific cleanup needed for text mode
           break;
         case 'blackbox':
         case 'whitebox':
@@ -4215,36 +4215,8 @@ $(document).ready(function () {
           $("#enableDrawing").removeClass("btn-outline-success").addClass("btn-danger");
           break;
         case 'text':
-          //  Do not add a new text box every time.
-          if (currentMode !== 'text') { // Only add if not already in text mode
-            const text = new fabric.IText('Click to edit', {
-              left: 50,
-              top: 50,
-              fontFamily: 'Arial',
-              fill: $('#textColor').val(),
-              fontSize: parseInt($('#textSize').val()),
-              hasControls: true,
-              padding: 10,
-              editable: true,
-              borderColor: '#4285f4',
-              cornerColor: '#4285f4',
-              cornerSize: 10,
-              transparentCorners: false
-            });
-            canvas.add(text);
-            canvas.setActiveObject(text);
-            setTimeout(() => {
-              text.enterEditing();
-              text.selectAll();
-              const textarea = text.hiddenTextarea;
-              if (textarea) {
-                textarea.focus();
-                $(textarea).on('keydown', function (e) {
-                  e.stopPropagation();
-                });
-              }
-            }, 100);
-          }
+          // Add new text box without affecting existing ones
+          addTextBox();
           break;
         case 'blackbox':
           addBox('#000000');
@@ -4252,7 +4224,6 @@ $(document).ready(function () {
         case 'whitebox':
           addBox('#ffffff');
           break;
-
         case 'selection':
           canvas.isDrawingMode = false;
           canvas.selection = true;
@@ -4261,9 +4232,44 @@ $(document).ready(function () {
       }
 
       currentMode = newMode;
-
-      // Update button states
       updateButtonStates();
+    }
+
+    // Function to add a new text box
+    function addTextBox() {
+      textBoxCounter++;
+      const text = new fabric.IText(`Text ${textBoxCounter}`, {
+        left: 50 + (textBoxCounter * 20),
+        top: 50 + (textBoxCounter * 20),
+        fontFamily: 'Arial',
+        fill: $('#textColor').val(),
+        fontSize: parseInt($('#textSize').val()),
+        hasControls: true,
+        padding: 10,
+        editable: true,
+        borderColor: '#4285f4',
+        cornerColor: '#4285f4',
+        cornerSize: 10,
+        transparentCorners: false,
+        selectable: true
+      });
+
+      canvas.add(text);
+      canvas.setActiveObject(text);
+      canvas.bringToFront(text);
+
+      // Focus on the new text box
+      setTimeout(() => {
+        text.enterEditing();
+        text.selectAll();
+        const textarea = text.hiddenTextarea;
+        if (textarea) {
+          textarea.focus();
+          $(textarea).on('keydown', function (e) {
+            e.stopPropagation();
+          });
+        }
+      }, 100);
     }
 
     function updateButtonStates() {
@@ -4282,7 +4288,6 @@ $(document).ready(function () {
     $("#enableSelection").click(function () {
       setMode('selection');
     });
-
 
     function setupTextEditing() {
       // Fix for text editing in Bootstrap modal
@@ -4393,7 +4398,11 @@ $(document).ready(function () {
     });
 
     $("#enableDrawing").click(function () {
-      setMode('draw');
+      if (currentMode !== 'draw') {
+        setMode('draw');
+      } else {
+        setMode('selection');
+      }
     });
 
     $("#clearCanvas").click(function () {
@@ -4404,11 +4413,17 @@ $(document).ready(function () {
         }
       });
       existingObjects = []; // Clear stored objects as well
+      textBoxCounter = 0; // Reset text box counter
       canvas.renderAll();
     });
 
     $("#addText").click(function () {
-      setMode('text');
+      if (currentMode !== 'text') {
+        setMode('text');
+      } else {
+        // If already in text mode, add another text box
+        addTextBox();
+      }
     });
 
     $("#textColor").change(function () {
@@ -4475,8 +4490,7 @@ $(document).ready(function () {
         $('.modal-backdrop').remove();
         canvas.clear();
         existingObjects = []; // Clear stored objects
-
-
+        textBoxCounter = 0; // Reset text box counter
       }
     });
 
@@ -4490,9 +4504,9 @@ $(document).ready(function () {
       }
       return new File([new Uint8Array(array)], filename, { type: mime });
     }
+
     updateButtonStates();
   }
-
 
 
   // Initialize when DOM is ready
