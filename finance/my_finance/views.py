@@ -32,7 +32,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
     FileResponse,
-    HttpResponseNotFound
+    HttpResponseNotFound,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
@@ -2888,17 +2888,21 @@ def subcategory_budget(request):
 # In an api_views.py file within your app
 class ProtectedResourceView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """
         An example view that requires JWT authentication.
         """
-        return Response({
-            'message': 'You have access to this protected resource',
-            'user': request.user.username
-        })
+        return Response(
+            {
+                "message": "You have access to this protected resource",
+                "user": request.user.username,
+            }
+        )
 
-logger = logging.getLogger('my_finance')
+
+logger = logging.getLogger("my_finance")
+
 
 @axes_dispatch
 def user_login(request):
@@ -2907,78 +2911,82 @@ def user_login(request):
     along with generating JWT tokens for the session.
     """
     context = {"page": "login_page"}
-    
+
     if request.method == "POST":
         username = request.POST.get("register-username")
         user_password = request.POST.get("register-password")
-        
+
         # Get redirect URL from POST data, defaulting to 'home' if not provided
         redirect_url = request.POST.get("redirect_url", "")
-        
+
         # If redirect_url is empty or invalid, use 'home' as a default
         if not redirect_url:
             redirect_url = "home"
-        
+
         # Step 1: Try Django authentication first
         user = authenticate(request=request, username=username, password=user_password)
-        
+
         # For superusers, proceed with standard Django login
         if user and user.is_superuser:
             login(request, user)
             reset_request(request)  # Reset Axes counters on successful login
             return redirect(redirect_url)
-        
+
         # Step 2: If Django authentication fails for non-superusers, try WordPress JWT
         if not user:
             try:
                 # Handle JWT authentication from WordPress
                 token_url = f"{wordpress_domain}/wp-json/api/v1/token"
                 token_data = {"username": username, "password": user_password}
-                
+
                 token_response = requests.post(token_url, json=token_data, timeout=10)
                 token_response.raise_for_status()
                 token_data = token_response.json()
-                
+
                 if "jwt_token" not in token_data:
                     # Authentication failed - log this failure
                     context["login_error"] = "Invalid credentials"
                     return render(request, "login_page.html", context=context)
-                
+
                 jwt_token = token_data["jwt_token"]
-                
+
                 # Step 3: Membership verification
                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
                 headers = {"Authorization": f"Bearer {jwt_token}"}
-                user_info_response = requests.get(user_info_url, headers=headers, timeout=10)
+                user_info_response = requests.get(
+                    user_info_url, headers=headers, timeout=10
+                )
                 user_info = user_info_response.json()
-                
-                if 'id' not in user_info:
+
+                if "id" not in user_info:
                     # Failed to get user info
                     context["login_error"] = "Failed to retrieve user information"
                     return render(request, "login_page.html", context=context)
-                
+
                 user_id = user_info["id"]
-                
+
                 # Check membership plan
                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
                 plan_response = requests.get(plan_url, timeout=10).json()
-                
+
                 if "response" not in plan_response or not plan_response["response"]:
                     context["login_error"] = "No membership plan found"
                     return render(request, "login_page.html", context=context)
-                
+
                 user_plan_id = list(plan_response["response"].keys())[0]
-                
+
                 # Verify membership level
                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
                 verify_user_response = requests.get(verify_user_url, timeout=10)
                 verify_user_response.raise_for_status()
-                
+
                 verify_user_data = verify_user_response.json()
                 if verify_user_data.get("response") != 1:
-                    context["login_error"] = "You don't have a valid membership subscription"
+                    context["login_error"] = (
+                        "You don't have a valid membership subscription"
+                    )
                     return render(request, "login_page.html", context=context)
-                
+
                 # Create or update user in Django
                 try:
                     django_user = User.objects.get(id=user_id)
@@ -2989,47 +2997,47 @@ def user_login(request):
                         id=user_id,
                         username=username,
                         email=user_info.get("email", ""),
-                        first_name=user_info.get("name", "")
+                        first_name=user_info.get("name", ""),
                     )
                     django_user.set_password(user_password)
                     django_user.save()
-                
+
                 # If we get here, authentication was successful, so reset Axes counters
                 reset_request(request)
-                
+
                 # Log the user in
                 login(request, django_user)
-                
+
                 # Generate JWT tokens for the session
                 refresh = RefreshToken.for_user(django_user)
                 access_token = str(refresh.access_token)
                 refresh_token = str(refresh)
-                
+
                 # Store tokens in secure, HTTP-only cookies
                 response = redirect(redirect_url)
-                
+
                 # Set access and refresh tokens as HTTP-only cookies
                 response.set_cookie(
-                    'access_token',
+                    "access_token",
                     access_token,
                     max_age=15 * 60,  # 15 minutes in seconds
                     httponly=True,
                     secure=True,
-                    samesite='Strict'
+                    samesite="Strict",
                 )
-                
+
                 response.set_cookie(
-                    'refresh_token',
+                    "refresh_token",
                     refresh_token,
                     max_age=24 * 60 * 60,  # 1 day in seconds
                     httponly=True,
                     secure=True,
-                    samesite='Strict'
+                    samesite="Strict",
                 )
-                
+
                 # Redirect to the target URL
                 return response
-                
+
             except requests.exceptions.RequestException as e:
                 logger.error(f"API request error during login: {str(e)}")
                 context["login_error"] = f"Error during login: {str(e)}"
@@ -3038,45 +3046,44 @@ def user_login(request):
                 logger.error(f"Unexpected error during login: {str(e)}")
                 context["login_error"] = f"An unexpected error occurred: {str(e)}"
                 return render(request, "login_page.html", context=context)
-        
+
         # If Django authentication was successful for non-superusers
         login(request, user)
-        
+
         # Reset Axes counters
         reset_request(request)
-        
+
         # Generate JWT tokens for the session
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
-        
+
         # Set cookies with the tokens
         response = redirect(redirect_url)
         response.set_cookie(
-            'access_token',
+            "access_token",
             access_token,
             max_age=15 * 60,  # 15 minutes
             httponly=True,
             secure=True,
-            samesite='Strict'
+            samesite="Strict",
         )
         response.set_cookie(
-            'refresh_token',
+            "refresh_token",
             refresh_token,
             max_age=24 * 60 * 60,  # 1 day
             httponly=True,
             secure=True,
-            samesite='Strict'
+            samesite="Strict",
         )
-        
+
         # Redirect after successful login
         return response
-    
+
     # GET request - just show the login form
     next_url = request.GET.get("next", "")
     context["redirect_url"] = next_url
     return render(request, "login_page.html", context=context)
-
 
 
 # from axes.decorators import axes_dispatch
@@ -3100,73 +3107,73 @@ def user_login(request):
 #     if request.method == "POST":
 #         username = request.POST.get("register-username")
 #         user_password = request.POST.get("register-password")
-        
+
 #         # Get redirect URL from POST data, defaulting to 'home' if not provided
 #         redirect_url = request.POST.get("redirect_url", "")
-        
+
 #         # If redirect_url is empty or invalid, use 'home' as a default
 #         if not redirect_url:
 #             redirect_url = "home"
-        
+
 #         # Step 1: First try Django authentication
 #         user = authenticate(request=request, username=username, password=user_password)
-        
+
 #         # For superusers, proceed with standard Django login
 #         if user and user.is_superuser:
 #             login(request, user)
 #             return redirect(redirect_url)
-        
+
 #         # If Django authentication fails for non-superusers, try WordPress JWT
 #         if not user:
 #             try:
 #                 # Handle JWT authentication from WordPress
 #                 token_url = f"{wordpress_domain}/wp-json/api/v1/token"
 #                 token_data = {"username": username, "password": user_password}
-                
+
 #                 token_response = requests.post(token_url, json=token_data, timeout=10)
 #                 token_response.raise_for_status()
 #                 token_data = token_response.json()
-                
+
 #                 if "jwt_token" not in token_data:
 #                     # Authentication failed - this will be logged by Axes
 #                     context["login_error"] = "Invalid credentials"
 #                     return render(request, "login_page.html", context=context)
-                
+
 #                 jwt_token = token_data["jwt_token"]
-                
+
 #                 # Membership verification
 #                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
 #                 headers = {"Authorization": f"Bearer {jwt_token}"}
 #                 user_info_response = requests.get(user_info_url, headers=headers, timeout=10)
 #                 user_info = user_info_response.json()
-                
+
 #                 if 'id' not in user_info:
 #                     # Failed to get user info
 #                     context["login_error"] = "Failed to retrieve user information"
 #                     return render(request, "login_page.html", context=context)
-                
+
 #                 user_id = user_info["id"]
-                
+
 #                 # Check membership plan
 #                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
 #                 plan_response = requests.get(plan_url, timeout=10).json()
-                
+
 #                 if "response" not in plan_response or not plan_response["response"]:
 #                     context["login_error"] = "No membership plan found"
 #                     return render(request, "login_page.html", context=context)
-                
+
 #                 user_plan_id = list(plan_response["response"].keys())[0]
-                
+
 #                 # Verify membership
 #                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
 #                 verify_user_response = requests.get(verify_user_url, timeout=10)
 #                 verify_user_response.raise_for_status()
-                
+
 #                 verify_user_data = verify_user_response.json()
 #                 if verify_user_data.get("response") != 1:
 #                     context["login_error"] = "You don't have a valid membership subscription"
 #                     return render(request, "login_page.html", context=context)
-                
+
 #                 # Create or update user in Django
 #                 try:
 #                     django_user = User.objects.get(id=user_id)
@@ -3181,13 +3188,13 @@ def user_login(request):
 #                     )
 #                     django_user.set_password(user_password)
 #                     django_user.save()
-                
+
 #                 # If we get here, authentication was successful, so reset Axes counters
 #                 reset_request(request)
-                
+
 #                 # Log the user in
 #                 login(request, django_user)
-                
+
 #                 # Use reverse to check URL validity before redirecting
 #                 try:
 #                     # Check if it's a named URL pattern
@@ -3200,7 +3207,7 @@ def user_login(request):
 #                     else:
 #                         # Fall back to the home page
 #                         return redirect('home')
-                
+
 #             except requests.exceptions.RequestException as e:
 #                 logger.error(f"API request error during login: {str(e)}")
 #                 context["login_error"] = f"Error during login: {str(e)}"
@@ -3209,10 +3216,10 @@ def user_login(request):
 #                 logger.error(f"Unexpected error during login: {str(e)}")
 #                 context["login_error"] = f"An unexpected error occurred: {str(e)}"
 #                 return render(request, "login_page.html", context=context)
-        
+
 #         # If we get here, Django authentication was successful
 #         login(request, user)
-        
+
 #         # Use reverse to check URL validity before redirecting
 #         try:
 #             # Check if it's a named URL pattern
@@ -3225,7 +3232,7 @@ def user_login(request):
 #             else:
 #                 # Fall back to the home page
 #                 return redirect('home')
-    
+
 #     # GET request - just show the login form
 #     next_url = request.GET.get("next", "")
 #     context["redirect_url"] = next_url
@@ -3325,7 +3332,6 @@ def user_login(request):
 #     else:
 #         context["redirect_url"] = request.GET.get("next", "")
 #         return render(request, "login_page.html", context=context)
-
 
 
 @login_required(login_url="/login")
@@ -3967,7 +3973,7 @@ def budgets_box(request):
         "user_budgets": user_budgets_qs,
         "user_budget_form": form,
         "selected_budget": selected_budget_id,
-        "tour_api": Tour_APIs["budget_page"]
+        "tour_api": Tour_APIs["budget_page"],
     }
     return render(request, "budget/budget_box.html", context)
 
@@ -5683,7 +5689,7 @@ def compare_different_budget_box(request):
         "user_budget_2": user_bgt2,
         "grouped_data": grouped_data,
         "category_icons": CATEGORY_ICONS,
-        "tour_api": Tour_APIs["compare_budget_page"]
+        "tour_api": Tour_APIs["compare_budget_page"],
     }
     return render(request, "budget/compare_diff_bgt_box.html", context=context)
 
@@ -6042,7 +6048,7 @@ def compare_target_budget_box(request):
         "budget_type": budget_type,
         "page": "budgets",
         "budget_dict": budget_dict,
-        "tour_api": Tour_APIs["compare_target_budget_page"]
+        "tour_api": Tour_APIs["compare_target_budget_page"],
     }
     return render(request, "budget/compare_target_box.html", context=context)
 
@@ -6074,7 +6080,7 @@ def sample_budget_box(request):
         "budget_graph_currency": "$",
         "translated_data": json.dumps(translated_data),
         "page": "budgets",
-        "tour_api": Tour_APIs["sample_budgets_page"]
+        "tour_api": Tour_APIs["sample_budgets_page"],
     }
     return render(request, "budget/sample_budget_box.html", context=context)
 
@@ -7152,11 +7158,8 @@ def transaction_list(request):
         )
         select_filter = "All"
 
-    context = transaction_summary(transaction_data, select_filter, user_name )
-    context.update({
-        "page": "transaction_list",
-        "tour_api": Tour_APIs["transactions"]
-    })
+    context = transaction_summary(transaction_data, select_filter, user_name)
+    context.update({"page": "transaction_list", "tour_api": Tour_APIs["transactions"]})
     return render(request, "transaction/transaction_list.html", context=context)
 
 
@@ -9691,7 +9694,11 @@ def mortgagecalculator(request):
         }
         return render(request, "mortgagecalculator_add.html", context)
 
-    context = {"form": form, "page": "mortgagecalculator_list",  "tour_api": Tour_APIs["mortgage_calculator_page"],}
+    context = {
+        "form": form,
+        "page": "mortgagecalculator_list",
+        "tour_api": Tour_APIs["mortgage_calculator_page"],
+    }
     return render(request, "mortgagecalculator_add.html", context)
 
 
@@ -12833,7 +12840,6 @@ def add_update_notes(request):
         notes = request.POST.get("notes", "").strip()
         notes_method = request.POST.get("notes_method", "").strip()
         select_title = request.POST.get("select_title", "").strip().title()
-
         result = {}
         notes_check = MyNotes.objects.filter(user=user, title=title).exists()
 
@@ -12859,8 +12865,12 @@ def add_update_notes(request):
 
         elif notes_method == "Delete":
             # Delete the specified note
-            notes_obj = MyNotes.objects.get(user=user, title=select_title)
+            notes_obj = MyNotes.objects.get(
+                user=user,
+                title=select_title,
+            )
             notes_obj.delete()
+            print(notes_obj)
             result = {"status": "Deleted Successfully"}
 
         elif notes_method == "Add":
@@ -13003,7 +13013,6 @@ def send_message_to_ai(request):
         return JsonResponse({"error": f"Exception: {str(e)}"}, status=400)
 
 
-
 # Read data from csv
 @require_GET
 def read_documentation_csv(request):
@@ -13060,7 +13069,8 @@ def create_feedback(request):
         {"message": "Feedback created successfully", "status": "success"}, status=201
     )
 
-@method_decorator(login_required, name='dispatch')
+
+@method_decorator(login_required, name="dispatch")
 class ErrorLogsList(ListView):
     """
     - Only staff user allowed.
@@ -13068,8 +13078,9 @@ class ErrorLogsList(ListView):
     - If there is no params with the url it renders the html file.
     - If there is a datatables params with the url it returns json response of all the error logs.
     """
+
     model = AppErrorLog
-    template_name = 'admin_only/app_error_logs.html'
+    template_name = "admin_only/app_error_logs.html"
 
     def render_to_response(self, context, **response_kwargs):
         if self.request.GET.get("datatables"):
@@ -13080,13 +13091,22 @@ class ErrorLogsList(ListView):
             order_direction = self.request.GET.get("order[0][dir]", "asc")
             status_filter = self.request.GET.get("status", None)
             sv = self.request.GET.get("search[value]", None)
-            
+
             # Define column mapping for ordering
-            order_columns = ["", "code", "timestamp", "exception_type", "request_path", "error_message", "count", "status", "action"]
+            order_columns = [
+                "",
+                "code",
+                "timestamp",
+                "exception_type",
+                "request_path",
+                "error_message",
+                "count",
+                "status",
+                "action",
+            ]
             order_column = order_columns[order_column_index]
             if order_direction == "desc":
                 order_column = f"-{order_column}"
-
 
             qs = self.get_queryset().order_by(order_column)
             # Apply status filter if provided
@@ -13094,34 +13114,38 @@ class ErrorLogsList(ListView):
                 qs = qs.filter(status=status_filter)
             if sv:
                 qs = qs.filter(
-                    Q(code__icontains=sv)|
-                    Q(request_path__icontains=sv)|
-                    Q(error_message__icontains=sv)|
-                    Q(exception_type__icontains=sv)
+                    Q(code__icontains=sv)
+                    | Q(request_path__icontains=sv)
+                    | Q(error_message__icontains=sv)
+                    | Q(exception_type__icontains=sv)
                 )
             filtered_count = qs.count()
-            qs = qs[start:start+length]
+            qs = qs[start : start + length]
 
             # Serialize response data
             data = [
                 {
                     "id": log.id,
                     "code": log.code,
-                    "timestamp": localtime(log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+                    "timestamp": localtime(log.timestamp).strftime("%Y-%m-%d %I:%M %p"),
                     "exception_type": log.exception_type,
                     "request_path": log.request_path,
                     "error_message": log.error_message,
                     "status": log.status,
                     "count": log.count,
-                } for log in qs
+                }
+                for log in qs
             ]
-            return JsonResponse({
-                "draw": draw,
-                "recordsTotal": self.model.objects.count(),
-                "recordsFiltered": filtered_count,
-                "data": data
-            })
+            return JsonResponse(
+                {
+                    "draw": draw,
+                    "recordsTotal": self.model.objects.count(),
+                    "recordsFiltered": filtered_count,
+                    "data": data,
+                }
+            )
         return super().render_to_response(context, **response_kwargs)
+
 
 @require_GET
 @staff_member_required
@@ -13133,21 +13157,22 @@ def error_report_details(request, error_id):
     """
     # Retrieve the error log or return a 404
     error_log = get_object_or_404(AppErrorLog, id=error_id)
-    
+
     # Define the fields to include in the response
     data = {
         "id": error_log.id,
         "code": error_log.code,
-        "timestamp": localtime(error_log.timestamp).strftime('%Y-%m-%d %I:%M %p'),
+        "timestamp": localtime(error_log.timestamp).strftime("%Y-%m-%d %I:%M %p"),
         "exception_type": error_log.exception_type,
         "request_path": error_log.request_path,
         "error_message": error_log.error_message,
         "count": error_log.count,
         "status": error_log.status,
-        "traceback": error_log.traceback
+        "traceback": error_log.traceback,
     }
-    
+
     return JsonResponse(data)
+
 
 @csrf_exempt
 @staff_member_required
@@ -13166,50 +13191,65 @@ def error_report_action(request):
         selected_ids = data.get("selected_ids", [])
 
         if not selected_ids:
-            return JsonResponse({
-                "status": 400,
-                "message": "No logs selected.",
-                "success": "Error",
-            })
+            return JsonResponse(
+                {
+                    "status": 400,
+                    "message": "No logs selected.",
+                    "success": "Error",
+                }
+            )
 
         logs = AppErrorLog.objects.filter(id__in=selected_ids)
 
         if action == "update_status":
             new_status = data.get("status")
-            if new_status in [choice[0] for choice in AppErrorLog.StatusChoices.choices]:
+            if new_status in [
+                choice[0] for choice in AppErrorLog.StatusChoices.choices
+            ]:
                 logs.update(status=new_status)
-                return JsonResponse({
-                    "status": 200,
-                    "message": "Status updated successfully.",
-                    "success": "Success",
-                })
-            return JsonResponse({
-                "status": 400,
-                "message": "Invalid status.",
-                "success": "Error",
-            })
+                return JsonResponse(
+                    {
+                        "status": 200,
+                        "message": "Status updated successfully.",
+                        "success": "Success",
+                    }
+                )
+            return JsonResponse(
+                {
+                    "status": 400,
+                    "message": "Invalid status.",
+                    "success": "Error",
+                }
+            )
 
         elif action == "delete":
             logs.delete()
-            return JsonResponse({
-                "status": 200,
-                "message": "Logs deleted successfully.",
-                "success": "Success",
-            })
+            return JsonResponse(
+                {
+                    "status": 200,
+                    "message": "Logs deleted successfully.",
+                    "success": "Success",
+                }
+            )
 
-        return JsonResponse({
-            "status": 400,
-            "message": "Invalid action.",
-            "success": "Error",
-        })
+        return JsonResponse(
+            {
+                "status": 400,
+                "message": "Invalid action.",
+                "success": "Error",
+            }
+        )
 
     except Exception as e:
-        return JsonResponse({
-            "status": 500,
-            "message": str(e),
-            "success": "Error",
-        })
-        
+        return JsonResponse(
+            {
+                "status": 500,
+                "message": str(e),
+                "success": "Error",
+            }
+        )
+
+
 @require_GET
 @staff_member_required
 def fetch_error_logs(request):
@@ -13218,16 +13258,16 @@ def fetch_error_logs(request):
     - Only Admin user allowed.
     - This view handles fetching latest 50 of error logs data.
     """
-    
+
     log_file_path = settings.LOG_FILE_PATH
-    
+
     # Number of lines to fetch from the end of the log file
     lines_to_fetch = 50
     try:
         with open(log_file_path, "r") as log_file:
             logs = log_file.readlines()[-lines_to_fetch:]
     except FileNotFoundError:
-        logs = ['Log file not found.']
+        logs = ["Log file not found."]
     except Exception as e:
         logs = [f"Error reading log file: {e}"]
     return JsonResponse({"logs": logs})
@@ -13246,12 +13286,17 @@ def download_log_file(request):
     log_file_path = settings.LOG_FILE_PATH
 
     if os.path.exists(log_file_path):
-        return FileResponse(open(log_file_path, 'rb'), as_attachment=True, filename="app_errors.log")
+        return FileResponse(
+            open(log_file_path, "rb"), as_attachment=True, filename="app_errors.log"
+        )
     else:
         return HttpResponseNotFound("Log file not found.")
 
+
 def test_middleware(request):
-    raise ValueError("A forced Error to test error middleware & error log functionalities.")
+    raise ValueError(
+        "A forced Error to test error middleware & error log functionalities."
+    )
 
 
 # Page Errors
@@ -13275,4 +13320,3 @@ def error_403(request, exception):
 def error_400(request, exception):
     data = {"error": "Bad Request!"}
     return render(request, "error.html", data)
-
