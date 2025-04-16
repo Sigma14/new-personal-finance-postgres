@@ -3928,11 +3928,12 @@ $(document).ready(function () {
 
   // Helper function to push messages to chat window
   function pushUserChat(content, prepend) {
+    const userAvatar = $('#chatContainer').attr('data-avatarUrl');
     const chatHTML = `
         <div class="chat chat-right">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
-                    <img src="{% static 'Images/logo.png' %}" alt="avatar" height="36" width="36" />
+                    <img src="${userAvatar}" alt="logo" height="36" width="36"  />
                 </span>
             </div>
             <div class="chat-body">
@@ -3951,11 +3952,12 @@ $(document).ready(function () {
   }
 
   function pushAIChat(content, prepend) {
+    const userAvatar = $('#chatContainer').attr('data-avatarUrl');
     const chatHTML = `
         <div class="chat chat-left">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
-                    <img src="{% static 'app-assets/images/icons/vuejs.svg' %}" alt="avatar"  height="36" width="36" />
+                    <img src="${userAvatar}" alt="avatar"  height="36" width="36" />
                 </span>
             </div>
             <div class="chat-body">
@@ -4060,17 +4062,17 @@ $(document).ready(function () {
   // Send message to ai through post request
   $("#sendMessageButton").click(function (e) {
     e.preventDefault();
-    const csrfmiddlewaretoken = getCookie("csrftoken");
     const msg = $("#aiMsgInput").val();
     if (msg.trim() === "") return;
-
     // API call to send message
     $.ajax({
       method: "POST",
       url: $("#sendMessageButton").data("url"),
       data: {
         message: msg,
-        csrfmiddlewaretoken,
+      },
+      headers: {
+        "X-CSRFToken": csrftoken,
       },
       dataType: "json",
       beforeSend: function () {
@@ -5743,7 +5745,19 @@ $(document).ready(function () {
 
   })();
 
-
-  console.log(window.location.pathname);
-
+  var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+    function csrfSafeMethod(method)
+    {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup(
+    {
+        beforeSend: function(xhr, settings)
+        {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain)
+            {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
 });

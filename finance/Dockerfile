@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the application port
-EXPOSE 8072
+EXPOSE 8077
 
 # Default command for development
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8072", "--insecure"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8077", "--insecure"]
