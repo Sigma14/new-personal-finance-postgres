@@ -34,6 +34,9 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/shepherd.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/dataTables.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/tables/datatable/responsive.bootstrap4.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/shepherd.min.css' %}">
         <!-- END: Vendor CSS-->
         <!-- Data Table-->
         <link rel="stylesheet" type="text/css" href="{% static 'assets/css/datatables.min.css' %}"/>
@@ -50,6 +53,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/core/menu/menu-types/vertical-menu.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/charts/chart-apex.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-toastr.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-tour.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/extensions/ext-component-tour.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/app-ecommerce.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/plugins/forms/pickers/form-flat-pickr.css' %}">
@@ -118,6 +122,9 @@
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'transaction_list' %} active {% endif %}"  href="{% url 'transaction_list' %}" data-placement="top">Transaction</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'real_estate_home' %} active {% endif %}"   href="{% url 'real_estate_home'%}" data-placement="top">Real Estate</a></li>
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'mortgagecalculator_list' %} active {% endif %}"  href="{% url 'mortgagecalculator_list' %}" data-placement="top">Calculator</a></li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'app-error-report' %} active {% endif %}"  href="{% url 'app-error-report' %}" data-placement="top">Admin Report</a></li>
+                    {% endif %}
                     {% if request.user.is_staff %}
                     <li class="nav-item d-none d-lg-block" style="padding-top:6px; padding-right:10px;"> <a style="height:25px;" class="nav-link {% if page == 'app-error-report' %} active {% endif %}"  href="{% url 'app-error-report' %}" data-placement="top">Admin Report</a></li>
                     {% endif %}
@@ -307,6 +314,18 @@
                         </ul>
                     </li>
                     {% endif %}
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="d-flex align-items-center" href="#">
+                        <i data-feather="settings"></i>
+                        <span class="menu-title text-truncate" data-i18n="Admin Panel">Admin Panel</span>
+                        </a>
+                        <ul class="menu-content">
+                            <li class="{% if request.resolver_match.view_name == 'app-error-report' %}active{% endif %}"><a class="d-flex align-items-center" href="{% url 'app-error-report' %}"><i data-feather="circle"></i><span class="menu-item text-truncate" data-i18n="App Error Report">App Error Report</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -314,6 +333,17 @@
         <div class='my-loader'> 
             <img src="{% static 'assets/animations/loading_small.gif' %}" alt="Loading..." />
         </div>
+        <!--START: Right Sidebar Includes-->
+        {% if request.user.is_authenticated %}
+        {% include "./right-sidebar/sidebar_toggler.html" %}
+        {% include "./right-sidebar/sidebar_body.html" %}
+        {% endif %}
+        {% include "./right-sidebar/image_preview_modal.html" %}
+        {% include "./right-sidebar/edit_note_modal.html" %}
+        {% if request.user.is_staff %}
+        {% include "./admin_only/error_details_modal.html" %}
+        {% endif %}
+        <!--END: Right Sidebar Includes-->
         <!--START: Right Sidebar Includes-->
         {% if request.user.is_authenticated %}
         {% include "./right-sidebar/sidebar_toggler.html" %}
@@ -361,8 +391,11 @@
         <script src="{% static 'app-assets/js/scripts/forms/form-number-input.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/jquery.dataTables.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/jquery.dataTables.min.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.bootstrap4.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/dataTables.responsive.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/tables/datatable/responsive.bootstrap4.js' %}"></script>
+        <script src="{% static 'app-assets/vendors/js/extensions/shepherd.min.js' %}"></script>
         <script src="{% static 'app-assets/vendors/js/extensions/shepherd.min.js' %}"></script>
         <!-- END: Page Vendor JS-->
         <!-- BEGIN: Theme JS-->
@@ -371,6 +404,8 @@
         <!-- END: Theme JS-->
         <!-- BEGIN: Page JS-->
         <script src="{% static '/assets/js/datatables.min.js' %}"></script>
+        <script src="{% static '/assets/js/papaparse.min.js' %}"></script>
+        <script src="{% static '/app-assets/js/scripts/tables/table-datatables-advanced.js' %}"></script>
         <script src="{% static '/assets/js/papaparse.min.js' %}"></script>
         <script src="{% static '/app-assets/js/scripts/tables/table-datatables-advanced.js' %}"></script>
         <script src="{% static '/app-assets/js/scripts/pages/app-ecommerce.js' %}"></script>
@@ -384,6 +419,7 @@
         <script src="{% static 'app-assets/js/scripts/pages/app-user-edit.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-navs.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/components/components-collapse.js' %}"></script>
+        <script src="{% static 'app-assets/js/scripts/extensions/ext-component-tour.js' %}"></script>
         <script src="{% static 'app-assets/js/scripts/extensions/ext-component-tour.js' %}"></script>
         <!-- END: Page JS-->
         <script src="{% static 'assets/js/line-graph.js' %}"></script>

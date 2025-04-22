@@ -83,6 +83,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "my_finance.context_processors.user_category",
                 "my_finance.context_processors.user_notes",
+                "my_finance.context_processors.user_notes",
             ],
         },
     },
