@@ -1,7 +1,8 @@
 import datetime
 import json
+
 from .helper import create_categories, create_category_group
-from .models import Category, SuggestiveCategory, MyNotes
+from .models import Category, MyNotes, SuggestiveCategory
 
 
 def user_category(request):

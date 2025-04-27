@@ -61,7 +61,8 @@ def save_fund_obj(request, user_name):
         )
         return fund_data
     if not category:
-        category_obj = Category.objects.create(name=category_name, user=user_name)
+        category_obj = Category.objects.create(
+            name=category_name, user=user_name)
     else:
         category_obj = category[0]
 
@@ -97,7 +98,8 @@ def save_fund_obj(request, user_name):
     transaction_obj.save()
     account_obj.transaction_count += 1
     account_obj.save()
-    fund_obj = AvailableFunds.objects.filter(user=user_name, account=account_obj)
+    fund_obj = AvailableFunds.objects.filter(
+        user=user_name, account=account_obj)
     if fund_obj:
         total_fund = round(float(fund_obj[0].total_fund) + freeze_amount, 2)
         fund_obj[0].total_fund = total_fund
@@ -147,8 +149,10 @@ def start_end_date(date_value, period):
         start_year_date = f"01-01-{date_value.year}"
         end_year_date = f"31-12-{date_value.year}"
         return (
-            datetime.strptime(start_year_date, DateFormats.DD_MM_YYYY.value).date(),
-            datetime.strptime(end_year_date, DateFormats.DD_MM_YYYY.value).date(),
+            datetime.strptime(
+                start_year_date, DateFormats.DD_MM_YYYY.value).date(),
+            datetime.strptime(
+                end_year_date, DateFormats.DD_MM_YYYY.value).date(),
         )
 
     if period == BudgetPeriods.QUARTERLY.value:
@@ -248,7 +252,8 @@ def check_bill_is_due():
 
         if auto_pay:
             remaining_amount = round(account_balance - bill_amount, 2)
-            categories = SubCategory.objects.get(name=label, category__user=bill.user)
+            categories = SubCategory.objects.get(
+                name=label, category__user=bill.user)
             tag_obj, tag_created = Tag.objects.get_or_create(
                 user=bill.user, name="Bills"
             )
@@ -350,7 +355,8 @@ def check_income_date():
     Check income date
     """
     today_date = datetime.today().date()
-    income_data = Income.objects.filter(income_date__lte=today_date, auto_income=True)
+    income_data = Income.objects.filter(
+        income_date__lte=today_date, auto_income=True)
     for income in income_data:
         account_obj = income.account
         account_balance = float(account_obj.available_balance)
@@ -617,10 +623,13 @@ def get_template_budget():
     }
     for tem_date in dates:
         if tem_date == template_end_date:
-            template_end_date = get_period_date(tem_date, BudgetPeriods.WEEKLY.value)
-            temp_start_date = datetime.strftime(tem_date, DateFormats.MON_DD_YYYY.value)
+            template_end_date = get_period_date(
+                tem_date, BudgetPeriods.WEEKLY.value)
+            temp_start_date = datetime.strftime(
+                tem_date, DateFormats.MON_DD_YYYY.value)
             temp_end_date = datetime.strftime(
-                template_end_date - relativedelta(days=1), DateFormats.MON_DD_YYYY.value
+                template_end_date -
+                relativedelta(days=1), DateFormats.MON_DD_YYYY.value
             )
             template_dict[BudgetPeriods.WEEKLY.value].append(
                 [
@@ -719,7 +728,8 @@ def get_template_budget():
 
     template_dict[BudgetPeriods.DAILY.value][0][1] = tem_daily_amount
     template_dict[BudgetPeriods.DAILY.value][0][2] = tem_daily_spent
-    template_dict[BudgetPeriods.DAILY.value][0][3] = tem_daily_amount - tem_daily_spent
+    template_dict[BudgetPeriods.DAILY.value][0][3] = tem_daily_amount - \
+        tem_daily_spent
     template_dict[BudgetPeriods.WEEKLY.value][0][1] = tem_weekly_amount
     template_dict[BudgetPeriods.WEEKLY.value][0][2] = tem_weekly_spent
     template_dict[BudgetPeriods.WEEKLY.value][0][3] = (
@@ -839,7 +849,8 @@ def get_cmp_data(
             )
 
         budget_graph_value.append(total_spent_amount)
-        budget_transaction_data_dict[bgt_name].insert(0, [bgt_name, total_spent_amount])
+        budget_transaction_data_dict[bgt_name].insert(
+            0, [bgt_name, total_spent_amount])
         budget_bar_value[0]["data"].append(total_spent_amount)
 
     return budget_bar_value, budget_graph_value, budget_transaction_data_dict

@@ -1,7 +1,9 @@
-import numpy as np
-import pandas as pd
 import math
+
+import numpy as np
 import numpy_financial as npf
+import pandas as pd
+
 
 def calculate_tenure(loan_amount, monthly_payment, annual_interest_rate):
     # Convert annual interest rate to a monthly interest rate
@@ -12,7 +14,8 @@ def calculate_tenure(loan_amount, monthly_payment, annual_interest_rate):
         return False
 
     # Calculate the number of payments (tenure) using the annuity formula
-    numerator = math.log(1 - ((loan_amount * monthly_interest_rate) / monthly_payment))
+    numerator = math.log(
+        1 - ((loan_amount * monthly_interest_rate) / monthly_payment))
     denominator = math.log(1 + monthly_interest_rate)
     tenure = -1 * (numerator / denominator)
 
@@ -40,9 +43,16 @@ def calculator(amount, interest, tenure, month=None):
     interest = npf.ipmt(rate, periods, nper, pv)
     pmt = principal + interest  # Or: pmt = np.pmt(rate, nper, pv)
 
-    cols = ['initial_balance', 'payment', 'interest', 'principle', 'ending_balance']
-    data = [balance(pv, rate, periods - 1, -pmt), abs(principal + interest), abs(interest), abs(principal), balance(pv, rate, periods, -pmt)]
+    cols = ["initial_balance", "payment",
+            "interest", "principle", "ending_balance"]
+    data = [
+        balance(pv, rate, periods - 1, -pmt),
+        abs(principal + interest),
+        abs(interest),
+        abs(principal),
+        balance(pv, rate, periods, -pmt),
+    ]
 
     table = pd.DataFrame(data, columns=periods, index=cols).T
-    table.index.name = 'month'
+    table.index.name = "month"
     return table.round(2)
