@@ -1,0 +1,714 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Property Manage Sample</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'property_list' %}">Property Manage</a>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                            <div class="card">
+                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i>&nbsp;Page Info</span>
+                                </div>
+                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                    <div class="card-body">
+                                        It is a sample page which is shows how your property manage section looks and how you can manage it.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+				<section class="app-user-edit">
+                    <ul class="nav nav-pills" role="tablist" id="custom-nav">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center active" id="property_tab" data-toggle="tab" href="#property_data" aria-controls="property_data" role="tab" aria-selected="false">
+                                <span class="d-none d-sm-block">Property</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" id="income_tab" data-toggle="tab" href="#income_data" aria-controls="income_data" role="tab" aria-selected="false">
+                                <span class="d-none d-sm-block">Income</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" id="expenses_tab" data-toggle="tab" href="#expenses_data" aria-controls="expenses_data" role="tab" aria-selected="false">
+                                <span class="d-none d-sm-block">Expenses</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center" id="maintenance_tab" data-toggle="tab" href="#maintenance_data" aria-controls="maintenance    _data" role="tab" aria-selected="false">
+                                <span class="d-none d-sm-block">Maintenance</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="property_data" aria-labelledby="property_tab" role="tabpanel">
+                        <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <!-- Statistics Card -->
+                        <div class="col-12">
+                            <div class="card card-statistics">
+                                <div class="card-body statistics-body">
+                                    <div class="row">
+                                        <div class="col-xl-3 col-sm-12 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <div class="item-img">
+                                                        <a href="app-ecommerce-details.html">
+                                                            <img src="{% static 'app-assets/images/property/property_image.jpeg' %}" alt="img-placeholder" height="50%" width="50%"/>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <br/>
+                                                    <h2 class="font-weight-bolder mb-0">Vine Street</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0"><i data-feather="map-pin" class="avatar-icon"></i>123 Main St.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-2 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <br/>
+                                                    <h2 class="font-weight-bolder mb-0">$500000</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">Property Value</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-2 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <br/>
+                                                    <h2 class="font-weight-bolder mb-0">$400</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">Total Monthly Rent</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-2 col-sm-3 col-12 mb-2 mb-xl-0">
+                                            <div class="media">
+                                                <div class="media-body my-auto">
+                                                    <br/>
+                                                    <h2 class="font-weight-bolder mb-0">1</h2>
+                                                    <br/>
+                                                    <p class="card-text font-small-3 mb-0">Tenants/Owners</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                        <br/>
+                        <section class="app-user-edit">
+                            <ul class="nav nav-pills" role="tablist" id="custom-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link d-flex align-items-center active" id="unit1_tab" data-toggle="tab" href="#unit1_data" aria-controls="unit1_data" role="tab" aria-selected="false">
+                                        <span class="d-none d-sm-block">Unit1</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </section>
+                        <section>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="unit1_data" aria-labelledby="unit1_tab" role="tabpanel">
+                                    <section id="dashboard-analytic">
+                                        <div class="row match-height">
+                                            <div class="col-lg-6 col-sm-6 col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Lease</h3>
+                                                    </div>
+                                                    <hr/>
+                                                    <div class="text-center">
+                                                        <h1 class="mb-1 text-white total_rental_amount">$400</h1>
+                                                        <p class="card-text m-auto w-75">
+                                                            Monthly Rent (Due on the 1 of every month)
+                                                        </p>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Start</h4>
+                                                                    <p class="card-text term_name">Oct. 1, 2022</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">End</h4>
+                                                                    <p class="card-text rent_amount_month">Oct. 1, 2023</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Lease Term</h4>
+                                                                    <p class="card-text rent_start_date">Fixed Term</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Days Remaining</h4>
+                                                                    <p class="card-text rent_end_date">365</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12"><hr/></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-sm-6 col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Collection</h3>
+                                                    </div>
+                                                    <hr/>
+                                                    <div class="row">
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Total Rent Collected</h4>
+                                                                    <p class="card-text">$0.0</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Other Collected</h4>
+                                                                    <p class="card-text">$100</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Total</h4>
+                                                                    <p class="card-text">$100</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-6 col-sm-6 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Current Invoices</h4>
+                                                                    <p class="card-text">Invoice Id :- 2</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 col-sm-12 col-12">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">Tenant</h3>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <div class="media align-items-center">
+                                                                    <div class="avatar avatar-xl mr-1">
+                                                                        <img src="{% static 'app-assets/images/portrait/small/avatar-s-11.jpg' %}" alt="Avatar" width="38" height="38" />
+                                                                    </div>
+                                                                    <div class="media-body">
+                                                                        <h6 class="mb-0">jhon lee</h6>
+                                                                        <p class="mb-0">jhone@gmail.com</p>
+                                                                    </div>
+                                                                </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Total Amount Paid</h4>
+                                                                    <p class="card-text term_name">$400</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Tenant Since</h4>
+                                                                    <p class="card-text term_name">Oct. 1, 2022</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Current Lease</h4>
+                                                                    <p class="card-text term_name">Vine Street | unit1</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Monthly Rent</h4>
+                                                                    <p class="card-text term_name">$400</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-xl-4 col-sm-4 col-12">
+                                                            <div class="card">
+                                                                <div class="card-header flex-column align-items-start pb-0">
+                                                                    <h4 class="font-weight-bolder mt-1">Starts & Ends</h4>
+                                                                    <p class="card-text term_name">Oct. 1, 2022 | Oct. 1, 2023</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="tab-pane" id="income_data" aria-labelledby="income_tab" role="tabpanel">
+                        <section>
+                            <div class="row match-height">
+                                <!-- Company Table Card -->
+                                <div class="col-lg-9 col-12">
+                                    <div class="card card-company-table">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover dataTable no-footer" id="property_table" role="grid" aria-describedby="property_table_info">
+                                                    <thead>
+                                                        <tr role="row"><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Property: activate to sort column ascending" style="width: 220.275px;">Property</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Unit: activate to sort column ascending" style="width: 100.662px;">Unit</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Amount: activate to sort column ascending" style="width: 151.163px;">Amount</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Paid: activate to sort column ascending" style="width: 116.225px;">Paid</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Balance: activate to sort column ascending" style="width: 159.075px;">Balance</th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="property_tr odd" property_detail_url="#" role="row">
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="avatar bg-light-primary mr-1">
+                                                                            <div class="avatar-content">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home font-medium-3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">Villa 526</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">villa_unit1</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$6100.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$600.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$5500.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        <tr class="property_tr even" property_detail_url="#" role="row">
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="avatar bg-light-primary mr-1">
+                                                                            <div class="avatar-content">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home font-medium-3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">Vine 65</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">vine_unit11</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$6000.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$0.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div>
+                                                                            <div class="font-weight-bolder">$6000.0</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-12">
+                                    <div class="card card-congratulation-medal">
+                                        <div class="card-body">
+                                            <h5 class="text-center">TOTAL INVOICE AMOUNT<strong>($12100) </strong></h5>
+                                            <div id="income_pie_chart"></div>
+                                            <div class="row">
+                                                <div class="col-xl-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Total Open Invoices</h4>
+                                                            <p class="card-text" style="color:#ffe700">$11500.0</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Overdue</h4>
+                                                            <p class="card-text" style="color:#FF5733">$0</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <hr/>
+                                                </div>
+                                                <div class="col-xl-12 col-sm-12 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Total Due Amount</h4>
+                                                            <p class="card-text">$11500</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <hr/>
+                                                </div>
+                                                <div class="col-xl-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Partially Paid</h4>
+                                                            <p class="card-text" style="color:#826bf8">$0</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Fully Paid</h4>
+                                                            <p class="card-text" style="color:#00d4bd">$600.0</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <hr/>
+                                                </div>
+
+                                                <div class="col-xl-12 col-sm-12 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <h4 class="font-weight-bolder mt-1">Total Paid Amount</h4>
+                                                            <p class="card-text">$600.0</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--/ Company Table Card -->
+                            </div>
+                        </section>
+                    </div>
+                    <div class="tab-pane" id="expenses_data" aria-labelledby="expenses_tab" role="tabpanel">
+                        <section>
+                            <div class="row match-height">
+                                <!-- Company Table Card -->
+                                <div class="col-lg-12 col-12">
+                                    <div class="card card-company-table">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover dataTable no-footer" role="grid" aria-describedby="property_table_info">
+                                                    <thead>
+                                                        <tr role="row"><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Properties: activate to sort column ascending" style="width: 188.3px;">Properties</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Category: activate to sort column ascending" style="width: 213.525px;">Category</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Date: activate to sort column ascending" style="width: 229.212px;">Date</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Request: activate to sort column ascending" style="width: 330.013px;">Request</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Amount: activate to sort column ascending" style="width: 139.15px;">Amount</th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr class="property_tr odd" property_detail_url="#" role="row">
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-primary mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home font-medium-3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Vine 65</div>
+                                                                        <div class="font-small-2 ">Unit :- unit1</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-warning mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tool font-medium-3"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">electronics</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-info mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar font-medium-3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Oct. 18, 2022</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="media align-items-center">
+                                                                    <div class="avatar avatar-xl mr-1">
+                                                                        <img src="/static/app-assets/images/portrait/small/avatar-s-11.jpg" alt="Avatar" width="38" height="38">
+                                                                    </div>
+                                                                    <div class="media-body">
+                                                                        <h6 class="mb-0">Ac repairing</h6>
+                                                                        <p class="mb-0">By mitt alam</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-success mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign font-medium-3"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">$50</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr><tr class="property_tr even" property_detail_url="/property/expense/update/2" role="row">
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-primary mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home font-medium-3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Villa 526</div>
+                                                                        <div class="font-small-2 ">Unit :- unit1</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-warning mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tool font-medium-3"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">electrical</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-info mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar font-medium-3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Oct. 18, 2022</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="media align-items-center">
+                                                                    <div class="avatar avatar-xl mr-1">
+                                                                        <img src="/static/app-assets/images/portrait/small/avatar-s-11.jpg" alt="Avatar" width="38" height="38">
+                                                                    </div>
+                                                                    <div class="media-body">
+                                                                        <h6 class="mb-0">new wiring</h6>
+                                                                        <p class="mb-0">By Mehtab alam</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-success mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign font-medium-3"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">$100</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--/ Company Table Card -->
+                            </div>
+                        </section>
+                    </div>
+                    <div class="tab-pane" id="maintenance_data" aria-labelledby="maintenance_tab" role="tabpanel">
+                        <section>
+                            <div class="row match-height">
+                                <!-- Company Table Card -->
+                                <div class="col-lg-12 col-12">
+                                    <div class="card card-company-table">
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover dataTable no-footer" role="grid" aria-describedby="property_table_info">
+                                                    <thead>
+                                                        <tr role="row"><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Properties: activate to sort column ascending" style="width: 150.012px;">Properties</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Address: activate to sort column ascending" style="width: 218.725px;">Address</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Request: activate to sort column ascending" style="width: 419.013px;">Request</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Category: activate to sort column ascending" style="width: 160.238px;">Category</th><th class="sorting" tabindex="0" aria-controls="property_table" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending" style="width: 152.212px;">Status</th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr class="property_tr odd" property_detail_url="/property/maintenance/update/1" role="row">
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-primary mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home font-medium-3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Villa 526</div>
+                                                                        <div class="font-small-2 ">Unit :- unit1</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-success mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-map-pin font-medium-3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Villa 526 Zentira</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="media align-items-center">
+                                                                    <div class="avatar avatar-xl mr-1">
+                                                                        <img src="/static/app-assets/images/portrait/small/avatar-s-11.jpg" alt="Avatar" width="38" height="38">
+                                                                    </div>
+                                                                    <div class="media-body">
+                                                                        <h6 class="mb-0">Pipe leakage</h6>
+                                                                        <p class="mb-0">By Mehtab alam on Oct. 18, 2022</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="avatar bg-light-info mr-1">
+                                                                        <div class="avatar-content">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tool font-medium-3"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="font-weight-bolder">Plumbing</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="font-medium-4">
+
+                                                                        <div class="badge badge-glow badge-danger">Unresolved</div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

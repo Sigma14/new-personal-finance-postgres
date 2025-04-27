@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+    <title>COMPARE BUDGETS PAGE</title>
+</head>
+<body>
+
+{% extends "index.html" %}
+{% load static i18n%}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Budgets</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                      Compare Budgets
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- BEGIN: Info card-->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="compate-qna">
+                            <div class="card">
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;" data-toggle="collapse" role="button" data-target="#compate-one" aria-expanded="false" aria-controls="compate-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Compate Budget Page Info</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id="compate-one" style="padding-top:0px; padding-left:10px;" class="collapse" data-parent="#compate-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                This page is designed to help you compare two different budgets in a straightforward way. It's perfect for seeing how your current budget measures up against a future budget goal. By comparing, you can identify what changes are needed in your spending or saving habits to achieve your financial targets.                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--END: Info card-->
+                <section id="stocks_grid_view" class="grid-view">
+                        <div class="card ecommerce-card">
+                            <div class="card-body">
+                                <div class="item-name" style="text-align:center;">
+                                    <a href="{% url 'compare-target-budgets' %}">Compare Spending against target</a>
+                                </div>
+                                <div class="item-name">
+                                    <p class="card-text">in this comparison functionality users can see spending and transaction comparison for selected budgets</p>
+                                </div>
+                            </div>
+                        </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

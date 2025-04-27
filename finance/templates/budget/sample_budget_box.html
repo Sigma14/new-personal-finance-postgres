@@ -1,0 +1,317 @@
+{% extends "index.html" %}
+{% load static i18n %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Sample Budget Box {% endblock title %}
+</head>
+<body>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0 Step-1">{% trans 'Sample Budgets' %}</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ _('Home')}}</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">{{ _('Budgets')}}</a>
+                                    </li>
+                                    <li class="breadcrumb-item">{% trans 'Sample' %}</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="sampleBudgetTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                 <a href="{% url 'budget_add' %}" class="btn btn-primary"><i
+                                            class="fa fa-plus"></i>{% trans ' Create Budget' %}</a>
+                <br/>
+                <br/>
+                <section>
+                    <div class="card ecommerce-card">
+                        <div class="card-body">
+                            <div class="card-datatable table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr class="show_bdgt_exp Step-2" method_name="expenses_income_cls">
+                                            <th><h5><b>{{ _('Income')}}</b></h5></th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th><h5><b class="text-success">$1000.0&nbsp;&nbsp;</b><i class="fa fa-chevron-down income_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right income_drp_sign"></i></h5></th>
+                                        </tr>
+
+                                        <tr class="expenses_income_cls" style="display:None;">
+                                            <th colspan="16">
+                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{% trans 'Income' %}</b></span></div>
+                                            </th>
+                                        </tr>
+                                        <tr class="expenses_income_cls" style="display:None;">
+                                                <th colspan="16">
+
+                                                    <div class="item-img text-center daily_bdgt_data" class_name=".daily2023">
+                                                        <div class="card-body"><a>
+                                                                </a><h6 style="float: left;"><a></a><a href="#" title="sample budget">{% trans 'Salary' %}</a></h6>
+                                                                <span class="text-danger">$4000.0 {% trans 'left' %}</span>
+                                                                <span style="float: right;" class="text-success">$1000.0 {{_('Spending')}} </span>
+                                                            </div>
+                                                            <br>
+                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                <h6 style="float: left;"><strong class="text-success">$1000.0</strong> of $5000.0</h6>
+                                                                <span class="font-small-2 text-muted" style="text-">{% trans 'THIS AMOUNT APPLIES FROM' %} {{month_start}} {% trans 'TO' %} {{month_end}}.</span>
+                                                            </div>
+                                                    </div>
+
+                                                </th>
+                                            </tr>
+                                        <tr class="show_bdgt_exp Step-3" method_name="expenses_budgets_cls">
+                                            <th><h5><b>{% trans 'Expenses' %}</b></h5></th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th><h5><b>$300.0&nbsp;&nbsp;</b><i class="fa fa-chevron-down expense_drp_sign" style="display:None;"></i><i class="fa fa-chevron-right expense_drp_sign"></i></h5></th>
+                                        </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                            <th colspan="16">
+                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{% trans 'Personal Care' %}</b></span></div>
+                                            </th>
+                                        </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                <th colspan="16">
+                                                    <div class="item-img text-center">
+                                                        <div class="card-body">
+                                                            <h6 style="float: left;"><a href="#" title="sample budget details link">{% trans 'Hobbies' %}</a></h6>
+                                                            <span class="text-danger">$50.0 {{_('left')}}</span>
+                                                            <span style="float: right;" class="text-success">$50.0 {{_('Spending')}}</span>
+                                                        </div>
+                                                        <br>
+                                                        <div class="progress progress-bar-success" style="height:9px;">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body" style="padding-bottom:40px;">
+                                                            <h6 style="float: left;"><strong class="text-success">$50.0</strong> {{ _('of')}} $100.0</h6>
+                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{month_start}} {{ _('TO')}} {{month_end}}.</span>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                <th colspan="16">
+                                                    <div class="item-img text-center">
+                                                            <div class="card-body">
+                                                                <h6 style="float: left;"><a href="#" title="sample budget details link">{% trans 'Clothes' %}</a></h6>
+                                                                <span class="text-danger">$30.0 {{_('left')}}</span>
+                                                                <span style="float: right;" class="text-success">$70.0 {{_('Spending')}}</span>
+                                                            </div>
+                                                            <br>
+                                                            <div class="progress progress-bar-success" style="height:9px;">
+                                                                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">
+                                                                </div>
+                                                            </div>
+                                                            <div class="card-body" style="padding-bottom:40px;">
+                                                                <h6 style="float: left;"><strong class="text-success">$70.0</strong> {{_('left')}} $100.0</h6>
+                                                                <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{month_start}} {{ _('TO')}} {{month_end}}.</span>
+                                                            </div>
+
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                            <th colspan="16">
+                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{% trans 'Transportation' %}</b></span></div>
+                                            </th>
+                                        </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                <th colspan="16">
+                                                    <div class="item-img text-center">
+                                                        <div class="card-body">
+                                                            <h6 style="float: left;"><a href="#" title="sample budget details link">{% trans 'Gas & Fuel' %}</a></h6>
+                                                            <span class="text-danger">$160.0 {{_('left')}}</span>
+                                                            <span style="float: right;" class="text-success">$40.0 {{_('Spending')}}</span>
+                                                        </div>
+                                                        <br>
+                                                        <div class="progress progress-bar-success" style="height:9px;">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body" style="padding-bottom:40px;">
+                                                            <h6 style="float: left;"><strong class="text-success">$40.0</strong> {{_('left')}} $200.0</h6>
+                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{month_start}} {{ _('TO')}} {{month_end}}.</span>  
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                            <th colspan="16">
+                                                <div class="badge badge-pill d-block badge-secondary"><span><b>{% trans 'Food' %}</b></span></div>
+                                            </th>
+                                        </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                <th colspan="16">
+                                                    <div class="item-img text-center">
+                                                        <div class="card-body">
+                                                            <h6 style="float: left;"><a href="#" title="sample budget details link">{% trans 'Restaurants' %}</a></h6>
+                                                            <span class="text-danger">$50.0 {{_('left')}}</span>
+                                                            <span style="float: right;" class="text-success">$100.0 {{_('Spending')}}</span>
+                                                        </div>
+                                                        <br>
+                                                        <div class="progress progress-bar-success" style="height:9px;">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body" style="padding-bottom:40px;">
+                                                            <h6 style="float: left;"><strong class="text-success">$50.0</strong> {{_('left')}} $100.0</h6>
+                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{month_start}} {{ _('TO')}} {{month_end}}.</span>  
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        <tr class="expenses_budgets_cls" style="display:None;">
+                                                <th colspan="16">
+                                                    <div class="item-img text-center">
+                                                        <div class="card-body">
+                                                            <h6 style="float: left;"><a href="#" title="sample budget details link">{% trans 'Groceries' %}</a></h6>
+                                                            <span class="text-danger">$160.0 {{_('left')}}</span>
+                                                            <span style="float: right;" class="text-success">$40.0 {{_('Spending')}}</span>
+                                                        </div>
+                                                        <br>
+                                                        <div class="progress progress-bar-success" style="height:9px;">
+                                                            <div class="progress-bar" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body" style="padding-bottom:40px;">
+                                                            <h6 style="float: left;"><strong class="text-success">$40.0</strong> {{ _('of')}} $200.0</h6>
+                                                            <span class="font-small-2 text-muted">{{ _('This amount applies from')}} {{month_start}} {{ _('TO')}} {{month_end}}.</span>  
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        <tr>
+                                            <th class="Step-4"><h5><b>{% trans 'Leftover cash' %}</b></h5></th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th>&nbsp;</th>
+                                            <th><h5>
+
+                                                    <b class="text-success">$700.0</b>
+
+                                            </h5></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="row match-height">
+                        <div class="col-xl-6 col-md-12 col-12 Step-5">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title"><h5><b>{% trans 'Cash Flow' %}</b></h5> </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="cash_flow_bar"></div> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-12 col-12 Step-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="card-title"><h5><b>{% trans 'Spending Categories' %}</b></h5> </div>
+                                            <div class="card-toolbar">
+                                                <ul class="nav nav-pills" style="float:right" role="tablist">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center active" id="budget_pie_tab" data-toggle="tab" href="#budget_pie_data" aria-controls="budget_pie_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Pie Chart"><i data-feather='pie-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link d-flex align-items-center" id="budget_bar_tab" data-toggle="tab" href="#budget_bar_data" aria-controls="budget_bar_data" role="tab" aria-selected="false">
+                                                            <span class="" title="Bar Chart"><i data-feather='bar-chart'></i></span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="tab-content">
+                                                <div class="tab-pane active" id="budget_pie_data" aria-labelledby="budget_pie_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="total_budget"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="tab-pane" id="budget_bar_data" aria-labelledby="budget_bar_tab" role="tabpanel">
+                                                    <section class="app-user-edit">
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <div id="budgets-bar"></div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head>
+    <title>APP ERROR LOGS</title>
+</head>
+<body>
+
+{% extends "index.html" %}
+{% load static i18n %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{% trans 'ADMIN REPORTS' %} </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+
+                <!--START: Data Table-->
+                <section id="responsive-datatable">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title">Erro Logs</h4>
+                                </div>
+                                <div class="card-datatable">
+                                    <div class="row g-2 align-items-center m-1">
+                                            <!-- Filter by Status -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
+                                            <select id="filterByStatus" class="form-control select">
+                                            <option value="">Filter Data By Status</option>
+                                            <option value="">Default / All</option>
+                                            <option value="open">Open</option>
+                                            <option value="resolved">Resolved</option>
+                                            <option value="skip">Skip</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Action Selector -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
+                                            <select id="actionSelector" class="form-control select">
+                                            <option value="">Change Status or Delete</option>
+                                            <option value="update_status">Change Status</option>
+                                            <option value="delete">Delete Selected</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Status Selector (hidden by default) -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6 d-none" id="statusSelectorContainer">
+                                            <select id="statusSelector" class="form-control select">
+                                            <option value="">Select Status</option>
+                                            <option value="open">Open</option>
+                                            <option value="resolved">Resolved</option>
+                                            <option value="skip">Skip</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Button -->
+                                        <div class="col-lg-3 col-md-4 col-sm-6">
+                                            <button
+                                            class="btn"
+                                            id="handleErrorBtn"
+                                            data-url="{% url 'app-error-report-action' %}"
+                                            >
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <table class="dt-multilingual table" id="errorLogsTable" data-api="{% url 'app-error-report' %}">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAllCheckbox"></th>
+                                                <th>Status Code</th>
+                                                <th>Time Stamp</th>
+                                                <th>Error Type</th>
+                                                <th>Path</th>
+                                                <th>Error Message</th>
+                                                <th>Counts</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!--END: Data Table-->
+
+                <!--START: Live Error Logs-->
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h1 class="text-center text-primary">Live Logs</h1>
+                            <div id="log-container" class="log-container theme-scrollbar" data-url="{% url 'fetch-error-logs' %}">
+                                Loading logs...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-12 text-left">
+                            <a href="/download-log/" class="btn btn-primary" role="button">
+                                <i class="fa fa-download"></i> Download Logs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!--END: Live Error Logs-->
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,832 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-29 07:27+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: finance/urls.py:28
+msgid "admin/"
+msgstr "行政/"
+
+#: my_finance/views.py:3576 my_finance/views.py:4997 my_finance/views.py:5685
+msgid "Earned"
+msgstr "已赚取"
+
+#: my_finance/views.py:3576 my_finance/views.py:4997 my_finance/views.py:5685
+#: templates/budget/compare_budget_box.html:178
+#: templates/budget/compare_budget_box.html:271
+#: templates/budget/compare_budget_box.html:364
+#: templates/budget/compare_budget_box.html:457
+#: templates/budget/sample_budget_box.html:74
+#: templates/budget/sample_budget_box.html:118
+#: templates/budget/sample_budget_box.html:138
+#: templates/budget/sample_budget_box.html:164
+#: templates/budget/sample_budget_box.html:189
+#: templates/budget/sample_budget_box.html:209
+msgid "Spending"
+msgstr "开支"
+
+#: templates/bill/bill_list.html:15
+msgid "Bills & Subscriptions"
+msgstr "账单和订阅"
+
+#: templates/budget/budget_add.html:17 templates/budget/budget_add.html:25
+msgid "Add budget"
+msgstr "添加预算"
+
+#: templates/budget/budget_add.html:20 templates/budget/budget_box.html:22
+#: templates/budget/budget_detail.html:20 templates/budget/budget_list.html:20
+#: templates/budget/budget_update.html:20
+#: templates/budget/compare_budget_box.html:20
+#: templates/budget/current_budget_box.html:20
+#: templates/budget/sample_budget_box.html:21
+msgid "Home"
+msgstr "家"
+
+#: templates/budget/budget_add.html:22 templates/budget/budget_box.html:19
+#: templates/budget/budget_box.html:24
+#: templates/budget/compare_budget_box.html:59
+#: templates/budget/compare_budget_box.html:71
+#: templates/budget/current_budget_box.html:22
+#: templates/budget/sample_budget_box.html:23
+msgid "Budgets"
+msgstr "预算"
+
+#: templates/budget/budget_add.html:38
+msgid "Budget already exist!"
+msgstr "預算已存在！"
+
+#: templates/budget/budget_add.html:56 templates/budget/budget_update.html:60
+#: templates/category/category_list.html:391
+msgid "Category Groups"
+msgstr "类别组"
+
+#: templates/budget/budget_add.html:71 templates/budget/budget_update.html:84
+#: templates/budget/budget_update.html:89
+#: templates/budget/compare_budget_box.html:178
+#: templates/budget/compare_budget_box.html:271
+#: templates/budget/compare_budget_box.html:364
+#: templates/budget/compare_budget_box.html:457
+#: templates/category/category_list.html:406
+msgid "Categories"
+msgstr "类别"
+
+#: templates/budget/budget_add.html:85 templates/budget/budget_update.html:105
+#: templates/category/category_list.html:421
+msgid "Currency"
+msgstr "货币"
+
+#: templates/budget/budget_add.html:100
+#: templates/budget/budget_update.html:128
+#: templates/budget/compare_budget_box.html:154
+#: templates/category/category_list.html:448
+msgid "Amount"
+msgstr "数量"
+
+#: templates/budget/budget_add.html:117
+#: templates/budget/budget_update.html:167
+#: templates/category/category_list.html:465
+msgid "Auto-budget period"
+msgstr "自动预算期"
+
+#: templates/budget/budget_add.html:132
+#: templates/budget/budget_update.html:202
+#: templates/category/category_list.html:480
+msgid "Start Date"
+msgstr "开始日期"
+
+#: templates/budget/budget_add.html:151
+#: templates/budget/budget_update.html:246
+#: templates/category/category_list.html:499
+msgid "Auto-budget"
+msgstr "自动预算"
+
+#: templates/budget/budget_add.html:156
+#: templates/category/category_list.html:504
+msgid "Create"
+msgstr "创造"
+
+#: templates/budget/budget_add.html:157
+#: templates/budget/budget_update.html:252
+#: templates/category/category_list.html:505
+msgid "Cancel"
+msgstr "取消"
+
+#: templates/budget/budget_add.html:169
+msgid "Add Category Group"
+msgstr "添加类别组"
+
+#: templates/budget/budget_add.html:184 templates/budget/budget_add.html:252
+msgid "Name"
+msgstr "姓名"
+
+#: templates/budget/budget_add.html:190 templates/budget/budget_add.html:258
+#: templates/budget/budget_list.html:1987 templates/index.html:214
+msgid "Add"
+msgstr "添加"
+
+#: templates/budget/budget_add.html:205 templates/budget/budget_add.html:273
+msgid "Suggestions"
+msgstr "建议"
+
+#: templates/budget/budget_add.html:226
+msgid "Add Category"
+msgstr "添加类别"
+
+#: templates/budget/budget_add.html:243
+msgid "Select Group"
+msgstr "选择组"
+
+#: templates/budget/budget_box.html:61 templates/budget/budget_box.html:67
+msgid "Create Budget"
+msgstr "创建预算"
+
+#: templates/budget/budget_box.html:122
+msgid "Create Budget Walkthrough"
+msgstr "创建预算演练"
+
+#: templates/budget/budget_box.html:125
+msgid ""
+" In this budget walkthrough, we provide a professional guide on the "
+"essential steps to help users create a well-structured budget by defining "
+"categories and allocating amounts. "
+msgstr "在此预算演练中，我们提供了有关基本步骤的专业指南，以帮助用户通过定义类别和分配金额来创建结构良好的预算。"
+
+#: templates/budget/budget_box.html:146
+msgid "Compare Budget"
+msgstr "比较预算"
+
+#: templates/budget/budget_box.html:149
+msgid ""
+"  Use the 'Compare Budget' feature to see how your current spending patterns stack up against your previous months or your initial budget plan. This tool is invaluable for spotting trends, understanding your spending habits, and making informed decisions to improve your financial well-being.\n"
+"                                            "
+msgstr ""
+"使用“比较预算”功能查看您当前的支出模式与前几个月或初始预算计划的对比情况。此工具对于发现趋势、了解您的消费习惯以及做出明智的决定以改善您的财务状况非常有用。"
+
+#: templates/budget/budget_box.html:163
+msgid "Current Budget"
+msgstr "当前预算"
+
+#: templates/budget/budget_box.html:166
+msgid ""
+" Your 'Current Budget' is where you track your current budget goals and "
+"financial activity. This interactive dashboard displays your income, "
+"expenses, and savings for the current month, giving you a clear view of your"
+" financial health. It's designed to help you stay on top of your spending "
+"and make adjustments as needed to align with your financial goals. "
+msgstr ""
+"“当前预算”用于跟踪您当前的预算目标和财务活动。此交互式仪表板显示您当月的收入、支出和储蓄，让您清晰了解自己的财务状况。它旨在帮助您掌握支出情况并根据需要进行调整以符合您的财务目标。"
+
+#: templates/budget/budget_box.html:177
+msgid "Sample Budget"
+msgstr "预算样本"
+
+#: templates/budget/budget_box.html:180
+msgid ""
+"Discover a sample of an already created budget, with our 'Sample Budget.' "
+"This feature provides you with a template showcasing a balanced budget, "
+"helping you understand how to allocate your income effectively across "
+"various categories like housing, food, savings, and more. It's a great "
+"starting point for beginners exploring sample budgets. "
+msgstr ""
+"使用我们的“示例预算”查看已创建的预算示例。此功能为您提供了一个展示平衡预算的模板，帮助您了解如何在住房、食品、储蓄等各个类别中有效分配收入。对于探索示例预算的初学者来说，这是一个很好的起点。"
+
+#: templates/budget/budget_detail.html:17
+#: templates/budget/budget_detail.html:22
+#: templates/budget/budget_detail.html:24 templates/budget/budget_list.html:17
+#: templates/budget/budget_list.html:22 templates/budget/budget_list.html:53
+#: templates/budget/budget_list.html:58 templates/budget/budget_list.html:63
+#: templates/budget/budget_list.html:68 templates/budget/budget_list.html:261
+#: templates/budget/budget_list.html:267 templates/budget/budget_list.html:290
+#: templates/budget/budget_list.html:435 templates/budget/budget_list.html:732
+#: templates/budget/budget_list.html:738 templates/budget/budget_list.html:756
+#: templates/budget/budget_list.html:900
+#: templates/budget/budget_list.html:1197
+#: templates/budget/budget_list.html:1203
+#: templates/budget/budget_list.html:1221
+#: templates/budget/budget_list.html:1364
+#: templates/budget/budget_list.html:1660
+#: templates/budget/budget_list.html:1666
+#: templates/budget/budget_list.html:1684
+#: templates/budget/budget_list.html:1827
+#: templates/budget/budget_list.html:1987
+#: templates/budget/budget_list.html:1995
+#: templates/budget/budget_list.html:1997
+#: templates/budget/budget_list.html:2521
+#: templates/budget/budget_list.html:2531
+#: templates/budget/budget_list.html:2557
+#: templates/budget/budget_list.html:2560
+#: templates/budget/budget_update.html:17
+#: templates/budget/budget_update.html:22
+#: templates/budget/budget_update.html:25
+#: templates/budget/budget_update.html:128
+#: templates/budget/compare_budget_box.html:22
+#: templates/budget/current_budget_box.html:50
+#: templates/budget/current_budget_box.html:52
+#: templates/category/category_list.html:95
+#: templates/category/category_list.html:97
+msgid "Budget"
+msgstr "预算"
+
+#: templates/budget/budget_detail.html:36
+msgid "Add Transaction"
+msgstr "添加交易"
+
+#: templates/budget/budget_detail.html:68
+#: templates/budget/budget_detail.html:81
+#: templates/budget/budget_list.html:2045
+#: templates/budget/budget_list.html:2129
+#: templates/budget/budget_list.html:2177
+#: templates/budget/budget_list.html:2261
+#: templates/budget/budget_list.html:2318
+#: templates/budget/budget_list.html:2429
+#: templates/budget/budget_list.html:2563
+#: templates/budget/budget_list.html:2609
+msgid "from"
+msgstr "从"
+
+#: templates/budget/budget_detail.html:74
+#: templates/budget/budget_detail.html:87
+msgid "To"
+msgstr "到"
+
+#: templates/budget/budget_detail.html:94
+msgid "Report"
+msgstr "报告"
+
+#: templates/budget/budget_detail.html:103
+#: templates/budget/budget_detail.html:105
+msgid "Budget Transactions"
+msgstr "预算交易"
+
+#: templates/budget/budget_detail.html:103
+#: templates/budget/budget_list.html:290 templates/budget/budget_list.html:435
+#: templates/budget/budget_list.html:756 templates/budget/budget_list.html:900
+#: templates/budget/budget_list.html:1221
+#: templates/budget/budget_list.html:1364
+#: templates/budget/budget_list.html:1684
+#: templates/budget/budget_list.html:1827
+#: templates/budget/budget_list.html:2045
+#: templates/budget/budget_list.html:2129
+#: templates/budget/budget_list.html:2177
+#: templates/budget/budget_list.html:2261
+#: templates/budget/budget_list.html:2318
+#: templates/budget/budget_list.html:2429
+#: templates/budget/budget_list.html:2563
+#: templates/budget/budget_list.html:2609
+#: templates/budget/current_budget_box.html:152
+#: templates/budget/current_budget_box.html:239
+#: templates/budget/current_budget_box.html:405
+msgid "to"
+msgstr "到"
+
+#: templates/budget/budget_list.html:35
+msgid "Budget Page Info"
+msgstr "预算页面信息"
+
+#: templates/budget/budget_list.html:39
+msgid ""
+"This page shows you an overview of your budgets. Budget table shows -> How "
+"many amount spent and left in budget."
+msgstr "此页面显示您的预算概览。预算表显示 -> 已花费金额和剩余预算。"
+
+#: templates/budget/budget_list.html:53 templates/budget/budget_list.html:2521
+#: templates/budget/budget_list.html:2531
+msgid "Template"
+msgstr "模板"
+
+#: templates/budget/budget_list.html:58
+#: templates/budget/current_budget_box.html:24
+msgid "Current"
+msgstr "当前的"
+
+#: templates/budget/budget_list.html:68
+#: templates/budget/compare_budget_box.html:85
+msgid "Compare"
+msgstr "比较"
+
+#: templates/budget/budget_list.html:89 templates/budget/budget_list.html:2560
+#: templates/budget/compare_budget_box.html:102
+#: templates/budget/compare_budget_box.html:224
+#: templates/budget/compare_budget_box.html:271
+msgid "Weekly"
+msgstr "每周"
+
+#: templates/budget/budget_list.html:94
+#: templates/budget/compare_budget_box.html:107
+#: templates/budget/compare_budget_box.html:131
+#: templates/budget/compare_budget_box.html:178
+msgid "Monthly"
+msgstr "每月"
+
+#: templates/budget/budget_list.html:99
+#: templates/budget/compare_budget_box.html:112
+#: templates/budget/compare_budget_box.html:317
+#: templates/budget/compare_budget_box.html:364
+msgid "Quarterly"
+msgstr "季刊"
+
+#: templates/budget/budget_list.html:104
+#: templates/budget/compare_budget_box.html:117
+#: templates/budget/compare_budget_box.html:410
+#: templates/budget/compare_budget_box.html:457
+msgid "Yearly"
+msgstr "每年"
+
+#: templates/budget/budget_list.html:121
+msgid "Current Week Transactions"
+msgstr "本周交易"
+
+#: templates/budget/budget_list.html:131 templates/budget/budget_list.html:300
+#: templates/budget/budget_list.html:445 templates/budget/budget_list.html:602
+#: templates/budget/budget_list.html:766 templates/budget/budget_list.html:910
+#: templates/budget/budget_list.html:1067
+#: templates/budget/budget_list.html:1231
+#: templates/budget/budget_list.html:1374
+#: templates/budget/budget_list.html:1530
+#: templates/budget/budget_list.html:1694
+#: templates/budget/budget_list.html:1837
+#: templates/budget/budget_list.html:2301
+#: templates/budget/budget_list.html:2540
+#: templates/budget/budget_list.html:2741
+msgid "Actions"
+msgstr "操作"
+
+#: templates/budget/budget_list.html:247 templates/budget/budget_list.html:718
+#: templates/budget/budget_list.html:1646
+msgid "Total Spending and Left All Budgets"
+msgstr "总支出和剩余所有预算"
+
+#: templates/budget/budget_list.html:290 templates/budget/budget_list.html:435
+#: templates/budget/budget_list.html:756 templates/budget/budget_list.html:900
+#: templates/budget/budget_list.html:1221
+#: templates/budget/budget_list.html:1364
+#: templates/budget/budget_list.html:1684
+#: templates/budget/budget_list.html:1827
+msgid "All the transactions for"
+msgstr "所有交易"
+
+#: templates/budget/budget_list.html:290 templates/budget/budget_list.html:435
+#: templates/budget/budget_list.html:756 templates/budget/budget_list.html:900
+#: templates/budget/budget_list.html:1221
+#: templates/budget/budget_list.html:1364
+#: templates/budget/budget_list.html:1684
+#: templates/budget/budget_list.html:1827
+msgid "between"
+msgstr "之间"
+
+#: templates/budget/budget_list.html:565
+#: templates/budget/budget_list.html:1030
+#: templates/budget/budget_list.html:1183
+#: templates/budget/budget_list.html:1347
+#: templates/budget/budget_list.html:1494
+#: templates/budget/budget_list.html:1810
+#: templates/budget/budget_list.html:1957
+#: templates/budget/budget_list.html:2640
+msgid "Total Spending and Left Budgets"
+msgstr "总支出和剩余预算"
+
+#: templates/budget/budget_list.html:592
+msgid "Current Month Transactions"
+msgstr "本月交易"
+
+#: templates/budget/budget_list.html:1057
+msgid "Current Quarter Transactions"
+msgstr "本季度交易"
+
+#: templates/budget/budget_list.html:1183
+msgid "All Budgets"
+msgstr "所有预算"
+
+#: templates/budget/budget_list.html:1520
+msgid "Current Year Transactions"
+msgstr "当年交易"
+
+#: templates/budget/budget_list.html:2011
+#: templates/budget/compare_budget_box.html:178
+#: templates/budget/compare_budget_box.html:271
+#: templates/budget/compare_budget_box.html:364
+#: templates/budget/compare_budget_box.html:457
+#: templates/budget/current_budget_box.html:87
+#: templates/budget/sample_budget_box.html:44
+#: templates/budget/sample_budget_box.html:64
+msgid "Income"
+msgstr "收入"
+
+#: templates/budget/budget_list.html:2035
+#: templates/budget/budget_list.html:2080
+#: templates/budget/budget_list.html:2167
+#: templates/budget/budget_list.html:2212
+#: templates/budget/sample_budget_box.html:73
+#: templates/budget/sample_budget_box.html:117
+#: templates/budget/sample_budget_box.html:137
+#: templates/budget/sample_budget_box.html:146
+#: templates/budget/sample_budget_box.html:163
+#: templates/budget/sample_budget_box.html:172
+#: templates/budget/sample_budget_box.html:188
+#: templates/budget/sample_budget_box.html:197
+#: templates/budget/sample_budget_box.html:208
+msgid "left"
+msgstr "左边"
+
+#: templates/budget/budget_list.html:2044
+#: templates/budget/sample_budget_box.html:126
+#: templates/budget/sample_budget_box.html:217
+msgid "of"
+msgstr "的"
+
+#: templates/budget/budget_list.html:2045
+#: templates/budget/budget_list.html:2127
+#: templates/budget/budget_list.html:2129
+#: templates/budget/budget_list.html:2177
+#: templates/budget/budget_list.html:2259
+#: templates/budget/budget_list.html:2261
+#: templates/budget/budget_list.html:2316
+#: templates/budget/budget_list.html:2318
+#: templates/budget/budget_list.html:2427
+#: templates/budget/budget_list.html:2429
+#: templates/budget/budget_list.html:2563
+#: templates/budget/budget_list.html:2607
+#: templates/budget/budget_list.html:2609
+msgid "This amount applies"
+msgstr "此金额适用"
+
+#: templates/budget/budget_list.html:2127
+#: templates/budget/budget_list.html:2259
+#: templates/budget/budget_list.html:2316
+#: templates/budget/budget_list.html:2427
+#: templates/budget/budget_list.html:2607
+msgid "at"
+msgstr "在"
+
+#: templates/budget/budget_list.html:2143
+#: templates/budget/compare_budget_box.html:45
+#: templates/budget/compare_budget_box.html:47
+#: templates/budget/current_budget_box.html:256
+#: templates/budget/sample_budget_box.html:90
+msgid "Expenses"
+msgstr "开支"
+
+#: templates/budget/budget_list.html:2275
+#: templates/budget/sample_budget_box.html:224
+msgid "Leftover cash"
+msgstr "剩余现金"
+
+#: templates/budget/budget_list.html:2462
+#: templates/budget/sample_budget_box.html:256
+msgid "Cash Flow"
+msgstr "现金周转"
+
+#: templates/budget/budget_list.html:2470
+#: templates/budget/current_budget_box.html:593
+#: templates/budget/sample_budget_box.html:266
+msgid "Spending Categories"
+msgstr "支出类别"
+
+#: templates/budget/budget_list.html:2525
+msgid ""
+"A template budget is a pre-structured budget format. It is showing the "
+"overview of your budget structure. You can see all the budgets and their "
+"total spending and left budgets."
+msgstr "模板预算是一种预先构建的预算格式。它显示了您的预算结构的概览。您可以查看所有预算及其总支出和剩余预算。"
+
+#: templates/budget/budget_list.html:2557
+msgid "Daily"
+msgstr "日常的"
+
+#: templates/budget/budget_list.html:2648
+msgid "Budgets and Spending"
+msgstr "预算和支出"
+
+#: templates/budget/budget_update.html:17
+#: templates/budget/budget_update.html:25
+#: templates/budget/budget_update.html:39
+#: templates/budget/budget_update.html:251 templates/index.html:211
+msgid "Update"
+msgstr "更新"
+
+#: templates/budget/budget_update.html:43
+msgid ""
+"If manual budget or auto budget have been used in any transaction, you can't"
+" update budget period and budget date. "
+msgstr "如果任何交易中使用了手动预算或自动预算，则您无法更新预算期间和预算日期。"
+
+#: templates/budget/budget_update.html:44
+msgid ""
+"If manual budget or auto budget not have been used in any transactions, "
+"updated budget period and budget date will be apply on the current budget."
+msgstr "如果任何交易中都未使用手动预算或自动预算，则更新的预算期和预算日期将应用于当前预算。"
+
+#: templates/budget/budget_update.html:68
+msgid "Select Category Group"
+msgstr "选择类别组"
+
+#: templates/budget/budget_update.html:89
+#: templates/budget/compare_budget_box.html:59
+#: templates/budget/compare_budget_box.html:71
+msgid "Select"
+msgstr "选择"
+
+#: templates/budget/budget_update.html:136
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget amount."
+msgstr "如果在任何交易中使用了手动预算或自动预算，则您无法编辑预算金额。"
+
+#: templates/budget/budget_update.html:150
+msgid "Current Period Amount"
+msgstr "本期金额"
+
+#: templates/budget/budget_update.html:157
+msgid ""
+"this amount not apply for previous budgets. it is only apply for current and"
+" next budget amount"
+msgstr "此金额不适用于以前的预算。它仅适用于当前和下一个预算金额"
+
+#: templates/budget/budget_update.html:175
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget period."
+msgstr "如果在任何交易中使用了手动预算或自动预算，则您无法编辑预算期。"
+
+#: templates/budget/budget_update.html:210
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can't"
+" edit budget start date."
+msgstr "如果在任何交易中使用了手动预算或自动预算，则您无法编辑预算开始日期。"
+
+#: templates/budget/budget_update.html:222
+msgid "Current Budget Date"
+msgstr "当前预算日期"
+
+#: templates/budget/budget_update.html:229
+msgid ""
+"If manual budget or auto budget have been used in any transaction. you can "
+"change current and next budget start date."
+msgstr "如果在任何交易中使用了手动预算或自动预算，您可以更改当前和下一个预算开始日期。"
+
+#: templates/budget/compare_budget_box.html:42
+msgid "Type"
+msgstr "类型"
+
+#: templates/budget/compare_budget_box.html:50
+#: templates/budget/compare_budget_box.html:52
+msgid "Incomes"
+msgstr "收入"
+
+#: templates/budget/compare_budget_box.html:153
+msgid "Date"
+msgstr "日期"
+
+#: templates/budget/current_budget_box.html:17
+msgid "Current Budgets"
+msgstr "当前预算"
+
+#: templates/budget/current_budget_box.html:152
+#: templates/budget/current_budget_box.html:239
+#: templates/budget/current_budget_box.html:405
+#: templates/budget/sample_budget_box.html:127
+#: templates/budget/sample_budget_box.html:147
+#: templates/budget/sample_budget_box.html:173
+#: templates/budget/sample_budget_box.html:198
+#: templates/budget/sample_budget_box.html:218
+msgid "This amount applies from"
+msgstr "此金额适用于"
+
+#: templates/budget/current_budget_box.html:237
+#: templates/budget/current_budget_box.html:403
+msgid "This amount applies at"
+msgstr "此金额适用于"
+
+#: templates/budget/current_budget_box.html:400
+msgid "Due on"
+msgstr "到期日期"
+
+#: templates/budget/sample_budget_box.html:18
+msgid "Sample Budgets"
+msgstr "预算示例"
+
+#: templates/budget/sample_budget_box.html:25
+msgid "Sample"
+msgstr "样本"
+
+#: templates/budget/sample_budget_box.html:34
+msgid " Create Budget"
+msgstr "创建预算"
+
+#: templates/budget/sample_budget_box.html:72
+msgid "Salary"
+msgstr "薪水"
+
+#: templates/budget/sample_budget_box.html:83
+msgid "THIS AMOUNT APPLIES FROM"
+msgstr "此金额适用于"
+
+#: templates/budget/sample_budget_box.html:83
+#: templates/budget/sample_budget_box.html:127
+#: templates/budget/sample_budget_box.html:147
+#: templates/budget/sample_budget_box.html:173
+#: templates/budget/sample_budget_box.html:198
+#: templates/budget/sample_budget_box.html:218
+msgid "TO"
+msgstr "到"
+
+#: templates/budget/sample_budget_box.html:109
+msgid "Personal Care"
+msgstr "个人护理"
+
+#: templates/budget/sample_budget_box.html:116
+msgid "Hobbies"
+msgstr "爱好"
+
+#: templates/budget/sample_budget_box.html:136
+msgid "Clothes"
+msgstr "衣服"
+
+#: templates/budget/sample_budget_box.html:155
+msgid "Transportation"
+msgstr "运输"
+
+#: templates/budget/sample_budget_box.html:162
+msgid "Gas & Fuel"
+msgstr "天然气和燃料"
+
+#: templates/budget/sample_budget_box.html:180
+msgid "Food"
+msgstr "食物"
+
+#: templates/budget/sample_budget_box.html:187
+msgid "Restaurants"
+msgstr "餐厅"
+
+#: templates/budget/sample_budget_box.html:207
+msgid "Groceries"
+msgstr "杂货"
+
+#: templates/home.html:19
+msgid "HOME PAGE"
+msgstr "主页"
+
+#: templates/home.html:30
+msgid "Personal Finance"
+msgstr "个人财务"
+
+#: templates/home.html:30
+msgid ""
+"Welcome to your one-stop solution for all things money-related! Our app is "
+"designed to help you understand, manage, and grow your finances, all in a "
+"user-friendly way. Whether you're looking to get a quick snapshot of your "
+"financial health, plan your spending, keep track of bills, or even save for "
+"your future dreams, we've got you covered."
+msgstr ""
+"欢迎来到您的一站式财务解决方案！我们的应用旨在帮助您以用户友好的方式了解、管理和发展您的财务状况。无论您是想快速了解您的财务状况、计划您的支出、跟踪账单，还是为未来的梦想储蓄，我们都能满足您的需求。"
+
+#: templates/home.html:30
+msgid ""
+"The app is laid out in easy-to-navigate boxes—each taking you to a specific "
+"feature like your Dashboard, Budget, Bills, and more. To start, simply click"
+" on any of the boxes to dive into the page you need. It's financial "
+"management made simple and effective, tailored just for you."
+msgstr ""
+"该应用程序采用易于导航的框布局，每个框都会带您进入特定功能，例如仪表板、预算、账单等。要开始使用，只需单击任意框即可进入所需的页面。它的财务管理变得简单而有效，专为您量身定制。"
+
+#: templates/home.html:30
+msgid "More.."
+msgstr "更多的.."
+
+#: templates/home.html:60
+msgid "BUDGET"
+msgstr "预算"
+
+#: templates/home.html:63
+msgid ""
+"The Budget section is your financial planning assistant, helping you create,"
+" monitor, and compare budgets. It ensures you achieve financial goals by "
+"tracking income and expenses, promoting financial health and discipline."
+msgstr "预算部分是您的财务规划助手，可帮助您创建、监控和比较预算。它通过跟踪收入和支出、促进财务健康和纪律来确保您实现财务目标。"
+
+#: templates/home.html:75
+msgid "BILLS"
+msgstr "账单"
+
+#: templates/home.html:78
+msgid ""
+"Our Bills feature is a centralized ledger for all your expenses, offering "
+"both calendar and table views. It helps you track due dates, avoid missed "
+"payments, and find opportunities to cut costs and save money."
+msgstr "我们的账单功能是集中记录您的所有费用，提供日历和表格视图。它可以帮助您跟踪到期日，避免错过付款，并找到削减成本和省钱的机会。"
+
+#: templates/home.html:90
+msgid "CATEGORY"
+msgstr "类别"
+
+#: templates/home.html:93
+msgid ""
+"The Category feature simplifies organization by grouping budgets and "
+"transactions. It helps you analyze spending patterns, identify savings "
+"opportunities, and make better financial decisions."
+msgstr "类别功能通过对预算和交易进行分组来简化组织。它可以帮助您分析消费模式、发现节省机会并做出更好的财务决策。"
+
+#: templates/home.html:106
+msgid "ACCOUNTS"
+msgstr "账户"
+
+#: templates/home.html:109
+msgid ""
+"Our Accounts section consolidates tracking for all your financial "
+"accounts—checking, savings, cash, credit cards, loans, and investments. This"
+" unified view enhances net worth and financial forecasting calculations, "
+"providing a comprehensive picture of your financial health."
+msgstr ""
+"我们的账户部分整合了对您所有财务账户（支票、储蓄、现金、信用卡、贷款和投资）的跟踪。这种统一的视图增强了净值和财务预测计算，全面展现了您的财务状况。"
+
+#: templates/home.html:121
+msgid "TRANSACTIONS"
+msgstr "交易"
+
+#: templates/home.html:124
+msgid ""
+"The Transactions feature integrates with your Budget section to track "
+"expenses and income in real time. By linking each transaction to a specific "
+"budget, you gain immediate insights into your financial progress, enabling "
+"timely adjustments to meet your goals."
+msgstr "交易功能与预算部分集成，可实时跟踪支出和收入。通过将每笔交易与特定预算关联，您可以立即了解自己的财务进展，从而及时调整以实现目标。"
+
+#: templates/home.html:136
+msgid "GOALS"
+msgstr "目标"
+
+#: templates/home.html:139
+msgid ""
+"The Goals section helps you achieve long-term financial aspirations, like "
+"buying a home or taking a dream vacation. By setting and tracking these "
+"goals, you can systematically save and allocate funds, making daunting "
+"milestones more achievable."
+msgstr ""
+"“目标”部分可帮助您实现长期财务愿望，例如购买房屋或度过梦想假期。通过设定和跟踪这些目标，您可以系统地储蓄和分配资金，使艰巨的里程碑更容易实现。"
+
+#: templates/home.html:151
+msgid "CALCULATORS"
+msgstr "计算器"
+
+#: templates/home.html:154
+msgid ""
+"Our Calculators feature offers a mortgage calculator, simplifying complex "
+"financial equations. Whether planning to buy a house or refinance, this tool"
+" provides the insights you need for smarter financial decisions."
+msgstr "我们的计算器功能提供抵押贷款计算器，简化复杂的财务方程式。无论是计划购买房屋还是再融资，此工具都可为您提供做出更明智财务决策所需的见解。"
+
+#: templates/home.html:166
+msgid "REAL ESTATE"
+msgstr "房地产"
+
+#: templates/home.html:169
+msgid ""
+"The Property Manage section helps you create property details, set rental "
+"terms, and add tenants. The Property Model section analyzes rental property "
+"investment summaries, capital expenditure budgets, yearly projections for "
+"revenue, expenses, and income, as well as investor contributions and "
+"mortgages."
+msgstr ""
+"物业管理部分可帮助您创建物业详细信息、设置租赁条款和添加租户。物业模型部分可分析租赁物业投资摘要、资本支出预算、年度收入、支出和收益预测以及投资者贡献和抵押贷款。"
+
+#: templates/index.html:148
+msgid "NOTES"
+msgstr "笔记"
+
+#: templates/index.html:156 templates/index.html:167
+msgid "My Notes"
+msgstr "我的笔记"
+
+#: templates/index.html:161 templates/index.html:172
+msgid "New Notes"
+msgstr "新笔记"
+
+#: templates/index.html:179
+msgid "Notes List"
+msgstr "备注列表"
+
+#: templates/index.html:189
+msgid "Title"
+msgstr "标题"
+
+#: templates/index.html:197
+msgid "Notes"
+msgstr "笔记"
+
+#: templates/index.html:212 templates/index.html:215
+msgid "Delete"
+msgstr "删除"

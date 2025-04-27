@@ -1,0 +1,479 @@
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <br/>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Future Net Worth Calculator</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a url="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">future-net-worth-calculator
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <section id="dashboard-ecommee">
+                    <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="faq-payment-qna">
+                            <div class="card">
+                                <div class="card-header" id="paymentOne" data-toggle="collapse" role="button" data-target="#faq-payment-one" aria-expanded="false" aria-controls="faq-payment-one">
+                                    <span class="lead collapse-title"><i class="bg-light-info" data-feather="info"></i> Future Net Worth Page Info</span>
+                                </div>
+                                <div id="faq-payment-one" class="collapse" aria-labelledby="paymentOne" data-parent="#faq-payment-qna">
+                                    <div class="card-body">
+                                        future net worth calculator to get a net worth projection of what your actual net worth in future over age and time will be. Your future net worth calculation is primarily based on what you are currently worth, your future savings and expected rate of return put through our net worth growth calculator.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <br/>
+                </section>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-primary" role="alert">
+                        </div>
+                    </div>
+                </div>
+                    <!-- Stats Horizontal Card -->
+                <form class="form form-horizontal" action="{% url 'future_net_worth_calculator' %}" method="POST">
+                    {% csrf_token %}
+
+                    <div class="row match-height">
+                        <div class="col-lg-3 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">{{currency}}{{current_net_worth}}</h2>
+                                        <p class="card-title">Current Net Worth</p>
+                                    </div>
+                                    <div class="avatar bg-light-primary p-40 m-0">
+                                        <div class="avatar-content">
+                                            <i data-feather="trending-up" class="font-medium-5"></i>
+                                        </div>
+                                    </div>
+                                    <p class="card-text font-small-3 mt-2">Your current Net Worth is equal to your Assets minus your Debt.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">{{currency}}{{total_asset}}</h2>
+                                        <p class="card-title">Assets</p>
+                                    </div>
+                                    <div class="avatar bg-light-success p-40 m-0">
+                                        <div class="avatar-content">
+                                            <i data-feather="home" class="font-medium-5"></i>
+                                        </div>
+                                    </div>
+                                    <p class="card-text font-small-3 mt-2">Assets is equal to the current value of everything you own.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">{{currency}}{{total_debt}}</h2>
+                                        <p class="card-title">Debt</p>
+                                    </div>
+                                    <div class="avatar bg-light-danger p-40 m-0">
+                                        <div class="avatar-content">
+                                            <i data-feather="dollar-sign" class="font-medium-5"></i>
+                                        </div>
+                                    </div>
+                                    <p class="card-text font-small-3 mt-2">Debt is equal to the current value of everything you owe.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">{{currency}}{{total_worth}}</h2>
+                                        <p class="card-title">Should Be Worth</p>
+                                    </div>
+                                    <div class="avatar bg-light-success p-40 m-0">
+                                        <div class="avatar-content">
+                                            <i data-feather="dollar-sign" class="font-medium-5"></i>
+                                        </div>
+                                    </div>
+                                    <p class="card-text font-small-3 mt-2">Your Age ({{age}}) x Income ({{currency}}{{income}}) / 10 provides an estimate.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-sm-12 col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <h5>Net Worth In Future Years</h5>
+                                    <div id="future-net-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">Assets Details</h2>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Home Value</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" name="home_value"
+                                                                   value="{{home_value}}" required placeholder="Home Value"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Vehicle Value</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{vehicle_value}}" name="vehicle_value" required
+                                                                   placeholder="Vehicle Value"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Cash Savings</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{cash_savings}}" name="cash_savings" required
+                                                                   placeholder="Cash Savings"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Open Taxable Savings</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{open_taxable_savings}}" name="open_taxable_savings" required
+                                                                   placeholder="Open Taxable Savings"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Non Taxable Savings</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{non_taxable_savings}}" name="non_taxable_savings" required
+                                                                   placeholder="Non Taxable Savings"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Tax Deferred Savings</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{tax_deferred_savings}}" name="tax_deferred_savings" required
+                                                                   placeholder="Tax Deferred Savings"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Other Assets Value</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{other_asset_value}}" name="other_asset_value" required
+                                                                   placeholder="Other Assets Value"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% if other_asset %}
+                                                {% for key, value in other_asset.items %}
+                                                    <div class="col-12">
+                                                        <div class="form-group row">
+                                                            <div class="col-sm-3 col-form-label">
+                                                                <input type="text" class="form-control" value="{{key | title}}" name="other_cost" required/>
+                                                            </div>
+                                                            <div class="col-sm-9">
+                                                                <div class="input-group input-group-merge">
+                                                                    <input type="text" class="form-control" value="{{value}}" name="other_cost" required
+                                                                           placeholder="{{key}}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            <div class="col-12 other_cost_div_1">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <input type="text" class="form-control last_cost" last_div="1" value="Other(Please Specify)" name="other_cost" required
+                                                                   placeholder="Other(Please Specify)"/>
+                                                    </div>
+                                                    <div class="col-sm-7" style="padding-top: 7px;">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="0" name="other_cost" required
+                                                                   placeholder="Enter Value"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-1 extra_other_cost_div_1" style="padding-top: 7px;">
+                                                        <button class="btn btn-primary add_other_cost" input_name="other_cost" main_class="other_cost_div_" extra_class="extra_other_cost_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-6 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">Liabilities (Debts/Mortgages/Loans) Details</h2>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Home Mortgage Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{home_mortgage_owing}}" name="home_mortgage_owing" required
+                                                                   placeholder="Home Mortgage Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Vehicle Loan Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{vehicle_loan_owing}}" name="vehicle_loan_owing" required
+                                                                   placeholder="Vehicle Loan Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Savings & Investments Loan Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{s_i_loan_owing}}" name="s_i_loan_owing" required
+                                                                   placeholder="Savings & Investments Loan Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Credit Card Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{credit_card_owing}}" name="credit_card_owing" required
+                                                                   placeholder="Credit Card Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Student Loan Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{student_loan_owing}}" name="student_loan_owing" required
+                                                                   placeholder="Student Loan Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <label>Other Loans Owing</label>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="{{other_loan_owing}}" name="other_loan_owing" required
+                                                                   placeholder="Other Loan Owing"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% if other_liability %}
+                                                {% for key, value in other_liability.items %}
+                                                    <div class="col-12">
+                                                        <div class="form-group row">
+                                                            <div class="col-sm-3 col-form-label">
+                                                                <input type="text" class="form-control" value="{{key | title}}" name="other_liab" required/>
+                                                            </div>
+                                                            <div class="col-sm-9">
+                                                                <div class="input-group input-group-merge">
+                                                                    <input type="text" class="form-control" value="{{value}}" name="other_liab" required
+                                                                           placeholder="{{key}}"/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            <div class="col-12 other_liab_div_1">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-3 col-form-label">
+                                                        <input type="text" class="form-control last_cost" last_div="1" value="Other(Please Specify)" name="other_liab" required
+                                                                   placeholder="Other(Please Specify)"/>
+                                                    </div>
+                                                    <div class="col-sm-7" style="padding-top: 7px;">
+                                                        <div class="input-group input-group-merge">
+                                                            <input type="text" class="form-control" value="0" name="other_liab" required
+                                                                   placeholder="Enter Value"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-1 extra_other_liab_div_1" style="padding-top: 7px;">
+                                                        <button class="btn btn-primary add_other_cost" input_name="other_liab" main_class="other_liab_div_" extra_class="extra_other_liab_div_" div_class="2" title="Add other"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-sm-12 col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        <h2 class="font-weight-bolder mb-0">Taxable Income and Age</h2>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label>Taxable Income</label>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" class="form-control" value="{{taxable_income}}" name="taxable_income" required
+                                                               placeholder="Taxable Income"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label>Age</label>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" class="form-control" value="{{age}}" name="age" required
+                                                               placeholder="Age"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label>Currency</label>
+                                                </div>
+                                                <div class="col-sm-9">
+                                                    <div class="input-group input-group-merge">
+                                                        <select class="form-control" name="currency" required placeholder="Currency" >
+                                                            {% for key, value in currency_dict.items %}
+                                                                {% if currency == key %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group row">
+                                                <div class="col-sm-3 col-form-label">
+                                                    <label>Savings & Asset Rate of Return</label>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <div class="input-group input-group-merge">
+                                                        <input type="text" class="form-control" value="{{asset_rate}}" name="asset_rate" required
+                                                               placeholder="Savings & Asset Rate of Return"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-1 col-form-label">
+                                                    <label>% / year</label>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <input type="submit" value="Calculate" class="btn btn-primary">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <!--/ Stats Horizontal Card -->
+            </div>
+        </div>
+    </div>
+{% endblock content %}

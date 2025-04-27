@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<head>
+    <title>REAL ESTATE HOME</title>
+</head>
+<body>
+
+{% extends "index.html" %}
+{% load static %}
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">HOME PAGE</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <section id="default-breadcrumb">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <p class="card-text"><strong style="font-size:18px;">Real Estate </strong><small style="font-size:14px;">is useful to manage property rental terms, income, expenses, budgets and mortgage. It has property manage and property model sections. </small><small class="see_more_summary" style="display:None; font-size:14px;">Property manage section useful to create property details, set rental terms and add tenants. Property model sections useful to analyse rental property investment summary, capital expenditure budget, yearly projection for revenue, expenses and income, investor contribution, and mortgage. </small><small class="text-primary table-hover more_button" style="font-size:14px;">More..</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section id="stocks_grid_view" class="grid-view">
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a href="{% url 'property_list' %}">
+                                <img src="{% static 'images/property_manage.jpg' %}" class="img-fluid" alt="img-placeholder" />
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="item-name" style="text-align:center;">
+                                <a href="{% url 'property_list' %}">Property Management</a>
+                            </div>
+                            <div class="item-name">
+                                <p class="card-text">It provides a facility to collect property rent for you and your tenants and also you can set lease terms for property units according to fixed and monthly term. you can easily manage your property income and expenses. you can easily open maintenance request for particular property. you can track all rental property in this section.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <a href="{% url 'rental_property_list' %}">
+                                <img src="{% static 'images/property_rental.jpg' %}" class="img-fluid" alt="img-placeholder" />
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="item-name" style="text-align:center;">
+                                <a href="{% url 'rental_property_list' %}">Property Model</a>
+                            </div>
+                            <div class="item-name">
+                                <p class="card-text">It manage the property investments. you can get investment summary for particular property. It provides a facility to check yearly projection of revenues, expenses, income, cash flows, return on investment and etc. It's automatically calculates all the mortgage report according to property value. you can export all the property investment reports from it. Using Property model you can easily track your property investments with better user interface.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,200 @@
+{% extends "index.html" %}
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Goal Add {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Goal</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'goal_list' %}">Goals</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Goal
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form id="goalAddForm" class="form form-horizontal" action="{% url 'goal_add' %}" method="post">
+                        {% if error %}
+                        <div class="col-sm-40 offset-sm-20">
+                            <p class="text-danger">{{error}}</p>
+                            <a href="{% url 'fund_accounts' %}" class="btn btn-primary"><i
+                                class="fa fa-plus"></i> Add Fund</a>
+                        </div>
+                        {% endif %}
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="user_budget" style="width:200px">
+
+                                                {% for budget in budget_qs %}
+                                                    <option value="{{budget.id}}">{{budget}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Category Group</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" name="category">
+                                                <option value="Goals">Goals</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="sub_category_name">Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control" name="sub_category_name" id="sub_category_name" placeholder="Goal Name">
+                                            
+                                            
+                                        </div><br>
+                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                            <h5 style="margin:5px;">Suggested Goals :-</h5>
+                                            {% for category in goal_category %}
+                                            <a style="margin:5px; font-size: 12px;"  data-goal="{{category.name}}" class="btn btn-outline-secondary goal-add-btn">
+                                                {% if category_icons|get_item:category.name %}
+                                                                    <img src="{% static category_icons|get_item:category.name %}" alt="{{ category.name }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                {% endif %}
+                                                {{category.name}}&nbsp;
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="goal_amount">Goal Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="goal_amount" class="form-control" name="goal_amount" required
+                                                   placeholder="Goal Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Account</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select class="form-control" id="account" name="account_name" required>
+                                                {% for value in account_data %}
+                                                <option value="{{value.name}}">{{value}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Is there a deadline for the goal?</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="deadlineCheckbox">
+                                            <label class="form-check-label" for="deadlineCheckbox">Yes</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="goalDateContainer" style="display: none;">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Goal Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="goal_date" name="goal_date" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>  
+                            {% comment %} <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Allocate Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="allocate_amount" value="0" class="form-control" name="allocate_amount"
+                                                   required placeholder="Enter Lock Amount Allocate to Goal"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> {% endcomment %}
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content%}

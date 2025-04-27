@@ -1,0 +1,148 @@
+{% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Maintenance Add {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{page}} Maintenance</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'property_maintenance_list' %}">Maintenance</a>
+                                    </li>
+                                    <li class="breadcrumb-item" id="page_name" name="{{page}}">
+                                        {{page}} Maintenance
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% if error %}
+                            <p class="text-danger">{{error}}</p>
+                        {% endif %}
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Name</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Description</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.description}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Property</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.property_details }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 property_relate">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Units</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <select class="form-control" name="unit_name" id="unit_options">
+                                                {% for unit_data in unit_list %}
+                                                    {% if unit_data.name == form.unit_name.value %}
+                                                        <option selected>{{unit_data.name}}</option>
+                                                    {% else %}
+                                                        <option>{{unit_data.name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 property_relate">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Requested By</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" id="tenant_n" value="{{form.tenant_name.value}}" class="form-control" name="tenant_name">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Category</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.category }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label>Status</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            {{ form.status }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                {% if page == 'Add' %}
+                                    <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-primary mr-1">Update</button>
+                                    <button type="button" delete_name="{{ form.name.value }} Maintenance" url="{% url 'property_maintenance_delete' pk=maintenance_id %}" class="btn btn-danger delete_button"><i data-feather="trash"></i>&nbsp;Delete </button>
+                                {% endif %}
+                                <a href="{% url 'property_maintenance_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+

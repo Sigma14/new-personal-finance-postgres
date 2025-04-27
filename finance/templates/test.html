@@ -1,0 +1,873 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+{% load static %}
+{% block content %}
+<div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{heading_name}}</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{{property_url}}">Rental Properties</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        {{heading_url}}
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Horizontal Wizard -->
+                <section class="horizontal-wizard">
+                    <div class="bs-stepper horizontal-wizard-example">
+                        <div class="bs-stepper-header">
+                            <div class="step" data-target="#account-details">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">1</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">PROPERTY DETAILS</span>
+                                        <span class="bs-stepper-subtitle">Address, Types, Units</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#personal-info">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">2</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">SET RENTAL TERMS</span>
+                                        <span class="bs-stepper-subtitle">Lease Details, Rent, Deposits</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#address-step">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">3</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">ADD TENANTS</span>
+                                        <span class="bs-stepper-subtitle">Tenants details</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bs-stepper-content">
+                            <form action="{% url 'property_add' %}" id="frm1" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div id="account-details" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-xl-4 col-md-6 col-12">
+                                                <div class="card card-congratulation-medal">
+                                                    <div class="card-body">
+                                                        <h3>CREATE PROPERTY</h3>
+                                                        <img src="{% static 'app-assets/images/property/property_image.jpeg' %}" alt="users avatar" class="user-avatar users-avatar-shadow rounded mr-2 my-25 cursor-pointer" height="80%" width="80%" />
+                                                        <div class="col-12 d-flex mt-1 px-0">
+                                                            <label class="btn btn-primary mr-75 mb-0" for="change-picture">
+                                                                <span class="d-none d-sm-block">Choose Image</span>
+                                                                <input class="form-control" type="file" id="change-picture" name="property_image" hidden accept="image/png, image/jpeg, image/jpg" />
+                                                                <span class="d-block d-sm-none">
+                                                                    <i class="mr-0" data-feather="edit"></i>
+                                                                </span>
+                                                            </label>
+                                                            <button class="btn btn-outline-secondary d-none d-sm-block">Remove</button>
+                                                            <button class="btn btn-outline-secondary d-block d-sm-none">
+                                                                <i class="mr-0" data-feather="trash-2"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-8 col-md-6 col-12">
+                                                <div class="row">
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i data-feather="map-pin" class="font-medium-4 mr-25"></i>
+                                                        <span class="align-middle">Address</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="address-1">Address Line 1</label>
+                                                        <input id="address-1" type="text" class="form-control" placeholder="A-65, Belvedere Streets" name="address_line1" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="address-2">Address Line 2</label>
+                                                        <input id="address-2" type="text" class="form-control" name="address_line2" placeholder="T-78, Groove Street" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="postcode">Postcode</label>
+                                                        <input id="postcode" type="text" class="form-control" placeholder="597626" name="postcode" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="city">City</label>
+                                                        <input id="city" type="text" class="form-control" placeholder="New York" name="city" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="state">State</label>
+                                                        <input id="state" type="text" class="form-control" name="state" placeholder="Manhattan" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="country">Country</label>
+                                                        <input id="country" type="text" class="form-control" name="country" placeholder="United States" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i data-feather="home" class="font-medium-4 mr-25"></i>
+                                                        <span class="align-middle">Property Information</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="name">Property Name</label>
+                                                        <input id="name" type="text" class="form-control" name="property_name" placeholder="Vine Street Lofts" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="currency_name">Currency</label>
+                                                        <select name="currency_name" class="form-control" id="currency_name">
+                                                            <option value="$">US Dollar ($)</option>
+                                                            <option value="€">Euro (€)</option>
+                                                            <option value="₹">Indian rupee (₹)</option>
+                                                            <option value="£">British Pound (£)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="property_amount">Property Value(In Amount)</label>
+                                                        <input id="property_amount" type="text" class="form-control" name="property_amount" placeholder="250000" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="name">Property Type</label>
+                                                        <select class="form-control" name="property_type" required>
+                                                            <option>Apartment</option>
+                                                            <option>Commercial</option>
+                                                            <option>Condo</option>
+                                                            <option>Duplex</option>
+                                                            <option>House</option>
+                                                            <option>Mixed-Use</option>
+                                                            <option>Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12">
+                                                    <div class="form-group">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" name="net_worth_check" class="custom-control-input" id="include_net_worth_check" />
+                                                            <label class="custom-control-label" for="include_net_worth_check"> Include in net worth</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+    <!--                                            <div class="col-lg-12 col-md-12">-->
+    <!--                                                <div class="form-group">-->
+    <!--                                                    <label for="name">Does this property have units managed by an HOA?</label>-->
+    <!--                                                    <select class="form-control" name="property_hoa" required>-->
+    <!--                                                        <option>No</option>-->
+    <!--                                                        <option selected>Yes</option>-->
+    <!--                                                    </select>-->
+    <!--                                                </div>-->
+    <!--                                            </div>-->
+                                                <div class="col-lg-4 col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Unit Name</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-8 col-md-8">
+                                                    <div class="form-group">
+                                                        <label>Unit Details</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-md-4">
+                                                    <div class="form-group">
+                                                        <input type="text" class="form-control unit_names" name="unit_name" placeholder="Suite 101" required/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-8 col-md-8">
+                                                    <div class="form-group">
+                                                        <div class="collapse-default">
+                                                            <div class="card">
+                                                                <div id="headingCollapse1" class="card-header" data-toggle="collapse" role="button" data-target="#collapse1" aria-expanded="false" aria-controls="collapse1">
+                                                                    <span><i class="fa fa-bed" aria-hidden="true"></i><strong id="bed_quantity">1</strong></span>
+                                                                    <span><i class="fa fa-bath" aria-hidden="true"></i><strong id="bath_quantity">1</strong></span>
+                                                                    <span><i class="fa fa-area-chart" aria-hidden="true"></i><strong id="feet_quantity">1</strong></span>
+                                                                </div>
+                                                                <div id="collapse1" role="tabpanel" aria-labelledby="headingCollapse1" class="collapse">
+                                                                    <div class="card-body">
+                                                                        <div class="col-12">
+                                                                            <div class="row match-height">
+                                                                                        <div class="col-lg-4 col-md-12">
+                                                                                            <div class="form-group">
+                                                                                                <label for="bed_room_quantity">BedRooms</label>
+                                                                                                <input id="bed_room_quantity" type="text" value="1" st_id="#bed_quantity" class="form-control change_quantity" name="bed_room_quantity" required/>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-4 col-md-12">
+                                                                                            <div class="form-group">
+                                                                                                <label for="bath_room_quantity">Bathrooms</label>
+                                                                                                <input id="bath_room_quantity" type="text" class="form-control change_quantity" st_id="#bath_quantity" value="1" name="bath_room_quantity" placeholder="" required/>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-4 col-md-12">
+                                                                                            <div class="form-group">
+                                                                                                <label for="square_feet">Square Feet</label>
+                                                                                                <input id="square_feet" type="text" class="form-control change_quantity" st_id="#feet_quantity" value="1" name="square_feet" placeholder="" required/>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-12">
+                                                                                            <div class="form-group">
+                                                                                                <label for="square_feet">Rent Includes</label>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="electricity_check0" class="custom-control-input select_category" id="customCheck1" />
+                                                                                                    <label class="custom-control-label" for="customCheck1">Electricity</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="gas_check0" class="custom-control-input select_category" id="customCheck2" />
+                                                                                                    <label class="custom-control-label" for="customCheck2">Gas</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="water_check0" class="custom-control-input select_category" id="customCheck3" />
+                                                                                                    <label class="custom-control-label" for="customCheck3">Water</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="int_cable_check0" class="custom-control-input select_category" id="customCheck4" />
+                                                                                                    <label class="custom-control-label" for="customCheck4">Internet and Cable</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-12">
+                                                                                            <div class="form-group">
+                                                                                                <label>Amenities</label>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="ac_check0" class="custom-control-input select_category" id="customCheck5" />
+                                                                                                    <label class="custom-control-label" for="customCheck5">A/C</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="pool_check0" class="custom-control-input select_category" id="customCheck6" />
+                                                                                                    <label class="custom-control-label" for="customCheck6">Pool</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="pets_check0" class="custom-control-input select_category" id="customCheck7" />
+                                                                                                    <label class="custom-control-label" for="customCheck7">Pets Allowed</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="furnished_check0" class="custom-control-input select_category" id="customCheck8" />
+                                                                                                    <label class="custom-control-label" for="customCheck8">Furnished</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="balcony_check0" class="custom-control-input select_category" id="customCheck9" />
+                                                                                                    <label class="custom-control-label" for="customCheck9">Balcony/Deck</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="hardwood_check0" class="custom-control-input select_category" id="customCheck10" />
+                                                                                                    <label class="custom-control-label" for="customCheck10">Hardwood Floor</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="wheel_check0" class="custom-control-input select_category" id="customCheck11" />
+                                                                                                    <label class="custom-control-label" for="customCheck11">Wheelchair Access</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3">
+                                                                                            <div class="form-group">
+                                                                                                <div class="custom-control custom-checkbox">
+                                                                                                    <input type="checkbox" name="parking_check0" class="custom-control-input select_category" id="customCheck0" />
+                                                                                                    <label class="custom-control-label" for="customCheck0">Off-street Parking</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                        </div>
+    <!--                                                                    <div class="col-12">-->
+    <!--                                                                        <div class="form-group">-->
+    <!--                                                                            <label for="unit_hoa">Is this unit managed by an HOA?</label>-->
+    <!--                                                                            <select class="form-control" id="unit_hoa" name="unit_hoa" required>-->
+    <!--                                                                                <option selected>Yes</option>-->
+    <!--                                                                                <option>No</option>-->
+    <!--                                                                            </select>-->
+    <!--                                                                        </div>-->
+    <!--                                                                    </div>-->
+    <!--                                                                    <div class="col-12">-->
+    <!--                                                                        <ul class="nav nav-pills" role="tablist">-->
+    <!--                                                                            <li class="nav-item">-->
+    <!--                                                                                <a class="nav-link d-flex align-items-center active" id="residential_tab" data-toggle="tab" href="#residential_data" aria-controls="template_budget_data" role="tab" aria-selected="false">-->
+    <!--                                                                                    <span class="d-none d-sm-block">Residential</span>-->
+    <!--                                                                                </a>-->
+    <!--                                                                            </li>-->
+    <!--                                                                            <li class="nav-item">-->
+    <!--                                                                                <a class="nav-link d-flex align-items-center" id="commercial_tab" data-toggle="tab" href="#commercial_data" aria-controls="template_budget_data" role="tab" aria-selected="false">-->
+    <!--                                                                                    <span class="d-none d-sm-block">Commercial</span>-->
+    <!--                                                                                </a>-->
+    <!--                                                                            </li>-->
+    <!--                                                                        </ul>-->
+    <!--                                                                        <div class="tab-content">-->
+    <!--                                                                            <div class="tab-pane active" id="residential_data" aria-labelledby="residential_tab" role="tabpanel">-->
+    <!--                                                                                <div class="row match-height">-->
+    <!--                                                                                    <div class="col-lg-4 col-md-12">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <label for="bed_room_quantity">BedRooms</label>-->
+    <!--                                                                                            <input id="bed_room_quantity" type="text" value="1" class="form-control" name="bed_room_quantity" required/>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-4 col-md-12">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <label for="bath_room_quantity">Bathrooms</label>-->
+    <!--                                                                                            <input id="bath_room_quantity" type="text" class="form-control" value="1" name="bath_room_quantity" placeholder="" required/>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-4 col-md-12">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <label for="square_feet">Square Feet</label>-->
+    <!--                                                                                            <input id="square_feet" type="text" class="form-control" value="1" name="square_feet" placeholder="" required/>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-12">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <label for="square_feet">Rent Includes</label>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="electricity_check" class="custom-control-input select_category" id="customCheck1" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck1">Electricity</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="gas_check" class="custom-control-input select_category" id="customCheck2" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck2">Gas</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="water_check" class="custom-control-input select_category" id="customCheck3" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck3">Water</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="int_cable_check" class="custom-control-input select_category" id="customCheck4" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck4">Internet and Cable</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-12">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <label>Amenities</label>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="ac_check" class="custom-control-input select_category" id="customCheck5" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck5">A/C</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="pool_check" class="custom-control-input select_category" id="customCheck6" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck6">Pool</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="pets_check" class="custom-control-input select_category" id="customCheck7" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck7">Pets Allowed</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="furnished_check" class="custom-control-input select_category" id="customCheck8" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck8">Furnished</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="balcony_check" class="custom-control-input select_category" id="customCheck9" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck9">Balcony/Deck</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="hardwood_check" class="custom-control-input select_category" id="customCheck10" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck10">Hardwood Floor</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="wheel_check" class="custom-control-input select_category" id="customCheck11" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck11">Wheelchair Access</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                    <div class="col-lg-3 col-md-3">-->
+    <!--                                                                                        <div class="form-group">-->
+    <!--                                                                                            <div class="custom-control custom-checkbox">-->
+    <!--                                                                                                <input type="checkbox" name="parking_check" class="custom-control-input select_category" id="customCheck12" />-->
+    <!--                                                                                                <label class="custom-control-label" for="customCheck12">Off-street Parking</label>-->
+    <!--                                                                                            </div>-->
+    <!--                                                                                        </div>-->
+    <!--                                                                                    </div>-->
+    <!--                                                                                </div>-->
+    <!--                                                                            </div>-->
+    <!--                                                                            <div class="tab-pane" id="commercial_data" aria-labelledby="commercial_tab" role="tabpanel">-->
+    <!--                                                                            </div>-->
+    <!--                                                                        </div>-->
+    <!--                                                                    </div>-->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12" id="add_property_unit">
+                                                    <button type="button" class="btn btn-success mr-1 add_another_prop_unit" div_class="2"><i data-feather="plus"></i>Add another unit</button>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <button class="btn btn-primary btn-next">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="personal-info" class="content">
+                                    <section>
+                                        <div class="row match-height">
+                                            <div class="col-xl-8 col-md-6 col-12">
+                                                <div class="row match-height">
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                        <span class="align-middle">SELECT LEASE TERM</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Select Unit</label>
+                                                        <select class="form-control unit_selected" id="unit_options" name="select_unit" required>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <ul class="nav nav-pills" role="tablist">
+                                                                <li class="nav-item">
+                                                                    <a class="nav-link d-flex align-items-center active select_terms" id="fixed_term_tab" data-toggle="tab" href="#fixed_term_data" aria-controls="fixed_term_data" role="tab" aria-selected="false">
+                                                                        <div class="media">
+                                                                        <div class="avatar bg-light-secondary mr-2">
+                                                                            <div class="avatar-content">
+                                                                                <i data-feather="calendar"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="media-body my-auto">
+                                                                            <h4 class="font-weight-bolder mb-0">Fixed Term</h4>
+                                                                            <p class="card-text font-small-3 mb-0">This lease has a start date but no fixed end date. It should automatically renew each month.</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <ul class="nav nav-pills" role="tablist">
+                                                                <li class="nav-item">
+                                                                    <a class="nav-link d-flex align-items-center select_terms" id="month_term_tab" data-toggle="tab" href="#month_term_data" aria-controls="month_term_data" role="tab" aria-selected="false">
+                                                                        <div class="media">
+                                                                        <div class="avatar bg-light-secondary mr-2">
+                                                                            <div class="avatar-content">
+                                                                                <i data-feather="calendar"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="media-body my-auto">
+                                                                            <h4 class="font-weight-bolder mb-0">Month Term</h4>
+                                                                            <p class="card-text font-small-3 mb-0">This lease has a start date but no fixed end date. It should automatically renew each month.</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6">
+                                                    <input type="hidden" name="term_name" id="rental_term_name" value="Fixed Term">
+                                                    <input type="hidden" name="invoice_date_list" id="invoice_date_list" value=''>
+                                                    <input type="hidden" name="invoice_amount_list" id="invoice_amount_list" value=''>
+                                                    <div class="form-group">
+                                                        <label>Lease Begin Date</label>
+                                                        <input type="text" name="lease_start_date" id="lease_start_date" value="{{today_date_str}}" class="form-control flatpickr-basic change_date" placeholder="YYYY-MM-DD" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 lease_end_date_remove">
+                                                    <div class="form-group">
+                                                        <label>Lease End Date</label>
+                                                        <input type="text" name="lease_end_date" id="lease_end_date" value="{{one_year_date_str}}" class="form-control flatpickr-basic change_date" placeholder="YYYY-MM-DD" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                        <span class="align-middle">DEPOSITS DETAILS</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Deposit</label>
+                                                        <div class="input-group md-4">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text currency_code_class" style="border:2px solid #6E6B7B; height:38px;">{{currency_symbol}}</span>
+                                                            </div>
+                                                            <input type="text" name="deposit" id="deposit" value="0" class="form-control deposit_amount_input" placeholder="" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Due on</label>
+                                                        <input type="text" name="due_on" id="due_on" value="{{today_date_str}}" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 col-md-12">
+                                                    <div class="form-group">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" name="already_deposit" class="custom-control-input" id="already_deposit_check" />
+                                                            <label class="custom-control-label" for="already_deposit_check">I have already collected the deposit, just create a record and mark as paid.</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h4 class="mb-1 mt-2">
+                                                        <i class="fa fa-regular fa-coins" aria-hidden="true"></i>
+                                                        <span class="align-middle">RENT DETAILS</span>
+                                                    </h4>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Rent</label>
+                                                        <div class="input-group md-4">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" style="border:2px solid #6E6B7B; height:38px;">{{currency_symbol}}</span>
+                                                            </div>
+                                                            <input type="text" name="rent" id="rent" value="{{rent}}" class="form-control change_rent_amount" placeholder="" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6" id="rental_due_on_div">
+                                                    <div class="form-group">
+                                                        <label>Due on the</label>
+                                                        <div class="input-group md-4">
+                                                            <select class="form-control change_every_month_date" name="select_due_date" required>
+                                                                <option>Select</option>
+                                                                <option value="1"> 1st </option><option value="2"> 2nd </option><option value="3"> 3rd </option><option value="4"> 4th </option><option value="5"> 5th </option><option value="6"> 6th </option><option value="7" > 7th </option><option value="8"> 8th </option><option value="9"> 9th </option><option value="10"> 10th </option><option value="11"> 11th </option><option value="12"> 12th </option><option value="13"> 13th </option><option value="14"> 14th </option><option value="15"> 15th </option><option value="16"> 16th </option><option value="17"> 17th </option><option value="18"> 18th </option><option value="19"> 19th </option><option value="20"> 20th </option><option value="21"> 21st </option><option value="22"> 22nd </option><option value="23"> 23rd </option><option value="24"> 24th </option><option value="25"> 25th </option><option value="26"> 26th </option><option value="27"> 27th </option><option value="28"> 28th </option><option value="29"> 29th </option><option value="30" > 30th </option>
+                                                            </select>
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text" style="border:2px solid #6E6B7B; height:38px;">of every month</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6" id="first_rental_div">
+                                                    <div class="form-group">
+                                                        <label>On which date should the first rental invoice be due?</label>
+                                                        <select class="form-control" id="rental_invoice" invoice_list="" name="first_rental_due_date" required>
+                                                            <option>Select</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-md-6 col-12 rental_summary_div">
+                                                <div class="customer-card">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <h3 class="card-title">Rental Summary (<strong class="unit_heading"></strong>)</h3>
+                                                        </div>
+                                                        <hr/>
+                                                        <div class="text-center">
+                                                            <h1 class="mb-1 text-white total_rental_amount">{{currency_symbol}}0.00</h1>
+                                                            <p class="card-text m-auto w-75">
+                                                                Total rent from lease for <span id="rent_duration">1 Year </span>
+                                                            </p>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Rental lease for</h4>
+                                                                        <p class="card-text term_name">Fixed Term</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Rent</h4>
+                                                                        <p class="card-text rent_amount_month">N/A</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Rental starts on</h4>
+                                                                        <p class="card-text rent_start_date">{{today_date}}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Rental ends on</h4>
+                                                                        <p class="card-text rent_end_date">{{one_year_date}}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Deposit</h4>
+                                                                        <p class="card-text deposit_amount_field">{{currency_symbol}}0</p>
+                                                                        <p class="card-text text-success deposit_check"></p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">First Rental Invoice Due On</h4>
+                                                                        <p class="card-text due_date_rental">N/A</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12"><hr/></div>
+                                                            <div class="col-xl-6 col-sm-6 col-12 invoice_div">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">Total # Invoices</h4>
+                                                                        <p class="card-text total_invoices_no">N/A</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12 invoice_div">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <h4 class="font-weight-bolder mt-1">To Be Collected</h4>
+                                                                        <p class="card-text total_rental_amount">N/A</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-6 col-sm-6 col-12" id="edit_invoice_div">
+                                                                <div class="card">
+                                                                    <div class="card-header flex-column align-items-start pb-0">
+                                                                        <input class="btn btn-outline-primary view_invoices_div" value="View/Edit Rental Schedule">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4 col-md-6 col-12 rental_edit_invoice_div">
+                                                <div class="customer-card">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <h3 class="card-title"><i class='fa fa-arrow-left view_invoices_div' style='font-size:18px;'></i>&nbsp;View and Edit Rental Schedule</h3>
+                                                        </div>
+                                                        <hr/>
+                                                        <div class="row">
+                                                        <div class="card-datatable table-responsive">
+                                                        <table class="dt-row-grouping table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Due</th>
+                                                                    <th>Rent</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="invoice_body_div">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-6 col-sm-6 col-12">
+                                                    <div class="card">
+                                                        <div class="card-header flex-column align-items-start pb-0">
+                                                            <input class="btn btn-outline-primary view_invoices_div" value="Rental Summary">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="col-12"><hr /></div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <button class="btn btn-primary btn-next" btn_id="false">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="address-step" class="content">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="customer-card">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <h3 class="card-title">ADD TENANTS (<strong class="unit_heading">Unit 1</strong>)</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label>First Name</label>
+                                                <input type="text" name="tenant_f_name" id="tenant_f_name" class="form-control" placeholder="First Name" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label>Last Name</label>
+                                                <input type="text" name="tenant_l_name" id="tenant_l_name" class="form-control" placeholder="Last Name">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="email">Email</label>
+                                                <input type="email" name="tenant_email" id="email" class="form-control" placeholder="john.doe@email.com" aria-label="john.doe" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="mobile_number">Mobile</label>
+                                                <input type="number" max="999999999999" min="1000000000" name="tenant_mobile_number" id="mobile_number" class="form-control" placeholder="Phone Number" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-12"><hr /></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <button class="btn btn-success btn-submit">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <!-- /Horizontal Wizard -->
+            </div>
+        </div>
+    </div>
+{% endblock content %}
