@@ -1835,5 +1835,6 @@ SAMPLE_MORTGAGE_DATE_DATA = [
 ]
 
 # Sample Property Page Constants
-GRAPH_LABELS = ["Total Open Invoices", "Overdue", "Partially Paid", "Fully Paid"]
+GRAPH_LABELS = ["Total Open Invoices",
+                "Overdue", "Partially Paid", "Fully Paid"]
 GRAPH_VALUES = [11500.0, 0, 0, 600.0]

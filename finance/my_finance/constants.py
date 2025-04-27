@@ -55,7 +55,6 @@ CATEGORY_ICONS = {
     "Pharmacy": "app-assets/images/categories/pharmacy.png",
     "Refreshments": "app-assets/images/categories/juice.png",
     "New Bike": "app-assets/images/categories/bike.png",
-
 }
 # To-do consisent symbols
 # Currencies
@@ -160,7 +159,7 @@ EXCLUDED_SUB_CATEGORIES = [
     "Goals",
     "Income",
     "Funds",
-    "Non-Monthly"
+    "Non-Monthly",
 ]
 
 # Expense category group list
@@ -262,10 +261,12 @@ PROPERTY_KEYS = [
 MAINTENANCE_KEYS = ["Properties", "Address", "Request", "Category", "Status"]
 
 # Property Expenses Keys
-PROPERTY_EXPENSES_KEYS = ["Properties", "Category", "Date", "Request", "Amount"]
+PROPERTY_EXPENSES_KEYS = ["Properties",
+                          "Category", "Date", "Request", "Amount"]
 
 # Property Income Graph labels
-INCOME_LABELS = ["Total Open Invoices", "Overdue", "Partially Paid", "Fully Paid"]
+INCOME_LABELS = ["Total Open Invoices",
+                 "Overdue", "Partially Paid", "Fully Paid"]
 
 # Property Income Keys
 INCOME_KEYS = ["Property", "Unit", "Amount", "Paid", "Balance"]
