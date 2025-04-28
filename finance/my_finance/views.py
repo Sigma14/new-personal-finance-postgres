@@ -1,3 +1,4 @@
+import html
 import os
 import ast
 import calendar
@@ -9538,92 +9539,233 @@ def bill_adding_fun(request, method_name=None):
     return context
 
 
-@login_required(login_url="/login")
-def bill_walk_through(request):
-    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        user_budget_id = request.POST.get("user_budget_id")
-        user_name = request.user
-        bill_name = request.POST["name"]
-        bill_exp_amount = float(request.POST["exp_amount"])
-        bill_act_amount = float(request.POST["actual_amount"])
-        bill_id = request.POST["id"]
-        bill_account_id = request.POST["bill_account_id"]
-        bill_left_amount = round(bill_exp_amount - bill_act_amount, 2)
-        account_obj = Account.objects.get(id=int(bill_account_id))
-        budget_period = request.POST["budget_period"]
-        bill_date = request.POST["budget_date"]
-        user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
+# @login_required(login_url="/login")
+# def bill_walk_through(request):
+#     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#         user_budget_id = request.POST.get("user_budget_id")
+#         user_name = request.user
+#         bill_name = request.POST["name"]
+#         bill_exp_amount = float(request.POST["exp_amount"])
+#         bill_act_amount = float(request.POST["actual_amount"])
+#         bill_id = request.POST["id"]
+#         bill_account_id = request.POST["bill_account_id"]
+#         bill_left_amount = round(bill_exp_amount - bill_act_amount, 2)
+#         account_obj = Account.objects.get(id=int(bill_account_id))
+#         budget_period = request.POST["budget_period"]
+#         bill_date = request.POST["budget_date"]
+#         user_budget = UserBudgets.objects.get(user=user_name, pk=int(user_budget_id))
 
-        # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
-        if bill_exp_amount == 0:
-            return JsonResponse(
-                {"status": "false", "message": "Bill amount cannot be 0"}
-            )
+#         # Check if the expected amount is greater than Zero to avoid ZeroDivisionError
+#         if bill_exp_amount == 0:
+#             return JsonResponse(
+#                 {"status": "false", "message": "Bill amount cannot be 0"}
+#             )
 
-        # check subcategory exist or not
-        print(CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,"bill")
-        try:
-            sub_cat_obj = SubCategory.objects.get(
-                category__user=user_name,
-                category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,
-                name=bill_name,
-            )
-            sub_cat_obj.name = bill_name
-            sub_cat_obj.save()
-        # To-Do  Remove bare except
-        except:
-            sub_cat_obj = SubCategory()
+#         # check subcategory exist or not
+#         print(CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,"bill")
+#         try:
+#             sub_cat_obj = SubCategory.objects.get(
+#                 category__user=user_name,
+#                 category__name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value,
+#                 name=bill_name,
+#             )
+#             sub_cat_obj.name = bill_name
+#             sub_cat_obj.save()
+#         # To-Do  Remove bare except
+#         except:
+#             sub_cat_obj = SubCategory()
             
 
-            sub_cat_obj.category = Category.objects.get(
-                user=user_name, name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value
-            )
-            sub_cat_obj.name = bill_name
-            sub_cat_obj.save()
+#             sub_cat_obj.category = Category.objects.get(
+#                 user=user_name, name=CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value
+#             )
+#             sub_cat_obj.name = bill_name
+#             sub_cat_obj.save()
 
+#         if bill_id == "false":
+#             if bill_date:
+#                 bill_date = datetime.datetime.strptime(
+#                     bill_date, DateFormats.YYYY_MM_DD.value
+#                 )
+#             else:
+#                 bill_date = datetime.datetime.today().date()
+#             bill_date, end_month_date = start_end_date(
+#                 bill_date, BudgetPeriods.MONTHLY.value
+#             )
+#             try:
+#                 bill_obj = Bill.objects.filter(
+#                     user=user_name,
+#                     user_budget=user_budget,
+#                     label=bill_name,
+#                     date__range=(bill_date, end_month_date),
+#                 )
+#                 if bill_obj:
+#                     return JsonResponse(
+#                         {"status": "false", "message": "Bill Already Exists"}
+#                     )
+#                 else:
+#                     bill_obj = Bill()
+#             # To-Do  Remove bare except
+#             except:
+#                 bill_obj = Bill()
+
+#             bill_obj.user = request.user
+#             bill_obj.user_budget = user_budget
+#             bill_obj.label = bill_name
+#             bill_obj.account = account_obj
+#             bill_obj.amount = bill_exp_amount
+#             bill_obj.date = bill_date
+#             bill_obj.currency = "$"
+#             bill_obj.remaining_amount = bill_left_amount
+#             bill_obj.frequency = budget_period
+#             bill_obj.auto_bill = False
+#             bill_obj.auto_pay = False
+#             # If full amount paid, change the status to 'paid'
+#             if bill_exp_amount == bill_act_amount:
+#                 bill_obj.status = "paid"
+#             else:
+#                 bill_obj.status = "unpaid"
+#             bill_details_obj = BillDetail.objects.create(
+#                 user=user_name,
+#                 user_budget=user_budget,
+#                 label=bill_name,
+#                 account=account_obj,
+#                 amount=bill_exp_amount,
+#                 date=bill_date,
+#                 frequency=bill_obj.frequency,
+#                 auto_bill=bill_obj.auto_bill,
+#                 auto_pay=bill_obj.auto_pay,
+#             )
+#             bill_obj.bill_details = bill_details_obj
+#             bill_obj.save()
+#         else:
+#             bill_obj = Bill.objects.get(id=int(bill_id), user_budget=user_budget)
+#             old_spend_amount = round(
+#                 float(bill_obj.amount) - float(bill_obj.remaining_amount), 2
+#             )
+#             bill_obj.name = bill_name
+#             bill_obj.amount = bill_exp_amount
+#             bill_obj.remaining_amount = bill_left_amount
+#             bill_details_obj = bill_obj.bill_details
+#             bill_details_obj.name = bill_name
+#             bill_details_obj.amount = bill_exp_amount
+#             bill_details_obj.save()
+#             # Change status to 'paid', if remaining amount becomes zero
+#             if bill_left_amount == 0.0:
+#                 bill_obj.status = "paid"
+#             bill_obj.save()
+
+#             if bill_act_amount >= old_spend_amount:
+#                 bill_act_amount = round(bill_act_amount - old_spend_amount, 2)
+
+#         if bill_act_amount > 0:
+#             account_obj = Account.objects.get(id=int(bill_account_id))
+#             remaining_amount = round(
+#                 float(account_obj.available_balance) - bill_act_amount, 2
+#             )
+#             tag_obj, _ = Tag.objects.get_or_create(user=user_name, name="Incomes")
+#             transaction_date = datetime.datetime.today().date()
+#             save_transaction(
+#                 user_name,
+#                 sub_cat_obj.name,
+#                 bill_act_amount,
+#                 remaining_amount,
+#                 transaction_date,
+#                 sub_cat_obj,
+#                 account_obj,
+#                 tag_obj,
+#                 True,
+#                 True,
+#                 bill_obj,
+#             )
+#             account_obj.available_balance = remaining_amount
+#             account_obj.transaction_count += 1
+#             account_obj.save()
+#         return JsonResponse({"status": "true"})
+#     return render(request, "bill/bill_walk_through.html", context={})
+# new code 
+
+
+@login_required(login_url="/login")
+def bill_walk_through(request):
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        user_name       = request.user
+        bill_name       = request.POST["name"]
+        bill_exp_amount = float(request.POST["exp_amount"])
+        bill_act_amount = float(request.POST["actual_amount"])
+        bill_id         = request.POST["id"]
+        bill_account_id = request.POST["bill_account_id"]
+        user_budget     = UserBudgets.objects.get(user=user_name, pk=int(request.POST.get("user_budget_id")))
+
+        # 0) validation
+        if bill_exp_amount == 0:
+            return JsonResponse({"status": "false", "message": "Bill amount cannot be 0"})
+
+        # 1) fetch or heal the parent Category
+        enum_name    = CategoryTypes.BILLS_AND_SUBSCRIPTIONS.value            # "Bills & Subscriptions"
+        escaped_name = html.escape(enum_name)                                  # "Bills &amp; Subscriptions"
+
+        try:
+            category_obj = Category.objects.get(user=user_name, name=enum_name)
+        except Category.DoesNotExist:
+            # maybe the DB has the escaped version
+            try:
+                category_obj = Category.objects.get(user=user_name, name=escaped_name)
+                # heal it permanently
+                category_obj.name = enum_name
+                category_obj.save(update_fields=["name"])
+            except Category.DoesNotExist:
+                # not found at all → create the correct one
+                category_obj = Category.objects.create(user=user_name, name=enum_name)
+
+        # 2) fetch or create the SubCategory
+        sub_cat_obj, created = SubCategory.objects.get_or_create(
+            category=category_obj,
+            name=bill_name,
+            defaults={"category": category_obj, "name": bill_name},
+        )
+        if not created and sub_cat_obj.name != bill_name:
+            sub_cat_obj.name = bill_name
+            sub_cat_obj.save(update_fields=["name"])
+
+        # 3) now your existing Bill / BillDetail logic…
+        account_obj    = Account.objects.get(id=int(bill_account_id))
+        bill_left_amt  = round(bill_exp_amount - bill_act_amount, 2)
+        budget_period  = request.POST["budget_period"]
+        bill_date_str  = request.POST.get("budget_date", "")
         if bill_id == "false":
-            if bill_date:
-                bill_date = datetime.datetime.strptime(
-                    bill_date, DateFormats.YYYY_MM_DD.value
-                )
+            # parse / default date
+            if bill_date_str:
+                bill_date = datetime.datetime.strptime(bill_date_str, DateFormats.YYYY_MM_DD.value)
             else:
                 bill_date = datetime.datetime.today().date()
-            bill_date, end_month_date = start_end_date(
-                bill_date, BudgetPeriods.MONTHLY.value
-            )
-            try:
-                bill_obj = Bill.objects.filter(
-                    user=user_name,
-                    user_budget=user_budget,
-                    label=bill_name,
-                    date__range=(bill_date, end_month_date),
-                )
-                if bill_obj:
-                    return JsonResponse(
-                        {"status": "false", "message": "Bill Already Exists"}
-                    )
-                else:
-                    bill_obj = Bill()
-            # To-Do  Remove bare except
-            except:
-                bill_obj = Bill()
+            bill_date, end_month_date = start_end_date(bill_date, BudgetPeriods.MONTHLY.value)
 
-            bill_obj.user = request.user
-            bill_obj.user_budget = user_budget
-            bill_obj.label = bill_name
-            bill_obj.account = account_obj
-            bill_obj.amount = bill_exp_amount
-            bill_obj.date = bill_date
-            bill_obj.currency = "$"
-            bill_obj.remaining_amount = bill_left_amount
-            bill_obj.frequency = budget_period
-            bill_obj.auto_bill = False
-            bill_obj.auto_pay = False
-            # If full amount paid, change the status to 'paid'
-            if bill_exp_amount == bill_act_amount:
-                bill_obj.status = "paid"
-            else:
-                bill_obj.status = "unpaid"
+            # prevent duplicates
+            if Bill.objects.filter(
+                user=user_name,
+                user_budget=user_budget,
+                label=bill_name,
+                date__range=(bill_date, end_month_date),
+            ).exists():
+                return JsonResponse({"status": "false", "message": "Bill Already Exists"})
+
+            bill_obj = Bill(
+                user=request.user,
+                user_budget=user_budget,
+                label=bill_name,
+                account=account_obj,
+                amount=bill_exp_amount,
+                date=bill_date,
+                currency="$",
+                remaining_amount=bill_left_amt,
+                frequency=budget_period,
+                auto_bill=False,
+                auto_pay=False,
+                status="paid" if bill_exp_amount == bill_act_amount else "unpaid",
+            )
+            bill_obj.save()
+
             bill_details_obj = BillDetail.objects.create(
                 user=user_name,
                 user_budget=user_budget,
@@ -9637,51 +9779,52 @@ def bill_walk_through(request):
             )
             bill_obj.bill_details = bill_details_obj
             bill_obj.save()
+
         else:
             bill_obj = Bill.objects.get(id=int(bill_id), user_budget=user_budget)
-            old_spend_amount = round(
-                float(bill_obj.amount) - float(bill_obj.remaining_amount), 2
-            )
-            bill_obj.name = bill_name
-            bill_obj.amount = bill_exp_amount
-            bill_obj.remaining_amount = bill_left_amount
-            bill_details_obj = bill_obj.bill_details
-            bill_details_obj.name = bill_name
-            bill_details_obj.amount = bill_exp_amount
-            bill_details_obj.save()
-            # Change status to 'paid', if remaining amount becomes zero
-            if bill_left_amount == 0.0:
+            old_spent = round(float(bill_obj.amount) - float(bill_obj.remaining_amount), 2)
+
+            bill_obj.label            = bill_name
+            bill_obj.amount           = bill_exp_amount
+            bill_obj.remaining_amount = bill_left_amt
+            if bill_left_amt == 0.0:
                 bill_obj.status = "paid"
             bill_obj.save()
 
-            if bill_act_amount >= old_spend_amount:
-                bill_act_amount = round(bill_act_amount - old_spend_amount, 2)
+            bill_details = bill_obj.bill_details
+            bill_details.label  = bill_name
+            bill_details.amount = bill_exp_amount
+            bill_details.save()
 
+            if bill_act_amount >= old_spent:
+                bill_act_amount = round(bill_act_amount - old_spent, 2)
+
+        # 4) record the actual payment as a transaction if needed
         if bill_act_amount > 0:
-            account_obj = Account.objects.get(id=int(bill_account_id))
-            remaining_amount = round(
-                float(account_obj.available_balance) - bill_act_amount, 2
-            )
+            remaining_balance = round(float(account_obj.available_balance) - bill_act_amount, 2)
             tag_obj, _ = Tag.objects.get_or_create(user=user_name, name="Incomes")
-            transaction_date = datetime.datetime.today().date()
             save_transaction(
-                user_name,
-                sub_cat_obj.name,
-                bill_act_amount,
-                remaining_amount,
-                transaction_date,
-                sub_cat_obj,
-                account_obj,
-                tag_obj,
-                True,
-                True,
-                bill_obj,
+                user=user_name,
+                subcategory_name=sub_cat_obj.name,
+                amount=bill_act_amount,
+                remaining_balance=remaining_balance,
+                transaction_date=datetime.datetime.today().date(),
+                subcategory=sub_cat_obj,
+                account=account_obj,
+                tag=tag_obj,
+                is_bill=True,
+                is_auto=True,
+                bill=bill_obj,
             )
-            account_obj.available_balance = remaining_amount
+            account_obj.available_balance = remaining_balance
             account_obj.transaction_count += 1
             account_obj.save()
+
         return JsonResponse({"status": "true"})
-    return render(request, "bill/bill_walk_through.html", context={})
+
+    # GET or non-AJAX
+    return render(request, "bill/bill_walk_through.html", {})
+# new code end 
 
 
 @login_required(login_url="/login")
