@@ -5573,63 +5573,395 @@ def current_budget_box(request, pk):
     }
     return render(request, "budget/current_budget_box.html", context=context)
 
-
+# old code start 
 # @login_required(login_url="/login")
 # def compare_boxes(request):
 #     user_name = request.user
 #     return render(request, "budget/compare_boxes.html")
 
 
+# @login_required(login_url="/login")
+# def compare_different_budget_box(request):
+#     user_name = request.user
+#     budget_graph_currency = "$"
+#     budget_type = "Expenses"
+#     no_budgets = True
+#     # Fetch all the user budgets
+#     user_budgets = UserBudgets.objects.filter(user=user_name)
+#     budgets_qs = Budget.objects.filter(user=user_name).exclude(
+#         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
+#     )
+  
+#     bill_qs = Bill.objects.filter(user=user_name)
+#     if budgets_qs:
+#         budget_graph_currency = budgets_qs[0].currency
+#     if bill_qs:
+#         budget_graph_currency = bill_qs[0].currency
+#     budgets = list(budgets_qs.values_list("name", flat=True).distinct())
+#     bill_budgets = list(bill_qs.values_list("label", flat=True).distinct())
+#     budgets += bill_budgets
+#     total_budget_count = len(budgets)
+#     budget1_names = []
+#     budget2_names = []
+#     list_of_months = []
+#     spending_amount_bgt1 = 0
+#     spending_amount_bgt2 = 0
+#     earned_amount_bgt1 = 0
+#     earned_amount_bgt2 = 0
+#     if budgets:
+#         earliest = Budget.objects.filter(
+#             user=user_name, start_date__isnull=False
+#         ).order_by("start_date")
+#         no_budgets = not bool(earliest)
+#         if no_budgets == False:
+#             start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+#             list_of_months = list(
+#                 OrderedDict(
+#                     (
+#                         (start + datetime.timedelta(_)).strftime(
+#                             DateFormats.MON_YYYY.value
+#                         ),
+#                         None,
+#                     )
+#                     for _ in range((end - start).days + 1)
+#                 ).keys()
+#             )
+#             split_budgets_count = int(total_budget_count / 2)
+#             budget1_names = budgets[0:split_budgets_count]
+#             budget2_names = budgets[split_budgets_count:total_budget_count]
+#         else:
+#             list_of_months = []
+#     user_bgt1 = user_bgt2 = None
+
+#     if request.method == "POST":
+#         month_name = "01-" + request.POST["select_period"]
+#         user_bgt1 = request.POST.get("user_budget1")
+#         user_bgt2 = request.POST.get("user_budget2")
+#         if user_bgt1 and user_bgt2:
+#             user_bgt1, user_bgt2 = int(user_bgt1), int(user_bgt2)
+#         budget1_names = request.POST.getlist("budget1_name")
+#         budget2_names = request.POST.getlist("budget2_name")
+#         date_value = datetime.datetime.strptime(
+#             month_name, DateFormats.DD_MON_YYYY.value
+#         ).date()
+#         current_month = datetime.datetime.strftime(
+#             date_value, DateFormats.MON_YYYY.value
+#         )
+#         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+#         user_bgt_obj1 = UserBudgets.objects.get(pk=user_bgt1)
+#         user_bgt_obj2 = UserBudgets.objects.get(pk=user_bgt2)
+
+#     else:
+#         date_value = datetime.datetime.today().date()
+#         current_month = datetime.datetime.strftime(
+#             date_value, DateFormats.MON_YYYY.value
+#         )
+#         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
+#         user_bgt_obj1 = user_bgt_obj2 = None
+
+#     transaction_data_dict1 = {}
+#     transaction_data_dict2 = {}
+#     budget1_graph_value = []
+#     budget1_bar_value = [{"name": "Spent", "data": []}]
+#     budget2_graph_value = []
+#     budget2_bar_value = [{"name": "Spent", "data": []}]
+#     budget1_income_graph_value = []
+#     budget1_income_bar_value = [{"name": "Earned", "data": []}]
+#     budget2_income_graph_value = []
+#     budget2_income_bar_value = [{"name": "Earned", "data": []}]
+#     income_bgt1_names = []
+#     income_bgt2_names = []
+#     expense_bgt1_names = []
+#     expense_bgt2_names = []
+
+#     if user_bgt_obj1 and user_bgt_obj2:
+#         (
+#             budget1_bar_value,
+#             budget1_graph_value,
+#             budget1_income_graph_value,
+#             budget1_income_bar_value,
+#             expense_bgt1_names,
+#             income_bgt1_names,
+#             transaction_data_dict1,
+#             spending_amount_bgt1,
+#             earned_amount_bgt1,
+#         ) = get_cmp_diff_data(
+#             budget2_names,
+#             user_name,
+#             start_date,
+#             end_date,
+#             budget1_bar_value,
+#             budget1_graph_value,
+#             transaction_data_dict1,
+#             budget1_income_graph_value,
+#             budget1_income_bar_value,
+#             expense_bgt1_names,
+#             income_bgt1_names,
+#             spending_amount_bgt1,
+#             earned_amount_bgt1,
+#             user_bgt_obj1,
+#         )
+
+#         (
+#             budget2_bar_value,
+#             budget2_graph_value,
+#             budget2_income_graph_value,
+#             budget2_income_bar_value,
+#             expense_bgt2_names,
+#             income_bgt2_names,
+#             transaction_data_dict2,
+#             spending_amount_bgt2,
+#             earned_amount_bgt2,
+#         ) = get_cmp_diff_data(
+#             budget2_names,
+#             user_name,
+#             start_date,
+#             end_date,
+#             budget2_bar_value,
+#             budget2_graph_value,
+#             transaction_data_dict2,
+#             budget2_income_graph_value,
+#             budget2_income_bar_value,
+#             expense_bgt2_names,
+#             income_bgt2_names,
+#             spending_amount_bgt2,
+#             earned_amount_bgt2,
+#             user_bgt_obj2,
+#         )
+
+#     else:
+#         (
+#             budget1_bar_value,
+#             budget1_graph_value,
+#             budget1_income_graph_value,
+#             budget1_income_bar_value,
+#             expense_bgt1_names,
+#             income_bgt1_names,
+#             transaction_data_dict1,
+#             spending_amount_bgt1,
+#             earned_amount_bgt1,
+#         ) = get_cmp_diff_data(
+#             budget2_names,
+#             user_name,
+#             start_date,
+#             end_date,
+#             budget1_bar_value,
+#             budget1_graph_value,
+#             transaction_data_dict1,
+#             budget1_income_graph_value,
+#             budget1_income_bar_value,
+#             expense_bgt1_names,
+#             income_bgt1_names,
+#             spending_amount_bgt1,
+#             earned_amount_bgt1,
+#         )
+
+#         (
+#             budget2_bar_value,
+#             budget2_graph_value,
+#             budget2_income_graph_value,
+#             budget2_income_bar_value,
+#             expense_bgt2_names,
+#             income_bgt2_names,
+#             transaction_data_dict2,
+#             spending_amount_bgt2,
+#             earned_amount_bgt2,
+#         ) = get_cmp_diff_data(
+#             budget2_names,
+#             user_name,
+#             start_date,
+#             end_date,
+#             budget2_bar_value,
+#             budget2_graph_value,
+#             transaction_data_dict2,
+#             budget2_income_graph_value,
+#             budget2_income_bar_value,
+#             expense_bgt2_names,
+#             income_bgt2_names,
+#             spending_amount_bgt2,
+#             earned_amount_bgt2,
+#         )
+
+#     # Initialize a dictionary to group by category
+#     grouped_data = {}
+
+#     # Process transaction_data1 and group by category
+#     for name, data in transaction_data_dict1.items():
+#         category = data[0][2]  # Get the category
+#         amount = data[0][1]  # Get the amount
+#         if category not in grouped_data:
+#             grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
+#         grouped_data[category]["items"].append(
+#             {
+#                 "name": name,
+#                 "amount1": amount,
+#                 "amount2": 0,  # Will fill this later with transaction_data2
+#             }
+#         )
+#         grouped_data[category]["total1"] += amount
+
+#     # Process transaction_data2 and update grouped data
+#     for name, data in transaction_data_dict2.items():
+#         category = data[0][2]
+#         amount = data[0][1]
+#         if category not in grouped_data:
+#             grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
+#         # Check if the item already exists in transaction_data1
+#         existing_item = next(
+#             (item for item in grouped_data[category]["items"] if item["name"] == name),
+#             None,
+#         )
+#         if existing_item:
+#             existing_item["amount2"] = amount
+#         else:
+#             grouped_data[category]["items"].append(
+#                 {
+#                     "name": name,
+#                     "amount1": 0,  # Not in transaction_data1
+#                     "amount2": amount,
+#                 }
+#             )
+#         grouped_data[category]["total2"] += amount
+
+#         # new code 
+#         grouped_data = {}
+
+#     # Process transaction_data1 and group by category
+#     for name, data in transaction_data_dict1.items():
+#         if not data:
+#             # no transactions for this budget/item → skip (or you could zero-fill here)
+#             continue
+
+#         _, amount, category = data[0]   # safe now, because data[0] exists
+
+#         entry = grouped_data.setdefault(category, {"items": [], "total1": 0, "total2": 0})
+#         entry["items"].append({
+#             "name":    name,
+#             "amount1": amount,
+#             "amount2": 0,
+#         })
+#         entry["total1"] += amount
+
+
+#     # Process transaction_data2 and update grouped data
+#     for name, data in transaction_data_dict2.items():
+#         if not data:
+#             continue
+
+#         _, amount, category = data[0]
+
+#         entry = grouped_data.setdefault(category, {"items": [], "total1": 0, "total2": 0})
+
+#         # find existing item (from data1) or append a new one
+#         for item in entry["items"]:
+#             if item["name"] == name:
+#                 item["amount2"] = amount
+#                 break
+#         else:
+#             entry["items"].append({
+#                 "name":    name,
+#                 "amount1": 0,
+#                 "amount2": amount,
+#             })
+
+#         entry["total2"] += amount
+#     context = {
+#         "user_budgets": user_budgets,
+#         "budgets": budgets,
+#         "list_of_months": list_of_months,
+#         "budget1_names": budget1_names,
+#         "budget2_names": budget2_names,
+#         "current_month": current_month,
+#         "total_spent_amount_bgt1": spending_amount_bgt1,
+#         "total_spent_amount_bgt2": spending_amount_bgt2,
+#         "total_earn_amount_bgt1": earned_amount_bgt1,
+#         "total_earn_amount_bgt2": earned_amount_bgt2,
+#         "transaction_data1": transaction_data_dict1,
+#         "transaction_data2": transaction_data_dict2,
+#         "budget_graph_currency": budget_graph_currency,
+#         "budget_names": expense_bgt1_names,
+#         "budget_graph_value": budget1_graph_value,
+#         "budget_graph_data": budget1_bar_value,
+#         "budget_graph_id": "#total_budget",
+#         "budget_bar_id": "#budgets-bar",
+#         "budget_names2": expense_bgt2_names,
+#         "budget_graph_value2": budget2_graph_value,
+#         "budget_graph_data2": budget2_bar_value,
+#         "budget_graph_id2": "#total_budget2",
+#         "budget_bar_id2": "#budgets-bar2",
+#         "budget_income_names": income_bgt1_names,
+#         "budget_income_graph_value": budget1_income_graph_value,
+#         "budget_income_graph_data": budget1_income_bar_value,
+#         "budget_income_graph_id": "#total_income_budget",
+#         "budget_income_bar_id": "#income-budgets-bar",
+#         "budget_income_names2": income_bgt2_names,
+#         "budget_income_graph_value2": budget2_income_graph_value,
+#         "budget_income_graph_data2": budget2_income_bar_value,
+#         "budget_income_graph_id2": "#total_income_budget2",
+#         "budget_income_bar_id2": "#income-budgets-bar2",
+#         "budget_type": budget_type,
+#         "page": "budgets",
+#         "no_budgets": no_budgets,
+#         "user_budget_1": user_bgt1,
+#         "user_budget_2": user_bgt2,
+#         "grouped_data": grouped_data,
+#         "category_icons": CATEGORY_ICONS,
+#         "tour_api": Tour_APIs["compare_budget_page"]
+#     }
+#     return render(request, "budget/compare_diff_bgt_box.html", context=context)
+# old code end 
+# new code 
 @login_required(login_url="/login")
 def compare_different_budget_box(request):
     user_name = request.user
     budget_graph_currency = "$"
     budget_type = "Expenses"
     no_budgets = True
+
     # Fetch all the user budgets
     user_budgets = UserBudgets.objects.filter(user=user_name)
     budgets_qs = Budget.objects.filter(user=user_name).exclude(
         category__category__name__in=["Bills", CategoryTypes.FUNDS.value]
     )
     bill_qs = Bill.objects.filter(user=user_name)
+
     if budgets_qs:
         budget_graph_currency = budgets_qs[0].currency
     if bill_qs:
         budget_graph_currency = bill_qs[0].currency
+
     budgets = list(budgets_qs.values_list("name", flat=True).distinct())
     bill_budgets = list(bill_qs.values_list("label", flat=True).distinct())
     budgets += bill_budgets
     total_budget_count = len(budgets)
+
     budget1_names = []
     budget2_names = []
     list_of_months = []
-    spending_amount_bgt1 = 0
-    spending_amount_bgt2 = 0
-    earned_amount_bgt1 = 0
-    earned_amount_bgt2 = 0
+    spending_amount_bgt1 = spending_amount_bgt2 = 0
+    earned_amount_bgt1 = earned_amount_bgt2 = 0
+
     if budgets:
         earliest = Budget.objects.filter(
             user=user_name, start_date__isnull=False
         ).order_by("start_date")
         no_budgets = not bool(earliest)
-        if no_budgets == False:
-            start, end = earliest[0].start_date, earliest[len(earliest) - 1].start_date
+        if not no_budgets:
+            start = earliest[0].start_date
+            end = earliest[len(earliest) - 1].start_date
             list_of_months = list(
                 OrderedDict(
                     (
-                        (start + datetime.timedelta(_)).strftime(
-                            DateFormats.MON_YYYY.value
-                        ),
+                        (start + datetime.timedelta(days=offset)).strftime(DateFormats.MON_YYYY.value),
                         None,
                     )
-                    for _ in range((end - start).days + 1)
+                    for offset in range((end - start).days + 1)
                 ).keys()
             )
-            split_budgets_count = int(total_budget_count / 2)
-            budget1_names = budgets[0:split_budgets_count]
-            budget2_names = budgets[split_budgets_count:total_budget_count]
-        else:
-            list_of_months = []
+            split = total_budget_count // 2
+            budget1_names = budgets[:split]
+            budget2_names = budgets[split:total_budget_count]
+
     user_bgt1 = user_bgt2 = None
 
     if request.method == "POST":
@@ -5637,27 +5969,22 @@ def compare_different_budget_box(request):
         user_bgt1 = request.POST.get("user_budget1")
         user_bgt2 = request.POST.get("user_budget2")
         if user_bgt1 and user_bgt2:
-            user_bgt1, user_bgt2 = int(user_bgt1), int(user_bgt2)
+            user_bgt1 = int(user_bgt1)
+            user_bgt2 = int(user_bgt2)
         budget1_names = request.POST.getlist("budget1_name")
         budget2_names = request.POST.getlist("budget2_name")
-        date_value = datetime.datetime.strptime(
-            month_name, DateFormats.DD_MON_YYYY.value
-        ).date()
-        current_month = datetime.datetime.strftime(
-            date_value, DateFormats.MON_YYYY.value
-        )
+        date_value = datetime.datetime.strptime(month_name, DateFormats.DD_MON_YYYY.value).date()
+        current_month = date_value.strftime(DateFormats.MON_YYYY.value)
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
         user_bgt_obj1 = UserBudgets.objects.get(pk=user_bgt1)
         user_bgt_obj2 = UserBudgets.objects.get(pk=user_bgt2)
-
     else:
         date_value = datetime.datetime.today().date()
-        current_month = datetime.datetime.strftime(
-            date_value, DateFormats.MON_YYYY.value
-        )
+        current_month = date_value.strftime(DateFormats.MON_YYYY.value)
         start_date, end_date = start_end_date(date_value, BudgetPeriods.MONTHLY.value)
         user_bgt_obj1 = user_bgt_obj2 = None
 
+    # Initialize structures for graph data
     transaction_data_dict1 = {}
     transaction_data_dict2 = {}
     budget1_graph_value = []
@@ -5668,11 +5995,10 @@ def compare_different_budget_box(request):
     budget1_income_bar_value = [{"name": "Earned", "data": []}]
     budget2_income_graph_value = []
     budget2_income_bar_value = [{"name": "Earned", "data": []}]
-    income_bgt1_names = []
-    income_bgt2_names = []
-    expense_bgt1_names = []
-    expense_bgt2_names = []
+    income_bgt1_names = income_bgt2_names = []
+    expense_bgt1_names = expense_bgt2_names = []
 
+    # Fetch comparison data
     if user_bgt_obj1 and user_bgt_obj2:
         (
             budget1_bar_value,
@@ -5685,7 +6011,7 @@ def compare_different_budget_box(request):
             spending_amount_bgt1,
             earned_amount_bgt1,
         ) = get_cmp_diff_data(
-            budget2_names,
+            budget1_names,
             user_name,
             start_date,
             end_date,
@@ -5698,9 +6024,8 @@ def compare_different_budget_box(request):
             income_bgt1_names,
             spending_amount_bgt1,
             earned_amount_bgt1,
-            user_bgt_obj1,
+        
         )
-
         (
             budget2_bar_value,
             budget2_graph_value,
@@ -5725,9 +6050,8 @@ def compare_different_budget_box(request):
             income_bgt2_names,
             spending_amount_bgt2,
             earned_amount_bgt2,
-            user_bgt_obj2,
+          
         )
-
     else:
         (
             budget1_bar_value,
@@ -5740,7 +6064,7 @@ def compare_different_budget_box(request):
             spending_amount_bgt1,
             earned_amount_bgt1,
         ) = get_cmp_diff_data(
-            budget2_names,
+            budget1_names,
             user_name,
             start_date,
             end_date,
@@ -5754,7 +6078,6 @@ def compare_different_budget_box(request):
             spending_amount_bgt1,
             earned_amount_bgt1,
         )
-
         (
             budget2_bar_value,
             budget2_graph_value,
@@ -5781,46 +6104,71 @@ def compare_different_budget_box(request):
             earned_amount_bgt2,
         )
 
-    # Initialize a dictionary to group by category
+    # === Defensive grouping for transaction_data_dict1 ===
     grouped_data = {}
 
-    # Process transaction_data1 and group by category
+# Loop 1
     for name, data in transaction_data_dict1.items():
-        category = data[0][2]  # Get the category
-        amount = data[0][1]  # Get the amount
-        if category not in grouped_data:
-            grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
-        grouped_data[category]["items"].append(
-            {
-                "name": name,
-                "amount1": amount,
-                "amount2": 0,  # Will fill this later with transaction_data2
-            }
-        )
-        grouped_data[category]["total1"] += amount
+        if not data:
+            continue
 
-    # Process transaction_data2 and update grouped data
-    for name, data in transaction_data_dict2.items():
-        category = data[0][2]
-        amount = data[0][1]
-        if category not in grouped_data:
-            grouped_data[category] = {"items": [], "total1": 0, "total2": 0}
-        # Check if the item already exists in transaction_data1
-        existing_item = next(
-            (item for item in grouped_data[category]["items"] if item["name"] == name),
-            None,
-        )
-        if existing_item:
-            existing_item["amount2"] = amount
+        first = data[0]
+        if len(first) == 3:
+            _, raw_amount, category = first
+        elif len(first) == 2:
+            raw_amount, category = first
         else:
-            grouped_data[category]["items"].append(
-                {
-                    "name": name,
-                    "amount1": 0,  # Not in transaction_data1
-                    "amount2": amount,
-                }
-            )
-        grouped_data[category]["total2"] += amount
+            continue
+
+        try:
+            amount = float(raw_amount)
+        except (ValueError, TypeError):
+            amount = 0.0
+
+        entry = grouped_data.setdefault(
+            category, {"items": [], "total1": 0.0, "total2": 0.0}
+        )
+        entry["items"].append({
+            "name":    name,
+            "amount1": amount,
+            "amount2": 0.0,
+        })
+        entry["total1"] += amount
+
+    # Loop 2
+    for name, data in transaction_data_dict2.items():
+        if not data:
+            continue
+
+        first = data[0]
+        if len(first) == 3:
+            _, raw_amount, category = first
+        elif len(first) == 2:
+            raw_amount, category = first
+        else:
+            continue
+
+        try:
+            amount = float(raw_amount)
+        except (ValueError, TypeError):
+            amount = 0.0
+
+        entry = grouped_data.setdefault(
+            category, {"items": [], "total1": 0.0, "total2": 0.0}
+        )
+        for item in entry["items"]:
+            if item["name"] == name:
+                item["amount2"] = amount
+                break
+        else:
+            entry["items"].append({
+                "name":    name,
+                "amount1": 0.0,
+                "amount2": amount,
+            })
+        entry["total2"] += amount
+
+
     context = {
         "user_budgets": user_budgets,
         "budgets": budgets,
@@ -5835,22 +6183,18 @@ def compare_different_budget_box(request):
         "transaction_data1": transaction_data_dict1,
         "transaction_data2": transaction_data_dict2,
         "budget_graph_currency": budget_graph_currency,
-        "budget_names": expense_bgt1_names,
         "budget_graph_value": budget1_graph_value,
         "budget_graph_data": budget1_bar_value,
         "budget_graph_id": "#total_budget",
         "budget_bar_id": "#budgets-bar",
-        "budget_names2": expense_bgt2_names,
         "budget_graph_value2": budget2_graph_value,
         "budget_graph_data2": budget2_bar_value,
         "budget_graph_id2": "#total_budget2",
         "budget_bar_id2": "#budgets-bar2",
-        "budget_income_names": income_bgt1_names,
         "budget_income_graph_value": budget1_income_graph_value,
         "budget_income_graph_data": budget1_income_bar_value,
         "budget_income_graph_id": "#total_income_budget",
         "budget_income_bar_id": "#income-budgets-bar",
-        "budget_income_names2": income_bgt2_names,
         "budget_income_graph_value2": budget2_income_graph_value,
         "budget_income_graph_data2": budget2_income_bar_value,
         "budget_income_graph_id2": "#total_income_budget2",
@@ -5862,10 +6206,11 @@ def compare_different_budget_box(request):
         "user_budget_2": user_bgt2,
         "grouped_data": grouped_data,
         "category_icons": CATEGORY_ICONS,
-        "tour_api": Tour_APIs["compare_budget_page"]
+        "tour_api": Tour_APIs["compare_budget_page"],
     }
-    return render(request, "budget/compare_diff_bgt_box.html", context=context)
 
+    return render(request, "budget/compare_diff_bgt_box.html", context=context)
+# new end 
 
 # def compare_different_budget_box(request):
 #     user_name = request.user
