@@ -2,7 +2,6 @@
 FROM python:3.13.2-slim AS base
 
 # Set work directory
-# Set work directory
 WORKDIR /finance
 
 # Set environment variables

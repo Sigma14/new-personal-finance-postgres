@@ -1,4 +1,3 @@
-import os
 import ast
 import calendar
 import csv
@@ -10,9 +9,7 @@ import time
 from collections import OrderedDict
 from io import BytesIO
 from itertools import chain
-from openai import OpenAI
 
-import bleach
 import pandas as pd
 import plaid
 import pytz
@@ -23,29 +20,23 @@ from dateutil import relativedelta
 from dateutil.relativedelta import relativedelta
 from decouple import config
 from django.conf import settings
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.staticfiles import finders
-from django.db.models import Q
 from django.http import (
-    FileResponse,
     HttpResponse,
     HttpResponseNotAllowed,
-    HttpResponseNotFound,
     HttpResponseRedirect,
+    HttpResponseNotFound,
     JsonResponse,
     FileResponse,
-    HttpResponseNotFound
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import  reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.timezone import localtime
 from django.utils.translation import gettext as _
@@ -60,7 +51,6 @@ from django.views.generic import (
     UpdateView,
 )
 from openai import OpenAI
-from plaid import ApiClient
 from plaid.api import plaid_api
 from plaid.model.country_code import CountryCode
 from plaid.model.item_public_token_exchange_request import (
@@ -84,7 +74,6 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Table, TableStyle
 from reportlab.platypus.flowables import Spacer
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -139,11 +128,9 @@ from .forms import (
     UserBudgetsForm,
 )
 from .helper import (
-    check_bill_is_due,
     check_subcategory_exists,
     create_bill_request,
     create_budget_request,
-    create_income_request,
     dict_value_to_list,
     get_cmp_diff_data,
     get_list_of_months,
@@ -151,8 +138,6 @@ from .helper import (
     get_template_budget,
     save_budgets,
     save_fund_obj,
-    save_income,
-    save_income_details,
     save_transaction,
     start_end_date,
 )
@@ -171,10 +156,7 @@ from .models import (
     ExpensesDetails,
     Feedback,
     Goal,
-    Income,
-    IncomeDetail,
     MortgageDetails,
-    MyNotes,
     MyNotes,
     PlaidItem,
     Property,
@@ -3142,252 +3124,7 @@ def user_login(request):
     return render(request, "login_page.html", context=context)
 
 
-# from axes.decorators import axes_dispatch
-# from axes.utils import reset_request
-# from django.contrib.auth import authenticate, login
-# from django.contrib.auth.models import User
-# from django.shortcuts import render, redirect
-# from django.urls import reverse
-# import requests
-# import logging
 
-# logger = logging.getLogger('my_finance')
-
-# @axes_dispatch
-# def user_login(request):
-#     """
-#     Handles user login, including authentication via Django and JWT,
-#     as well as membership verification.
-#     """
-#     context = {"page": "login_page"}
-#     if request.method == "POST":
-#         username = request.POST.get("register-username")
-#         user_password = request.POST.get("register-password")
-
-#         # Get redirect URL from POST data, defaulting to 'home' if not provided
-#         redirect_url = request.POST.get("redirect_url", "")
-
-#         # If redirect_url is empty or invalid, use 'home' as a default
-#         if not redirect_url:
-#             redirect_url = "home"
-
-#         # Step 1: First try Django authentication
-#         user = authenticate(request=request, username=username, password=user_password)
-
-#         # For superusers, proceed with standard Django login
-#         if user and user.is_superuser:
-#             login(request, user)
-#             return redirect(redirect_url)
-
-#         # If Django authentication fails for non-superusers, try WordPress JWT
-#         if not user:
-#             try:
-#                 # Handle JWT authentication from WordPress
-#                 token_url = f"{wordpress_domain}/wp-json/api/v1/token"
-#                 token_data = {"username": username, "password": user_password}
-
-#                 token_response = requests.post(token_url, json=token_data, timeout=10)
-#                 token_response.raise_for_status()
-#                 token_data = token_response.json()
-
-#                 if "jwt_token" not in token_data:
-#                     # Authentication failed - this will be logged by Axes
-#                     context["login_error"] = "Invalid credentials"
-#                     return render(request, "login_page.html", context=context)
-
-#                 jwt_token = token_data["jwt_token"]
-
-#                 # Membership verification
-#                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
-#                 headers = {"Authorization": f"Bearer {jwt_token}"}
-#                 user_info_response = requests.get(user_info_url, headers=headers, timeout=10)
-#                 user_info = user_info_response.json()
-
-#                 if 'id' not in user_info:
-#                     # Failed to get user info
-#                     context["login_error"] = "Failed to retrieve user information"
-#                     return render(request, "login_page.html", context=context)
-
-#                 user_id = user_info["id"]
-
-#                 # Check membership plan
-#                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
-#                 plan_response = requests.get(plan_url, timeout=10).json()
-
-#                 if "response" not in plan_response or not plan_response["response"]:
-#                     context["login_error"] = "No membership plan found"
-#                     return render(request, "login_page.html", context=context)
-
-#                 user_plan_id = list(plan_response["response"].keys())[0]
-
-#                 # Verify membership
-#                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
-#                 verify_user_response = requests.get(verify_user_url, timeout=10)
-#                 verify_user_response.raise_for_status()
-
-#                 verify_user_data = verify_user_response.json()
-#                 if verify_user_data.get("response") != 1:
-#                     context["login_error"] = "You don't have a valid membership subscription"
-#                     return render(request, "login_page.html", context=context)
-
-#                 # Create or update user in Django
-#                 try:
-#                     django_user = User.objects.get(id=user_id)
-#                     django_user.set_password(user_password)
-#                     django_user.save()
-#                 except User.DoesNotExist:
-#                     django_user = User(
-#                         id=user_id,
-#                         username=username,
-#                         email=user_info.get("email", ""),
-#                         first_name=user_info.get("name", "")
-#                     )
-#                     django_user.set_password(user_password)
-#                     django_user.save()
-
-#                 # If we get here, authentication was successful, so reset Axes counters
-#                 reset_request(request)
-
-#                 # Log the user in
-#                 login(request, django_user)
-
-#                 # Use reverse to check URL validity before redirecting
-#                 try:
-#                     # Check if it's a named URL pattern
-#                     reverse(redirect_url)
-#                     return redirect(redirect_url)
-#                 except:
-#                     # If it's not a named URL pattern, check if it's a direct URL path
-#                     if redirect_url.startswith('/'):
-#                         return redirect(redirect_url)
-#                     else:
-#                         # Fall back to the home page
-#                         return redirect('home')
-
-#             except requests.exceptions.RequestException as e:
-#                 logger.error(f"API request error during login: {str(e)}")
-#                 context["login_error"] = f"Error during login: {str(e)}"
-#                 return render(request, "login_page.html", context=context)
-#             except Exception as e:
-#                 logger.error(f"Unexpected error during login: {str(e)}")
-#                 context["login_error"] = f"An unexpected error occurred: {str(e)}"
-#                 return render(request, "login_page.html", context=context)
-
-#         # If we get here, Django authentication was successful
-#         login(request, user)
-
-#         # Use reverse to check URL validity before redirecting
-#         try:
-#             # Check if it's a named URL pattern
-#             reverse(redirect_url)
-#             return redirect(redirect_url)
-#         except:
-#             # If it's not a named URL pattern, check if it's a direct URL path
-#             if redirect_url.startswith('/'):
-#                 return redirect(redirect_url)
-#             else:
-#                 # Fall back to the home page
-#                 return redirect('home')
-
-#     # GET request - just show the login form
-#     next_url = request.GET.get("next", "")
-#     context["redirect_url"] = next_url
-#     return render(request, "login_page.html", context=context)
-
-
-# from axes.decorators import axes_dispatch
-# from axes.models import AccessAttempt
-# from django.contrib.auth import authenticate, login
-# from django.shortcuts import render, redirect
-# import requests
-
-# @axes_dispatch
-# def user_login(request):
-#     """
-#     Handles user login, including authentication via Django and JWT,
-#     as well as membership verification.
-#     """
-#     context = {"page": "login_page"}
-
-#     if request.method == "POST":
-#         username = request.POST.get("register-username")
-#         user_password = request.POST.get("register-password")
-#         check_jwt_authentication = False
-#         check_user_membership = False
-
-#         try:
-#             # Authenticate the user and pass the request object to authenticate
-#             user = authenticate(request=request, username=username, password=user_password)
-#             if user:
-#                 if user.is_superuser:
-#                     login(request, user)
-#                     redirect_url = request.POST.get("redirect_url")
-#                     return redirect(redirect_url if redirect_url else "home")
-#             else:
-#                 context["login_error"] = "Invalid credentials"
-#                 return render(request, "login_page.html", context=context)
-#         except Exception as e:
-#             context["login_error"] = f"Authentication error: {e}"
-#             return render(request, "login_page.html", context=context)
-
-#         # Handle JWT authentication from WordPress
-#         token_url = f"{wordpress_domain}/wp-json/api/v1/token"
-#         token_data = {"username": username, "password": user_password}
-#         try:
-#             token_response = requests.post(token_url, json=token_data)
-#             token_response.raise_for_status()  # Raises HTTPError for bad responses
-#             token_data = token_response.json()
-#             if "jwt_token" in token_data:
-#                 jwt_token = token_data["jwt_token"]
-#                 check_jwt_authentication = True
-#         except requests.exceptions.RequestException as e:
-#             context["login_error"] = f"Error while fetching token: {e}"
-#             return render(request, "login_page.html", context=context)
-
-#         # Membership verification
-#         if check_jwt_authentication:
-#             try:
-#                 user_info_url = f"{wordpress_domain}/wp-json/wp/v2/users/me"
-#                 headers = {"Authorization": f"Bearer {jwt_token}"}
-#                 user_info_response = requests.get(user_info_url, headers=headers)
-#                 user_info = user_info_response.json()
-#                 user_id = user_info["id"]
-
-#                 plan_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=get_user_levels&uid={user_id}"
-#                 plan_response = requests.get(plan_url).json()["response"]
-#                 user_plan_id = list(plan_response.keys())[0]
-
-#                 verify_user_url = f"{wordpress_domain}/?ihc_action=api-gate&ihch={wordpress_api_key}&action=verify_user_level&uid={user_id}&lid={user_plan_id}"
-#                 verify_user_response = requests.get(verify_user_url)
-#                 if verify_user_response.status_code == 200:
-#                     verify_user_data = verify_user_response.json()
-#                     if verify_user_data["response"] == 1:
-#                         check_user_membership = True
-#             except requests.exceptions.RequestException as e:
-#                 context["login_error"] = f"Error during membership verification: {e}"
-#                 return render(request, "login_page.html", context=context)
-
-#         if not check_user_membership:
-#             context["login_error"] = "You don't have a membership subscription."
-#             return render(request, "login_page.html", context=context)
-
-#         if check_jwt_authentication and check_user_membership:
-#             try:
-#                 user = User.objects.get(id=user_id)
-#                 user.set_password(user_password)
-#                 user.save()
-#             except User.DoesNotExist:
-#                 user = User(id=user_id, username=username, email="", first_name=user_info["name"])
-#                 user.set_password(user_password)
-#                 user.save()
-
-#             login(request, user)
-#             redirect_url = request.POST.get("redirect_url")
-#             return redirect(redirect_url if redirect_url else "home")
-
-#     else:
-#         context["redirect_url"] = request.GET.get("next", "")
-#         return render(request, "login_page.html", context=context)
 
 
 @login_required(login_url="/login")
@@ -6558,9 +6295,6 @@ def budget_details(request, pk):
         transaction_data = Transaction.objects.filter(
             user=user_name,
             budgets=budget_obj,
-        transaction_data = Transaction.objects.filter(
-            user=user_name,
-            budgets=budget_obj,
             categories=budget_obj.category,
             transaction_date__range=(start_date, end_date),
         ).order_by("transaction_date")
@@ -7321,61 +7055,8 @@ class TemplateDelete(LoginRequiredMixin, DeleteView):
         return JsonResponse({"status": "Successfully", "path": "None"})
 
 
-# @login_required(login_url="/login")
-# def template_budget_details(request, pk):
-#     user_name = request.user
-#     budget_obj = TemplateBudget.objects.get(pk=pk)
-#     transaction_key = ['S.No.', 'Date', 'Amount', 'Payee', 'Account', 'Categories', 'Bill', 'Budget', 'Cleared']
-#
-#     start_date = budget_obj.start_date
-#     end_date = budget_obj.end_date
-#     going_out_list = [[1, start_date, 100, "gaming", "", ]]
-#     transaction_dict = {'Going out': [], 'Groceries': [], 'Bills': []}
-#     context = {
-#         'budget_obj': budget_obj, 'budget_transaction_data': transaction_data,
-#         'transaction_key': transaction_key, 'transaction_key_dumbs': json.dumps(transaction_key),
-#         'start_date': start_date, 'end_date': end_date
-#     }
-#     return render(request, "budget/budget_detail.html", context=context)
-
-# class BillList(LoginRequiredMixin, ListView):
-#     model = Bill
-#     template_name = 'bill/bill_list.html'
-#
-#     def get_queryset(self):
-#         return Bill.objects.filter(user=self.request.user)
-#
-#
-# class BillDetail(LoginRequiredMixin, DetailView):
-#     model = Bill
-#     template_name = 'bill/bill_detail.html'
-#
-#
-# class BillAdd(LoginRequiredMixin, CreateView):
-#     model = Bill
-#     form_class = BillForm
-#     template_name = 'bill/bill_add.html'
-#
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         obj.user = self.request.user
-#         obj.save()
-#         return super().form_valid(form)
-#
-#
-# class BillUpdate(LoginRequiredMixin, UpdateView):
-#     model = Bill
-#     form_class = BillForm
-#     template_name = 'bill/bill_update.html'
-#
-#
-# class BillDelete(LoginRequiredMixin, DeleteView):
-#     model = Bill
-#     form_class = BillForm
-#     template_name = 'bill/bill_delete.html'
 
 # Tag Views
-
 
 def tag_add(request):
     name = request.POST["name"].title()
@@ -8528,20 +8209,13 @@ class GoalList(LoginRequiredMixin, ListView):
         Handles POST request
         """
         if request.method == "POST":
-        if request.method == "POST":
             self.object_list = self.get_queryset()
-            user_budget_id = self.request.POST.get("user_budget")
             user_budget_id = self.request.POST.get("user_budget")
             if user_budget_id:
                 self.user_budget = UserBudgets.objects.get(
                     user=request.user, pk=user_budget_id
                 )
-                    user=request.user, pk=user_budget_id
-                )
-
-            return self.render_to_response(self.get_context_data())
-        else:
-            return HttpResponseNotAllowed(["POST"])
+                return self.render_to_response(self.get_context_data())
             return HttpResponseNotAllowed(["POST"])
 
     def get(self, request, *args, **kwargs):
@@ -13945,4 +13619,3 @@ def error_403(request, exception):
 def error_400(request, exception):
     data = {"error": "Bad Request!"}
     return render(request, "error.html", data)
-
