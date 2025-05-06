@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import *
+from . import views
+
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -346,4 +348,11 @@ urlpatterns = [
     path("app-error-report/", ErrorLogsList.as_view(), name="app-error-report"),
     path("app-error-report/details/<int:error_id>/", error_report_details, name="app-error-report-detail"),
     path("app-error-report/action/", error_report_action, name="app-error-report-action"),
+    path('update-user-budget/<int:pk>/', update_user_budget, name='update_user_budget'),
+      path(
+        'budgets/<int:pk>/ajax/change-default/',
+        change_default,
+        name='change_default'
+    ),
+
 ]
