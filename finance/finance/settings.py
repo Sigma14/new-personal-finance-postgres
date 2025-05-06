@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +27,7 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 
 # mongodb_host = os.environ.get("NOSQL_HOST") or "localhost"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 # Application definition
@@ -44,8 +45,7 @@ INSTALLED_APPS = [
     "axes",
     "rest_framework",
     "rest_framework_simplejwt",
-    'rest_framework_simplejwt.token_blacklist',
-
+    "rest_framework_simplejwt.token_blacklist",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,9 +61,9 @@ MIDDLEWARE = [
     # Error Tracking Middleware
     "my_finance.auto_middleware.AppErrorLogMiddleware",
     # JWT Cookie Middleware should be after auth middleware
-    'my_finance.middleware.JWTCookieMiddleware',
-    #DJANGO AXES MIDDLEWARE
-    "axes.middleware.AxesMiddleware", 
+    "my_finance.middleware.JWTCookieMiddleware",
+    # DJANGO AXES MIDDLEWARE
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "finance.urls"
@@ -115,13 +115,13 @@ stock_app_url = "http://vuexy.myds.me:8071"
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('SQL_DB_NAME'),
-        'USER': config('SQL_USER'),
-        'PASSWORD': config('SQL_PASSWORD'),
-        'HOST': config('SQL_HOST'), 
-        'PORT': config('SQL_PORT', '5432'),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("SQL_DB_NAME"),
+        "USER": config("SQL_USER"),
+        "PASSWORD": config("SQL_PASSWORD"),
+        "HOST": config("SQL_HOST"),
+        "PORT": config("SQL_PORT", "5432"),
     }
 }
 
@@ -153,12 +153,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 
-
 USE_I18N = True
 
 USE_L10N = True
-
-
 
 
 LOCALE_PATHS = [
@@ -209,9 +206,7 @@ LOGGING = {
         "verbose": {
             "format": "%(levelname)s %(name)-12s %(asctime)s %(module)s %(message)s"
         },
-        "simple": {
-            "format": "%(levelname)s %(message)s"
-        },
+        "simple": {"format": "%(levelname)s %(message)s"},
     },
     "handlers": {
         "console": {
@@ -252,34 +247,41 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',  # Keep the default auth backend
-    'axes.backends.AxesBackend',  # Use this for Axes logging
+    "django.contrib.auth.backends.ModelBackend",  # Keep the default auth backend
+    "axes.backends.AxesBackend",  # Use this for Axes logging
 )
 
 # DRF Configuration
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT Authentication
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",  # JWT Authentication
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Only authenticated users
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # Only authenticated users
     ],
 }
 
 
 # JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('ACCESS_TOKEN_LIFETIME', default=15, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('REFRESH_TOKEN_LIFETIME', default=1, cast=int)),
-    'ROTATE_REFRESH_TOKENS': config('ROTATE_REFRESH_TOKENS', default=True, cast=bool),
-    'BLACKLIST_AFTER_ROTATION': config('BLACKLIST_AFTER_ROTATION', default=True, cast=bool),
-    'ALGORITHM': config('JWT_ALGORITHM', default='HS256'),
-    'SIGNING_KEY': config('SECRET_KEY'),  # Make sure SECRET_KEY is also in .env file
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=config("ACCESS_TOKEN_LIFETIME", default=15, cast=int)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=config("REFRESH_TOKEN_LIFETIME", default=1, cast=int)
+    ),
+    "ROTATE_REFRESH_TOKENS": config("ROTATE_REFRESH_TOKENS", default=True, cast=bool),
+    "BLACKLIST_AFTER_ROTATION": config(
+        "BLACKLIST_AFTER_ROTATION", default=True, cast=bool
+    ),
+    "ALGORITHM": config("JWT_ALGORITHM", default="HS256"),
+    # Make sure SECRET_KEY is also in .env file
+    "SIGNING_KEY": config("SECRET_KEY"),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
 }
 
 
@@ -292,16 +294,28 @@ SIMPLE_JWT = {
 # CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE')  # Restrict CSRF cookies to same-site requests
 
 # Secure cookies (only enabled in production)
-SESSION_COOKIE_SECURE = not DEBUG and config('SESSION_COOKIE_SECURE', default=True)  # Send cookies only via HTTPS
-SESSION_COOKIE_HTTPONLY = config('SESSION_COOKIE_HTTPONLY', default=False)  # Always enabled for security
-SESSION_COOKIE_SAMESITE = config('SESSION_COOKIE_SAMESITE', default='Lax')  # Default to Lax
+SESSION_COOKIE_SECURE = not DEBUG and config(
+    "SESSION_COOKIE_SECURE", default=True
+)  # Send cookies only via HTTPS
+SESSION_COOKIE_HTTPONLY = config(
+    "SESSION_COOKIE_HTTPONLY", default=False
+)  # Always enabled for security
+SESSION_COOKIE_SAMESITE = config(
+    "SESSION_COOKIE_SAMESITE", default="Lax"
+)  # Default to Lax
 
-CSRF_COOKIE_SECURE = not DEBUG and config('CSRF_COOKIE_SECURE', default=True)  # Send CSRF cookies only via HTTPS
-CSRF_COOKIE_HTTPONLY = config('CSRF_COOKIE_HTTPONLY', default=False)  # Always enabled for security
-CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', default='Strict')  # Default to Strict
+CSRF_COOKIE_SECURE = not DEBUG and config(
+    "CSRF_COOKIE_SECURE", default=True
+)  # Send CSRF cookies only via HTTPS
+CSRF_COOKIE_HTTPONLY = config(
+    "CSRF_COOKIE_HTTPONLY", default=False
+)  # Always enabled for security
+CSRF_COOKIE_SAMESITE = config(
+    "CSRF_COOKIE_SAMESITE", default="Strict"
+)  # Default to Strict
 
 # Optional: Set SESSION_ENGINE to use database or cache-based sessions for better security
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Database-backed sessions
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Database-backed sessions
 
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if not DEBUG else None
 
@@ -309,25 +323,33 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Database-backed sessio
 # Secure settings (only enabled in production)
 # Clickjacking Protection (Prevents embedding in iframes)
 X_FRAME_OPTIONS = "DENY"
-SECURE_BROWSER_XSS_FILTER = not DEBUG and config('SECURE_BROWSER_XSS_FILTER', default=True)
+SECURE_BROWSER_XSS_FILTER = not DEBUG and config(
+    "SECURE_BROWSER_XSS_FILTER", default=True
+)
 # Prevents MIME-type sniffing
-SECURE_CONTENT_TYPE_NOSNIFF = not DEBUG and config('SECURE_CONTENT_TYPE_NOSNIFF', default=True)
-SECURE_SSL_REDIRECT = not DEBUG and config('SECURE_SSL_REDIRECT', default=True)
-SECURE_HSTS_SECONDS = not DEBUG and config('SECURE_HSTS_SECONDS', default=3600)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG and config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
-SECURE_HSTS_PRELOAD = not DEBUG and config('SECURE_HSTS_PRELOAD', default=True)
+SECURE_CONTENT_TYPE_NOSNIFF = not DEBUG and config(
+    "SECURE_CONTENT_TYPE_NOSNIFF", default=True
+)
+SECURE_SSL_REDIRECT = not DEBUG and config("SECURE_SSL_REDIRECT", default=True)
+SECURE_HSTS_SECONDS = not DEBUG and config("SECURE_HSTS_SECONDS", default=3600)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG and config(
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
+)
+SECURE_HSTS_PRELOAD = not DEBUG and config("SECURE_HSTS_PRELOAD", default=True)
 
 
 # Axes Configuration
-AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=50, cast=int)
-AXES_COOLOFF_TIME = timedelta(minutes=config('AXES_COOLOFF_TIME', default=15, cast=int))
-AXES_LOCKOUT_URL = config('AXES_LOCKOUT_URL', default='/locked/')
-AXES_ENABLED = config('AXES_ENABLED', default=True, cast=bool)
-AXES_HANDLER = config('AXES_HANDLER', default='axes.handlers.database.AxesDatabaseHandler')
-AXES_VERBOSE = config('AXES_VERBOSE', default=True, cast=bool)
-AXES_RESET_ON_SUCCESS = config('AXES_RESET_ON_SUCCESS', default=True, cast=bool)
+AXES_FAILURE_LIMIT = config("AXES_FAILURE_LIMIT", default=50, cast=int)
+AXES_COOLOFF_TIME = timedelta(minutes=config(
+    "AXES_COOLOFF_TIME", default=15, cast=int))
+AXES_LOCKOUT_URL = config("AXES_LOCKOUT_URL", default="/locked/")
+AXES_ENABLED = config("AXES_ENABLED", default=True, cast=bool)
+AXES_HANDLER = config(
+    "AXES_HANDLER", default="axes.handlers.database.AxesDatabaseHandler"
+)
+AXES_VERBOSE = config("AXES_VERBOSE", default=True, cast=bool)
+AXES_RESET_ON_SUCCESS = config(
+    "AXES_RESET_ON_SUCCESS", default=True, cast=bool)
 
 
-
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
