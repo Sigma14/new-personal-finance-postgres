@@ -1,0 +1,405 @@
+<<<<<<< HEAD
+{% extends "index.html" %} {% load mathfilters %}
+<!DOCTYPE html>
+<head>
+  {% block title %} {% endblock title %}
+</head>
+{% block content %}
+<!-- BEGIN: Content-->
+<div class="app-content content">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper">
+    <div class="content-header row">
+      <div class="content-header-left col-md-9 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="col-12">
+            <h2 class="content-header-title float-left mb-0">Properties</h2>
+            <div class="breadcrumb-wrapper">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="breadcrumb-item">Properties</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-body" float="left">
+      <div class="col-sm-40 offset-sm-20">
+        <a href="{% url 'property_add' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Property</a>
+      </div>
+      <br />
+      <section id="dashboard-ecommrc">
+        <div class="row match-height">
+          <!-- Company Table Card -->
+          <div class="col-lg-12 col-12">
+            <div class="card card-company-table">
+              <div class="download_csv_form"></div>
+              <div class="card-header border-bottom">
+                <h4 class="card-title mb-25">PROPERTIES</h4>
+                <div float="right">
+                  <button
+                    class="btn btn-primary download_csv"
+                    file_name="my_properties.csv"
+                    table_heading="{{property_key_dumps}}"
+                    table_length="{{property_key | length}}"
+                    table_id="#property_table"
+                    fun_name="download_csv"
+                    url="/download/csv"
+                  >
+                    CSV<i data-feather="download" class="avatar-icon"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover" id="property_table">
+                    <thead>
+                      <tr>
+                        {% for name in property_key %}
+                        <th>{{name}}</th>
+                        {% endfor %}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for data in property_obj %}
+                      <tr class="property_tr" property_detail_url="{% url 'property_details'  pk=data.id%}">
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-primary mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="home" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">{{data.property_name}}</div>
+                              <div class="font-small-2">Units :- {{data.units_no}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-success mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="map-pin" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">{{data.address_line1}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-info mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="dollar-sign" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">{{data.currency}}{{data.value}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-success mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="dollar-sign" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">{{data.currency}}{{data.total_monthly_rent}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-warning mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="user" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">{{data.total_tenants}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar bg-light-danger mr-1">
+                              <div class="avatar-content">
+                                <i data-feather="tool" class="font-medium-3"></i>
+                              </div>
+                            </div>
+                            <div>
+                              <div class="font-weight-bolder">
+                                {% for key, val in maintenance_dict.items %} {% if key == data.property_name %} {{val}}
+                                {% endif %} {% endfor %}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {% endfor %} {# 2) A “Total” header row #}
+                      <tr class="font-weight-bold"></tr>
+
+                      {# 3) One summed row per currency #} {% for currency, amount in total_property.items %}
+                      <tr class="font-weight-bold">
+                        <td></td>
+                        {# collapse the next 1 column so your summed value lands in the “Value” column #}
+                        <td></td>
+                        {# Address blank #}
+                        <td>Total : {{ amount|floatformat:2 }}</td>
+                        <td colspan="3"></td>
+                        {# Rent / Tenants / Maintenance blank #}
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--/ Company Table Card -->
+        </div>
+
+        <!--                    {% for object in rental_property_data %}-->
+        <!--                    <div class="card ecommerce-card">-->
+        <!--                        <div class="item-img text-center">-->
+        <!--                            <form id="form{{object.id}}">-->
+        <!--                                {% csrf_token %}-->
+        <!--                                <input type="text" name="name" value="{{object.name}}" hidden>-->
+        <!--                                <input type="text" name="currency" value="{{object.currency}}" hidden>-->
+        <!--                                <input type="text" name="interest_period" value="Per month" hidden>-->
+        <!--                                <input type="text" name="liability_type" value="Mortgage" hidden>-->
+        <!--                                <input type="text" name="interest_rate" value="{{object.mortgage_detail.interest_rate}}" hidden>-->
+        <!--                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:0 }}" hidden>-->
+        <!--                                <input type="text" name="value" value="{{object.purchase_price_detail.selected_price}}" hidden>-->
+        <!--                                <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" hidden />-->
+        <!--                                <a href="{% url 'rental_property_detail' pk=object.id %}">-->
+        <!--                                    <div class="card-body">-->
+        <!--                                        <h2 style="float: left;">{{ object.name }}</h2>-->
+        <!--                                        <h4 style="float: right;" class="text-info" id="buy_price">-->
+        <!--                                            {{ object.currency }}{{ object.purchase_price_detail.selected_price }}-->
+        <!--                                        </h4>-->
+        <!--                                    </div>-->
+        <!--                                    <div class="card-body" style="padding-bottom:40px;">-->
+        <!--                                        <h4 style="float: left;">Down Payment -: <strong class="text-warning" id="down_price">{{ object.currency }}{{ object.purchase_price_detail.selected_price|mul:object.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>-->
+        <!--                                        {% if object.name in property_data %}-->
+        <!--                                            {% for key, val in property_data.items %}-->
+        <!--                                                {% if key == object.name %}-->
+        <!--                                                    <a style="float: right;" href="{% url 'property_list' %}" class="btn btn-primary mr-1">Personal Property List</a>-->
+        <!--                                                {% endif %}-->
+        <!--                                            {% endfor %}-->
+        <!--                                        {% else %}-->
+        <!--                                            <a style="float: right;" form_id="form{{object.id}}" class="btn btn-success mr-1 add_property_liab">Add to Personal Property</a>-->
+        <!--                                        {% endif %}-->
+        <!--                                    </div>-->
+        <!--                                </a>-->
+        <!--                            </form>-->
+        <!--                        </div>-->
+        <!--                    </div>-->
+        <!--                    {% endfor %}-->
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock content%}
+=======
+{% extends "index.html" %}
+{% load mathfilters %}
+<!DOCTYPE html>
+<head>
+    {% block title %}   {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Properties</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Properties
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'property_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Property</a>
+                </div>
+                <br/>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <!-- Company Table Card -->
+                        <div class="col-lg-12 col-12">
+                            <div class="card card-company-table">
+                                <div class="download_csv_form"></div>
+                                <div class="card-header border-bottom">
+                                    <h4 class="card-title mb-25">PROPERTIES</h4>
+                                    <div float="right">
+                                        <button class="btn btn-primary download_csv" file_name="my_properties.csv" table_heading="{{property_key_dumps}}" table_length="{{property_key | length}}" table_id="#property_table" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="property_table">
+                                            <thead>
+                                                <tr>
+                                                    {% for name in property_key %}
+                                                        <th>{{name}}</th>
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for data in property_obj %}
+                                                <tr class="property_tr" property_detail_url="{% url 'property_details'  pk=data.id%}">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-primary mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="home" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.property_name}}</div>
+                                                                <div class="font-small-2 ">Units :- {{data.units_no}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-success mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="map-pin" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.address_line1}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-info mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="dollar-sign" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.currency}}{{data.value}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-success mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="dollar-sign" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.currency}}{{data.total_monthly_rent}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-warning mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="user" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">{{data.total_tenants}}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar bg-light-danger mr-1">
+                                                                <div class="avatar-content">
+                                                                    <i data-feather="tool" class="font-medium-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="font-weight-bolder">
+                                                                    {% for key, val in maintenance_dict.items %}
+                                                                        {% if key == data.property_name %}
+                                                                            {{val}}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/ Company Table Card -->
+                    </div>
+
+<!--                    {% for object in rental_property_data %}-->
+<!--                    <div class="card ecommerce-card">-->
+<!--                        <div class="item-img text-center">-->
+<!--                            <form id="form{{object.id}}">-->
+<!--                                {% csrf_token %}-->
+<!--                                <input type="text" name="name" value="{{object.name}}" hidden>-->
+<!--                                <input type="text" name="currency" value="{{object.currency}}" hidden>-->
+<!--                                <input type="text" name="interest_period" value="Per month" hidden>-->
+<!--                                <input type="text" name="liability_type" value="Mortgage" hidden>-->
+<!--                                <input type="text" name="interest_rate" value="{{object.mortgage_detail.interest_rate}}" hidden>-->
+<!--                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:0 }}" hidden>-->
+<!--                                <input type="text" name="value" value="{{object.purchase_price_detail.selected_price}}" hidden>-->
+<!--                                <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" hidden />-->
+<!--                                <a href="{% url 'rental_property_detail' pk=object.id %}">-->
+<!--                                    <div class="card-body">-->
+<!--                                        <h2 style="float: left;">{{ object.name }}</h2>-->
+<!--                                        <h4 style="float: right;" class="text-info" id="buy_price">-->
+<!--                                            {{ object.currency }}{{ object.purchase_price_detail.selected_price }}-->
+<!--                                        </h4>-->
+<!--                                    </div>-->
+<!--                                    <div class="card-body" style="padding-bottom:40px;">-->
+<!--                                        <h4 style="float: left;">Down Payment -: <strong class="text-warning" id="down_price">{{ object.currency }}{{ object.purchase_price_detail.selected_price|mul:object.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>-->
+<!--                                        {% if object.name in property_data %}-->
+<!--                                            {% for key, val in property_data.items %}-->
+<!--                                                {% if key == object.name %}-->
+<!--                                                    <a style="float: right;" href="{% url 'property_list' %}" class="btn btn-primary mr-1">Personal Property List</a>-->
+<!--                                                {% endif %}-->
+<!--                                            {% endfor %}-->
+<!--                                        {% else %}-->
+<!--                                            <a style="float: right;" form_id="form{{object.id}}" class="btn btn-success mr-1 add_property_liab">Add to Personal Property</a>-->
+<!--                                        {% endif %}-->
+<!--                                    </div>-->
+<!--                                </a>-->
+<!--                            </form>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    {% endfor %}-->
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}
+
+>>>>>>> fixes/docker

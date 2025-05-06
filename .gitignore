@@ -1,9 +1,13 @@
+# Pycharm Cache Files
+*.pyc
 .env
 __pycache__/
 *.py[cod]
 # Python artifacts
 __pycache__/
 *.py[cod]
-
-
+venv
+env
+myenv
+testvenv
 *.key

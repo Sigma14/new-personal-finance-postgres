@@ -1,0 +1,848 @@
+{% extends "index.html" %}
+{% load mathfilters custom_filters %}
+{% load static %}
+{% block content %}
+<style>
+    .form-control{
+        width: 8rem;
+    }
+</style>
+<div class="app-content content ecommerce-application">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">{{heading_name}}</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'budgets' %}">Budgets</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Walk through
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Horizontal Wizard -->
+                <section class="modern-horizontal-wizard">
+                    <div class="bs-stepper wizard-modern modern-wizard-example">
+                        <div class="bs-stepper-header">
+                            <div class="step" data-target="#account-details">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">1</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">BUDGET WELCOME PAGE</span>
+                                        <span class="bs-stepper-subtitle">Description</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#income-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">2</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">INCOME SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for income creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#bill-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">3</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">BILL SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for bills creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <div class="step" data-target="#expense-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">4</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">EXPENSE SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for expenses creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <!-- New step for non-monthly expenses -->
+                            <div class="step" data-target="#non-monthly-expenses-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">5</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">NON-MONTHLY EXPENSES SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for non-monthly expenses creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="line">
+                                <i data-feather="chevron-right" class="font-medium-2"></i>
+                            </div>
+                            <!-- New step for non-monthly expenses -->
+                            <div class="step" data-target="#goals-section">
+                                <button type="button" class="step-trigger">
+                                    <span class="bs-stepper-box">6</span>
+                                    <span class="bs-stepper-label">
+                                        <span class="bs-stepper-title">GOALS SECTION</span>
+                                        <span class="bs-stepper-subtitle">Go for goals creation walkthrough</span>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bs-stepper-content">
+                            <form action="#" id="frm1" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div id="account-details" class="content">
+                                    <section>
+                                        <div class="row ">
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Welcome to the Budget Creation Page.</h4>
+                                                    </div>
+                                                    <img class="img-fluid"  src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body" style="margin-top:4rem;">
+                                                        <p class="card-text"><strong>Description: </strong>A budget is a plan for how you'll spend your money over a certain period, this is a monthly budget planner. Creating a budget is useful because it helps you understand your financial situation, control your spending, and save for future goals.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Be realistic about your income and expenses. Remember, a budget is a tool to help you, not restrict you. Regularly review and adjust it as your financial situation changes.</p>
+                                                    </div>
+
+                                                </div>
+                                                
+<<<<<<< HEAD
+                                                {% comment %} <div class="card">
+=======
+                                                <div class="card">
+>>>>>>> fixes/docker
+                                                    <div class="card-body">
+                                                        <div class="form-group row">
+                                                            <div class="col-sm-2 col-form-label">
+                                                                <label for="fname-icon">Budget Name</label>
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <div class="input-group input-group-merge">
+                                                                    
+                                                                    <input type="text" id="user_budget_input" class="form-control" value="{{user_budget_name}}" required
+                                                                           />
+
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <button class="form-control" type="button" id="bgt-update-btn" url="{% url 'update_user_budget' pk=pk%}">Update</button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+<<<<<<< HEAD
+                                                </div> {% endcomment %}
+                                                 <div class="card">
+                                                <div class="card-body">
+                                                    <!-- Budget Name Field (remains unchanged) -->
+                                                    <div class="form-group row">
+                                                        <div class="col-sm-2 col-form-label">
+                                                            <label for="user_budget_input">Budget Name</label>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="input-group input-group-merge">
+                                                                <input type="text" id="user_budget_input" class="form-control" value="{{ user_budget_name }}" required />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <button class="form-control" type="button" id="bgt-update-btn" url="{% url 'update_user_budget' pk=pk %}">Update</button>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Description Field and New Save Button -->
+                                                    <div class="form-group row">
+                                                        <div class="col-sm-2 col-form-label">
+                                                            <label for="budget_description">Description</label>
+                                                        </div>
+                                                        <div class="col-sm-10">
+                                                            <div class="input-group">
+                                                                <textarea id="budget_description" class="form-control" placeholder="Enter a description" rows="3">{{ user_budget_description }}</textarea>
+                                                            </div>
+                                                            <!-- New Save Button for Description -->
+                                                            <button style="margin:14px;" type="button" id="save-description-btn" url="{% url 'update_user_budget' pk=pk %}" class="btn btn-primary">Save Description</button>
+                                                        </div>
+                                                    </div>
+                                                 </div>
+                                             </div>
+                                                
+=======
+                                                </div>
+>>>>>>> fixes/docker
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-outline-secondary btn-prev" disabled>
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </button>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="income-section" class="content">
+                                    <section>
+                                        <div class="row">
+                                            <div class="col-md-6 col-lg-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Income Creation Walkthrough.</h4>
+                                                        <img class="img-fluid" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                        <p class="card-text"><strong>Description: </strong>Consider all your income sources when planning your budget. This includes your main job, any side jobs, and other income like rental income or investments.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Always use your net income (after-tax income) for budgeting. If your income varies, use an average of the last few months to estimate.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-6">
+<<<<<<< HEAD
+                                                    <input type="hidden" name="category_group" value="Income">
+                                                    <input type="hidden" name="category_name" value="Income">
+                                                    <input type="hidden" name="amount" value="500">
+                                                    <input type="hidden" name="currency" value="$">
+                                                    
+
+=======
+>>>>>>> fixes/docker
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Income Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="income_account_id" name="budget_categories" style='width:100%' required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Sources</th>
+                                                                        <th>Expected Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, value in income_bdgt_dict.items %}
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td><span style="display: flex; align-items: center;">
+                                                                                {% if category_icons|get_item:data.0 %}
+                                                                                    <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                {% else %}
+                                                                                    <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                {% endif %}&ensp;
+                                                                                <input type="text" value="{{data.0}}" id="income_sources{{forloop.counter}}" name="income_sources" class="form-control income_sources" required/></span></td>
+                                                                                <td><input type="number" value="{{data.1}}" id="income_expected_amount{{forloop.counter}}" name="income_expected_amount" class="form-control total_income_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="income_actual_amount{{forloop.counter}}" name="income_actual_amount" class="form-control total_income_act" required hidden/></td>
+
+                                                                                <td><button class="btn btn-outline-secondary update_income_bgt_walkthrough" income_index="{{forloop.counter}}" income_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    <tr class="total_income_row">
+                                                                        <td><strong >Total Income</strong></td>
+                                                                        <td><strong id="total_inc_exp">{{total_income_expected}}</strong></td>
+<!--                                                                        <td><strong id="total_inc_act">{{total_actual_income}}</strong></td>-->
+                                                                        <td><button class="btn btn-outline-success add_other_income" last_index="{{income_bdgt_dict.Income|length}}" title="Add other income" user_budget="{{pk}}">+ Other Income</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Incomes :-</h5>
+                                                            {% for category in subcategories.Income %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Income" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="bill-section" class="content">
+                                    <section>
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Bill Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Track all your recurring transactions, including bills and subscriptions, whether they occur weekly, monthly, quarterly, or yearly. This helps you understand your fixed expenses.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Regularly review your subscriptions and bills. Sometimes, you might find services you no longer use and can cancel.</p>
+                                                        <p class="card-text"><strong>Autobill Button: </strong>Automatically creates a transaction log for your bill on the selected date and frequency.</p>
+                                                        <p class="card-text"><strong>Autopay Button: </strong>Automatically deducts the bill amount from your selected account, ensuring you never miss a payment.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-8">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Bill Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="bill_account_id" name="bill_account" required style='width:100%'>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
+                                                                        <th>Period</th>
+                                                                        <th>Calender</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, value in bills_dict.items %}
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="bill_sources{{forloop.counter}}" name="bill_sources" class="form-control bill_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="bill_expected_amount{{forloop.counter}}" name="bill_expected_amount" class="form-control total_bill_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="bill_actual_amount{{forloop.counter}}" name="bill_actual_amount" class="form-control total_bill_act" required hidden/></td>
+<!--                                                                                <td></td>-->
+                                                                                <td>
+                                                                                    <select id="bill_budget_period{{ forloop.counter }}" name="bill_budget_period" class="form-control" required>
+                                                                                        <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
+                                                                                        <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 bill_calender_icon " id="bill_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                    <input type="text" id="bill_add_budget_date{{forloop.counter}}"  name="bill_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
+                                                                                <td><button class="btn btn-outline-secondary update_bill_bgt_walkthrough" bill_index="{{forloop.counter}}" bill_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    <tr class="total_bill_row">
+                                                                        <td><strong >Total Bill</strong></td>
+                                                                        <td><strong id="total_bill_exp">{{total_expected_bill}}</strong></td>
+<!--                                                                        <td><strong id="total_bill_act">{{total_actual_bill}}</strong></td>-->
+                                                                        <td></td>
+                                                                        <td></td>
+                                                                        <td><button class="btn btn-outline-success add_other_bill" last_index="{{bills_dict.Bills |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Bill</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Bills :-</h5>
+                                                            {% for category in subcategories|get_item:'Bills & Subscriptions' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Bills & Subscriptions" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="expense-section" class="content">
+                                    <section>
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Expense Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Expenses are what you spend money on regularly, like groceries, dining out, entertainment, and transportation. Understanding your expenses is crucial to managing your money effectively.</p>
+                                                        <p class="card-text"><strong>Tips: </strong>Categorize your expenses between 'needs' (essentials) and 'wants' (non-essentials). This helps in prioritizing spending and identifying areas where you can cut back if needed.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-8">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Expenses Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="expenses_account_id" name="expense_account" style='width:100%' required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
+                                                                        <th>Period</th>
+                                                                        <th>Calender</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    
+                                                                    {% for key, value in expenses_dict.items %}
+                                                                    <tr><th colspan="4">{{key}}</th></tr>
+                                                                        {% for data in value %}
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="expenses_sources{{data|last}}" name="expenses_sources" class="form-control expenses_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="expenses_expected_amount{{data|last}}" name="expenses_expected_amount" class="form-control total_expenses_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="expenses_actual_amount{{data|last}}" name="expenses_actual_amount" class="form-control total_expenses_act" required hidden/></td>
+<!--                                                                                <td></td>-->
+                                                                                <td>
+                                                                                    <select id="expenses_budget_period{{ data|last }}" name="expenses_budget_period" class="form-control" required>
+                                                                                        <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
+                                                                                        <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
+                                                                                    </select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 expenses_calender_icon " id="expenses_calender_icon" index="{{data|last}}"></i> 
+                                                                                    <input type="text" id="expenses_add_budget_date{{data|last}}"  name="expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
+                                                                                <td><button class="btn btn-outline-secondary update_expenses_bgt_walkthrough" category_name="{{key}}" expenses_index="{{data|last}}" expenses_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
+                                                                            </tr>
+                                                                            
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                    
+                                                                    <tr class="total_expenses_row">
+                                                                        <td><strong >Total Expenses</strong></td>
+                                                                        <td><strong id="total_expenses_exp">{{total_expected_expenses}}</strong></td>
+<!--                                                                        <td><strong id="total_expenses_act">{{total_actual_expenses}}</strong></td>-->
+                                                                        <td></td>
+                                                                        <td></td>
+                                                                        <td><button class="btn btn-outline-success add_other_expenses" last_index="{{index_counter}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Expenses :-</h5>
+                                                            {% for category, sub_cat in subcategories.items %}
+                                                                {% if category not in excluded_subcategories %}
+                                                                <h5>{{category}}</h5>
+                                                                {% for sub_cat_name in sub_cat %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{sub_cat_name}}" data-category="{{category}}" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:sub_cat_name %}
+                                                                            <img src="{% static category_icons|get_item:sub_cat_name %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{sub_cat_name}}&nbsp;
+                                                                </a>
+                                                                {% endfor %}
+                                                                {% endif %}
+
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                        
+                                    </div>
+                                
+                                </div>
+                                <div id="non-monthly-expenses-section" class="content">
+                                    <section>
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Non Monthly Expense Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Non-monthly expenses are costs that do not occur on a regular monthly basis but are still essential to plan for. These include expenses such as annual insurance premiums, car maintenance, home repairs, holiday gifts, and vacations. </p>
+                                                        <p class="card-text"><strong>Tips: </strong>Categorize your expenses between 'needs' (essentials) and 'wants' (non-essentials). This helps in prioritizing spending and identifying areas where you can cut back if needed.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-8">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Non Monthly Expenses Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="non_monthly_expenses_account_id" name="non_monthly_expense_account" style='width:100%' required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
+                                                                        <th>Period</th>
+                                                                        <th>Calender</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, data in non_monthly_expenses_dict.items %}
+                                                                    
+                                                                       
+                                                                        <tr>
+                                                                            <td>
+                                                                                <span style="display: flex; align-items: center;">
+                                                                                    {% if category_icons|get_item:data.0 %}
+                                                                                        <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                    {% else %}
+                                                                                        <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                    {% endif %}&ensp;
+                                                                                    <input type="text" value="{{data.0}}" id="non_monthly_expenses_sources{{forloop.counter}}" name="non_monthly_expenses_sources" class="form-control non_monthly_expenses_sources" required/>
+                                                                                </span>
+                                                                            </td>
+                                                                            <td><input type="number" value="{{data.1}}" id="non_monthly_expenses_expected_amount{{forloop.counter}}" name="non_monthly_expenses_expected_amount" class="form-control total_non_monthly_expenses_exp" required/>
+                                                                            <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="non_monthly_expenses_actual_amount{{forloop.counter}}" name="non_monthly_expenses_actual_amount" class="form-control total_non_monthly_expenses_act" required hidden/></td>
+<!--                                                                            <td></td>-->
+                                                                            <td>
+                                                                                <select id="non_monthly_expenses_budget_period{{ forloop.counter }}" name="non_monthly_expenses_budget_period" class="form-control" required>
+                                                                                    <option value="Monthly" {% if data.5 == 'Monthly' %} selected {% endif %}>Monthly</option>
+                                                                                    <option value="Yearly" {% if data.5 == 'Yearly' %} selected {% endif %}>Yearly</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td>
+                                                                                <i class="fa fa-calendar fa-1 non_monthly_expenses_calender_icon " id="non_monthly_expenses_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                <input type="text" id="non_monthly_expenses_add_budget_date{{forloop.counter}}"  name="non_monthly_expenses_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                            </td>
+                                                                            <td><button class="btn btn-outline-secondary update_non_monthly_expenses_bgt_walkthrough" category_name="{{key}}" non_monthly_expenses_index="{{forloop.counter}}" non_monthly_expenses_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
+                                                                        </tr>
+                                                                    
+                                                                    {% endfor %}
+                                                                    <tr class="total_non_monthly_expenses_row">
+                                                                        <td><strong >Total Expenses</strong></td>
+                                                                        <td><strong id="total_non_monthly_expenses_exp">{{total_non_monthly_expected_expenses}}</strong></td>
+<!--                                                                        <td><strong id="total_non_monthly_expenses_act">{{total_non_monthly_actual_expenses}}</strong></td>-->
+                                                                        <td></td>
+                                                                        <td></td>
+                                                                        <td><button class="btn btn-outline-success add_other_non_monthly_expenses" last_index="{{non_monthly_expenses_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Expenses</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Non-Monthly Expenses :-</h5>
+                                                            {% for category in subcategories|get_item:'Non-Monthly' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Non-Monthly" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </section>
+
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <div class="btn btn-primary btn-next" btn_id="true">
+                                            <span class="align-middle d-sm-inline-block d-none">Next</span>
+                                            <i data-feather="arrow-right" class="align-middle ml-sm-25 ml-0"></i>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <div id="goals-section" class="content">
+                                    <section>
+                                        <div class="row">
+                                            <div class="col-md-12 col-lg-4">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Goals Creation Walkthrough.</h4>
+                                                    </div>
+                                                    <img class="img-fluid" style="height:300px;" src="{% static 'images/budget_creation.jpg' %}" alt="Card image cap" />
+                                                    <div class="card-body">
+                                                        <p class="card-text"><strong>Description: </strong>Goals are the financial targets you aim to achieve within a specific timeframe. They can be short-term, such as saving for a vacation or buying a new gadget, or long-term, like purchasing a home, funding education, or planning for retirement. </p>
+                                                        <p class="card-text"><strong>Tips: </strong>Break down your goals into manageable steps and set specific, measurable, achievable, relevant, and time-bound (SMART) objectives. This approach helps in creating a clear action plan, tracking your progress, and staying motivated.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-lg-8">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">Goals Summary (Monthly) </h4>
+                                                        <div class="form-group">
+                                                            <h5>Accounts</h5>
+                                                            <select class="form-control" id="goals_account_id" name="goalsaccount" style='width:100%' required>
+                                                                {% for key, value in bank_accounts.items %}
+                                                                {% if forloop.counter == 1 %}
+                                                                    <option value="{{key}}" selected>{{value}}</option>
+                                                                {% else %}
+                                                                    <option value="{{key}}">{{value}}</option>
+                                                                {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="card-datatable">
+                                                            <table class="dt-row-grouping table category_table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Name</th>
+                                                                        <th>Expected Amount</th>
+<!--                                                                        <th>Actual Amount</th>-->
+                                                                        <th>Budget date</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for key, data in goals_dict.items %}
+                                                                        
+                                                                        
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <span style="display: flex; align-items: center;">
+                                                                                        {% if category_icons|get_item:data.0 %}
+                                                                                            <img src="{% static category_icons|get_item:data.0 %}" alt="{{ data.0 }}" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% else %}
+                                                                                            <img src="{{ default_icon }}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                                        {% endif %}&ensp;
+                                                                                        <input type="text" value="{{data.0}}" id="goals_sources{{forloop.counter}}" name="goals_sources" class="form-control goals_sources" required/>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td><input type="number" value="{{data.1}}" id="goals_expected_amount{{forloop.counter}}" name="goals_expected_amount" class="form-control total_goals_exp" required/>
+                                                                                <input type="number" value="{{data.2}}" min="{{data.2}}" max="{{data.1}}"  id="goals_actual_amount{{forloop.counter}}" name="goals_actual_amount" class="form-control total_goals_act" required hidden/></td>
+<!--                                                                                <td></td>-->
+                                                                                <td>
+                                                                                    <i class="fa fa-calendar fa-1 goal_calender_icon " id="goal_calender_icon" index="{{forloop.counter}}"></i> 
+                                                                                    <input type="text" id="goals_add_budget_date{{forloop.counter}}"  name="goals_add_budget_date" class="form-control flatpickr-basic budget_data1" hidden required>
+                                                                                </td>
+                                                                                <td><button class="btn btn-outline-secondary update_goals_bgt_walkthrough" category_name="{{key}}" goals_index="{{forloop.counter}}" goals_id="{{data.4}}" user_budget="{{pk}}">Update</button></td>
+                                                                            </tr>
+                                                                    
+                                                                    {% endfor %}
+                                                                    <tr class="total_goals_row">
+                                                                        <td><strong >Total Goals</strong></td>
+                                                                        <td><strong id="total_goals_exp">{{total_goals_expected}}</strong></td>
+<!--                                                                        <td><strong id="total_goals_act">{{total_goals_actual}}</strong></td>-->
+                                                                        <td></td>
+                                                                        <td><button class="btn btn-outline-success add_other_goals" last_index="{{goals_dict |length}}" title="Add other bill" user_budget="{{pk}}">+ Other Goals</button></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div><br/>
+                                                        <div style="border-color: #3B4253; border-style: solid; border-width: 1px;">
+                                                            <h5 style="margin:5px;">Suggested Goals :-</h5>
+                                                            {% for category in subcategories|get_item:'Goals' %}
+                                                                <a style="margin:5px; font-size: 12px;"  data-name="{{category}}" data-category="Goals" class="btn btn-outline-secondary sub-cat-name">
+                                                                    {% if category_icons|get_item:category %}
+                                                                            <img src="{% static category_icons|get_item:category %}" alt="" style="width: 20px; height: 20px; vertical-align: middle;">
+                                                                    {% endif %}
+                                                                    {{category}}&nbsp;
+                                                                </a>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </section>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <div class="btn btn-primary btn-prev">
+                                            <i data-feather="arrow-left" class="align-middle mr-sm-25 mr-0"></i>
+                                            <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                                        </div>
+                                        <a href="{% url 'current-budgets' pk=pk %}" class="btn btn-success"> finished </a>
+                                    </div>
+                                </div>
+                                    
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                <!-- /Horizontal Wizard -->
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+        // When the budgets_walk_through page is loaded
+        $(document).ready(function() {
+
+            // Check the section in current URL
+            setTimeout(function() {
+            // It will take to the section for which the hash is available in the url
+            if (window.location.hash === '#bill-section') {
+                $('[data-target="#bill-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#expense-section') {
+                $('[data-target="#expense-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#non-monthly-expenses-section') {
+                $('[data-target="#non-monthly-expenses-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#goals-section') {
+                $('[data-target="#goals-section"] .step-trigger').click();
+            }
+            if (window.location.hash === '#income-section') {
+                $('[data-target="#income-section"] .step-trigger').click();
+            }
+        }, 500);
+        });
+<<<<<<< HEAD
+         $('#save-description-btn').on('click', function(e) {
+            var saveBtn = $(this);
+            // Get the new description from the textarea.
+            var description = $('#budget_description').val().trim();
+
+            // Validate description.
+            if (description === "") {
+                alert("Please enter a description to save.");
+                return false;
+            }
+            
+            // Get URL from the button attribute.
+            var updateUrl = saveBtn.attr("url");
+
+            // Optionally, disable the button while processing.
+            saveBtn.prop("disabled", true);
+            
+            $.ajax({
+                url: updateUrl,
+                type: "POST",
+                data: {
+                    description: description,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    if(response.status === "success") {
+                        alert(response.message);
+                    } else {
+                        alert("Unexpected response: " + response.message);
+                    }
+                    saveBtn.prop("disabled", false);
+                },
+                error: function(xhr, status, error) {
+                    alert("Error saving description: " + xhr.responseJSON.message);
+                    saveBtn.prop("disabled", false);
+                }
+            });
+        });
+=======
+>>>>>>> fixes/docker
+    </script>
+{% endblock content %}

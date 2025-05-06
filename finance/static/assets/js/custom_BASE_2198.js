@@ -3928,12 +3928,11 @@ $(document).ready(function () {
 
   // Helper function to push messages to chat window
   function pushUserChat(content, prepend) {
-    const userAvatar = $('#chatContainer').attr('data-avatarUrl');
     const chatHTML = `
         <div class="chat chat-right">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
-                    <img src="${userAvatar}" alt="logo" height="36" width="36"  />
+                    <img src="{% static 'Images/logo.png' %}" alt="avatar" height="36" width="36" />
                 </span>
             </div>
             <div class="chat-body">
@@ -3952,12 +3951,11 @@ $(document).ready(function () {
   }
 
   function pushAIChat(content, prepend) {
-    const userAvatar = $('#chatContainer').attr('data-avatarUrl');
     const chatHTML = `
         <div class="chat chat-left">
             <div class="chat-avatar">
                 <span class="avatar box-shadow-1 cursor-pointer">
-                    <img src="${userAvatar}" alt="avatar"  height="36" width="36" />
+                    <img src="{% static 'app-assets/images/icons/vuejs.svg' %}" alt="avatar"  height="36" width="36" />
                 </span>
             </div>
             <div class="chat-body">
@@ -4062,17 +4060,17 @@ $(document).ready(function () {
   // Send message to ai through post request
   $("#sendMessageButton").click(function (e) {
     e.preventDefault();
+    const csrfmiddlewaretoken = getCookie("csrftoken");
     const msg = $("#aiMsgInput").val();
     if (msg.trim() === "") return;
+
     // API call to send message
     $.ajax({
       method: "POST",
       url: $("#sendMessageButton").data("url"),
       data: {
         message: msg,
-      },
-      headers: {
-        "X-CSRFToken": csrftoken,
+        csrfmiddlewaretoken,
       },
       dataType: "json",
       beforeSend: function () {
@@ -4102,44 +4100,29 @@ $(document).ready(function () {
     fileName
   ) {
     let canvas;
-    let img; // Store the original image reference
-    let currentMode = null;
-    let existingObjects = []; // To store non-image objects between modes
-    let textBoxCounter = 0; // Track number of text boxes added
 
     // Generate file name
     const generateFileName = () => {
       const date = new Date();
       const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based
       const day = date.getDate().toString().padStart(2, "0");
       const hours = date.getHours();
       const minutes = date.getMinutes().toString().padStart(2, "0");
 
-      const period = hours >= 12 ? "pm" : "am";
-      const formattedHours = (((hours + 11) % 12) + 1).toString();
+      const period = hours >= 12 ? "pm" : "am"; // Determine AM/PM
+      const formattedHours = (((hours + 11) % 12) + 1).toString(); // Convert to 12-hour format
 
       return `${fileName}_${year}${month}${day}_${formattedHours}_${minutes}${period}.png`;
     };
-
-    // Initialize canvas
-    function initCanvas(image, containerWidth, containerHeight) {
-      img = image;
+    // initialize canvas
+    function initCanvas(img, containerWidth, containerHeight) {
       const dimensions = calculateCanvasDimensions(containerWidth);
-      const canvasEl = document.getElementById('snapEditCanvas')
-      if (canvas) {
-        canvas.dispose();
-      }
 
-      canvasEl.width = dimensions.width;
-      canvasEl.height = dimensions.height;
+      $("#snapEditCanvas").width = dimensions.width;
+      $("#snapEditCanvas").height = dimensions.height;
 
-      canvas = new fabric.Canvas(canvasEl, {
-        preserveObjectStacking: true,
-        selection: true,
-        defaultCursor: 'default',
-        backgroundColor: '#f8f9fa'
-      });
+      canvas = new fabric.Canvas("snapEditCanvas");
 
       const fabricImage = new fabric.Image(img, {
         left: 0,
@@ -4147,230 +4130,57 @@ $(document).ready(function () {
         selectable: false,
         scaleX: dimensions.width / img.width,
         scaleY: dimensions.height / img.height,
-        originX: 'left',
-        originY: 'top'
       });
 
-      canvas.setBackgroundImage(fabricImage, function () {
-        // Restore existing objects (like textboxes)
-        existingObjects.forEach(obj => canvas.add(obj));
-        canvas.renderAll();
-        setupTextEditing();
-      });
+      canvas.setWidth(dimensions.width);
+      canvas.setHeight(dimensions.height);
+      canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
-      // Enable draw mode by default
-      setTimeout(() => {
-        setMode('draw');
-      }, 100);
-
-      // Add keyboard event listener for Delete key
-      canvas.on('selection:created', handleSelection);
-      canvas.on('selection:cleared', handleSelection);
-      canvas.on('object:removed', handleSelection);
-
-      function handleSelection() {
-        if (canvas.getActiveObject()) {
-          $(document).on("keydown.delete", function (e) {
-            if (e.key === "Delete") {
-              e.preventDefault(); // Prevent scrolling
-              const activeObjects = canvas.getActiveObjects();
-
-              activeObjects.forEach((obj) => {
-                canvas.remove(obj);
-                existingObjects = existingObjects.filter((o) => o !== obj);
-              });
-
-              canvas.discardActiveObject().renderAll();
-              $(document).off("keydown.delete"); // Remove the handler after deletion
-            }
-          });
-        } else {
-          $(document).off("keydown.delete");
-        }
-      }
+      ensureModalResponsive($("#snapEditCanvas"));
     }
 
-    // Mode management function
-    function setMode(newMode) {
-      // Exit current mode
-      switch (currentMode) {
-        case 'draw':
-          canvas.isDrawingMode = false;
-          $("#enableDrawing").removeClass("btn-danger").addClass("btn-outline-success");
-          break;
-        case 'text':
-          // No specific cleanup needed for text mode
-          break;
-        case 'blackbox':
-        case 'whitebox':
-          existingObjects = canvas.getObjects().filter(obj => obj.type === 'rect');
-          break;
-      }
-
-      // Enter new mode
-      switch (newMode) {
-        case 'draw':
-          canvas.isDrawingMode = true;
-          canvas.freeDrawingBrush.width = 2;
-          canvas.freeDrawingBrush.color = $("#textColor").val();
-          $("#enableDrawing").removeClass("btn-outline-success").addClass("btn-danger");
-          break;
-        case 'text':
-          // Add new text box without affecting existing ones
-          addTextBox();
-          break;
-        case 'blackbox':
-          addBox('#000000');
-          break;
-        case 'whitebox':
-          addBox('#ffffff');
-          break;
-        case 'selection':
-          canvas.isDrawingMode = false;
-          canvas.selection = true;
-          canvas.getObjects().forEach(obj => obj.selectable = true);
-          break;
-      }
-
-      currentMode = newMode;
-      updateButtonStates();
-    }
-
-    // Function to add a new text box
-    function addTextBox() {
-      textBoxCounter++;
-      const text = new fabric.IText(`Text ${textBoxCounter}`, {
-        left: 50 + (textBoxCounter * 20),
-        top: 50 + (textBoxCounter * 20),
-        fontFamily: 'Arial',
-        fill: $('#textColor').val(),
-        fontSize: parseInt($('#textSize').val()),
-        hasControls: true,
-        padding: 10,
-        editable: true,
-        borderColor: '#4285f4',
-        cornerColor: '#4285f4',
-        cornerSize: 10,
-        transparentCorners: false,
-        selectable: true
-      });
-
-      canvas.add(text);
-      canvas.setActiveObject(text);
-      canvas.bringToFront(text);
-
-      // Focus on the new text box
-      setTimeout(() => {
-        text.enterEditing();
-        text.selectAll();
-        const textarea = text.hiddenTextarea;
-        if (textarea) {
-          textarea.focus();
-          $(textarea).on('keydown', function (e) {
-            e.stopPropagation();
-          });
-        }
-      }, 100);
-    }
-
-    function updateButtonStates() {
-      $("#enableSelection, #enableDrawing, #addText, #addBlackBox, #addWhiteBox").removeClass("active");
-      if (currentMode === 'draw') {
-        $("#enableDrawing").addClass("active");
-      } else if (currentMode === 'text') {
-        $("#addText").addClass("active");
-      } else if (currentMode === 'blackbox') {
-        $("#addBlackBox").addClass("active");
-      } else if (currentMode === 'whitebox') {
-        $("#addWhiteBox").addClass("active");
-      }
-    }
-
-    $("#enableSelection").click(function () {
-      setMode('selection');
-    });
-
-    function setupTextEditing() {
-      // Fix for text editing in Bootstrap modal
-      canvas.on('text:editing:entered', function (options) {
-        $('.canvas-container').css('z-index', '1051');
-        const text = options.target;
-        const textarea = text.hiddenTextarea;
-
-        if (textarea) {
-          // Prevent event bubbling
-          $(textarea).off('keydown').on('keydown', function (e) {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-          });
-
-          // Ensure focus
-          setTimeout(() => {
-            textarea.focus();
-          }, 50);
-        }
-      });
-
-      canvas.on('text:editing:exited', function () {
-        $('.canvas-container').css('z-index', '');
-      });
-    }
-
-    // Calculate canvas dimensions
+    // function to calculate canvas dimensions
     function calculateCanvasDimensions(containerWidth) {
-      const maxWidth = Math.min(containerWidth - 40, img.width);
-      const maxHeight = Math.min(window.innerHeight - 200, img.height);
-
-      const aspectRatio = img.width / img.height;
-
-      let width = maxWidth;
-      let height = width / aspectRatio;
-
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
+      if (containerWidth > 1200) {
+        return { width: 800, height: 500 };
+      } else if (containerWidth > 768) {
+        return { width: 600, height: 400 };
+      } else {
+        return { width: 500, height: 350 };
       }
-
-      return { width, height };
     }
 
-    // Show modal
-    function showModal() {
-      const modal = new bootstrap.Modal(document.getElementById('editorModal'), {
-        backdrop: "static",
-        keyboard: true,
-        focus: false
-      });
-      modal.show();
-
-      // Prevent Bootstrap from interfering with text editing
-      $(document).on('focusin', function (e) {
-        if ($(e.target).closest('.canvas-container').length &&
-          $(e.target).is('textarea.fabric-textarea')) {
-          e.stopPropagation();
-        }
-      });
+    // function to ensure modal is responsive
+    function ensureModalResponsive(canvasElement) {
+      const modalContent = document.querySelector(
+        ".canvasModal .modal-content"
+      );
+      modalContent.style.maxWidth = `${canvasElement.width + 40}px`;
+      modalContent.style.overflowX = "auto";
     }
 
     // Screenshot event to capture current page screenshot
     screenShotButton.on("click", function () {
       const ignoreElementIds = ["rightSettingBody", "accSubmitError"];
       html2canvas(document.body, {
-        ignoreElements: (element) => ignoreElementIds.includes(element.id),
+        ignoreElements: (element) => {
+          return ignoreElementIds.includes(element.id);
+        },
         width: window.innerWidth,
         height: window.innerHeight,
-        scale: 1,
-        logging: false,
-        useCORS: true
-      }).then((snapshot) => {
-        const image = new Image();
-        image.src = snapshot.toDataURL("image/png");
+      })
+        .then((snapshot) => {
+          const img = new Image();
+          img.src = snapshot.toDataURL("image/png");
 
-        image.onload = function () {
-          initCanvas(image, window.innerWidth, window.innerHeight);
-          showModal();
-        };
-      }).catch(console.error);
+          img.onload = function () {
+            // Clear the canvas, including the background image
+            // clearCanvasAndReset();
+            initCanvas(img, window.innerWidth, window.innerHeight);
+            showModal();
+          };
+        })
+        .catch((error) => console.error("Error taking screenshot:", error));
     });
 
     // upload existing photo for feedback form & edit by fabric.js
@@ -4379,11 +4189,11 @@ $(document).ready(function () {
       if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          const image = new Image();
-          image.src = e.target.result;
+          const img = new Image();
+          img.src = e.target.result;
 
-          image.onload = function () {
-            initCanvas(image, window.innerWidth, window.innerHeight);
+          img.onload = function () {
+            initCanvas(img, window.innerWidth, window.innerHeight);
             showModal();
           };
         };
@@ -4394,93 +4204,53 @@ $(document).ready(function () {
     // Download button event to download edited image
     $("#downloadEditedImage").click(function () {
       const editedImage = canvas.toDataURL("image/png");
+
       const link = document.createElement("a");
       link.href = editedImage;
-      link.download = generateFileName();
+      link.download = "edited-screenshot.png";
       link.click();
     });
 
     // Toggle the drawing mode on the Fabric.js canvas
     $("#enableDrawing").click(function () {
-      if (currentMode !== 'draw') {
-        setMode('draw');
-      } else {
-        setMode('selection');
+      canvas.isDrawingMode = !canvas.isDrawingMode;
+      $(this).toggleClass("btn-outline-success btn-outline-danger");
+
+      if (canvas.isDrawingMode) {
+        canvas.freeDrawingBrush.width = 2;
+        canvas.freeDrawingBrush.color = "#ff0000";
+      }
+
+      const backgroundImage = canvas.backgroundImage;
+      if (backgroundImage) {
+        canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
       }
     });
 
     // Clear all drawing from canvas
     $("#clearCanvas").click(function () {
-      const backgroundImage = canvas.backgroundImage;
+      const backgroundImage = canvas.backgroundImage; // Save the current background image
+
+      // Remove all objects except the background image
       canvas.getObjects().forEach((obj) => {
         if (obj !== backgroundImage) {
           canvas.remove(obj);
         }
       });
-      existingObjects = []; // Clear stored objects as well
-      textBoxCounter = 0; // Reset text box counter
-      canvas.renderAll();
+
+      // Reapply the background image and re-render the canvas
+      canvas.setBackgroundImage(backgroundImage, canvas.renderAll.bind(canvas));
     });
 
-    $("#addText").click(function () {
-      if (currentMode !== 'text') {
-        setMode('text');
-      } else {
-        // If already in text mode, add another text box
-        addTextBox();
-      }
-    });
-
-    $("#textColor").change(function () {
-      const activeObject = canvas.getActiveObject();
-      if (activeObject?.type === 'i-text') {
-        activeObject.set('fill', $(this).val());
-        canvas.renderAll();
-      }
-      if (currentMode === "draw") {
-        canvas.freeDrawingBrush.color = $(this).val();
-      }
-    });
-
-    $("#textSize").change(function () {
-      const activeObject = canvas.getActiveObject();
-      if (activeObject?.type === 'i-text') {
-        activeObject.set('fontSize', parseInt($(this).val()));
-        canvas.renderAll();
-      }
-    });
-
-    $("#addBlackBox").click(function () {
-      setMode('blackbox');
-    });
-
-    $("#addWhiteBox").click(function () {
-      setMode('whitebox');
-    });
-
-    function addBox(color) {
-      const box = new fabric.Rect({
-        left: 50,
-        top: 50,
-        width: 100,
-        height: 50,
-        fill: color,
-        stroke: '#000000',
-        strokeWidth: 1,
-        selectable: true,
-        hasControls: true
-      });
-      canvas.add(box);
-      canvas.setActiveObject(box);
-    }
-    $("#closeEditorModal").click(function () {
-      $('#editorModal').removeClass('show').css('display', 'none');
-      $('.modal-backdrop').remove();
-    });
-
+    // Transfer edited image from canvas-modal to feedback form img field
     $("#saveEditedImage").click(function () {
+      // Get the canvas element
+      // Ensure the canvas exists
       if (canvas) {
+        // Convert canvas to a Base64 string
         const dataURL = canvas.toDataURL("image/png");
+
+        // Convert Base64 string to a File
         const file = dataURLToFile(dataURL, generateFileName());
 
         // Create a DataTransfer to simulate a FileList
@@ -4492,11 +4262,8 @@ $(document).ready(function () {
         fileInput.files = dataTransfer.files;
 
         imageUploadNotification.removeClass("d-none");
-        $('#editorModal').removeClass('show').css('display', 'none');
-        $('.modal-backdrop').remove();
+        // clear canvas
         canvas.clear();
-        existingObjects = []; // Clear stored objects
-        textBoxCounter = 0; // Reset text box counter
       }
     });
 
@@ -4512,31 +4279,15 @@ $(document).ready(function () {
       return new File([new Uint8Array(array)], filename, { type: mime });
     }
 
-    updateButtonStates();
-  }
-
-
-  // Initialize when DOM is ready
-  $(document).ready(function () {
-    // Make sure all required libraries are loaded
-    if (typeof fabric !== 'undefined' && typeof html2canvas !== 'undefined' && typeof bootstrap !== 'undefined') {
-      const screenShotButton = $("#takeScreenshot");
-      const uploadScreenShotButton = $("#feedbackImg");
-      const imageUploadNotification = $("#feedbackSnapAdded");
-      const imageInputID = "#screenshotData";
-      const fileName = "feedback_img";
-
-      captureScreenshotAndEdit(
-        screenShotButton,
-        uploadScreenShotButton,
-        imageUploadNotification,
-        imageInputID,
-        fileName
-      );
-    } else {
-      console.error("Required libraries not loaded");
+    // display bootstrap modal dialog
+    function showModal() {
+      const modal = new bootstrap.Modal($("#staticBackdrop").get(0), {
+        backdrop: "static",
+        keyboard: false,
+      });
+      modal.show();
     }
-  });
+  }
 
   // Submit feedback form
   (function () {
@@ -5750,19 +5501,7 @@ $(document).ready(function () {
 
   })();
 
-  var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    function csrfSafeMethod(method)
-    {
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-    $.ajaxSetup(
-    {
-        beforeSend: function(xhr, settings)
-        {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain)
-            {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        }
-    });
+
+  console.log(window.location.pathname);
+
 });

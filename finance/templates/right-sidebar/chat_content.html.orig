@@ -4,7 +4,10 @@
     class="user-chats border border-bottom-0 theme-scrollbar"
     id="chatContainer"
     data-url="{% url 'load_ai_chats' %}"
+<<<<<<< HEAD
+=======
     data-avatarUrl="{% static 'app-assets/images/logo/logo.png' %}"
+>>>>>>> fixes/docker
 >
     <!--Loading-->
     <!--Actual chat message container-->

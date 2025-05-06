@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="17c8bebc-4fc2-4f54-8f93-7779c4038e68" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/finance.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/finance.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/finance/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/finance/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0001_initial.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0002_alter_account_id_alter_aichat_id_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0027_aichat_feedback_mynotes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0028_errorlog.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0029_auto_20241210_1850.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0030_auto_20241211_1759.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0031_auto_20241211_1854.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0032_auto_20241212_1112.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0033_auto_20241212_1401.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0034_apperrorlog.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/migrations/0035_auto_20241214_2138.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_finance/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/my_finance/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/my_finance/views.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;tanzid64&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:Sigma14/new-personal-finance.git&quot;,
+    &quot;accountId&quot;: &quot;8aa9a8ea-63e4-43f1-8047-0d9211dc1163&quot;
+  }
+}</component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="C:\php\php.exe" />
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2w5BLeysjPmmgU12vt1HQZplhOH" />
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="openDirectoriesWithSingleClick" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showScratchesAndConsoles" value="false" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.codeium.enabled": "true",
+    "git-widget-placeholder": "fixes/docker",
+    "last_opened_file_path": "D:/new-personal-finance/finance",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\new-personal-finance\finance" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="17c8bebc-4fc2-4f54-8f93-7779c4038e68" name="Changes" comment="" />
+      <created>1745321504307</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1745321504307</updated>
+      <workItem from="1745321509062" duration="752000" />
+      <workItem from="1745602797280" duration="1471000" />
+      <workItem from="1745608578909" duration="3650000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

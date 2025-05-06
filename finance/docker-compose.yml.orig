@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+# version: "3.9"
+services:
+  dashboard:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8072 --insecure
+    ports:
+      - "8072:8072"
+=======
 services:
   dashboard:
     container_name: finance_dashboard
@@ -5,11 +14,22 @@ services:
     command: python manage.py runserver 0.0.0.0:8077 --insecure
     ports:
       - "8077:8077"
+>>>>>>> fixes/docker
     env_file:
       - .env
     environment:
       - DEBUG=1
       - SQL_ENGINE=django.db.backends.postgresql
+<<<<<<< HEAD
+      - SQL_DB_NAME=personal_finance
+      - SQL_USER=test
+      - SQL_PASSWORD=test
+      - SQL_HOST=postgres
+      - SQL_PORT=5432
+    volumes:
+      - .:/finance # Mounts the current directory to the container's /finance directory
+      - ./static:/finance/static # Mounts static files directory
+=======
       - SQL_DB_NAME=${SQL_DB_NAME}
       - SQL_USER=${SQL_USER}
       - SQL_PASSWORD=${SQL_PASSWORD}
@@ -18,6 +38,7 @@ services:
     volumes:
       - .:/finance 
       - ./static:/finance/static
+>>>>>>> fixes/docker
     depends_on:
       postgres:
         condition: service_healthy
@@ -28,19 +49,30 @@ services:
     container_name: finance_postgres
     restart: always
     environment:
+<<<<<<< HEAD
+      POSTGRES_DB: personal_finance
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+=======
       POSTGRES_DB: ${SQL_DB_NAME}
       POSTGRES_USER: ${SQL_USER}
       POSTGRES_PASSWORD: ${SQL_PASSWORD}
+>>>>>>> fixes/docker
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
+<<<<<<< HEAD
+      test: ["CMD-SHELL", "pg_isready -U test -d personal_finance"]
+=======
       test: ["CMD-SHELL", "pg_isready -U ${SQL_USER} -d ${SQL_DB_NAME}"]
+>>>>>>> fixes/docker
       interval: 10s
       retries: 5
       timeout: 5s
 
+<<<<<<< HEAD
   pgadmin:
     image: dpage/pgadmin4
     restart: always
@@ -57,3 +89,8 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+=======
+volumes:
+  postgres_data:
+
+>>>>>>> fixes/docker

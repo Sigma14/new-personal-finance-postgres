@@ -356,3 +356,7 @@ urlpatterns = [
     ),
 
 ]
+<<<<<<< HEAD
+
+=======
+>>>>>>> fixes/docker

@@ -4126,7 +4126,8 @@ $(document).ready(function () {
     function initCanvas(image, containerWidth, containerHeight) {
       img = image;
       const dimensions = calculateCanvasDimensions(containerWidth);
-      const canvasEl = document.getElementById('snapEditCanvas')
+      const canvasEl = document.getElementById('snapEditCanvas');
+
       if (canvas) {
         canvas.dispose();
       }
@@ -4352,7 +4353,7 @@ $(document).ready(function () {
       });
     }
 
-    // Screenshot event to capture current page screenshot
+    // Event handlers
     screenShotButton.on("click", function () {
       const ignoreElementIds = ["rightSettingBody", "accSubmitError"];
       html2canvas(document.body, {
@@ -4373,7 +4374,6 @@ $(document).ready(function () {
       }).catch(console.error);
     });
 
-    // upload existing photo for feedback form & edit by fabric.js
     uploadScreenShotButton.on("change", function (event) {
       const file = event.target.files[0];
       if (file) {
@@ -4473,14 +4473,21 @@ $(document).ready(function () {
       canvas.add(box);
       canvas.setActiveObject(box);
     }
+
     $("#closeEditorModal").click(function () {
       $('#editorModal').removeClass('show').css('display', 'none');
       $('.modal-backdrop').remove();
     });
 
+    // Transfer edited image from canvas-modal to feedback form img field
     $("#saveEditedImage").click(function () {
+      // Get the canvas element
+      // Ensure the canvas exists
       if (canvas) {
+        // Convert canvas to a Base64 string
         const dataURL = canvas.toDataURL("image/png");
+
+        // Convert Base64 string to a File
         const file = dataURLToFile(dataURL, generateFileName());
 
         // Create a DataTransfer to simulate a FileList
