@@ -4090,6 +4090,7 @@ $(document).ready(function () {
     });
   });
 
+
   /*
    * Helper function to capture screenshot & implement edit by fabric.js
    */
