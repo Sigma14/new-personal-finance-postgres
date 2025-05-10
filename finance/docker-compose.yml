@@ -14,7 +14,7 @@ services:
       - SQL_USER=${SQL_USER}
       - SQL_PASSWORD=${SQL_PASSWORD}
       - SQL_HOST=postgres
-      - SQL_PORT=5432
+      - SQL_PORT=${SQL_PORT}
     volumes:
       - .:/finance 
       - ./static:/finance/static
@@ -32,7 +32,7 @@ services:
       POSTGRES_USER: ${SQL_USER}
       POSTGRES_PASSWORD: ${SQL_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
