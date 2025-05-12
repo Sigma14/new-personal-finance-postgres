@@ -1,5 +1,5 @@
 services:
-  dashboard:
+  dashboard_v2:
     container_name: finance_dashboard_v2
     build: .
     command: python manage.py runserver 0.0.0.0:8077 --insecure
