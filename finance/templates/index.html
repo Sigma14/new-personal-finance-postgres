@@ -1139,6 +1139,635 @@
         });
       });
     </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const tour = new Shepherd.Tour({
+          useModalOverlay: true,
+          defaultStepOptions: {
+            classes: 'shadow-md bg-purple-dark',
+            scrollTo: true,
+            cancelIcon: {
+              enabled: true
+            },
+            scrollTo: {
+              behavior: 'smooth',
+              block: 'center'
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'welcome-step',
+          title: 'Welcome!',
+          text: 'Welcome to the Real Estate Results page! This is where you can review detailed results and analysis of your rental property model.\
+                  <br><br>Familiarize yourself with the main navigation tabs at the top to explore different insights.',
+          buttons: [
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature1-step',
+          title: 'Property Overview',
+          text: 'The top section displays a summary of the property, including address, down payment, and purchase price. It also features a photo of the property.\
+                  <br><br>Verify that the displayed information matches your input data for accuracy.',
+          attachTo: {
+            element: '#property_details',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature2-step',
+          title: 'Navigation Tabs',
+          text: 'The page contains four navigation tabs: Investment Summary, Stats & Graphs, Income Statement, and Mortgage Analysis. <br><br>Click through each tab to explore different aspects of the property analysis.',
+          attachTo: {
+            element: '#custom-nav',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature3-step',
+          title: 'Investment Summary Tab',
+          text: 'This tab offers a summary of all property-related details, including property price, down payment, taxes, fees, and total investment required.\
+                <br><br>Review all information to ensure it aligns with your input. Adjust values if needed.',
+          attachTo: {
+            element: '#property_summary_data',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const tabTrigger = document.getElementById('property_summary_tab');
+              if (tabTrigger) {
+                tabTrigger.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature4-step',
+          title: 'Capital Expenditure Budget',
+          text: 'This section breaks down capital expenditures by categories like appliances, renovations, and more.\
+                <br><br>Review budget allocations to ensure accurate expense tracking.',
+          attachTo: {
+            element: '#capex_budget_data',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': async function() {
+              const tabTrigger = document.getElementById('capex_budget_tab');
+              if (tabTrigger) {
+                tabTrigger.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature5-step',
+          title: 'Stats & Graphs Tab',
+          text: 'Visual graphs illustrate return on investment, cash on cash returns, and other financial metrics over time.\
+                <br><br>Hover over the graphs to view detailed insights for each year.',
+          attachTo: {
+            element: '#stats_graph_data',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const tabTrigger = document.getElementById('stats_graph_tab');
+              if (tabTrigger) {
+                tabTrigger.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature6-step',
+          title: 'Income Statement Tab',
+          text: 'This tab presents yearly projections for revenue, expenses, and return on investment.\
+                <br><br>Compare the revenue and expense data to understand projected profitability over time.',
+          attachTo: {
+            element: '#income_statement_data',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const tabTrigger = document.getElementById('income_statement_tab');
+              if (tabTrigger) {
+                tabTrigger.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature7-step',
+          title: 'Mortgage Analysis Tab',
+          text: 'Displays mortgage repayment details, including monthly payments, interest breakdown, and a payment timeline.\
+                <br><br>Check total payments and payoff date to plan mortgage management.',
+          attachTo: {
+            element: '#mortgage_analysis_data',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const tabTrigger = document.getElementById('mortgage_analysis_tab');
+              if (tabTrigger) {
+                tabTrigger.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature8-step',
+          title: 'Calculation Result Table',
+          text: 'A detailed table provides month-by-month payment breakdown, including principal, interest, and balance.\
+                <br><br>Scroll through the table to see how your payments are distributed over time.',
+          attachTo: {
+            element: '#responsive-datatable',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature9-step',
+          title: 'Final Graph',
+          text: 'The final graph visualizes the reduction in mortgage balance over time and the distribution of payments.\
+                <br><br>Use this graph to assess your mortgage strategy and potential refinancing plans.',
+          attachTo: {
+            element: '#line-chart-div',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+        
+        tour.addStep({
+          id: 'end-step',
+          title: 'Tour Complete!',
+          text: 'You\'ve now explored all the features of the Real Estate Results page. This page provides a comprehensive view of your property\'s financial performance, helping you make informed investment decisions.\
+                <br><br>Take some time to review each section thoroughly to optimize your investment strategy.',
+          when: {
+            'before-show': function() {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Finish',
+              action: tour.complete
+            }
+          ]
+        });
+
+        document.getElementById('start-tour-btn').addEventListener('click', function() {
+          tour.start();
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const tour = new Shepherd.Tour({
+          useModalOverlay: true,
+          defaultStepOptions: {
+            classes: 'shadow-md bg-purple-dark',
+            scrollTo: true,
+            cancelIcon: {
+              enabled: true
+            },
+            scrollTo: {
+              behavior: 'smooth',
+              block: 'center'
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'welcome-step',
+          title: 'Welcome!',
+          text: 'Welcome to the Add Rental Property page. This feature helps you enter the necessary details to evaluate the financial performance of a potential rental property.\
+                  <br><br>Follow the steps in this tour to understand how to input information across the six tabs.',
+          buttons: [
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature1-step',
+          title: 'Property Details',
+          text: 'In this section, you\'ll provide key details about the rental property. Enter the property name, upload an image, select the currency, and choose the likely, best, and worst-case scenario prices for the property. This gives you flexibility in planning for different market conditions.\
+                  <br><br>Add a property name, image, and select a purchase price scenario to begin analyzing the property.',
+          attachTo: {
+            element: '#faq-payment-qna',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ]
+        });
+
+        tour.addStep({
+          id: 'feature2-step',
+          title: 'Down Payment and Mortgage Details',
+          text: 'Input your down payment percentage and mortgage information here. You can adjust the interest rate, mortgage amortization, and start date. This section helps calculate mortgage payments based on the property price you entered.\
+                <br><br>Enter the mortgage details including down payment and interest rate to simulate the mortgage scenario.',
+          attachTo: {
+            element: '#mortgage-qna',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#account-details"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature3-step',
+          title: 'Renovation, Closing, and Startup Costs',
+          text: 'Use this tab to calculate additional property costs, such as land transfer taxes, legal fees, title insurance, and any renovation costs required before the property can be rented. Each cost will be factored into the property’s overall financial performance.\
+                <br><br>Input the expected closing costs and renovation expenses for accurate upfront cost estimation.',
+          attachTo: {
+            element: '#personal-info',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          scrollTo: false,
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#personal-info"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            },
+
+            'show': function() {
+              const tourModal = this.el;
+              const modalRect = tourModal.getBoundingClientRect();
+              const aLittleBitOfPadding = 20; // this value is in px
+
+              if (modalRect.top < aLittleBitOfPadding) {
+                const absoluteModalTop = modalRect.top + window.scrollY;
+                const scrollToPosition = absoluteModalTop - aLittleBitOfPadding;
+                window.scrollTo({
+                  top: scrollToPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature4-step',
+          title: 'Estimated Monthly Revenue by Unit',
+          text: 'Enter the expected monthly rent for each unit in the property. You can also specify an annual percentage increase in rent, which helps you project future rental income over time. This is important for planning long-term rental profitability.\
+                <br><br>Estimate rental income for each unit, and consider adding assumptions for annual rent increases.',
+          attachTo: {
+            element: '#address-step',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          scrollTo: false,
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#address-step"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            },
+
+            'show': function() {
+              const tourModal = this.el;
+              const modalRect = tourModal.getBoundingClientRect();
+              const aLittleBitOfPadding = 20; // this value is in px
+
+              if (modalRect.top < aLittleBitOfPadding) {
+                const absoluteModalTop = modalRect.top + window.scrollY;
+                const scrollToPosition = absoluteModalTop - aLittleBitOfPadding;
+                window.scrollTo({
+                  top: scrollToPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature5-step',
+          title: 'Monthly Expenses',
+          text: 'This tab helps track recurring expenses like property taxes, insurance, and maintenance fees. Utilities and other operating costs should also be added to get a full picture of the monthly outflows associated with the rental property.\
+                <br><br>Fill out your expected monthly expenses for a complete breakdown of the property’s ongoing costs.',
+          attachTo: {
+            element: '#social-links',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          scrollTo: false,
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#social-links"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            },
+
+            'show': function() {
+              const tourModal = this.el;
+              const modalRect = tourModal.getBoundingClientRect();
+              const aLittleBitOfPadding = 20; // this value is in px
+
+              if (modalRect.top < aLittleBitOfPadding) {
+                const absoluteModalTop = modalRect.top + window.scrollY;
+                const scrollToPosition = absoluteModalTop - aLittleBitOfPadding;
+                window.scrollTo({
+                  top: scrollToPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature6-step',
+          title: 'Capital Expenditure Budget',
+          text: 'Here, you can break down capital expenditure (CapEx) for various property components such as roof, flooring, electrical systems, and appliances. This helps track major long-term repair or replacement costs over the property\'s lifespan.\
+                <br><br>Estimate replacement costs for major property components to plan for long-term capital expenditures.',
+          attachTo: {
+            element: '#step-budget',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          scrollTo: false,
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#step-budget"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            },
+            'show': function() {
+              const tourModal = this.el;
+              const modalRect = tourModal.getBoundingClientRect();
+              const aLittleBitOfPadding = 20; // this value is in px
+
+              if (modalRect.top < aLittleBitOfPadding) {
+                const absoluteModalTop = modalRect.top + window.scrollY;
+                const scrollToPosition = absoluteModalTop - aLittleBitOfPadding;
+                window.scrollTo({
+                  top: scrollToPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          }
+        });
+
+        tour.addStep({
+          id: 'feature7-step',
+          title: 'Investor Details',
+          text: 'This section allows you to add investors\' names and capital contributions. If you are collaborating with others on a property investment, this will calculate returns for each investor and ensure accurate profit distribution.\
+                <br><br>Add investor details and their capital contributions to see the financial breakdown by investor.',
+          attachTo: {
+            element: '#step-investor',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Next',
+              action: tour.next
+            }
+          ],
+          when: {
+            'before-show': function() {
+              const selector = '.step[data-target="#step-investor"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            }
+          }
+        });
+        
+        tour.addStep({
+          id: 'end-step',
+          title: 'Tour Complete!',
+          text: 'Congratulations! You\'ve completed the input process for the rental property. You can now analyze the potential financial performance and evaluate the property\'s profitability over time. Keep this walkthrough in mind as you continue adding more properties or refining the data for your current projects.\
+                <br><br>Take some time to review each section thoroughly to optimize your investment strategy.',
+          when: {
+            'before-show': function() {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const selector = '.step[data-target="#account-details"] .step-trigger';
+              const buttonToClick = document.querySelector(selector);
+              if (buttonToClick) {
+                buttonToClick.click();
+              }
+            }
+          },
+          buttons: [
+            {
+              text: 'Back',
+              action: tour.back,
+              classes: 'shepherd-button-secondary'
+            },
+            {
+              text: 'Finish',
+              action: tour.complete
+            }
+          ]
+        });
+
+        document.getElementById('add-property-tour-btn').addEventListener('click', function() {
+          tour.start();
+        });
+      });
+    </script>
   </body>
   <!-- END: Body-->
 </html>
