@@ -1,0 +1,333 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Goal List {% endblock title %}
+</head>
+
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0 Step-1">Goals</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Goals
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-header-right col-md-3 col-2 mb-2">
+                    <div class="d-none d-md-flex align-items-center justify-content-end">
+                        <!--Button for tour-->
+                        <div class="btn btn-primary tour-btn" id="goalTourBtn" data-csv="{{tour_api}}">Start Tour</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="collapse-margin collapse-icon mt-2" id="goal-list-qna">
+                            <div class="card">
+                                <div class="card-header" style="padding-bottom:0px; padding-left:0px;"  data-toggle="collapse" role="button" data-target="#goal-list-one" aria-expanded="false" aria-controls="goal-list-one">
+                                    <ul class="nav nav-pills">
+                                        <li class="nav-item">
+                                            <a class="nav-link"><i class="bg-light-info" data-feather="info"></i>Goal Page Info</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id="goal-list-one" style="padding-top:0px; padding-left:20px;" class="collapse"  data-parent="#goal-list-qna">
+                                    <div class="card-header">
+                                        <ul class="nav nav-pills">
+                                            <li class="nav-item">
+                                                The 'Goals Page' is designed to motivate and assist users in saving for their personal goals. It enables users to create specific financial goals, like saving for a new phone, a vacation, or an emergency fund. The page combines visual tools and practical functionalities to make saving for these goals more engaging and attainable. Users can allocate funds, track their progress, and see their savings grow, all within a user-friendly and visually appealing interface.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="row d-flex justify-content-between">
+                    <div style="margin-left:1rem;">
+                        <a href="{% url 'goal_add' %}" class="btn btn-primary Step-2"><i
+                                class="fa fa-plus"></i> Add Goal</a>
+                    </div>
+                    <!-- User Budget dropdown -->
+                    <div class="dropdown" style="margin-right:1rem; ">
+                        <form method="post" action="{% url 'goal_list' %}" id="user_budget_form">
+
+                            {% csrf_token %}
+                            <select class="form-control user_budget_filter" name="user_budget" style="width:200px">
+                                {% for budget in user_budget_qs %}
+                                    {% if budget.id == selected_budget.id %}
+                                        <option selected value="{{budget.id}}">{{budget}}</option>
+                                    {% else %}
+                                        <option value="{{budget.id}}">{{budget}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                </div>
+                <br/>
+                <section id="ecommerce-products" class="list-view">
+                    {% for object in goal_data %}
+                    <div class="card ecommerce-card">
+                        <div class="card-header">
+                            <h2 style="float: left;">
+                                <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#GoalDescription"></i> 
+                                {{ object.label }} ({{ object.allocate_amount|div:object.goal_amount|mul:100|floatformat:1 }}%)
+                            </h2>
+                            <h2 style="float: right;">{{ object.currency }}{{ object.allocate_amount }} / {{ object.currency }}{{ object.goal_amount }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="item-img text-center">
+                                <a href="{% url 'goal_update' pk=object.id %}">
+                                    <div class="progress progress-bar-warning" style="height:30px;">
+                                        <!-- Budget amount progress -->
+                                        {% if object.budget_amount != 0 %}
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:0 }}%; background-color:red;"
+                                        data-toggle="tooltip" data-placement="top" title="Budget - $ {{ object.budget_amount }}">
+                                            {{ object.budget_amount|div:object.goal_amount|mul:100|floatformat:1 }}%
+                                        </div>
+                                        {% endif %}
+                                        <!-- Fund amount progress -->
+                                        {% if object.fund_amount %}
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:0 }}%"
+                                        data-toggle="tooltip" data-placement="top" title="Fund - $ {{ object.fund_amount }}">
+                                             {{ object.fund_amount|div:object.goal_amount|mul:100|floatformat:1 }}%
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+
+                                    <div class="card-body" style="padding-bottom:40px;">
+                                        {% if object.goal_date == None %}
+                                            <h4 style="float: left;">Goal Date :- No deadline</h4>
+                                        {% else %}
+                                        <h4 style="float: left;">Goal Date :- {{object.goal_date}}</h4>
+                                        {% endif %}
+                                            <h4>Account :- {{object.account}}</h4>
+                                            <!-- Budget and fund allocated amount details -->
+                                            <div style="float: left;">
+                                                <div class='goal-box red'></div>
+                                                <div class="goal-box-label"><h6>Budget - $ {{object.budget_amount}} &ensp;</h6></div>
+                                                <div class='goal-box orange'></div>
+                                                <div class="goal-box-label"><h6>Fund - $ {{object.fund_amount}} </h6></div>
+                                            </div>
+                                              
+                                        <h4 style="float: right;">
+                                            <div class="col-sm-40 offset-sm-20 Step-3">
+                                                <a href="{% url 'goal_update' pk=object.id %}" class="btn btn-primary"><i
+                                                data-feather="edit-2"></i>&nbsp;Edit</a>
+                                                <button type="button" del_method="Goals" delete_name="{{ object.label.name }} Goal" url="{% url 'goal_delete' pk=object.id %}" class="btn btn-danger delete_button"><i
+                                                data-feather="trash"></i>&nbsp;Delete</button>
+
+                                            </div>
+                                        </h4>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </section>
+                <section id="dashboard-ecommrc">
+                    <div class="row match-height">
+                        <div class="col-12">
+                            <div class="card card-congratulation-medal">
+                                <div class="card-body">
+                                    <div class="download_csv_form"></div>
+                                    <div class="card-header border-bottom">
+                                        <div class="col-sm-40 offset-sm-20">
+                                            <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundAddInfo"></i> 
+                                            <a href="{% url 'fund_accounts' %}" class="btn btn-primary Step-6"><i
+                                                    class="fa fa-plus"></i> Add Fund</a>
+                                        </div>
+                                        <h4 class="card-title mb-25 Step-5">
+                                            <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#FundListInfo"></i> 
+                                            Fund List
+                                        </h4>
+                                        <button class="btn btn-primary download_csv Step-8" file_name="my_funds.csv" table_heading="{{fund_key_dumbs}}" table_length="{{fund_key | length}}" table_id="#budgets" fun_name="download_csv" url="/download/csv">CSV<i data-feather="download" class="avatar-icon"></i></button>
+                                    </div>
+                                    <div class="card-datatable">
+                                        <table class="dt-row-grouping table" id="budgets">
+                                            <thead>
+                                            <tr>
+                                                {% for name in fund_key %}
+                                                    <th>{{name}}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for object in fund_value %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">{{ forloop.counter }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1 Step-7">
+                                                            <p class="dropdown-item fund_overtime " data-toggle="modal" data-target="#edit">Show
+                                                            </p>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                {% for data in object %}
+                                                {% if forloop.counter != 6 %}
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1" id="acc_name" account_name="{{data}}">{{ data }}</span>
+                                                    </div>
+                                                </td>
+                                                {% else %}
+                                                <td style="width:15%;">
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="font-weight-bolder mr-1">
+                                                            <ul class="list-inline m-0">
+                                                                <li class="list-inline-item">
+                                                                    <a href="{% url 'fund_update' pk=data %}"class="btn btn-success btn-sm rounded-0"> <i class="fa fa-edit"></i></a>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <button type="button" del_method="Funds" delete_name="{{ object.name }} Funds" url="{% url 'fund_delete' pk=data %}"
+                                                                       class="btn btn-danger btn-sm rounded-0 delete_button"
+                                                                       data-toggle="tooltip" data-placement="top" title="Delete"><i
+                                                                            class="fa fa-trash"></i></button>
+                                                                </li>
+                                                            </ul>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade text-left" id="edit" tabindex="-1" role="dialog" aria-labelledby="editLabel1" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content" style="width:800px;">
+                                <form class="form form-vertical" method="POST">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="editLabel1">Funds Charts</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Basic Vertical form layout section start -->
+                                    <section id="basic-vertical-layout" >
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="card card-congratulation-medal">
+                                                    <div class="card-body">
+                                                        <h5>Accounts</h5>
+                                                        <canvas class="macro-chart chartjs" data-height="450"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <!-- Basic Vertical form layout section end -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-danger" data-dismiss="modal" aria-label="Close" aria-hidden="true">Cancel</button>
+                                </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal fade" id="GoalDescription" tabindex="-1" role="dialog" aria-labelledby="GoalDescriptionModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="GoalDescriptionModel">Goal Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        As an example, let's consider the goal of saving for a new phone. On this page, you can set this as your goal, specify the amount needed, and start allocating funds towards it. The process is made simple and visually rewarding, with progress bars and graphs to show how close you are to achieving your goal.
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="modal fade" id="FundListInfo" tabindex="-1" role="dialog" aria-labelledby="FundListInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="FundListInfoModel">FundList Table Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <li>
+                                See Overtime Graph: This graph shows the growth of your savings over time, giving you a visual representation of your progress towards your goal.
+                            </li>
+                            <li>
+                                Account Name: Displays the name of the account where the funds are being saved.
+                            </li>
+                            <li>
+                                Current Balance: Indicates the total amount of money in the account.
+                            </li>
+                            <li>
+                                Freeze Amount: The amount of the current balance that is 'frozen' or set aside for goals. Freezing funds helps in disciplined saving by saving this amount specifically for your goal.
+                            </li>
+                            <li>
+                                Used Locked Funds: This shows the funds that have already been allocated towards a goal.
+                            </li>
+                            <li>
+                                Available Funds: These are the frozen funds that have not yet been allocated towards a goal and are available for allocation. This figure helps you understand how much more you can commit to your current goals.
+                            </li>
+                        </ul>  
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="modal fade" id="FundAddInfo" tabindex="-1" role="dialog" aria-labelledby="FundAddInfoModel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="FundAddInfoModel">Add Funds Description</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        The '+ Add Fund' feature allows users to select an account and then freeze a portion of the funds in that account to allocate towards a goal. This function is crucial for users who have multiple savings accounts or who want to allocate funds from different sources for various goals. By freezing funds, users can methodically plan and track their savings, ensuring they are constantly moving towards their financial objectives.
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+

@@ -1,0 +1,223 @@
+{% extends "index.html" %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Bill Add  {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Add Bills & Subscriptions</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'bill_list' %}">Bills & Subscriptions</a>
+                                    </li>
+                                    <li class="breadcrumb-item">
+                                        Add Bills & Subscriptions
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <form class="form form-horizontal" method="post">
+                        {% if error %}
+                            <p class="text-danger">{{error}}</p>
+                        {% endif %}
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">User Budget</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                           {{ form.user_budget }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon"><a class="lead add_category" href="{% url 'subcategory_add' category_pk=bill_id %}" title="add category"><i class="bg-light-info" data-feather="plus"></i>&nbsp;</a>Category</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select type="text" id="fname-icon" class="form-control" name="label" required>
+                                                {% for label in bill_category %}
+                                                    <option value="{{label.name}}">{{label.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">
+                                            <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#AccountDescription"></i> 
+                                            Account
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <select name="account_name" class="form-control" id="account_name" required>
+                                                {% for account in account_qs %}
+                                                    <option>{{account.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="email-icon">Amount</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="mail"></i></span>
+                                            </div>
+                                            <input type="text" id="email-icon" class="form-control" name="amount" required
+                                                   placeholder="Amount"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Bill Due Date</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            <input type="text" id="due_date" name="date" class="form-control flatpickr-basic"  placeholder="YYYY-MM-DD" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="auto_bill" class="custom-control-input check_auto_bill" id="customCheck1" checked/>
+                                        <label class="custom-control-label" for="customCheck1">
+                                            &nbsp;&nbsp;Auto-bill 
+                                        </label>
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#AutoBill"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 show_bill_budget_periods">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">Frequency</label>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-merge">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i data-feather="user"></i></span>
+                                            </div>
+                                            {{ form.frequency }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group row">
+                                    <div class="col-sm-3 col-form-label">
+                                        <label for="fname-icon">&nbsp;</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" name="auto_pay" class="custom-control-input" id="customCheck2"/>
+                                        <label class="custom-control-label" for="customCheck2">&nbsp;&nbsp;Auto-pay</label>
+                                        <i class="bg-light-info" data-feather="info" data-toggle="modal" data-target="#AutoPay"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary mr-1">Create</button>
+                                <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Model -->
+        <div class="modal fade" id="AccountDescription" tabindex="-1" role="dialog" aria-labelledby="AccountDescriptionModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="AccountDescriptionModel">Account Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    When adding a bill, you can select which of your accounts the money should be paid from. This flexibility allows you to manage your payments efficiently, ensuring funds are always available.
+                </div>
+            </div>
+          </div>
+        </div> 
+        <!-- Model -->
+        <div class="modal fade" id="AutoBill" tabindex="-1" role="dialog" aria-labelledby="AutoBillModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="AutoBillModel">Auto Bill Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    For recurring transactions, you can set the frequency (e.g., monthly, quarterly). This automation saves time and ensures consistency in your financial planning.
+                </div>
+            </div>
+          </div>
+        </div> 
+        <div class="modal fade" id="AutoPay" tabindex="-1" role="dialog" aria-labelledby="AutoPayModel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="AutoPayModel">AutoPay Description</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    The autopay feature is a convenience tool that automatically pays your bills as soon as they become due. The payment is directly debited from the chosen funding account, and the transaction is automatically logged in the app's transaction section. This feature helps in maintaining a good payment history and reduces the hassle of manual bill payments.
+                </div>
+            </div>
+          </div>
+        </div> 
+    </div>
+{% endblock content%}
+

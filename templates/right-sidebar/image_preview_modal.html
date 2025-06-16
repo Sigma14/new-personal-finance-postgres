@@ -1,0 +1,60 @@
+<!-- Editor Modal -->
+<div class="modal fade canvasModal" id="editorModal" tabindex="-1" aria-labelledby="editorModalLabel"
+  aria-hidden="true" >
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editorModalLabel">Screenshot Editor</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <canvas id="snapEditCanvas"></canvas>
+      </div>
+      <div class="modal-footer d-flex flex-wrap">
+        <!-- Drawing Tools -->
+        <div class="tool-group btn-group" role="group">
+          <button type="button" id="enableSelection" class="btn btn-outline-warning" title="Selection Mode">
+            <i class="bi bi-cursor"></i>
+          </button>
+          <button type="button" id="enableDrawing" class="btn btn-outline-success" title="Draw">
+            <i class="bi bi-pencil-fill"></i>
+          </button>
+          <button type="button" id="addText" class="btn btn-outline-primary" title="Add Text">
+            <i class="bi bi-fonts"></i>
+          </button>
+          <button type="button" id="addBlackBox" class="btn btn-outline-dark" title="Black Box">
+            <i class="bi bi-square-fill"></i>
+          </button>
+          <button type="button" id="addWhiteBox" class="btn btn-outline-light border-dark" title="White Box">
+            <i class="bi bi-square"></i>
+          </button>
+          <button type="button" id="clearCanvas" class="btn btn-outline-danger" title="Clear All">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </div>
+
+        <!-- Text Controls -->
+        <div class="tool-group">
+          <input type="color" id="textColor" value="#000000" class="text-color-control" title="Text Color">
+          <input type="range" id="textSize" min="10" max="72" value="20" class="form-range text-size-control"
+            title="Text Size">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="tool-group ms-auto">
+          <button type="button" id="downloadEditedImage" class="btn btn-primary" title="Download">
+            <i class="bi bi-download"></i>
+          </button>
+          <button type="button" id="saveEditedImage" class="btn btn-success" title="Save">
+            <i class="bi bi-save-fill"></i>
+          </button>
+          <button type="button" class="btn btn-secondary" title="Close" data-dismiss="modal" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

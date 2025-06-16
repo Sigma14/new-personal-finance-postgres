@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Locked</title>
+    <style>
+        .lockout-message {
+            color: #c62828;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="lockout-message">
+        <h2>Account Temporarily Locked</h2>
+        <p>Too many failed login attempts. Please try again in {{ cooloff_time }} minutes.</p>
+    </div>
+</body>
+</html>

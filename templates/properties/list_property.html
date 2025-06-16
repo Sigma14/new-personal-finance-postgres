@@ -1,0 +1,84 @@
+{% extends "index.html" %}
+{% load mathfilters %}
+<!DOCTYPE html>
+<head>
+    {% block title %} Property List {% endblock title %}
+</head>
+{% block content %}
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-left mb-0">Rental Properties</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item">Rental Properties
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-body" float="left">
+                <div class="col-sm-40 offset-sm-20">
+                    <a href="{% url 'rental_property_add' %}" class="btn btn-primary"><i
+                            class="fa fa-plus"></i> Add Rental Property</a>
+                </div>
+                <br/>
+                <section id="dashboard-ecommrc">
+                    {% for object in rental_property_data %}
+                    <div class="card ecommerce-card">
+                        <div class="item-img text-center">
+                            <form id="form{{object.id}}" action="{% url 'property_add' %}" method="get" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% if object.property_image %}
+                                    <input type="text" name="file_name" value="{{object.property_image.url}}" hidden>
+                                {% else %}
+                                    <input type="text" name="file_name" value="False" hidden>
+                                {% endif %}
+                                <input type="text" name="name" value="{{object.name}}" hidden>
+                                <input type="text" name="currency" value="{{object.currency}}" hidden>
+                                <input type="text" name="interest_period" value="Per month" hidden>
+                                <input type="text" name="liability_type" value="Mortgage" hidden>
+                                <input type="text" name="interest_rate" value="{{object.mortgage_detail.interest_rate}}" hidden>
+                                <input type="text" name="mortgage_year" value="{{object.mortgage_detail.amortization_year|floatformat:0 }}" hidden>
+                                <input type="text" name="value" value="{{object.purchase_price_detail.selected_price}}" hidden>
+                                <input type="checkbox" name="include_net_worth" checked class="custom-control-input new_tab_check" id="customCheck1" hidden />
+                                <a href="{% url 'rental_property_detail' pk=object.id %}">
+                                    <div class="card-body">
+                                        <h2 style="float: left;">{{ object.name }}</h2>
+                                        <h4 style="float: right;" class="text-info" id="buy_price">
+                                            {{ object.currency }}{{ object.purchase_price_detail.selected_price }}
+                                        </h4>
+                                    </div>
+                                    <div class="card-body" style="padding-bottom:40px;">
+                                        <h4 style="float: left;">Down Payment -: <strong class="text-warning" id="down_price">{{ object.currency }}{{ object.purchase_price_detail.selected_price|mul:object.purchase_price_detail.down_payment|div:100|floatformat:0 }}</strong></h4>
+                                        {% if object.name in liability_data %}
+                                            <a style="float: right;" href="{% url 'liability_list' %}" class="btn btn-primary mr-1">Liability List</a>
+                                        {% else %}
+                                            <a style="float: right;" form_id="form{{object.id}}" method_type="add_liab" id="liab_added_check" action_type="not_added" class="btn btn-success mr-1 add_property_liab">Add to Liability</a>
+                                        {% endif %}
+                                        {% if object.name in property_data %}
+                                            <a style="float: right;" href="{% url 'property_list' %}" class="btn btn-primary mr-1">Property List</a>
+                                        {% else %}
+                                            <a style="float: right;" form_id="form{{object.id}}" method_type="add_prop" class="btn btn-success mr-1 add_property_liab">Add to Personal Property</a>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content%}

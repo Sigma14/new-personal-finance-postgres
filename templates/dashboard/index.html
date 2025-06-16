@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load dashboard_filters %}
+
+{% block title %}Dashboard - Property Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card">
+            <h3>Total Property Value</h3>
+            <p class="amount">${{ total_property_value|floatformat:2|intcomma }}</p>
+        </div>
+        <div class="card">
+            <h3>Monthly Income</h3>
+            <p class="amount">${{ monthly_income|floatformat:2|intcomma }}</p>
+        </div>
+        <div class="card">
+            <h3>Monthly Expenses</h3>
+            <p class="amount">${{ monthly_expenses|floatformat:2|intcomma }}</p>
+        </div>
+        <div class="card">
+            <h3>Net Monthly Income</h3>
+            <p class="amount {% if net_monthly_income < 0 %}negative{% endif %}">
+                ${{ net_monthly_income|floatformat:2|intcomma }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3>Income vs Expenses</h3>
+            <canvas id="incomeExpensesChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Maintenance Status</h3>
+            <canvas id="maintenanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Property Performance -->
+    <div class="property-performance">
+        <h3>Property Performance</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Monthly Income</th>
+                        <th>Monthly Expenses</th>
+                        <th>Maintenance Requests</th>
+                        <th>Net Income</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for property in property_performance %}
+                    <tr>
+                        <td>{{ property.property_name }}</td>
+                        <td>${{ property.monthly_income|default:0|floatformat:2|intcomma }}</td>
+                        <td>${{ property.monthly_expenses|default:0|floatformat:2|intcomma }}</td>
+                        <td>{{ property.maintenance_count }}</td>
+                        <td class="{% if property.monthly_income|subtract:property.monthly_expenses < 0 %}negative{% endif %}">
+                            ${{ property.monthly_income|subtract:property.monthly_expenses|floatformat:2|intcomma }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <div class="activity-section">
+            <h3>Recent Maintenance Requests</h3>
+            <div class="activity-list">
+                {% for maintenance in recent_maintenance %}
+                <div class="activity-item">
+                    <div class="activity-header">
+                        <span class="property-name">{{ maintenance.property_details.property_name }}</span>
+                        <span class="status {{ maintenance.status }}">{{ maintenance.status|title }}</span>
+                    </div>
+                    <p class="description">{{ maintenance.description|truncatechars:100 }}</p>
+                    <div class="activity-footer">
+                        <span class="date">{{ maintenance.request_date|naturaltime }}</span>
+                        <span class="cost">${{ maintenance.cost|floatformat:2|intcomma }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="no-data">No recent maintenance requests</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <h3>Overdue Invoices</h3>
+            <div class="activity-list">
+                {% for invoice in overdue_invoices %}
+                <div class="activity-item">
+                    <div class="activity-header">
+                        <span class="property-name">{{ invoice.property_details.property_name }}</span>
+                        <span class="status overdue">Overdue</span>
+                    </div>
+                    <p class="description">Invoice #{{ invoice.invoice_number }}</p>
+                    <div class="activity-footer">
+                        <span class="date">Due: {{ invoice.invoice_due_date|date:"M d, Y" }}</span>
+                        <span class="amount">${{ invoice.item_amount|floatformat:2|intcomma }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="no-data">No overdue invoices</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Categories -->
+    <div class="expense-categories">
+        <h3>Expense Categories</h3>
+        <div class="category-list">
+            {% for category in expense_categories %}
+            <div class="category-item">
+                <div class="category-name">{{ category.expense_category|title }}</div>
+                <div class="category-amount">${{ category.total|floatformat:2|intcomma }}</div>
+                <div class="category-bar">
+                    <div class="bar-fill" style="width: {{ category.total|percentage:monthly_expenses }}%"></div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-data">No expenses this month</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Income vs Expenses Chart
+    const incomeExpensesCtx = document.getElementById('incomeExpensesChart').getContext('2d');
+    new Chart(incomeExpensesCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                data: [{{ monthly_income }}, {{ monthly_expenses }}],
+                backgroundColor: ['#4CAF50', '#F44336'],
+                borderColor: ['#388E3C', '#D32F2F'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Maintenance Status Chart
+    const maintenanceCtx = document.getElementById('maintenanceChart').getContext('2d');
+    new Chart(maintenanceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Completed'],
+            datasets: [{
+                data: [
+                    {{ maintenance_stats.pending_requests }},
+                    {{ maintenance_stats.completed_requests }}
+                ],
+                backgroundColor: ['#FFC107', '#4CAF50'],
+                borderColor: ['#FFA000', '#388E3C'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Auto-refresh dashboard data every 5 minutes
+    setInterval(function() {
+        fetch('/api/dashboard/')
+            .then(response => response.json())
+            .then(data => {
+                // Update summary cards
+                document.querySelector('.summary-cards').innerHTML = `
+                    <div class="card">
+                        <h3>Total Property Value</h3>
+                        <p class="amount">$${parseFloat(data.total_property_value).toLocaleString()}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Monthly Income</h3>
+                        <p class="amount">$${parseFloat(data.monthly_income).toLocaleString()}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Monthly Expenses</h3>
+                        <p class="amount">$${parseFloat(data.monthly_expenses).toLocaleString()}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Net Monthly Income</h3>
+                        <p class="amount ${parseFloat(data.monthly_income) - parseFloat(data.monthly_expenses) < 0 ? 'negative' : ''}">
+                            $${(parseFloat(data.monthly_income) - parseFloat(data.monthly_expenses)).toLocaleString()}
+                        </p>
+                    </div>
+                `;
+            })
+            .catch(error => console.error('Error refreshing dashboard:', error));
+    }, 300000); // 5 minutes
+});
+</script>
+{% endblock %} 

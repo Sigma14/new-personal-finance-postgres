@@ -1,0 +1,59 @@
+services:
+  dashboard_v2:
+    container_name: finance_dashboard_v2
+    build: .
+    command: python manage.py runserver 0.0.0.0:8077 --insecure
+    ports:
+      - "8077:8077"
+    env_file:
+      - .env
+    environment:
+      - DEBUG=1
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DB_NAME=${SQL_DB_NAME}
+      - SQL_USER=${SQL_USER}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+      - SQL_HOST=postgres
+      - SQL_PORT=${SQL_PORT}
+    volumes:
+      - .:/finance 
+      - ./static:/finance/static
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: finance_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${SQL_DB_NAME}
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SQL_USER} -d ${SQL_DB_NAME}"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  pgadmin_data:
