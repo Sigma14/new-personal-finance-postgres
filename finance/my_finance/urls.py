@@ -355,4 +355,7 @@ urlpatterns = [
         name='change_default'
     ),
 
+    #AI_Feature_System
+    
+
 ]

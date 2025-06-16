@@ -117,11 +117,11 @@ stock_app_url = "http://vuexy.myds.me:8071"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('SQL_DB_NAME'),
-        'USER': config('SQL_USER'),
-        'PASSWORD': config('SQL_PASSWORD'),
-        'HOST': config('SQL_HOST'), 
-        'PORT': config('SQL_PORT', '5432'),
+        'NAME': 'system_db',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

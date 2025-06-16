@@ -1987,6 +1987,8 @@ from django.urls import reverse
 from django.utils.timezone import now
 import datetime
 import bleach
+from django.utils import timezone
+from django.conf import settings
 
 # No HTML is allowed
 ALLOWED_TAGS = []
@@ -3054,3 +3056,56 @@ class AppErrorLog(models.Model):
 
     def __str__(self):
         return "[{}] {} ({}): {}".format(self.count, self.exception_type, self.code, self.error_message[:50])
+    
+
+# ---------------------------------------------------------------------------
+# AI Subscription Models (Added for AI features functionality)
+# ---------------------------------------------------------------------------
+
+class AISubscriptionPlan(models.Model):
+    plan_name = models.CharField(max_length=100, unique=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    duration_days = models.IntegerField()
+    
+    def __str__(self):
+        return self.plan_name
+
+class AIFeatureLimits(models.Model):
+    plan = models.ForeignKey(AISubscriptionPlan, on_delete=models.CASCADE)
+    feature_name = models.CharField(max_length=100)
+    usage_limit = models.IntegerField()
+    
+    class Meta:
+        unique_together = ('plan', 'feature_name')
+    
+    def __str__(self):
+        return f"{self.plan.plan_name} - {self.feature_name}"
+
+class AIUserSubscription(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(AISubscriptionPlan, on_delete=models.SET_NULL, null=True)
+    registration_date = models.DateTimeField(default=timezone.now)
+    expiration_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.plan.plan_name if self.plan else 'No Plan'}"
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only on creation
+            if self.plan:
+                self.expiration_date = self.registration_date + timezone.timedelta(days=self.plan.duration_days)
+        super().save(*args, **kwargs)
+
+class AIUserFeatureUsage(models.Model):
+    user_subscription = models.ForeignKey(AIUserSubscription, on_delete=models.CASCADE)
+    feature_name = models.CharField(max_length=100)
+    usage_count = models.IntegerField(default=0)
+    period_start = models.DateTimeField()
+    period_end = models.DateTimeField()
+    
+    class Meta:
+        unique_together = ('user_subscription', 'feature_name', 'period_start')
+    
+    def __str__(self):
+        return f"{self.user_subscription.user.username} - {self.feature_name}"
