@@ -13,24 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.static import static
+
 from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 
-
 urlpatterns = [
-    path('i18n/', include('django.conf.urls.i18n')),
-    path('ai_feature/', include('ai_feature.urls')), 
+    path("i18n/", include("django.conf.urls.i18n")),
+    path("ai_feature/", include("ai_feature.urls")),
 ]
 urlpatterns += i18n_patterns(
-    path(_('admin/'), admin.site.urls),
-    path('', include('my_finance.urls')),
+    path(_("admin/"), admin.site.urls),
+    path("", include("my_finance.urls")),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = 'my_finance.views.error_404'
-handler500 = 'my_finance.views.error_500'
-handler403 = 'my_finance.views.error_403'
-handler400 = 'my_finance.views.error_400'
+handler404 = "my_finance.views.error_404"
+handler500 = "my_finance.views.error_500"
+handler403 = "my_finance.views.error_403"
+handler400 = "my_finance.views.error_400"

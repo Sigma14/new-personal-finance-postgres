@@ -1,15 +1,17 @@
 from django.urls import path
-from .views import *
-from . import views
-
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
 
+from . import views
+from .views import *
+
+
 def lockout_view(request):
-    return render(request, 'lockout.html')
+    return render(request, "lockout.html")
+
 
 urlpatterns = [
     # Home url:-
@@ -26,15 +28,21 @@ urlpatterns = [
     path("transactions/get", get_transactions, name="get-transactions"),
     # Category urls :-
     path("category_list/", CategoryList.as_view(), name="category_list"),
-    path("category_detail/<int:pk>", CategoryDetail.as_view(), name="category_detail"),
+    path("category_detail/<int:pk>",
+         CategoryDetail.as_view(), name="category_detail"),
     path("category_add/", CategoryAdd.as_view(), name="category_add"),
-    path("category_update/<int:pk>", CategoryUpdate.as_view(), name="category_update"),
-    path("category_delete/<int:pk>", CategoryDelete.as_view(), name="category_delete"),
+    path("category_update/<int:pk>",
+         CategoryUpdate.as_view(), name="category_update"),
+    path("category_delete/<int:pk>",
+         CategoryDelete.as_view(), name="category_delete"),
     path("category_group_add/", category_group_add, name="category_group_add"),
     # SubCategory urls :-
-    path("subcategory_update/<int:pk>", subcategory_update, name="subcategory_update"),
-    path("subcategory_add/<int:category_pk>", subcategory_add, name="subcategory_add"),
-    path("subcategory_delete/<int:pk>", subcategory_delete, name="subcategory_delete"),
+    path("subcategory_update/<int:pk>",
+         subcategory_update, name="subcategory_update"),
+    path("subcategory_add/<int:category_pk>",
+         subcategory_add, name="subcategory_add"),
+    path("subcategory_delete/<int:pk>",
+         subcategory_delete, name="subcategory_delete"),
     path("subcategory_list", subcategory_list, name="subcategory_list"),
     path("subcategory_budget", subcategory_budget, name="subcategory_budget"),
     path(
@@ -86,11 +94,14 @@ urlpatterns = [
         name="budgets_goals_walk_through",
     ),
     path("create_user_budget/", UserBudgetAdd.as_view(), name="create_user_budget"),
-    path("user_budget_update/<int:pk>", user_budget_update, name="update_user_budget"),
+    path("user_budget_update/<int:pk>",
+         user_budget_update, name="update_user_budget"),
     # Template Budget urls :-
-    path("template_budget_list/", template_budget_list, name="template_budget_list"),
+    path("template_budget_list/", template_budget_list,
+         name="template_budget_list"),
     # path('template_budget_detail/<int:pk>', template_budget_details, name='template_budget_detail'),
-    path("template_budget_add/", TemplateAdd.as_view(), name="template_budget_add"),
+    path("template_budget_add/", TemplateAdd.as_view(),
+         name="template_budget_add"),
     path(
         "template_budget_update/<int:pk>",
         TemplateUpdate.as_view(),
@@ -164,7 +175,8 @@ urlpatterns = [
     path("bill_update/<int:pk>", bill_update, name="bill_update"),
     path("bill_delete/<int:pk>", bill_delete, name="bill_delete"),
     path("bill_pay/<int:pk>", bill_pay, name="bill_pay"),
-    path("bill/automatic_amount", bill_automatic_amount, name="bill_automatic_amount"),
+    path("bill/automatic_amount", bill_automatic_amount,
+         name="bill_automatic_amount"),
     path("bill/due_list", unpaid_bills, name="bill_due_list"),
     # Tag urls :-
     path("tag_add/", tag_add, name="tag_add"),
@@ -191,7 +203,8 @@ urlpatterns = [
     path("fund_add/<str:name>", fund_add, name="fund_add"),
     path("fund_accounts/", fund_accounts, name="fund_accounts"),
     # Calculators
-    path("mortgagecalculator/", mortgagecalculator, name="mortgagecalculator_list"),
+    path("mortgagecalculator/", mortgagecalculator,
+         name="mortgagecalculator_list"),
     path(
         "future-net-worth-calculator/",
         future_net_worth_calculator,
@@ -222,7 +235,8 @@ urlpatterns = [
     # Property Urls:-
     path("property_add/", add_property, name="property_add"),
     path("property_list/", list_property, name="property_list"),
-    path("update/<int:pk>/<str:method_name>", update_property, name="property_update"),
+    path("update/<int:pk>/<str:method_name>",
+         update_property, name="property_update"),
     path("property_details/<int:pk>", property_details, name="property_details"),
     path("property_delete/<int:pk>", delete_property, name="property_delete"),
     path("lease_add/<int:pk>/<str:unit_name>", add_lease, name="add_lease"),
@@ -254,8 +268,10 @@ urlpatterns = [
     ),
     path("property/property_info/", property_info, name="property_info"),
     # Property Expenses
-    path("property/expense/add/", ExpenseAdd.as_view(), name="property_expense_add"),
-    path("property/expense/list/", ExpenseList.as_view(), name="property_expense_list"),
+    path("property/expense/add/", ExpenseAdd.as_view(),
+         name="property_expense_add"),
+    path("property/expense/list/", ExpenseList.as_view(),
+         name="property_expense_list"),
     path(
         "property/expense/update/<int:pk>",
         ExpenseUpdate.as_view(),
@@ -267,7 +283,8 @@ urlpatterns = [
         name="property_expense_delete",
     ),
     # Property Invoice
-    path("property/income/list/", property_income_list, name="property_income_list"),
+    path("property/income/list/", property_income_list,
+         name="property_income_list"),
     path(
         "property/invoice/list/<str:property_name>/<str:unit_name>",
         property_invoice_list,
@@ -283,7 +300,8 @@ urlpatterns = [
         property_invoice_update,
         name="property_invoice_update",
     ),
-    path("property/invoice/add", property_invoice_add, name="property_invoice_add"),
+    path("property/invoice/add", property_invoice_add,
+         name="property_invoice_add"),
     path(
         "property/invoice/delete/<int:pk>",
         property_invoice_delete,
@@ -300,27 +318,21 @@ urlpatterns = [
         name="delete_invoice_payment",
     ),
     # Sample Pages
-    path("property/sample-page", property_sample_page, name="property_sample_page"),
+    path("property/sample-page", property_sample_page,
+         name="property_sample_page"),
     path(
         "rental_property/sample-page",
         rental_property_sample_page,
         name="rental_property_sample_page",
     ),
-    
     # AXES
-    path('locked/', lockout_view, name='locked'),
-
+    path("locked/", lockout_view, name="locked"),
     # JWT authentication endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-
-
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("login", user_login, name="user_login"),
     path("logout", user_logout, name="user_logout"),
-
-
-    
     path("net_worth", net_worth, name="net_worth"),
     # path('mortgagecalculator_list/', MortgageCalculatorList.as_view(), name='mortgagecalculator_list'),
     # path('mortgagecalculator_detail/<int:pk>', MortgageCalculatorDetail.as_view(), name='mortgagecalculator_detail'),
@@ -330,7 +342,8 @@ urlpatterns = [
     # STOCK ANALYSIS
     path("stock-analysis", stock_analysis, name="stock_analysis"),
     path("stock-holdings", stock_holdings, name="stock_holdings"),
-    path("add_port_in_networth", add_port_in_networth, name="add_port_in_networth"),
+    path("add_port_in_networth", add_port_in_networth,
+         name="add_port_in_networth"),
     # DOWNLOADS FILE OPTIONS
     path("download/pdf", download_pdf, name="download_pdf"),
     path("download/csv", download_csv, name="download_csv"),
@@ -343,19 +356,21 @@ urlpatterns = [
     path("test-middleware/", test_middleware, name="test-middleware"),
     # Enpoint for terminal Logs
     path("fetch-logs/", fetch_error_logs, name="fetch-error-logs"),
-    path('download-log/', download_log_file, name='download_log'),
+    path("download-log/", download_log_file, name="download_log"),
     # Enpoint for error logs from db
     path("app-error-report/", ErrorLogsList.as_view(), name="app-error-report"),
-    path("app-error-report/details/<int:error_id>/", error_report_details, name="app-error-report-detail"),
-    path("app-error-report/action/", error_report_action, name="app-error-report-action"),
-    path('update-user-budget/<int:pk>/', update_user_budget, name='update_user_budget'),
-      path(
-        'budgets/<int:pk>/ajax/change-default/',
-        change_default,
-        name='change_default'
+    path(
+        "app-error-report/details/<int:error_id>/",
+        error_report_details,
+        name="app-error-report-detail",
     ),
-
-    #AI_Feature_System
-    
-
+    path(
+        "app-error-report/action/", error_report_action, name="app-error-report-action"
+    ),
+    path("update-user-budget/<int:pk>/",
+         update_user_budget, name="update_user_budget"),
+    path(
+        "budgets/<int:pk>/ajax/change-default/", change_default, name="change_default"
+    ),
+    # AI_Feature_System
 ]
