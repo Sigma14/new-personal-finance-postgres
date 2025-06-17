@@ -53,8 +53,8 @@ def user_page(request):
         
         if not subscription:
             try:
-                basic_plan = SubscriptionPlan.objects.get(plan_name='basic')
-                subscription = UserSubscription.objects.create(
+                basic_plan = AISubscriptionPlan.objects.get(plan_name='basic')
+                subscription = AIUserSubscription.objects.create(
                     user=request.user,
                     plan=basic_plan,
                     registration_date=timezone.now(),
@@ -62,12 +62,12 @@ def user_page(request):
                     is_active=True
                 )
                 messages.info(request, "You've been automatically subscribed to our Basic plan")
-            except SubscriptionPlan.DoesNotExist:
+            except AISubscriptionPlan.DoesNotExist:
                 messages.error(request, "No subscription plans available. Please contact admin.")
                 return redirect('index')
         
-        usage_records = UserFeatureUsage.objects.filter(user_subscription=subscription)
-        feature_limits = FeatureLimits.objects.filter(plan=subscription.plan)
+        usage_records = AIUserFeatureUsage.objects.filter(user_subscription=subscription)
+        feature_limits = AIFeatureLimits.objects.filter(plan=subscription.plan)
         limits = {fl.feature_name: fl.usage_limit for fl in feature_limits}
         
         days_remaining = max((subscription.expiration_date - timezone.now()).days, 0) if subscription.is_active else 0
@@ -77,7 +77,7 @@ def user_page(request):
             try:
                 usage = usage_records.get(feature_name=feature)
                 remaining = max(limit - usage.usage_count, 0)
-            except UserFeatureUsage.DoesNotExist:
+            except AIUserFeatureUsage.DoesNotExist:
                 remaining = limit
             
             features.append({
@@ -87,7 +87,7 @@ def user_page(request):
                 'percentage': (remaining / limit) * 100 if limit > 0 else 0
             })
         
-        available_plans = SubscriptionPlan.objects.exclude(id=subscription.plan.id) if subscription.plan else SubscriptionPlan.objects.all()
+        available_plans = AISubscriptionPlan.objects.exclude(id=subscription.plan.id) if subscription.plan else SubscriptionPlan.objects.all()
         
         return render(request, 'user.html', {
             'user': request.user,
@@ -106,8 +106,8 @@ def user_page(request):
 def choose_subscription(request, plan_id):
     if request.method == 'POST':
         try:
-            plan = SubscriptionPlan.objects.get(id=plan_id)
-            subscription, created = UserSubscription.objects.update_or_create(
+            plan = AISubscriptionPlan.objects.get(id=plan_id)
+            subscription, created = AIUserSubscription.objects.update_or_create(
                 user=request.user,
                 defaults={
                     'plan': plan,
@@ -117,18 +117,18 @@ def choose_subscription(request, plan_id):
                 }
             )
             messages.success(request, f"You've successfully subscribed to {plan.plan_name} plan")
-        except SubscriptionPlan.DoesNotExist:
+        except AISubscriptionPlan.DoesNotExist:
             messages.error(request, "Invalid subscription plan selected")
     
     return redirect('user_page')
 
 @user_passes_test(lambda u: u.is_superuser)
 def admin_page(request):
-    plans = SubscriptionPlan.objects.all()
+    plans = AISubscriptionPlan.objects.all()
     plan_stats = []
     for plan in plans:
-        count = UserSubscription.objects.filter(plan=plan).count()
-        active_count = UserSubscription.objects.filter(plan=plan, is_active=True).count()
+        count = AIUserSubscription.objects.filter(plan=plan).count()
+        active_count = AIUserSubscription.objects.filter(plan=plan, is_active=True).count()
         plan_stats.append({
             'name': plan.plan_name,
             'count': count,
@@ -137,7 +137,7 @@ def admin_page(request):
             'duration': plan.duration_days
         })
     
-    feature_limits = FeatureLimits.objects.select_related('plan').all()
+    feature_limits = AIFeatureLimits.objects.select_related('plan').all()
     
     return render(request, 'admin.html', {
         'plan_stats': plan_stats,
@@ -153,8 +153,8 @@ def update_feature_limit(request):
         new_limit = request.POST.get('new_limit')
         
         try:
-            plan = SubscriptionPlan.objects.get(id=plan_id)
-            limit, created = FeatureLimits.objects.get_or_create(
+            plan = AISubscriptionPlan.objects.get(id=plan_id)
+            limit, created = AIFeatureLimits.objects.get_or_create(
                 plan=plan,
                 feature_name=feature_name,
                 defaults={'usage_limit': new_limit}
@@ -184,7 +184,7 @@ def signup(request):
     if request.user.is_authenticated:
         return redirect('user_page')
     
-    plans = SubscriptionPlan.objects.all()
+    plans = AISubscriptionPlan.objects.all()
     return render(request, 'signup.html', {'plans': plans})
 
 def register_user(request):
@@ -202,12 +202,12 @@ def register_user(request):
             user = User.objects.create_user(username, email, password)
             
             try:
-                plan = SubscriptionPlan.objects.get(id=plan_id)
-            except SubscriptionPlan.DoesNotExist:
+                plan = AISubscriptionPlan.objects.get(id=plan_id)
+            except AISubscriptionPlan.DoesNotExist:
                 messages.error(request, 'Invalid subscription plan selected')
                 return redirect('signup')
             
-            UserSubscription.objects.create(
+            AIUserSubscription.objects.create(
                 user=user,
                 plan=plan,
                 registration_date=timezone.now(),
