@@ -63,7 +63,7 @@ def user_page(request):
 
         if not subscription:
             try:
-                basic_plan = SubscriptionPlan.objects.get(plan_name='basic')
+                basic_plan = SubscriptionPlan.objects.get(plan_name="basic")
                 subscription = UserSubscription.objects.create(
                     user=request.user,
                     plan=basic_plan,
@@ -72,12 +72,17 @@ def user_page(request):
                     + timedelta(days=basic_plan.duration_days),
                     is_active=True,
                 )
-                messages.info(request, "You've been automatically subscribed to our Basic plan")
+                messages.info(
+                    request, "You've been automatically subscribed to our Basic plan"
+                )
             except SubscriptionPlan.DoesNotExist:
-                messages.error(request, "No subscription plans available. Please contact admin.")
-                return redirect('index')
-        
-        usage_records = UserFeatureUsage.objects.filter(user_subscription=subscription)
+                messages.error(
+                    request, "No subscription plans available. Please contact admin."
+                )
+                return redirect("index")
+
+        usage_records = UserFeatureUsage.objects.filter(
+            user_subscription=subscription)
         feature_limits = FeatureLimits.objects.filter(plan=subscription.plan)
         limits = {fl.feature_name: fl.usage_limit for fl in feature_limits}
 
@@ -94,25 +99,35 @@ def user_page(request):
                 remaining = max(limit - usage.usage_count, 0)
             except AIUserFeatureUsage.DoesNotExist:
                 remaining = limit
-            
-            features.append({
-                'name': feature,
-                'limit': limit,
-                'remaining': remaining,
-                'percentage': (remaining / limit) * 100 if limit > 0 else 0
-            })
-        
-        available_plans = SubscriptionPlan.objects.exclude(id=subscription.plan.id) if subscription.plan else SubscriptionPlan.objects.all()
-        
-        return render(request, 'user.html', {
-            'user': request.user,
-            'subscription': subscription,
-            'features': features,
-            'plans': available_plans,
-            'days_remaining': days_remaining,
-            'is_subscription_active': subscription.is_active,
-        })
-        
+
+            features.append(
+                {
+                    "name": feature,
+                    "limit": limit,
+                    "remaining": remaining,
+                    "percentage": (remaining / limit) * 100 if limit > 0 else 0,
+                }
+            )
+
+        available_plans = (
+            SubscriptionPlan.objects.exclude(id=subscription.plan.id)
+            if subscription.plan
+            else SubscriptionPlan.objects.all()
+        )
+
+        return render(
+            request,
+            "user.html",
+            {
+                "user": request.user,
+                "subscription": subscription,
+                "features": features,
+                "plans": available_plans,
+                "days_remaining": days_remaining,
+                "is_subscription_active": subscription.is_active,
+            },
+        )
+
     except Exception as e:
         messages.error(request, f"An error occurred: {str(e)}")
         return redirect("index")
@@ -133,7 +148,9 @@ def choose_subscription(request, plan_id):
                     "is_active": True,
                 },
             )
-            messages.success(request, f"You've successfully subscribed to {plan.plan_name} plan")
+            messages.success(
+                request, f"You've successfully subscribed to {plan.plan_name} plan"
+            )
         except SubscriptionPlan.DoesNotExist:
             messages.error(request, "Invalid subscription plan selected")
 
@@ -146,22 +163,31 @@ def admin_page(request):
     plan_stats = []
     for plan in plans:
         count = UserSubscription.objects.filter(plan=plan).count()
-        active_count = UserSubscription.objects.filter(plan=plan, is_active=True).count()
-        plan_stats.append({
-            'name': plan.plan_name,
-            'count': count,
-            'active_count': active_count,
-            'price': plan.price,
-            'duration': plan.duration_days
-        })
-    
-    feature_limits = FeatureLimits.objects.select_related('plan').all()
-    
-    return render(request, 'admin.html', {
-        'plan_stats': plan_stats,
-        'feature_limits': feature_limits,
-        'all_plans': plans
-    })
+        active_count = UserSubscription.objects.filter(
+            plan=plan, is_active=True
+        ).count()
+        plan_stats.append(
+            {
+                "name": plan.plan_name,
+                "count": count,
+                "active_count": active_count,
+                "price": plan.price,
+                "duration": plan.duration_days,
+            }
+        )
+
+    feature_limits = FeatureLimits.objects.select_related("plan").all()
+
+    return render(
+        request,
+        "admin.html",
+        {
+            "plan_stats": plan_stats,
+            "feature_limits": feature_limits,
+            "all_plans": plans,
+        },
+    )
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def update_feature_limit(request):
@@ -207,10 +233,11 @@ def use_feature(request, feature_name):
 
 def signup(request):
     if request.user.is_authenticated:
-        return redirect('user_page')
-    
+        return redirect("user_page")
+
     plans = SubscriptionPlan.objects.all()
-    return render(request, 'signup.html', {'plans': plans})
+    return render(request, "signup.html", {"plans": plans})
+
 
 def register_user(request):
     if request.method == "POST":
@@ -229,9 +256,9 @@ def register_user(request):
             try:
                 plan = SubscriptionPlan.objects.get(id=plan_id)
             except SubscriptionPlan.DoesNotExist:
-                messages.error(request, 'Invalid subscription plan selected')
-                return redirect('signup')
-            
+                messages.error(request, "Invalid subscription plan selected")
+                return redirect("signup")
+
             UserSubscription.objects.create(
                 user=user,
                 plan=plan,
