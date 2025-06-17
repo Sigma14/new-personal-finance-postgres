@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .feature-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+        .progress-container { height: 20px; background: #f1f1f1; margin-top: 10px; border-radius: 10px; }
+        .progress-bar { height: 100%; background: #4CAF50; border-radius: 10px; width: 0%; transition: width 0.3s; }
+        .logout-btn { background: #f44336; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; }
+        .logout-btn:hover { background: #d32f2f; }
+        .plans { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .plan { border: 1px solid #ddd; padding: 15px; flex: 1; min-width: 200px; border-radius: 5px; }
+        .plan h4 { margin-top: 0; }
+        .upgrade-btn { background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; width: 100%; }
+        .upgrade-btn:hover { background: #0b7dda; }
+        .use-feature-btn { background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .use-feature-btn:hover { background: #45a049; }
+        .use-feature-btn:disabled { background: #cccccc; cursor: not-allowed; }
+        .subscription-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .expired { color: #f44336; font-weight: bold; }
+        .active { color: #4CAF50; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome, {{ user.username }}</h1>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+    
+    <div class="subscription-info">
+        <h2>Your Subscription: {{ subscription.plan.plan_name|title }}</h2>
+        <p>Status: 
+            <span class="{% if is_subscription_active %}active{% else %}expired{% endif %}">
+                {% if is_subscription_active %}Active{% else %}Expired{% endif %}
+            </span>
+        </p>
+        <p>Price: ${{ subscription.plan.price }}</p>
+        <p>Days Remaining: {{ days_remaining }}</p>
+        <p>Renewal Date: {{ subscription.expiration_date|date:"F d, Y" }}</p>
+    </div>
+    
+    <h3>AI Features</h3>
+    {% for feature in features %}
+    <div class="feature-card">
+        <h4>{{ feature.name|title }}</h4>
+        <p>Remaining: {{ feature.remaining }} of {{ feature.limit }}</p>
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ feature.percentage }}%"></div>
+        </div>
+        <button 
+            onclick="useFeature('{{ feature.name }}')" 
+            class="use-feature-btn"
+            {% if feature.remaining <= 0 or not is_subscription_active %}disabled{% endif %}
+        >
+            Use Feature
+        </button>
+    </div>
+    {% endfor %}
+    
+    <h3>Upgrade Plan</h3>
+    <div class="plans">
+        {% for plan in plans %}
+        <div class="plan">
+            <h4>{{ plan.plan_name|title }} Plan</h4>
+            <p>Price: ${{ plan.price }}</p>
+            <p>Duration: {{ plan.duration_days }} days</p>
+            <a href="{% url 'choose_subscription' plan.id %}" class="upgrade-btn">Upgrade to {{ plan.plan_name|title }}</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        function useFeature(feature) {
+            fetch(`/use-feature/${feature}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        if (data.error.includes("expired") || data.error.includes("No active subscription")) {
+                            // Redirect to plan selection if subscription issue
+                            window.location.href = "{% url 'user_page' %}";
+                        }
+                    } else {
+                        // Refresh to show updated counts
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while using the feature');
+                });
+        }
+    </script>
+</body>
+</html>

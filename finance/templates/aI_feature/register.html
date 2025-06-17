@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Register</h2>
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <label>Username:</label>
+        <input type="text" name="username" required>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+    </div>
+    <div>
+        <label>Email (optional):</label>
+        <input type="email" name="email">
+    </div>
+    
+    <div>
+        <label>Subscription Plan:</label>
+        <select name="plan_id">
+            {% for plan in plans %}
+            <option value="{{ plan.id }}" 
+                {% if plan.plan_name == 'basic' %}selected{% endif %}>
+                {{ plan.plan_name|title }} (${{ plan.price }}/month)
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <button type="submit">Sign Up</button>
+</form>
+<p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+{% endblock %}
