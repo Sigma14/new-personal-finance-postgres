@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign Up | AI Features Platform</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #555;
+            --error-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: var(--text-color);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            padding: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        button:hover {
+            background: var(--primary-hover);
+        }
+        
+        .plan-option {
+            margin: 15px 0;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .plan-option.selected {
+            border-color: var(--primary-color);
+            background: #f0f8ff;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Your Account</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="error-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email (optional):</label>
+            <input type="email" id="email" name="email">
+        </div>
+        
+        <div class="form-group">
+            <h3>Select Subscription Plan:</h3>
+            {% for plan in plans %}
+            <div class="plan-option {% if plan.plan_name == 'basic' %}selected{% endif %}">
+                <input type="radio" name="plan_id" id="plan-{{ plan.id }}" 
+                       value="{{ plan.id }}" {% if plan.plan_name == 'basic' %}checked{% endif %} required>
+                <label for="plan-{{ plan.id }}">
+                    <strong>{{ plan.plan_name|title }} Plan</strong> - ${{ plan.price }}/month
+                </label>
+                <ul>
+                    <li>AI Portfolio Analysis: {{ plan.ai_portfolio_analysis }} uses</li>
+                    <li>AI Stock Analysis: {{ plan.ai_stock_analysis }} uses</li>
+                    <li>AI Personal Finance: {{ plan.ai_personal_finance_budget }} uses</li>
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button type="submit">Create Account</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px;">
+        Already have an account? <a href="{% url 'index' %}">Login here</a>
+    </p>
+
+    <script>
+        // Plan selection functionality
+        document.querySelectorAll('.plan-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.plan-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+    </script>
+</body>
+</html>

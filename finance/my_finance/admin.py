@@ -49,3 +49,22 @@ class ErrorLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+@admin.register(AISubscriptionPlan)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('plan_name', 'price', 'duration_days')
+
+@admin.register(AIFeatureLimits)
+class FeatureLimitsAdmin(admin.ModelAdmin):
+    list_display = ('plan', 'feature_name', 'usage_limit')
+    list_filter = ('plan',)
+
+@admin.register(AIUserSubscription)
+class UserSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'registration_date', 'expiration_date', 'is_active')
+    list_filter = ('plan', 'is_active')
+
+@admin.register(AIUserFeatureUsage)
+class UserFeatureUsageAdmin(admin.ModelAdmin):
+    list_display = ('user_subscription', 'feature_name', 'usage_count', 'period_start', 'period_end')
+    list_filter = ('feature_name',)

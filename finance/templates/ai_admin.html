@@ -1,0 +1,88 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Admin Dashboard</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .logout-btn { background: #f44336; padding: 10px 15px; color: white; border: none; cursor: pointer; }
+            .logout-btn:hover { background: #d32f2f; }
+            .form-inline { display: inline; }
+            .edit-form { display: none; margin-top: 10px; }
+            .edit-btn { background: #2196F3; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+            .edit-btn:hover { background: #0b7dda; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <form method="post" action="{% url 'ai-logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+        
+        <h2>Subscription Statistics</h2>
+        <table>
+            <tr>
+                <th>Plan</th>
+                <th>Price</th>
+                <th>Duration (Days)</th>
+                <th>Total Subscribers</th>
+                <th>Active Subscribers</th>
+            </tr>
+            {% for stat in plan_stats %}
+            <tr>
+                <td>{{ stat.name|title }}</td>
+                <td>${{ stat.price }}</td>
+                <td>{{ stat.duration }}</td>
+                <td>{{ stat.count }}</td>
+                <td>{{ stat.active_count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <h2>Feature Limits</h2>
+        <table>
+            <tr>
+                <th>Plan</th>
+                <th>Feature</th>
+                <th>Usage Limit</th>
+                <th>Action</th>
+            </tr>
+            {% for limit in feature_limits %}
+            <tr>
+                <td>{{ limit.plan.plan_name|title }}</td>
+                <td>{{ limit.feature_name|title }}</td>
+                <td class="limit-value">{{ limit.usage_limit }}</td>
+                <td>
+                    <button onclick="showEditForm('{{ limit.id }}')" class="edit-btn">Edit</button>
+                    <div id="edit-form-{{ limit.id }}" class="edit-form">
+                        <form method="post" action="{% url 'ai-update_feature_limit' %}" class="form-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="plan_id" value="{{ limit.plan.id }}">
+                            <input type="hidden" name="feature_name" value="{{ limit.feature_name }}">
+                            <input type="number" name="new_limit" value="{{ limit.usage_limit }}" min="1" required>
+                            <button type="submit" class="edit-btn">Save</button>
+                            <button type="button" onclick="hideEditForm('{{ limit.id }}')" class="logout-btn" style="padding: 5px 10px;">Cancel</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <script>
+            function showEditForm(id) {
+                document.getElementById(`edit-form-${id}`).style.display = 'block';
+            }
+            
+            function hideEditForm(id) {
+                document.getElementById(`edit-form-${id}`).style.display = 'none';
+            }
+        </script>
+    </body>
+    </html>
