@@ -331,3 +331,35 @@ AXES_RESET_ON_SUCCESS = config('AXES_RESET_ON_SUCCESS', default=True, cast=bool)
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# AI_Subscription plans configuration
+SUBSCRIPTION_PLANS = {
+    "basic": {
+        "ai_portfolio_analysis": 30,
+        "ai_stock_analysis": 20,
+        "ai_personal_finance_budget": 25,
+        "ai_transaction_analysis": 15,
+        "ai_real_estate_analysis": 10,
+        "price": 9.99,
+        "duration_days": 30
+    },
+    "standard": {
+        "ai_portfolio_analysis": 60,
+        "ai_stock_analysis": 40,
+        "ai_personal_finance_budget": 50,
+        "ai_transaction_analysis": 30,
+        "ai_real_estate_analysis": 20,
+        "price": 19.99,
+        "duration_days": 30
+    },
+    "premium": {
+        "ai_portfolio_analysis": 100,
+        "ai_stock_analysis": 80,
+        "ai_personal_finance_budget": 100,
+        "ai_transaction_analysis": 60,
+        "ai_real_estate_analysis": 40,
+        "price": 29.99,
+        "duration_days": 30
+    },
+}
