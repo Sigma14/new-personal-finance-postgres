@@ -39,32 +39,68 @@ admin.site.register(MyNotes)
 admin.site.register(AIChat)
 admin.site.register(Feedback)
 
+
 # Error Log Admin
 @admin.register(AppErrorLog)
 class ErrorLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'exception_type', 'code', "status", 'error_message', 'request_path', 'count')
-    search_fields = ('exception_type', 'error_message', 'request_path', 'code', 'users__username')
-    list_filter = ('exception_type', 'code', 'timestamp', 'request_path', 'status')
-    readonly_fields = ('timestamp', 'exception_type', 'error_message', 'traceback', 'request_path', 'code', 'count', 'users')
+    list_display = (
+        "timestamp",
+        "exception_type",
+        "code",
+        "status",
+        "error_message",
+        "request_path",
+        "count",
+    )
+    search_fields = (
+        "exception_type",
+        "error_message",
+        "request_path",
+        "code",
+        "users__username",
+    )
+    list_filter = ("exception_type", "code",
+                   "timestamp", "request_path", "status")
+    readonly_fields = (
+        "timestamp",
+        "exception_type",
+        "error_message",
+        "traceback",
+        "request_path",
+        "code",
+        "count",
+        "users",
+    )
 
     def has_add_permission(self, request):
         return False
 
+
 @admin.register(AISubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):
-    list_display = ('plan_name', 'price', 'duration_days')
+    list_display = ("plan_name", "price", "duration_days")
+
 
 @admin.register(AIFeatureLimits)
 class FeatureLimitsAdmin(admin.ModelAdmin):
-    list_display = ('plan', 'feature_name', 'usage_limit')
-    list_filter = ('plan',)
+    list_display = ("plan", "feature_name", "usage_limit")
+    list_filter = ("plan",)
+
 
 @admin.register(AIUserSubscription)
 class UserSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'plan', 'registration_date', 'expiration_date', 'is_active')
-    list_filter = ('plan', 'is_active')
+    list_display = ("user", "plan", "registration_date",
+                    "expiration_date", "is_active")
+    list_filter = ("plan", "is_active")
+
 
 @admin.register(AIUserFeatureUsage)
 class UserFeatureUsageAdmin(admin.ModelAdmin):
-    list_display = ('user_subscription', 'feature_name', 'usage_count', 'period_start', 'period_end')
-    list_filter = ('feature_name',)
+    list_display = (
+        "user_subscription",
+        "feature_name",
+        "usage_count",
+        "period_start",
+        "period_end",
+    )
+    list_filter = ("feature_name",)

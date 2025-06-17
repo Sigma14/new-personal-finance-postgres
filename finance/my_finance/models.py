@@ -189,7 +189,6 @@
 # #     created_at = models.DateTimeField(auto_now_add=True)
 # #     updated_at = models.DateTimeField(auto_now=True)
 
-    
 
 # #     def __str__(self):
 # #         return str(
@@ -226,7 +225,7 @@
 
 #     def save(self, *args, **kwargs):
 #         # Sanitize text fields before saving
-#         text_fields = ["unit_name", "rental_term", "deposit_check", "rental_summary", 
+#         text_fields = ["unit_name", "rental_term", "deposit_check", "rental_summary",
 #                        "first_name", "last_name", "email", "mobile_number"]
 
 #         for field in text_fields:
@@ -238,10 +237,10 @@
 
 #     def __str__(self):
 #         return str(
-#             (self.first_name or "") 
-#             + " " 
-#             + (self.property_address.property_name if self.property_address else "") 
-#             + " " 
+#             (self.first_name or "")
+#             + " "
+#             + (self.property_address.property_name if self.property_address else "")
+#             + " "
 #             + (self.unit_name or "")
 #         )
 
@@ -391,7 +390,6 @@
 #         return reverse("property_maintenance_list")
 
 
-
 # # class PropertyExpense(models.Model):
 # #     user = models.ForeignKey(
 # #         User, on_delete=models.CASCADE, related_name="property_expense_user"
@@ -521,7 +519,6 @@
 #         return reverse("category_list")
 
 
-
 # # class SuggestiveCategory(models.Model):
 # #     name = models.CharField(max_length=50)
 # #     created_at = models.DateTimeField(auto_now_add=True)
@@ -543,7 +540,7 @@
 
 #     def __str__(self):
 #         return str(self.name)
-    
+
 
 # # class TemplateBudget(models.Model):
 # #     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -638,7 +635,7 @@
 
 #     def __str__(self):
 #         return f"PlaidItem {self.item_id}"
-    
+
 
 # # class Account(models.Model):
 # #     user = models.ForeignKey(
@@ -782,7 +779,7 @@
 #         # Sanitize input fields before saving
 #         self.label = bleach.clean(self.label) if self.label else None
 #         self.frequency = bleach.clean(self.frequency) if self.frequency else None
-        
+
 #         super().save(*args, **kwargs)
 
 #     def __str__(self):
@@ -866,7 +863,7 @@
 #         self.label = bleach.clean(self.label) if self.label else None
 #         self.status = bleach.clean(self.status) if self.status else None
 #         self.frequency = bleach.clean(self.frequency) if self.frequency else None
-        
+
 #         super().save(*args, **kwargs)
 
 #     def __str__(self):
@@ -1870,7 +1867,6 @@
 #         return str(self.title + " " + self.user.username)
 
 
-
 # # Chat Model for chatting with chatgpt
 # class AIChat(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aichat_user")
@@ -1973,26 +1969,22 @@
 #         verbose_name = "Error Log"
 #         verbose_name_plural = "Error Logs"
 #         ordering = ["-timestamp"]
-    
+
 #     def __str__(self):
 #         return f"[{self.count}] {self.exception_type} ({self.code}): {self.error_message[:50]}"
 
 
+import datetime
 
-from django.db import models
+import bleach
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
-from django.utils.timezone import now
-import datetime
-import bleach
 from django.utils import timezone
-from django.conf import settings
-
-# No HTML is allowed
-ALLOWED_TAGS = []
-ALLOWED_ATTRIBUTES = {}
+from django.utils.timezone import now
 
 from .constants import (
     BUDGET_ACCOUNT_TYPES,
@@ -2005,6 +1997,11 @@ from .constants import (
     PROPERTY_TYPE,
 )
 
+# No HTML is allowed
+ALLOWED_TAGS = []
+ALLOWED_ATTRIBUTES = {}
+
+
 # ---------------------------------------------------------------------------
 # UserBudgets
 # ---------------------------------------------------------------------------
@@ -2014,13 +2011,13 @@ class UserBudgets(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     description = models.TextField(blank=True, null=True)
-    is_default  = models.BooleanField(default=False)
-
-
+    is_default = models.BooleanField(default=False)
 
     def clean(self):
         if self.name:
-            self.name = bleach.clean(self.name, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES).strip()
+            self.name = bleach.clean(
+                self.name, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES
+            ).strip()
         super().clean()
 
     def save(self, *args, **kwargs):
@@ -2030,26 +2027,32 @@ class UserBudgets(models.Model):
     def __str__(self):
         return self.name or ""
 
+
 @receiver(post_save, sender=User)
 def add_user_budget(sender, instance, created, **kwargs):
     if created:
         UserBudgets.objects.create(
             user=instance,
             name="Default Budget",
-            is_default = True,         # ← mark this one as the default
-
-            # description will be NULL by default; you can supply a default string 
+            is_default=True,  # ← mark this one as the default
+            # description will be NULL by default; you can supply a default string
             description=None,
         )
+
 
 # ---------------------------------------------------------------------------
 # Property
 # ---------------------------------------------------------------------------
 class Property(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_user"
+    )
     property_name = models.CharField(max_length=255, blank=True, null=True)
-    property_image = models.ImageField(upload_to="property_pics", blank=True, null=True)
-    property_type = models.CharField(max_length=10, choices=PROPERTY_TYPE, blank=True, null=True)
+    property_image = models.ImageField(
+        upload_to="property_pics", blank=True, null=True)
+    property_type = models.CharField(
+        max_length=10, choices=PROPERTY_TYPE, blank=True, null=True
+    )
     address_line1 = models.CharField(max_length=255, blank=True, null=True)
     address_line2 = models.CharField(max_length=255, blank=True, null=True)
     post_code = models.CharField(max_length=255, blank=True, null=True)
@@ -2057,17 +2060,30 @@ class Property(models.Model):
     state = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     unit_details = models.CharField(max_length=500, blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    value = models.CharField(max_length=255, blank=True, null=True)  # Keeping same datatype as before
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    value = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # Keeping same datatype as before
     include_net_worth = models.BooleanField(default=False)
     units_no = models.CharField(max_length=255, blank=True, null=True)
-    total_monthly_rent = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    total_monthly_rent = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     total_tenants = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        for field in ['unit_details', 'address_line1', 'address_line2', 'city', 'state', 'country']:
+        for field in [
+            "unit_details",
+            "address_line1",
+            "address_line2",
+            "city",
+            "state",
+            "country",
+        ]:
             value = getattr(self, field, None)
             if value:
                 setattr(self, field, bleach.clean(value))
@@ -2080,21 +2096,32 @@ class Property(models.Model):
     def __str__(self):
         return self.property_name or ""
 
+
 # ---------------------------------------------------------------------------
 # PropertyRentalInfo
 # ---------------------------------------------------------------------------
 class PropertyRentalInfo(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_rental_user")
-    property_address = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="property_address")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_rental_user"
+    )
+    property_address = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name="property_address"
+    )
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     rental_term = models.CharField(max_length=255, blank=True, null=True)
     rental_start_date = models.DateField(blank=True, null=True)
     rental_end_date = models.DateField(blank=True, null=True)
-    deposit_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    deposit_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     deposit_due_date = models.DateField(blank=True, null=True)
     deposit_check = models.CharField(max_length=255, blank=True, null=True)
-    rent_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    rent_due_every_month = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    rent_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    rent_due_every_month = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     rent_due_date = models.DateField(blank=True, null=True)
     rental_summary = models.CharField(max_length=500, blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2105,8 +2132,16 @@ class PropertyRentalInfo(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        for field in ["unit_name", "rental_term", "deposit_check", "rental_summary",
-                      "first_name", "last_name", "email", "mobile_number"]:
+        for field in [
+            "unit_name",
+            "rental_term",
+            "deposit_check",
+            "rental_summary",
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_number",
+        ]:
             value = getattr(self, field, None)
             if value:
                 setattr(self, field, bleach.clean(value))
@@ -2116,24 +2151,33 @@ class PropertyRentalInfo(models.Model):
         parts = [
             self.first_name or "",
             self.property_address.property_name if self.property_address else "",
-            self.unit_name or ""
+            self.unit_name or "",
         ]
         return " ".join(parts).strip()
+
 
 # ---------------------------------------------------------------------------
 # PropertyInvoice
 # ---------------------------------------------------------------------------
 class PropertyInvoice(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_invoice_user")
-    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="property_details")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_invoice_user"
+    )
+    property_details = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name="property_details"
+    )
     tenant_name = models.CharField(max_length=255, blank=True, null=True)
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     item_type = models.CharField(max_length=255, blank=True, null=True)
     item_description = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.CharField(max_length=255, blank=True, null=True)
-    item_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    item_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     already_paid = models.CharField(max_length=255, blank=True, null=True)
-    balance_due = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    balance_due = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     invoice_due_date = models.DateField(blank=True, null=True)
     invoice_paid_date = models.DateField(blank=True, null=True)
     invoice_status = models.CharField(max_length=255, blank=True, null=True)
@@ -2142,8 +2186,16 @@ class PropertyInvoice(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        for field in ["tenant_name", "unit_name", "item_type", "item_description",
-                      "quantity", "already_paid", "invoice_status", "record_payment"]:
+        for field in [
+            "tenant_name",
+            "unit_name",
+            "item_type",
+            "item_description",
+            "quantity",
+            "already_paid",
+            "invoice_status",
+            "record_payment",
+        ]:
             value = getattr(self, field, None)
             if value:
                 setattr(self, field, bleach.clean(str(value)))
@@ -2154,21 +2206,30 @@ class PropertyInvoice(models.Model):
             self.tenant_name or "",
             self.property_details.property_name if self.property_details else "",
             self.unit_name or "",
-            self.id
+            self.id,
         )
+
 
 # ---------------------------------------------------------------------------
 # PropertyMaintenance
 # ---------------------------------------------------------------------------
 class PropertyMaintenance(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_maintenance_user")
-    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="property_maintenance_details")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_maintenance_user"
+    )
+    property_details = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name="property_maintenance_details"
+    )
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     tenant_name = models.CharField(max_length=255, blank=True, null=True)
-    category = models.CharField(max_length=10, choices=MAINTENANCE_CATEGORY, blank=True, null=True)
+    category = models.CharField(
+        max_length=10, choices=MAINTENANCE_CATEGORY, blank=True, null=True
+    )
     name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=10, choices=MAINTENANCE_STATUS, blank=True, null=True)
+    status = models.CharField(
+        max_length=10, choices=MAINTENANCE_STATUS, blank=True, null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -2183,25 +2244,31 @@ class PropertyMaintenance(models.Model):
         parts = [
             self.name or "",
             self.property_details.property_name if self.property_details else "",
-            self.unit_name or ""
+            self.unit_name or "",
         ]
         return " ".join(parts).strip()
 
     def get_absolute_url(self):
         return reverse("property_maintenance_list")
 
+
 # ---------------------------------------------------------------------------
 # PropertyExpense
 # ---------------------------------------------------------------------------
 class PropertyExpense(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_expense_user")
-    property_details = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="property_info")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_expense_user"
+    )
+    property_details = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name="property_info"
+    )
     payee_name = models.CharField(max_length=255, blank=True, null=True)
     expense_date = models.DateField(blank=True, null=True)
     unit_name = models.CharField(max_length=255, blank=True, null=True)
     category = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -2217,11 +2284,12 @@ class PropertyExpense(models.Model):
             self.payee_name or "",
             self.property_details.property_name if self.property_details else "",
             self.unit_name or "",
-            self.id
+            self.id,
         )
 
     def get_absolute_url(self):
         return reverse("property_expense_list")
+
 
 # ---------------------------------------------------------------------------
 # Category
@@ -2243,6 +2311,7 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse("category_list")
 
+
 # ---------------------------------------------------------------------------
 # SubCategory
 # ---------------------------------------------------------------------------
@@ -2263,6 +2332,7 @@ class SubCategory(models.Model):
     def get_absolute_url(self):
         return reverse("category_list")
 
+
 # ---------------------------------------------------------------------------
 # SuggestiveCategory
 # ---------------------------------------------------------------------------
@@ -2279,6 +2349,7 @@ class SuggestiveCategory(models.Model):
     def __str__(self):
         return self.name
 
+
 # ---------------------------------------------------------------------------
 # TemplateBudget
 # ---------------------------------------------------------------------------
@@ -2287,15 +2358,28 @@ class TemplateBudget(models.Model):
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    initial_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    budget_spent = models.DecimalField(max_digits=15, decimal_places=2, default=0, blank=True, null=True)
-    budget_left = models.DecimalField(max_digits=15, decimal_places=2, default=0, blank=True, null=True)
+    category = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    initial_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
+    budget_spent = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0, blank=True, null=True
+    )
+    budget_left = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0, blank=True, null=True
+    )
     auto_budget = models.BooleanField(default=True)
     auto_pay = models.BooleanField(default=True)
-    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    budget_period = models.CharField(
+        max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
+    )
     budget_status = models.BooleanField(default=False)
     budget_start_date = models.DateField(blank=True, null=True)
     created_at = models.DateField(blank=True, null=True)
@@ -2316,6 +2400,7 @@ class TemplateBudget(models.Model):
     def get_absolute_url(self):
         return reverse("template_budget_list")
 
+
 # ---------------------------------------------------------------------------
 # PlaidItem
 # ---------------------------------------------------------------------------
@@ -2334,30 +2419,49 @@ class PlaidItem(models.Model):
     def __str__(self):
         return "PlaidItem {}".format(self.item_id)
 
+
 # ---------------------------------------------------------------------------
 # Account
 # ---------------------------------------------------------------------------
 class Account(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="account_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="account_user"
+    )
     name = models.CharField(max_length=50, null=True)
-    account_type = models.CharField(max_length=50, choices=BUDGET_ACCOUNT_TYPES, blank=True, null=True)
-    balance = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    available_balance = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    lock_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    interest_rate = models.FloatField(verbose_name="Interest rate", default=0.00)
+    account_type = models.CharField(
+        max_length=50, choices=BUDGET_ACCOUNT_TYPES, blank=True, null=True
+    )
+    balance = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    available_balance = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    lock_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    interest_rate = models.FloatField(
+        verbose_name="Interest rate", default=0.00)
     include_net_worth = models.BooleanField(default=True)
-    liability_type = models.CharField(max_length=10, choices=MORTGAGE_TYPES, blank=True, null=True)
-    interest_period = models.CharField(max_length=10, choices=INTEREST_PERIODS, blank=True, null=True)
+    liability_type = models.CharField(
+        max_length=10, choices=MORTGAGE_TYPES, blank=True, null=True
+    )
+    interest_period = models.CharField(
+        max_length=10, choices=INTEREST_PERIODS, blank=True, null=True
+    )
     mortgage_date = models.DateField(blank=True, null=True)
-    mortgage_monthly_payment = models.CharField(max_length=10, blank=True, null=True)
+    mortgage_monthly_payment = models.CharField(
+        max_length=10, blank=True, null=True)
     mortgage_year = models.CharField(max_length=10, blank=True, null=True)
     transaction_count = models.IntegerField(default=0, blank=True, null=True)
     plaid_account_id = models.CharField(max_length=200, blank=True, null=True)
     mask = models.CharField(max_length=200, blank=True, null=True)
     subtype = models.CharField(max_length=200, blank=True, null=True)
     item = models.ForeignKey(
-     PlaidItem,
+        PlaidItem,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -2368,13 +2472,29 @@ class Account(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = bleach.clean(self.name) if self.name else None
-        self.account_type = bleach.clean(self.account_type) if self.account_type else None
+        self.account_type = (
+            bleach.clean(self.account_type) if self.account_type else None
+        )
         self.currency = bleach.clean(self.currency) if self.currency else None
-        self.liability_type = bleach.clean(self.liability_type) if self.liability_type else None
-        self.interest_period = bleach.clean(self.interest_period) if self.interest_period else None
-        self.mortgage_monthly_payment = bleach.clean(self.mortgage_monthly_payment) if self.mortgage_monthly_payment else None
-        self.mortgage_year = bleach.clean(self.mortgage_year) if self.mortgage_year else None
-        self.plaid_account_id = bleach.clean(self.plaid_account_id) if self.plaid_account_id else None
+        self.liability_type = (
+            bleach.clean(self.liability_type) if self.liability_type else None
+        )
+        self.interest_period = (
+            bleach.clean(
+                self.interest_period) if self.interest_period else None
+        )
+        self.mortgage_monthly_payment = (
+            bleach.clean(self.mortgage_monthly_payment)
+            if self.mortgage_monthly_payment
+            else None
+        )
+        self.mortgage_year = (
+            bleach.clean(self.mortgage_year) if self.mortgage_year else None
+        )
+        self.plaid_account_id = (
+            bleach.clean(
+                self.plaid_account_id) if self.plaid_account_id else None
+        )
         self.mask = bleach.clean(self.mask) if self.mask else None
         self.subtype = bleach.clean(self.subtype) if self.subtype else None
         super().save(*args, **kwargs)
@@ -2387,20 +2507,29 @@ class Account(models.Model):
     def get_absolute_url(self):
         return reverse("account_box")
 
+
 # ---------------------------------------------------------------------------
 # BillDetail
 # ---------------------------------------------------------------------------
 class BillDetail(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True)
+    user_budget = models.ForeignKey(
+        UserBudgets, on_delete=models.CASCADE, null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="bill_details_account",
-        blank=True, null=True
+        Account,
+        on_delete=models.CASCADE,
+        related_name="bill_details_account",
+        blank=True,
+        null=True,
     )
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
     date = models.DateField()
-    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    frequency = models.CharField(
+        max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
+    )
     auto_bill = models.BooleanField(default=False)
     auto_pay = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2408,33 +2537,50 @@ class BillDetail(models.Model):
 
     def save(self, *args, **kwargs):
         self.label = bleach.clean(self.label) if self.label else None
-        self.frequency = bleach.clean(self.frequency) if self.frequency else None
+        self.frequency = bleach.clean(
+            self.frequency) if self.frequency else None
         super().save(*args, **kwargs)
 
     def __str__(self):
         return "{} - {}".format(self.label, self.user.username if self.user else "")
+
 
 # ---------------------------------------------------------------------------
 # Bill
 # ---------------------------------------------------------------------------
 class Bill(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
+    user_budget = models.ForeignKey(
+        UserBudgets, on_delete=models.CASCADE, null=True)
     label = models.CharField(max_length=50)
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="bill_account",
-        blank=True, null=True
+        Account,
+        on_delete=models.CASCADE,
+        related_name="bill_account",
+        blank=True,
+        null=True,
     )
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    remaining_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
+    remaining_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     date = models.DateField()
     bill_details = models.ForeignKey(
-        BillDetail, on_delete=models.CASCADE, related_name="bill_details",
-        blank=True, null=True
+        BillDetail,
+        on_delete=models.CASCADE,
+        related_name="bill_details",
+        blank=True,
+        null=True,
     )
-    status = models.CharField(max_length=50, default="unpaid", blank=True, null=True)
-    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    status = models.CharField(
+        max_length=50, default="unpaid", blank=True, null=True)
+    frequency = models.CharField(
+        max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
+    )
     auto_bill = models.BooleanField(default=False)
     auto_pay = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2443,7 +2589,8 @@ class Bill(models.Model):
     def save(self, *args, **kwargs):
         self.label = bleach.clean(self.label) if self.label else None
         self.status = bleach.clean(self.status) if self.status else None
-        self.frequency = bleach.clean(self.frequency) if self.frequency else None
+        self.frequency = bleach.clean(
+            self.frequency) if self.frequency else None
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -2452,25 +2599,46 @@ class Bill(models.Model):
     def get_absolute_url(self):
         return reverse("bill_list")
 
+
 # ---------------------------------------------------------------------------
 # Budget
 # ---------------------------------------------------------------------------
 class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
+    user_budget = models.ForeignKey(
+        UserBudgets, on_delete=models.CASCADE, null=True)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="budget_account", blank=True, null=True)
-    initial_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    budget_spent = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    budget_left = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    category = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="budget_account",
+        blank=True,
+        null=True,
+    )
+    initial_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
+    budget_spent = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
+    budget_left = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     auto_budget = models.BooleanField(default=True)
     auto_pay = models.BooleanField(default=True)
-    budget_period = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    budget_period = models.CharField(
+        max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
+    )
     budget_status = models.BooleanField(default=False)
     budget_start_date = models.DateField(blank=True, null=True)
     created_at = models.DateField(blank=True, null=True)
@@ -2479,7 +2647,9 @@ class Budget(models.Model):
     def save(self, *args, **kwargs):
         self.name = bleach.clean(self.name) if self.name else None
         self.currency = bleach.clean(self.currency) if self.currency else None
-        self.budget_period = bleach.clean(self.budget_period) if self.budget_period else None
+        self.budget_period = (
+            bleach.clean(self.budget_period) if self.budget_period else None
+        )
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -2488,35 +2658,48 @@ class Budget(models.Model):
     def get_absolute_url(self):
         return reverse("current-budgets")
 
+
 # ---------------------------------------------------------------------------
 # AvailableFunds
 # ---------------------------------------------------------------------------
 class AvailableFunds(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fund_user")
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="fund_account")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="fund_user")
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="fund_account"
+    )
     total_fund = models.CharField(max_length=20)
     lock_fund = models.CharField(max_length=20)
     created_at = models.DateField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.total_fund = bleach.clean(self.total_fund) if self.total_fund else None
-        self.lock_fund = bleach.clean(self.lock_fund) if self.lock_fund else None
+        self.total_fund = bleach.clean(
+            self.total_fund) if self.total_fund else None
+        self.lock_fund = bleach.clean(
+            self.lock_fund) if self.lock_fund else None
         super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.account)
 
+
 # ---------------------------------------------------------------------------
 # Goal
 # ---------------------------------------------------------------------------
 class Goal(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="goal_user")
-    user_budget = models.ForeignKey(UserBudgets, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="goal_user")
+    user_budget = models.ForeignKey(
+        UserBudgets, on_delete=models.CASCADE, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     goal_date = models.DateField(blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    label = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    label = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
     goal_amount = models.FloatField()
     allocate_amount = models.FloatField()
     fund_amount = models.FloatField(default=0)
@@ -2531,11 +2714,14 @@ class Goal(models.Model):
     def __str__(self):
         return str(self.label)
 
+
 # ---------------------------------------------------------------------------
 # PropertyPurchaseDetails
 # ---------------------------------------------------------------------------
 class PropertyPurchaseDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="property_purchase_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="property_purchase_user"
+    )
     best_case_price = models.CharField(max_length=30)
     likely_case_price = models.CharField(max_length=30)
     worst_case_price = models.CharField(max_length=30)
@@ -2548,18 +2734,25 @@ class PropertyPurchaseDetails(models.Model):
         self.likely_case_price = bleach.clean(self.likely_case_price)
         self.worst_case_price = bleach.clean(self.worst_case_price)
         self.selected_case = bleach.clean(self.selected_case)
-        self.selected_price = bleach.clean(self.selected_price) if self.selected_price else None
+        self.selected_price = (
+            bleach.clean(self.selected_price) if self.selected_price else None
+        )
         self.down_payment = bleach.clean(self.down_payment)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return "Property Purchase: {} - {}".format(self.selected_case, self.selected_price)
+        return "Property Purchase: {} - {}".format(
+            self.selected_case, self.selected_price
+        )
+
 
 # ---------------------------------------------------------------------------
 # MortgageDetails
 # ---------------------------------------------------------------------------
 class MortgageDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mortgage_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="mortgage_user"
+    )
     start_date = models.DateField(blank=True, null=True)
     interest_rate = models.CharField(max_length=30)
     amortization_year = models.CharField(max_length=30)
@@ -2572,11 +2765,14 @@ class MortgageDetails(models.Model):
     def __str__(self):
         return "Mortgage: {} - {}".format(self.interest_rate, self.amortization_year)
 
+
 # ---------------------------------------------------------------------------
 # ClosingCostDetails
 # ---------------------------------------------------------------------------
 class ClosingCostDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="closing_cost_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="closing_cost_user"
+    )
     transfer_tax = models.CharField(max_length=30)
     legal_fee = models.CharField(max_length=30)
     title_insurance = models.CharField(max_length=30)
@@ -2596,14 +2792,19 @@ class ClosingCostDetails(models.Model):
         self.appliances = bleach.clean(self.appliances)
         self.renovation_cost = bleach.clean(self.renovation_cost)
         self.others_cost = bleach.clean(self.others_cost)
-        self.total_investment = bleach.clean(self.total_investment) if self.total_investment else None
+        self.total_investment = (
+            bleach.clean(
+                self.total_investment) if self.total_investment else None
+        )
         super().save(*args, **kwargs)
+
 
 # ---------------------------------------------------------------------------
 # RevenuesDetails
 # ---------------------------------------------------------------------------
 class RevenuesDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rev_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="rev_user")
     unit_1 = models.CharField(max_length=30)
     others_revenue_cost = models.CharField(max_length=500)
     total_revenue = models.CharField(max_length=30)
@@ -2613,14 +2814,18 @@ class RevenuesDetails(models.Model):
         self.unit_1 = bleach.clean(self.unit_1)
         self.others_revenue_cost = bleach.clean(self.others_revenue_cost)
         self.total_revenue = bleach.clean(self.total_revenue)
-        self.rent_increase_assumption = bleach.clean(self.rent_increase_assumption)
+        self.rent_increase_assumption = bleach.clean(
+            self.rent_increase_assumption)
         super().save(*args, **kwargs)
+
 
 # ---------------------------------------------------------------------------
 # ExpensesDetails
 # ---------------------------------------------------------------------------
 class ExpensesDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="expense_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="expense_user"
+    )
     property_tax = models.CharField(max_length=30)
     insurance = models.CharField(max_length=30)
     maintenance = models.CharField(max_length=30)
@@ -2652,14 +2857,18 @@ class ExpensesDetails(models.Model):
         self.other_expenses = bleach.clean(self.other_expenses)
         self.total_expenses = bleach.clean(self.total_expenses)
         self.inflation_assumption = bleach.clean(self.inflation_assumption)
-        self.appreciation_assumption = bleach.clean(self.appreciation_assumption)
+        self.appreciation_assumption = bleach.clean(
+            self.appreciation_assumption)
         super().save(*args, **kwargs)
+
 
 # ---------------------------------------------------------------------------
 # CapexBudgetDetails
 # ---------------------------------------------------------------------------
 class CapexBudgetDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="capex_budget_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="capex_budget_user"
+    )
     roof = models.CharField(max_length=500, blank=True, null=True)
     water_heater = models.CharField(max_length=500, blank=True, null=True)
     all_appliances = models.CharField(max_length=500, blank=True, null=True)
@@ -2700,20 +2909,40 @@ class CapexBudgetDetails(models.Model):
         self.total_budget_cost = bleach.clean(self.total_budget_cost)
         super().save(*args, **kwargs)
 
+
 # ---------------------------------------------------------------------------
 # RentalPropertyModel
 # ---------------------------------------------------------------------------
 class RentalPropertyModel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rental_property_user")
-    property_image = models.ImageField(upload_to="property_pics", blank=True, null=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="rental_property_user"
+    )
+    property_image = models.ImageField(
+        upload_to="property_pics", blank=True, null=True)
     name = models.CharField(max_length=30)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    purchase_price_detail = models.ForeignKey(PropertyPurchaseDetails, on_delete=models.CASCADE, related_name="property_purchase_user")
-    mortgage_detail = models.ForeignKey(MortgageDetails, on_delete=models.CASCADE, related_name="mortgage_user")
-    closing_cost_detail = models.ForeignKey(ClosingCostDetails, on_delete=models.CASCADE, related_name="closing_cost_user")
-    monthly_revenue = models.ForeignKey(RevenuesDetails, on_delete=models.CASCADE, related_name="rev_user")
-    monthly_expenses = models.ForeignKey(ExpensesDetails, on_delete=models.CASCADE, related_name="expense_user")
-    capex_budget_details = models.ForeignKey(CapexBudgetDetails, on_delete=models.CASCADE, related_name="capex_budget")
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    purchase_price_detail = models.ForeignKey(
+        PropertyPurchaseDetails,
+        on_delete=models.CASCADE,
+        related_name="property_purchase_user",
+    )
+    mortgage_detail = models.ForeignKey(
+        MortgageDetails, on_delete=models.CASCADE, related_name="mortgage_user"
+    )
+    closing_cost_detail = models.ForeignKey(
+        ClosingCostDetails, on_delete=models.CASCADE, related_name="closing_cost_user"
+    )
+    monthly_revenue = models.ForeignKey(
+        RevenuesDetails, on_delete=models.CASCADE, related_name="rev_user"
+    )
+    monthly_expenses = models.ForeignKey(
+        ExpensesDetails, on_delete=models.CASCADE, related_name="expense_user"
+    )
+    capex_budget_details = models.ForeignKey(
+        CapexBudgetDetails, on_delete=models.CASCADE, related_name="capex_budget"
+    )
     investor_details = models.CharField(max_length=500, blank=True, null=True)
     include_net_worth = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2735,11 +2964,13 @@ class RentalPropertyModel(models.Model):
     def __str__(self):
         return self.name
 
+
 # ---------------------------------------------------------------------------
 # Tag
 # ---------------------------------------------------------------------------
 class Tag(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tag_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="tag_user")
     name = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -2750,41 +2981,54 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
 # ---------------------------------------------------------------------------
 # Transaction
 # ---------------------------------------------------------------------------
 class Transaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transaction_user")
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    remaining_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="transaction_user"
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
+    remaining_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     transaction_date = models.DateField(blank=True, null=True)
-    categories = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
-    split_transactions = models.CharField(max_length=255, blank=True, null=True)
-    original_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    categories = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    split_transactions = models.CharField(
+        max_length=255, blank=True, null=True)
+    original_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     # budgets = models.ForeignKey(Budget, on_delete=models.CASCADE)
     budgets = models.ForeignKey(
-    Budget,
-    null=True,            # allow NULL
-    blank=True,           # allow empty on forms
-    on_delete=models.SET_NULL,
-    related_name="transactions",
-)
+        Budget,
+        null=True,  # allow NULL
+        blank=True,  # allow empty on forms
+        on_delete=models.SET_NULL,
+        related_name="transactions",
+    )
     payee = models.CharField(max_length=25)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     # bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     bill = models.ForeignKey(
-    Bill,
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name="transactions",
-)
-    tags = models.ForeignKey(Tag, on_delete=models.CASCADE, null=True, blank=True)
+        Bill,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="transactions",
+    )
+    tags = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, null=True, blank=True)
     notes = models.CharField(max_length=255, blank=True, null=True)
     in_flow = models.BooleanField(default=False)
     out_flow = models.BooleanField(default=True)
     plaid_account_id = models.CharField(max_length=255, blank=True, null=True)
-    plaid_transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    plaid_transaction_id = models.CharField(
+        max_length=255, blank=True, null=True)
     cleared = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -2803,13 +3047,18 @@ class Transaction(models.Model):
     def get_absolute_url(self):
         return reverse("transaction_list")
 
+
 # ---------------------------------------------------------------------------
 # MortgageCalculator
 # ---------------------------------------------------------------------------
 class MortgageCalculator(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mortgagecalculator_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="mortgagecalculator_user"
+    )
     label = models.CharField(max_length=30)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
     amount = models.IntegerField(default=0)
     years = models.CharField(max_length=10)
     interest = models.CharField(max_length=10)
@@ -2837,17 +3086,30 @@ class MortgageCalculator(models.Model):
     def get_absolute_url(self):
         return reverse("mortgagecalculator_list")
 
+
 # ---------------------------------------------------------------------------
 # Income
 # ---------------------------------------------------------------------------
 class Income(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null=True, blank=True)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="income_account", blank=True, null=True)
-    income_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    sub_category = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="income_account",
+        blank=True,
+        null=True,
+    )
+    income_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     income_date = models.DateField()
     auto_income = models.BooleanField(default=False)
-    frequency = models.CharField(max_length=10, choices=BUDGET_PERIODS, blank=True, null=True)
+    frequency = models.CharField(
+        max_length=10, choices=BUDGET_PERIODS, blank=True, null=True
+    )
     auto_credit = models.BooleanField(default=False)
     primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2867,12 +3129,21 @@ class Income(models.Model):
     def __str__(self):
         return str(self.sub_category.name) if self.sub_category else ""
 
+
 # ---------------------------------------------------------------------------
 # IncomeDetail
 # ---------------------------------------------------------------------------
 class IncomeDetail(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="income_detail_account", blank=True, null=True)
-    income_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        related_name="income_detail_account",
+        blank=True,
+        null=True,
+    )
+    income_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True
+    )
     income_date = models.DateField(blank=True, null=True)
     income = models.ForeignKey(Income, on_delete=models.CASCADE)
     credited = models.BooleanField(default=False)
@@ -2881,7 +3152,8 @@ class IncomeDetail(models.Model):
 
     def clean_fields(self, *args, **kwargs):
         if self.income and self.income.sub_category and self.income.sub_category.name:
-            self.income.sub_category.name = bleach.clean(self.income.sub_category.name)
+            self.income.sub_category.name = bleach.clean(
+                self.income.sub_category.name)
         super().clean_fields(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -2889,18 +3161,28 @@ class IncomeDetail(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return bleach.clean(str(self.income.sub_category.name)) if self.income and self.income.sub_category else ""
+        return (
+            bleach.clean(str(self.income.sub_category.name))
+            if self.income and self.income.sub_category
+            else ""
+        )
+
 
 # ---------------------------------------------------------------------------
 # Revenues
 # ---------------------------------------------------------------------------
 class Revenues(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="revenue_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="revenue_user"
+    )
     name = models.CharField(max_length=255)
     month = models.DateField(blank=True, null=True)
     end_month = models.DateField(blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
     primary = models.BooleanField(default=False)
     non_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -2917,16 +3199,22 @@ class Revenues(models.Model):
     def __str__(self):
         return str(self.month)
 
+
 # ---------------------------------------------------------------------------
 # Expenses
 # ---------------------------------------------------------------------------
 class Expenses(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="expenses_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="expenses_user"
+    )
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     month = models.DateField(blank=True, null=True)
-    currency = models.CharField(max_length=10, choices=CURRENCIES, blank=True, null=True)
-    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    currency = models.CharField(
+        max_length=10, choices=CURRENCIES, blank=True, null=True
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -2941,11 +3229,14 @@ class Expenses(models.Model):
     def __str__(self):
         return str(self.month)
 
+
 # ---------------------------------------------------------------------------
 # StockHoldings
 # ---------------------------------------------------------------------------
 class StockHoldings(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stockholdings_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="stockholdings_user"
+    )
     port_id = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     currency = models.CharField(max_length=10, blank=True, null=True)
@@ -2964,6 +3255,7 @@ class StockHoldings(models.Model):
 
     def __str__(self):
         return self.name
+
 
 # ---------------------------------------------------------------------------
 # MyNotes
@@ -2985,11 +3277,13 @@ class MyNotes(models.Model):
     def __str__(self):
         return "{} {}".format(self.title, self.user.username)
 
+
 # ---------------------------------------------------------------------------
 # AIChat
 # ---------------------------------------------------------------------------
 class AIChat(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aichat_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="aichat_user")
     message = models.TextField()
     ai_response = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3001,14 +3295,19 @@ class AIChat(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
+
 # ---------------------------------------------------------------------------
 # Feedback
 # ---------------------------------------------------------------------------
 class Feedback(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="feedback_user")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="feedback_user"
+    )
     feature = models.CharField(max_length=255)
     issue = models.CharField(max_length=255)
-    screenshot = models.ImageField(upload_to="feedback_screenshots/", null=True, blank=True)
+    screenshot = models.ImageField(
+        upload_to="feedback_screenshots/", null=True, blank=True
+    )
     description = models.TextField()
     suggestion = models.TextField()
     importance = models.CharField(max_length=255)
@@ -3031,6 +3330,7 @@ class Feedback(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
+
 # ---------------------------------------------------------------------------
 # AppErrorLog
 # ---------------------------------------------------------------------------
@@ -3039,6 +3339,7 @@ class AppErrorLog(models.Model):
         RESOLVED = "resolved", "Resolved"
         OPEN = "open", "Open"
         SKIP = "skip", "Skip"
+
     users = models.ManyToManyField(User, blank=True, related_name="error_logs")
     timestamp = models.DateTimeField(default=now, db_index=True)
     exception_type = models.CharField(max_length=255, db_index=True)
@@ -3047,7 +3348,12 @@ class AppErrorLog(models.Model):
     request_path = models.CharField(max_length=255, blank=True, null=True)
     count = models.PositiveIntegerField(default=1)
     code = models.IntegerField(null=True, blank=True, db_index=True)
-    status = models.CharField(max_length=10, choices=StatusChoices.choices, default=StatusChoices.OPEN, db_index=True)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.OPEN,
+        db_index=True,
+    )
 
     class Meta:
         verbose_name = "Error Log"
@@ -3055,7 +3361,9 @@ class AppErrorLog(models.Model):
         ordering = ["-timestamp"]
 
     def __str__(self):
-        return "[{}] {} ({}): {}".format(self.count, self.exception_type, self.code, self.error_message[:50])
+        return "[{}] {} ({}): {}".format(
+            self.count, self.exception_type, self.code, self.error_message[:50]
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -3065,46 +3373,55 @@ class AISubscriptionPlan(models.Model):
     plan_name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     duration_days = models.IntegerField()
-    
+
     def __str__(self):
         return self.plan_name
+
 
 class AIFeatureLimits(models.Model):
     plan = models.ForeignKey(AISubscriptionPlan, on_delete=models.CASCADE)
     feature_name = models.CharField(max_length=100)
     usage_limit = models.IntegerField()
-    
+
     class Meta:
-        unique_together = ('plan', 'feature_name')
-    
+        unique_together = ("plan", "feature_name")
+
     def __str__(self):
         return f"{self.plan.plan_name} - {self.feature_name}"
 
+
 class AIUserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    plan = models.ForeignKey(AISubscriptionPlan, on_delete=models.SET_NULL, null=True)
+    plan = models.ForeignKey(
+        AISubscriptionPlan, on_delete=models.SET_NULL, null=True)
     registration_date = models.DateTimeField(default=timezone.now)
     expiration_date = models.DateTimeField()
     is_active = models.BooleanField(default=True)
-    
+
     def __str__(self):
-        return f"{self.user.username} - {self.plan.plan_name if self.plan else 'No Plan'}"
-    
+        return (
+            f"{self.user.username} - {self.plan.plan_name if self.plan else 'No Plan'}"
+        )
+
     def save(self, *args, **kwargs):
         if not self.pk:  # Only on creation
             if self.plan:
-                self.expiration_date = self.registration_date + timezone.timedelta(days=self.plan.duration_days)
+                self.expiration_date = self.registration_date + timezone.timedelta(
+                    days=self.plan.duration_days
+                )
         super().save(*args, **kwargs)
 
+
 class AIUserFeatureUsage(models.Model):
-    user_subscription = models.ForeignKey(AIUserSubscription, on_delete=models.CASCADE)
+    user_subscription = models.ForeignKey(
+        AIUserSubscription, on_delete=models.CASCADE)
     feature_name = models.CharField(max_length=100)
     usage_count = models.IntegerField(default=0)
     period_start = models.DateTimeField()
     period_end = models.DateTimeField()
-    
+
     class Meta:
-        unique_together = ('user_subscription', 'feature_name', 'period_start')
-    
+        unique_together = ("user_subscription", "feature_name", "period_start")
+
     def __str__(self):
         return f"{self.user_subscription.user.username} - {self.feature_name}"
