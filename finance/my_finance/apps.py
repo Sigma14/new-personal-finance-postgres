@@ -3,11 +3,12 @@ from django.db.models.signals import post_migrate
 
 
 class MyFinanceConfig(AppConfig):
-    name = 'my_finance'
+    name = "my_finance"
 
     def ready(self):
-        from .models import AISubscriptionPlan, AIFeatureLimits
         from django.db.utils import OperationalError, ProgrammingError
+
+        from .models import AIFeatureLimits, AISubscriptionPlan
 
         def create_default_plans(sender, **kwargs):
             SUBSCRIPTION_PLANS = {
@@ -18,7 +19,7 @@ class MyFinanceConfig(AppConfig):
                     "ai_transaction_analysis": 15,
                     "ai_real_estate_analysis": 10,
                     "price": 9.99,
-                    "duration_days": 30
+                    "duration_days": 30,
                 },
                 "standard": {
                     "ai_portfolio_analysis": 60,
@@ -27,7 +28,7 @@ class MyFinanceConfig(AppConfig):
                     "ai_transaction_analysis": 30,
                     "ai_real_estate_analysis": 20,
                     "price": 19.99,
-                    "duration_days": 30
+                    "duration_days": 30,
                 },
                 "premium": {
                     "ai_portfolio_analysis": 100,
@@ -36,7 +37,7 @@ class MyFinanceConfig(AppConfig):
                     "ai_transaction_analysis": 60,
                     "ai_real_estate_analysis": 40,
                     "price": 29.99,
-                    "duration_days": 30
+                    "duration_days": 30,
                 },
             }
 
@@ -45,9 +46,9 @@ class MyFinanceConfig(AppConfig):
                     plan_obj, _ = AISubscriptionPlan.objects.update_or_create(
                         plan_name=plan_name,
                         defaults={
-                            'price': data["price"],
-                            'duration_days': data["duration_days"]
-                        }
+                            "price": data["price"],
+                            "duration_days": data["duration_days"],
+                        },
                     )
 
                     # Add or update feature limits
@@ -57,7 +58,7 @@ class MyFinanceConfig(AppConfig):
                         AIFeatureLimits.objects.update_or_create(
                             plan=plan_obj,
                             feature_name=feature,
-                            defaults={'usage_limit': limit}
+                            defaults={"usage_limit": limit},
                         )
 
             except (OperationalError, ProgrammingError):

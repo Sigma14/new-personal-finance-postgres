@@ -9,55 +9,117 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('my_finance', '0006_alter_transaction_budgets'),
+        ("my_finance", "0006_alter_transaction_budgets"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AISubscriptionPlan',
+            name="AISubscriptionPlan",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('plan_name', models.CharField(max_length=100, unique=True)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=6)),
-                ('duration_days', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("plan_name", models.CharField(max_length=100, unique=True)),
+                ("price", models.DecimalField(decimal_places=2, max_digits=6)),
+                ("duration_days", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='AIUserSubscription',
+            name="AIUserSubscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('registration_date', models.DateTimeField(default=django.utils.timezone.now)),
-                ('expiration_date', models.DateTimeField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('plan', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='my_finance.aisubscriptionplan')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "registration_date",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("expiration_date", models.DateTimeField()),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "plan",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="my_finance.aisubscriptionplan",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='AIFeatureLimits',
+            name="AIFeatureLimits",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('feature_name', models.CharField(max_length=100)),
-                ('usage_limit', models.IntegerField()),
-                ('plan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='my_finance.aisubscriptionplan')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("feature_name", models.CharField(max_length=100)),
+                ("usage_limit", models.IntegerField()),
+                (
+                    "plan",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="my_finance.aisubscriptionplan",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('plan', 'feature_name')},
+                "unique_together": {("plan", "feature_name")},
             },
         ),
         migrations.CreateModel(
-            name='AIUserFeatureUsage',
+            name="AIUserFeatureUsage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('feature_name', models.CharField(max_length=100)),
-                ('usage_count', models.IntegerField(default=0)),
-                ('period_start', models.DateTimeField()),
-                ('period_end', models.DateTimeField()),
-                ('user_subscription', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='my_finance.aiusersubscription')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("feature_name", models.CharField(max_length=100)),
+                ("usage_count", models.IntegerField(default=0)),
+                ("period_start", models.DateTimeField()),
+                ("period_end", models.DateTimeField()),
+                (
+                    "user_subscription",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="my_finance.aiusersubscription",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('user_subscription', 'feature_name', 'period_start')},
+                "unique_together": {
+                    ("user_subscription", "feature_name", "period_start")
+                },
             },
         ),
     ]
