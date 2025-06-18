@@ -358,14 +358,14 @@ urlpatterns = [
 
 
     # AI_feature_tracking url:-
-    path('ai_feature/', ai_views.ai_index, name='index'),
-    path('ai_feature/login/', ai_views.ai_user_login, name='login'),
-    path('ai_feature/signup/', ai_views.ai_signup, name='signup'),
-    path('ai_feature/register/', ai_views.ai_register_user, name='register'),
-    path('ai_feature/logout/', ai_views.ai_user_logout, name='logout'),
-    path('ai_feature/user/', ai_views.ai_user_page, name='user_page'),
-    path('ai_feature/admin/', ai_views.ai_admin_page, name='admin_page'),
-    path('ai_feature/use-feature/<str:feature_name>/', ai_views.ai_use_feature, name='use_feature'),
-    path('ai_feature/admin/update-feature-limit/', ai_views.ai_update_feature_limit, name='update_feature_limit'),
-    path('ai_feature/choose-subscription/<int:plan_id>/', ai_views.ai_choose_subscription, name='choose_subscription'),
+    path('ai_feature/', ai_views.ai_index, name='ai-index'),
+    path('ai_feature/login/', ai_views.ai_user_login, name='ai-login'),
+    path('ai_feature/signup/', ai_views.ai_signup, name='ai-signup'),
+    path('ai_feature/register/', ai_views.ai_register_user, name='ai-register'),
+    path('ai_feature/logout/', ai_views.ai_user_logout, name='ai-logout'),
+    path('ai_feature/user/', ai_views.ai_user_page, name='ai-user_page'),
+    path('ai_feature/admin/', ai_views.ai_admin_page, name='ai-admin_page'),
+    path('ai_feature/ai-use-feature/<str:feature_name>/', ai_views.ai_use_feature, name='ai-use_feature'),
+    path('ai_feature/admin/ai-update-feature-limit/', ai_views.ai_update_feature_limit, name='ai-update_feature_limit'),
+    path('ai_feature/ai-choose-subscription/<int:plan_id>/', ai_views.ai_choose_subscription, name='ai-choose_subscription'),
 ]

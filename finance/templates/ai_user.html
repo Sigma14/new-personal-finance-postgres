@@ -76,7 +76,7 @@
     
     <script>
         function useFeature(feature) {
-            fetch(`/use-feature/${feature}/`)
+            fetch(`/ai_feature/ai-use-feature/${feature}/`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {

@@ -98,7 +98,7 @@
                         <div class="error-message">{{ message }}</div>
                     {% endfor %}
                 {% endif %}
-                <form method="post" action="{% url 'ai-alogin' %}">
+                <form method="post" action="{% url 'ai-login' %}">
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{% url 'ai-user_page' %}">
                     <div class="form-group">
